@@ -1,13 +1,29 @@
 
 # =========================================================
-# MISUKI OAUTH2
-# Bot Installation OAuth2 + Dashboard + Licenses
-# Reviews + Likes + Expiration
-# Cookies + Legal Pages + Discord Contact
+# MISUKI DASHBOARD
+#
+# Discord Login OAuth2
+# Bot Installation OAuth2
+# Dashboard
+# Licenses
+# Reviews
+# Likes
+# Cookies
 #
 # IMPORTANT:
-# OAuth2 is ONLY used for installing the Misuki bot.
-# There is NO separate Discord OAuth2 login system.
+#
+# 1. Discord Login:
+#       /login
+#       -> Official Discord OAuth2 page
+#       -> /login/callback
+#
+# 2. Bot Installation:
+#       /install/<guild_id>
+#       -> Discord bot authorization page
+#       -> NO redirect_uri
+#       -> NO login callback
+#
+# The two OAuth2 flows are completely separate.
 # =========================================================
 
 import os
@@ -78,7 +94,8 @@ CLIENT_SECRET = os.getenv(
     "DISCORD_CLIENT_SECRET"
 )
 
-REDIRECT_URI = os.getenv(
+# This redirect URI is ONLY for Discord LOGIN.
+LOGIN_REDIRECT_URI = os.getenv(
     "DISCORD_REDIRECT_URI"
 )
 
@@ -110,7 +127,7 @@ if not CLIENT_SECRET:
         "DISCORD_CLIENT_SECRET is not configured."
     )
 
-if not REDIRECT_URI:
+if not LOGIN_REDIRECT_URI:
     raise RuntimeError(
         "DISCORD_REDIRECT_URI is not configured."
     )
@@ -122,6 +139,10 @@ if not REDIRECT_URI:
 
 DISCORD_API = (
     "https://discord.com/api/v10"
+)
+
+DISCORD_OAUTH_AUTHORIZE = (
+    "https://discord.com/oauth2/authorize"
 )
 
 BOT_PERMISSIONS = "8"
@@ -162,7 +183,6 @@ app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
 app.config["SESSION_COOKIE_PATH"] = "/"
 
-# Session does NOT disappear when browser closes.
 app.config["SESSION_COOKIE_PERMANENT"] = True
 
 app.config["PERMANENT_SESSION_LIFETIME"] = (
@@ -206,10 +226,6 @@ def create_database():
 
     with database() as connection:
 
-        # =================================================
-        # LICENSES
-        # =================================================
-
         connection.execute(
             """
             CREATE TABLE IF NOT EXISTS licenses (
@@ -229,10 +245,6 @@ def create_database():
             """
         )
 
-        # =================================================
-        # WEB SESSIONS
-        # =================================================
-
         connection.execute(
             """
             CREATE TABLE IF NOT EXISTS web_sessions (
@@ -250,30 +262,6 @@ def create_database():
             )
             """
         )
-
-        # =================================================
-        # INSTALLATION STATES
-        # =================================================
-
-        connection.execute(
-            """
-            CREATE TABLE IF NOT EXISTS installation_states (
-
-                state TEXT PRIMARY KEY,
-
-                guild_id TEXT NOT NULL,
-
-                created_at TEXT NOT NULL,
-
-                expires_at TEXT NOT NULL
-
-            )
-            """
-        )
-
-        # =================================================
-        # REVIEWS
-        # =================================================
 
         connection.execute(
             """
@@ -302,10 +290,6 @@ def create_database():
             """
         )
 
-        # =================================================
-        # REVIEW LIKES
-        # =================================================
-
         connection.execute(
             """
             CREATE TABLE IF NOT EXISTS review_likes (
@@ -325,9 +309,9 @@ def create_database():
             """
         )
 
-        # =================================================
+        # -------------------------------------------------
         # SAFE REVIEW MIGRATION
-        # =================================================
+        # -------------------------------------------------
 
         cursor = connection.execute(
             "PRAGMA table_info(reviews)"
@@ -382,10 +366,6 @@ def create_database():
                         error
                     )
 
-        # =================================================
-        # MIGRATE OLD REVIEWS
-        # =================================================
-
         try:
 
             connection.execute(
@@ -421,159 +401,6 @@ def create_database():
 
 
 create_database()
-
-
-# =========================================================
-# INSTALLATION STATE
-# =========================================================
-
-def create_installation_state(
-    guild_id
-):
-
-    state = secrets.token_urlsafe(
-        32
-    )
-
-    now = datetime.utcnow()
-
-    expires = (
-        now
-        + timedelta(minutes=10)
-    )
-
-    with database() as connection:
-
-        connection.execute(
-            """
-            INSERT INTO installation_states
-            (
-                state,
-                guild_id,
-                created_at,
-                expires_at
-            )
-
-            VALUES (?, ?, ?, ?)
-            """,
-            (
-                state,
-                str(guild_id),
-                now.isoformat(),
-                expires.isoformat()
-            )
-        )
-
-        connection.commit()
-
-    return state
-
-
-def get_installation_state(
-    state
-):
-
-    if not state:
-
-        return None
-
-    with database() as connection:
-
-        cursor = connection.cursor()
-
-        cursor.execute(
-            """
-            SELECT
-                guild_id,
-                expires_at
-
-            FROM installation_states
-
-            WHERE state = ?
-            """,
-            (
-                state,
-            )
-        )
-
-        row = cursor.fetchone()
-
-    if not row:
-
-        return None
-
-    try:
-
-        expires_at = datetime.fromisoformat(
-            row[1]
-        )
-
-    except (
-        ValueError,
-        TypeError
-    ):
-
-        delete_installation_state(
-            state
-        )
-
-        return None
-
-    if datetime.utcnow() >= expires_at:
-
-        delete_installation_state(
-            state
-        )
-
-        return None
-
-    return {
-        "guild_id": str(row[0])
-    }
-
-
-def delete_installation_state(
-    state
-):
-
-    if not state:
-
-        return
-
-    with database() as connection:
-
-        connection.execute(
-            """
-            DELETE FROM installation_states
-
-            WHERE state = ?
-            """,
-            (
-                state,
-            )
-        )
-
-        connection.commit()
-
-
-def cleanup_installation_states():
-
-    now = datetime.utcnow().isoformat()
-
-    with database() as connection:
-
-        connection.execute(
-            """
-            DELETE FROM installation_states
-
-            WHERE expires_at < ?
-            """,
-            (
-                now,
-            )
-        )
-
-        connection.commit()
 
 
 # =========================================================
@@ -635,16 +462,11 @@ def create_web_session(
     return session_id
 
 
-# =========================================================
-# GET WEB SESSION
-# =========================================================
-
 def get_web_session(
     session_id
 ):
 
     if not session_id:
-
         return None
 
     with database() as connection:
@@ -670,7 +492,6 @@ def get_web_session(
         row = cursor.fetchone()
 
     if not row:
-
         return None
 
     try:
@@ -720,16 +541,11 @@ def get_web_session(
         return None
 
 
-# =========================================================
-# DELETE SESSION
-# =========================================================
-
 def delete_web_session(
     session_id
 ):
 
     if not session_id:
-
         return
 
     with database() as connection:
@@ -747,10 +563,6 @@ def delete_web_session(
 
         connection.commit()
 
-
-# =========================================================
-# CLEANUP SESSIONS
-# =========================================================
 
 def cleanup_sessions():
 
@@ -772,14 +584,629 @@ def cleanup_sessions():
         connection.commit()
 
 
-# =========================================================
-# CURRENT SESSION
-# =========================================================
-
 def get_current_web_session():
 
     return get_web_session(
         session.get("sid")
+    )
+
+
+# =========================================================
+# DISCORD HTTP HELPERS
+# =========================================================
+
+def discord_headers(
+    token
+):
+
+    return {
+        "Authorization":
+            f"Bearer {token}",
+
+        "Content-Type":
+            "application/json"
+    }
+
+
+def bot_headers():
+
+    if not BOT_TOKEN:
+        return None
+
+    return {
+        "Authorization":
+            f"Bot {BOT_TOKEN}"
+    }
+
+
+# =========================================================
+# DISCORD LOGIN
+#
+# THIS IS ONLY USER LOGIN.
+#
+# It does NOT install the bot.
+# =========================================================
+
+def discord_login_url():
+
+    state = secrets.token_urlsafe(
+        32
+    )
+
+    session["login_state"] = state
+
+    session.permanent = True
+
+    params = {
+
+        "client_id":
+            CLIENT_ID,
+
+        "response_type":
+            "code",
+
+        "redirect_uri":
+            LOGIN_REDIRECT_URI,
+
+        "scope":
+            "identify guilds",
+
+        "state":
+            state
+    }
+
+    return (
+        DISCORD_OAUTH_AUTHORIZE
+        + "?"
+        + urlencode(params)
+    )
+
+
+@app.route("/login")
+def login():
+
+    return redirect(
+        discord_login_url()
+    )
+
+
+@app.route("/login/callback")
+def login_callback():
+
+    error = request.args.get(
+        "error"
+    )
+
+    if error:
+
+        session.pop(
+            "login_state",
+            None
+        )
+
+        return page(
+            "Login Cancelled",
+            """
+            <div class="card center">
+
+                <h1>
+                    ❌ Login Cancelled
+                </h1>
+
+                <p>
+                    Discord login was cancelled.
+                </p>
+
+                <a
+                    class="button"
+                    href="/"
+                >
+                    Return Home
+                </a>
+
+            </div>
+            """
+        ), 400
+
+    state = request.args.get(
+        "state"
+    )
+
+    expected_state = session.pop(
+        "login_state",
+        None
+    )
+
+    if (
+        not state
+        or not expected_state
+        or not secrets.compare_digest(
+            state,
+            expected_state
+        )
+    ):
+
+        return page(
+            "Login Error",
+            """
+            <div class="card center">
+
+                <h1>
+                    ❌ Invalid Login
+                </h1>
+
+                <p>
+                    The Discord login request
+                    could not be verified.
+                </p>
+
+                <a
+                    class="button"
+                    href="/"
+                >
+                    Return Home
+                </a>
+
+            </div>
+            """
+        ), 400
+
+    code = request.args.get(
+        "code"
+    )
+
+    if not code:
+
+        return page(
+            "Login Error",
+            """
+            <div class="card center">
+
+                <h1>
+                    ❌ Login Failed
+                </h1>
+
+                <p>
+                    Discord did not provide an
+                    authorization code.
+                </p>
+
+                <a
+                    class="button"
+                    href="/"
+                >
+                    Return Home
+                </a>
+
+            </div>
+            """
+        ), 400
+
+    # -----------------------------------------------------
+    # EXCHANGE LOGIN CODE
+    # -----------------------------------------------------
+
+    token_data = {
+
+        "client_id":
+            CLIENT_ID,
+
+        "client_secret":
+            CLIENT_SECRET,
+
+        "grant_type":
+            "authorization_code",
+
+        "code":
+            code,
+
+        "redirect_uri":
+            LOGIN_REDIRECT_URI
+    }
+
+    try:
+
+        response = requests.post(
+
+            f"{DISCORD_API}/oauth2/token",
+
+            data=token_data,
+
+            headers={
+                "Content-Type":
+                    "application/x-www-form-urlencoded"
+            },
+
+            timeout=15
+        )
+
+    except requests.RequestException as error:
+
+        print(
+            "Discord login token request failed:",
+            error
+        )
+
+        return page(
+            "Login Error",
+            """
+            <div class="card center">
+
+                <h1>
+                    ❌ Discord Connection Error
+                </h1>
+
+                <p>
+                    Could not connect to Discord.
+                </p>
+
+                <a
+                    class="button"
+                    href="/"
+                >
+                    Return Home
+                </a>
+
+            </div>
+            """
+        ), 500
+
+    if response.status_code != 200:
+
+        print(
+            "Discord login token response:",
+            response.status_code,
+            response.text
+        )
+
+        return page(
+            "Login Error",
+            """
+            <div class="card center">
+
+                <h1>
+                    ❌ Discord Rejected Login
+                </h1>
+
+                <p>
+                    Discord rejected the login request.
+                </p>
+
+                <a
+                    class="button"
+                    href="/"
+                >
+                    Return Home
+                </a>
+
+            </div>
+            """
+        ), 400
+
+    try:
+
+        token_json = response.json()
+
+    except ValueError:
+
+        return page(
+            "Login Error",
+            """
+            <div class="card center">
+
+                <h1>
+                    ❌ Invalid Discord Response
+                </h1>
+
+            </div>
+            """
+        ), 500
+
+    access_token = token_json.get(
+        "access_token"
+    )
+
+    if not access_token:
+
+        return page(
+            "Login Error",
+            """
+            <div class="card center">
+
+                <h1>
+                    ❌ No Access Token
+                </h1>
+
+                <p>
+                    Discord did not provide an
+                    access token.
+                </p>
+
+            </div>
+            """
+        ), 400
+
+    # -----------------------------------------------------
+    # GET USER
+    # -----------------------------------------------------
+
+    try:
+
+        user_response = requests.get(
+
+            f"{DISCORD_API}/users/@me",
+
+            headers=discord_headers(
+                access_token
+            ),
+
+            timeout=15
+        )
+
+        guild_response = requests.get(
+
+            f"{DISCORD_API}/users/@me/guilds",
+
+            headers=discord_headers(
+                access_token
+            ),
+
+            timeout=15
+        )
+
+    except requests.RequestException as error:
+
+        print(
+            "Discord user request failed:",
+            error
+        )
+
+        return page(
+            "Login Error",
+            """
+            <div class="card center">
+
+                <h1>
+                    ❌ Discord Connection Error
+                </h1>
+
+            </div>
+            """
+        ), 500
+
+    if user_response.status_code != 200:
+
+        print(
+            "Discord user response:",
+            user_response.status_code,
+            user_response.text
+        )
+
+        return page(
+            "Login Error",
+            """
+            <div class="card center">
+
+                <h1>
+                    ❌ Could Not Get Discord Account
+                </h1>
+
+            </div>
+            """
+        ), 400
+
+    if guild_response.status_code != 200:
+
+        print(
+            "Discord guild response:",
+            guild_response.status_code,
+            guild_response.text
+        )
+
+        return page(
+            "Login Error",
+            """
+            <div class="card center">
+
+                <h1>
+                    ❌ Could Not Get Discord Servers
+                </h1>
+
+            </div>
+            """
+        ), 400
+
+    try:
+
+        user = user_response.json()
+
+        guilds = guild_response.json()
+
+    except ValueError:
+
+        return page(
+            "Login Error",
+            """
+            <div class="card center">
+
+                <h1>
+                    ❌ Invalid Discord Data
+                </h1>
+
+            </div>
+            """
+        ), 500
+
+    # -----------------------------------------------------
+    # CREATE WEBSITE SESSION
+    # -----------------------------------------------------
+
+    cleanup_sessions()
+
+    old_session = session.get(
+        "sid"
+    )
+
+    if old_session:
+
+        delete_web_session(
+            old_session
+        )
+
+    session_id = create_web_session(
+        user,
+        guilds
+    )
+
+    session.clear()
+
+    session.permanent = True
+
+    session["sid"] = session_id
+
+    return redirect(
+        url_for(
+            "dashboard"
+        )
+    )
+
+
+# =========================================================
+# BOT INSTALLATION
+#
+# THIS IS NOT USER LOGIN.
+#
+# NO redirect_uri.
+# NO response_type.
+# NO callback.
+# =========================================================
+
+def bot_install_url(
+    guild_id
+):
+
+    params = {
+
+        "client_id":
+            CLIENT_ID,
+
+        "scope":
+            "bot applications.commands",
+
+        "permissions":
+            BOT_PERMISSIONS,
+
+        "guild_id":
+            str(guild_id),
+
+        "disable_guild_select":
+            "true"
+    }
+
+    return (
+        DISCORD_OAUTH_AUTHORIZE
+        + "?"
+        + urlencode(params)
+    )
+
+
+# =========================================================
+# BOT GUILDS
+# =========================================================
+
+def get_bot_guild_ids():
+
+    if not BOT_TOKEN:
+
+        print(
+            "DISCORD_BOT_TOKEN not configured."
+        )
+
+        return set()
+
+    try:
+
+        response = requests.get(
+
+            f"{DISCORD_API}/users/@me/guilds",
+
+            headers=bot_headers(),
+
+            timeout=15
+        )
+
+    except requests.RequestException as error:
+
+        print(
+            "Bot guild request failed:",
+            error
+        )
+
+        return set()
+
+    if response.status_code != 200:
+
+        print(
+            "Bot guild request:",
+            response.status_code,
+            response.text
+        )
+
+        return set()
+
+    try:
+
+        guilds = response.json()
+
+    except ValueError:
+
+        return set()
+
+    return {
+        str(guild.get("id"))
+        for guild in guilds
+        if guild.get("id")
+    }
+
+
+# =========================================================
+# USER CAN MANAGE GUILD
+# =========================================================
+
+def user_can_manage_guild(
+    guild
+):
+
+    permissions = guild.get(
+        "permissions"
+    )
+
+    if permissions is None:
+
+        return False
+
+    try:
+
+        permissions = int(
+            permissions
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        return False
+
+    ADMINISTRATOR = 1 << 3
+    MANAGE_GUILD = 1 << 5
+
+    return bool(
+        permissions
+        & (
+            ADMINISTRATOR
+            | MANAGE_GUILD
+        )
     )
 
 
@@ -894,604 +1321,6 @@ def license_status(
 
 
 # =========================================================
-# DISCORD HEADERS
-# =========================================================
-
-def discord_headers(
-    token
-):
-
-    return {
-        "Authorization":
-            f"Bearer {token}",
-
-        "Content-Type":
-            "application/json"
-    }
-
-
-# =========================================================
-# BOT HEADERS
-# =========================================================
-
-def bot_headers():
-
-    if not BOT_TOKEN:
-
-        return None
-
-    return {
-        "Authorization":
-            f"Bot {BOT_TOKEN}"
-    }
-
-
-# =========================================================
-# BOT GUILDS
-# =========================================================
-
-def get_bot_guild_ids():
-
-    if not BOT_TOKEN:
-
-        print(
-            "DISCORD_BOT_TOKEN not configured."
-        )
-
-        return set()
-
-    try:
-
-        response = requests.get(
-            f"{DISCORD_API}/users/@me/guilds",
-            headers=bot_headers(),
-            timeout=15
-        )
-
-    except requests.RequestException as error:
-
-        print(
-            "Bot guild request failed:",
-            error
-        )
-
-        return set()
-
-    if response.status_code != 200:
-
-        print(
-            "Bot guild request:",
-            response.status_code,
-            response.text
-        )
-
-        return set()
-
-    try:
-
-        guilds = response.json()
-
-    except ValueError:
-
-        return set()
-
-    return {
-        str(guild.get("id"))
-        for guild in guilds
-        if guild.get("id")
-    }
-
-
-# =========================================================
-# USER CAN MANAGE GUILD
-# =========================================================
-
-def user_can_manage_guild(
-    guild
-):
-
-    permissions = guild.get(
-        "permissions"
-    )
-
-    if permissions is None:
-
-        return False
-
-    try:
-
-        permissions = int(
-            permissions
-        )
-
-    except (
-        TypeError,
-        ValueError
-    ):
-
-        return False
-
-    ADMINISTRATOR = 1 << 3
-    MANAGE_GUILD = 1 << 5
-
-    return bool(
-        permissions
-        & (
-            ADMINISTRATOR
-            | MANAGE_GUILD
-        )
-    )
-
-
-# =========================================================
-# BOT INSTALL URL
-#
-# THIS IS THE ONLY OAUTH2 INSTALL FLOW.
-# =========================================================
-
-def bot_install_url(
-    guild_id,
-    state
-):
-
-    params = {
-
-        "client_id":
-            CLIENT_ID,
-
-        "scope":
-            "bot applications.commands",
-
-        "permissions":
-            BOT_PERMISSIONS,
-
-        "guild_id":
-            str(guild_id),
-
-        "disable_guild_select":
-            "true",
-
-        "response_type":
-            "code",
-
-        "redirect_uri":
-            REDIRECT_URI,
-
-        "state":
-            state
-    }
-
-    return (
-        "https://discord.com/oauth2/authorize?"
-        + urlencode(params)
-    )
-
-
-# =========================================================
-# INSTALL BOT
-#
-# OAuth2 is ONLY used here.
-# =========================================================
-
-@app.route(
-    "/install/<guild_id>"
-)
-def install_bot(
-    guild_id
-):
-
-    current = get_current_web_session()
-
-    if current is None:
-
-        return page(
-            "Installation",
-            """
-            <div class="card center">
-
-                <h1>
-                    🔐 Session Required
-                </h1>
-
-                <p>
-                    Your Misuki session is not active.
-                    Please return to the dashboard
-                    and try again.
-                </p>
-
-                <a
-                    class="button"
-                    href="/dashboard"
-                >
-                    Dashboard
-                </a>
-
-            </div>
-            """
-        ), 401
-
-    guild = None
-
-    for item in current["guilds"]:
-
-        if str(
-            item.get("id")
-        ) == str(guild_id):
-
-            guild = item
-
-            break
-
-    if guild is None:
-
-        return page(
-            "Access Denied",
-            """
-            <div class="card center">
-
-                <h1>
-                    🔒 Access Denied
-                </h1>
-
-                <p>
-                    This server is not available
-                    to your account.
-                </p>
-
-                <a
-                    class="button"
-                    href="/dashboard"
-                >
-                    Back to Dashboard
-                </a>
-
-            </div>
-            """
-        ), 403
-
-    if not user_can_manage_guild(
-        guild
-    ):
-
-        return page(
-            "Permission Required",
-            """
-            <div class="card center">
-
-                <h1>
-                    🔒 Permission Required
-                </h1>
-
-                <p>
-                    You need Manage Server or
-                    Administrator permission to
-                    install Misuki.
-                </p>
-
-                <a
-                    class="button"
-                    href="/dashboard"
-                >
-                    Back to Dashboard
-                </a>
-
-            </div>
-            """
-        ), 403
-
-    bot_guild_ids = get_bot_guild_ids()
-
-    if str(guild_id) in bot_guild_ids:
-
-        return redirect(
-            url_for(
-                "manage",
-                guild_id=guild_id
-            )
-        )
-
-    cleanup_installation_states()
-
-    state = create_installation_state(
-        guild_id
-    )
-
-    discord_url = bot_install_url(
-        guild_id,
-        state
-    )
-
-    return redirect(
-        discord_url
-    )
-
-
-# =========================================================
-# INSTALL CALLBACK
-#
-# This callback belongs ONLY to bot installation.
-# =========================================================
-
-@app.route(
-    "/callback"
-)
-def callback():
-
-    state = request.args.get(
-        "state"
-    )
-
-    installation = get_installation_state(
-        state
-    )
-
-    if installation is None:
-
-        return page(
-            "Installation Error",
-            """
-            <div class="card center">
-
-                <h1>
-                    ❌ Invalid Installation
-                </h1>
-
-                <p>
-                    The installation request is
-                    invalid or has expired.
-                </p>
-
-                <a
-                    class="button"
-                    href="/dashboard"
-                >
-                    Return to Dashboard
-                </a>
-
-            </div>
-            """
-        ), 400
-
-    guild_id = installation[
-        "guild_id"
-    ]
-
-    delete_installation_state(
-        state
-    )
-
-    error = request.args.get(
-        "error"
-    )
-
-    if error:
-
-        return page(
-            "Installation Cancelled",
-            """
-            <div class="card center">
-
-                <h1>
-                    ❌ Installation Cancelled
-                </h1>
-
-                <p>
-                    Discord did not complete the
-                    Misuki installation.
-                </p>
-
-                <a
-                    class="button"
-                    href="/dashboard"
-                >
-                    Return to Dashboard
-                </a>
-
-            </div>
-            """
-        ), 400
-
-    code = request.args.get(
-        "code"
-    )
-
-    if not code:
-
-        return page(
-            "Installation Error",
-            """
-            <div class="card center">
-
-                <h1>
-                    ❌ Installation Failed
-                </h1>
-
-                <p>
-                    Discord did not provide an
-                    authorization code.
-                </p>
-
-                <a
-                    class="button"
-                    href="/dashboard"
-                >
-                    Return to Dashboard
-                </a>
-
-            </div>
-            """
-        ), 400
-
-    # =====================================================
-    # EXCHANGE INSTALLATION CODE
-    # =====================================================
-
-    token_data = {
-
-        "client_id":
-            CLIENT_ID,
-
-        "client_secret":
-            CLIENT_SECRET,
-
-        "grant_type":
-            "authorization_code",
-
-        "code":
-            code,
-
-        "redirect_uri":
-            REDIRECT_URI
-    }
-
-    try:
-
-        response = requests.post(
-
-            f"{DISCORD_API}/oauth2/token",
-
-            data=token_data,
-
-            headers={
-                "Content-Type":
-                    "application/x-www-form-urlencoded"
-            },
-
-            timeout=15
-        )
-
-    except requests.RequestException as error:
-
-        print(
-            "Installation token request failed:",
-            error
-        )
-
-        return page(
-            "Installation Error",
-            """
-            <div class="card center">
-
-                <h1>
-                    ❌ Discord Connection Error
-                </h1>
-
-                <p>
-                    Could not complete the bot
-                    installation.
-                </p>
-
-            </div>
-            """
-        ), 500
-
-    if response.status_code != 200:
-
-        print(
-            "Installation token response:",
-            response.status_code,
-            response.text
-        )
-
-        return page(
-            "Installation Error",
-            """
-            <div class="card center">
-
-                <h1>
-                    ❌ Discord Rejected Installation
-                </h1>
-
-                <p>
-                    Discord rejected the installation
-                    request.
-                </p>
-
-                <a
-                    class="button"
-                    href="/dashboard"
-                >
-                    Return to Dashboard
-                </a>
-
-            </div>
-            """
-        ), 400
-
-    # =====================================================
-    # VERIFY INSTALLATION
-    # =====================================================
-
-    bot_guild_ids = get_bot_guild_ids()
-
-    if str(guild_id) not in bot_guild_ids:
-
-        return page(
-            "Installation Pending",
-            """
-            <div class="card center">
-
-                <h1>
-                    ⏳ Installation Pending
-                </h1>
-
-                <p>
-                    Discord completed the authorization,
-                    but Misuki has not appeared in the
-                    server list yet.
-                </p>
-
-                <a
-                    class="button"
-                    href="/dashboard"
-                >
-                    Refresh Dashboard
-                </a>
-
-            </div>
-            """
-        )
-
-    return page(
-        "Misuki Installed",
-        f"""
-        <div class="card center">
-
-            <div class="logo">
-                🌸
-            </div>
-
-            <h1>
-                ✅ Misuki Installed
-            </h1>
-
-            <p>
-                Misuki has been successfully added
-                to your Discord server.
-            </p>
-
-            <a
-                class="button"
-                href="/manage/{escape(str(guild_id))}"
-            >
-                ⚙️ Manage Server
-            </a>
-
-            <br>
-
-            <a
-                class="button secondary"
-                href="/dashboard"
-            >
-                Dashboard
-            </a>
-
-        </div>
-        """
-    )
-
-
-# =========================================================
 # REVIEWS
 # =========================================================
 
@@ -1561,29 +1390,23 @@ def can_user_review(
     session_data = get_current_web_session()
 
     if session_data is None:
-
         return False
 
-    guilds = session_data.get(
+    for guild in session_data.get(
         "guilds",
         []
-    )
-
-    for guild in guilds:
+    ):
 
         guild_id = guild.get(
             "id"
         )
 
         if not guild_id:
-
             continue
 
-        license_info = license_status(
+        if license_status(
             guild_id
-        )
-
-        if license_info["licensed"]:
+        )["licensed"]:
 
             return True
 
@@ -1759,8 +1582,8 @@ def page(
     else:
 
         auth_button = """
-        <a href="/dashboard">
-            Dashboard
+        <a href="/login">
+            🔵 Sign In with Discord
         </a>
         """
 
@@ -1901,7 +1724,7 @@ a {{
 
     top: 62px;
 
-    min-width: 190px;
+    min-width: 210px;
 
     padding: 10px;
 
@@ -2089,10 +1912,6 @@ p {{
     background: #1d6c3b;
 }}
 
-.red {{
-    background: #ed4245;
-}}
-
 .server-grid {{
 
     display: grid;
@@ -2170,6 +1989,8 @@ p {{
     font-size: 22px;
 
     font-weight: 800;
+
+    object-fit: cover;
 }}
 
 .server-name {{
@@ -3040,8 +2861,14 @@ def home():
             for your servers.
         </p>
 
-    </div>
+        <a
+            class="button"
+            href="/login"
+        >
+            🔵 Sign In with Discord
+        </a>
 
+    </div>
 
     <div class="card">
 
@@ -3071,11 +2898,6 @@ def home():
 
 # =========================================================
 # DASHBOARD
-#
-# There is deliberately NO /login route.
-#
-# A web session is created when the user completes
-# the bot installation OAuth2 flow.
 # =========================================================
 
 @app.route("/dashboard")
@@ -3099,19 +2921,15 @@ def dashboard():
                 </h1>
 
                 <p>
-                    Your Misuki session is not active.
-                </p>
-
-                <p>
-                    To start a session, choose a server
-                    where you can install Misuki.
+                    Sign in with Discord to access
+                    your Misuki dashboard.
                 </p>
 
                 <a
                     class="button"
-                    href="/"
+                    href="/login"
                 >
-                    Return Home
+                    🔵 Sign In with Discord
                 </a>
 
             </div>
@@ -3292,29 +3110,52 @@ def dashboard():
                 TypeError
             ):
 
-                expiration_html = f"""
+                expiration_html = ""
 
-                <div
-                    style="
-                        margin-top:10px;
-                        color:#858a98;
-                        font-size:12px;
-                    "
-                >
+        # -------------------------------------------------
+        # SERVER ICON
+        # -------------------------------------------------
 
-                    📅 Expires:
+        guild_icon = guild.get(
+            "icon"
+        )
 
-                    <strong>
-                        {escape(str(expires_at))}
-                    </strong>
+        if guild_icon:
 
-                </div>
+            icon_url = (
+                "https://cdn.discordapp.com/"
+                f"icons/{guild_id}/{guild_icon}.png"
+            )
 
-                """
+            icon_html = f"""
+            <img
+                class="server-icon"
+                src="{escape(icon_url)}"
+                alt="Server icon"
+            >
+            """
 
-        # =================================================
+        else:
+
+            first_letter = escape(
+                (
+                    guild.get(
+                        "name",
+                        "?"
+                    )[:1]
+                    or "?"
+                ).upper()
+            )
+
+            icon_html = f"""
+            <div class="server-icon">
+                {first_letter}
+            </div>
+            """
+
+        # -------------------------------------------------
         # INSTALLATION
-        # =================================================
+        # -------------------------------------------------
 
         if installed:
 
@@ -3341,13 +3182,8 @@ def dashboard():
             </span>
             """
 
-            state = create_installation_state(
-                guild_id
-            )
-
             invite = bot_install_url(
-                guild_id,
-                state
+                guild_id
             )
 
             installation_button = f"""
@@ -3359,25 +3195,13 @@ def dashboard():
             </a>
             """
 
-        first_letter = escape(
-            (
-                guild.get(
-                    "name",
-                    "?"
-                )[:1]
-                or "?"
-            ).upper()
-        )
-
         return f"""
 
         <div class="server">
 
             <div class="server-header">
 
-                <div class="server-icon">
-                    {first_letter}
-                </div>
+                {icon_html}
 
                 <div>
 
@@ -3457,10 +3281,6 @@ def dashboard():
         </div>
         """
 
-    # =====================================================
-    # CONTENT
-    # =====================================================
-
     content = f"""
 
     <div class="card">
@@ -3495,9 +3315,6 @@ def dashboard():
 
     </div>
 
-
-    <!-- AUTHORIZED FIRST -->
-
     <div class="card">
 
         <h2>
@@ -3516,9 +3333,6 @@ def dashboard():
 
     </div>
 
-
-    <!-- AVAILABLE SECOND -->
-
     <div class="card">
 
         <h2>
@@ -3536,7 +3350,6 @@ def dashboard():
         </div>
 
     </div>
-
 
     <div style="text-align:center;">
 
@@ -3601,11 +3414,6 @@ def manage(
                     🔒 Access Denied
                 </h1>
 
-                <p>
-                    You do not have access to
-                    this Discord server.
-                </p>
-
                 <a
                     class="button"
                     href="/dashboard"
@@ -3628,6 +3436,8 @@ def manage(
         guild_id
     )
 
+    expiration_text = "Never"
+
     if info["expires_at"]:
 
         try:
@@ -3647,13 +3457,9 @@ def manage(
             TypeError
         ):
 
-            expiration_text = info[
-                "expires_at"
-            ]
-
-    else:
-
-        expiration_text = "Never"
+            expiration_text = str(
+                info["expires_at"]
+            )
 
     content = f"""
 
@@ -3717,7 +3523,7 @@ def review_page():
 
         return redirect(
             url_for(
-                "dashboard"
+                "login"
             )
         )
 
@@ -3769,7 +3575,6 @@ def review_page():
         )
 
         if not guild_id:
-
             continue
 
         if license_status(
@@ -3897,7 +3702,7 @@ def submit_review():
 
         return redirect(
             url_for(
-                "dashboard"
+                "login"
             )
         )
 
@@ -4040,11 +3845,6 @@ def submit_review():
                     🔒 License Required
                 </h1>
 
-                <p>
-                    You need an active license
-                    to review Misuki.
-                </p>
-
             </div>
             """
         ), 403
@@ -4058,7 +3858,6 @@ def submit_review():
         ) == str(guild_id):
 
             valid_guild = True
-
             break
 
     if not valid_guild:
@@ -4100,9 +3899,7 @@ def submit_review():
             </h1>
 
             <p>
-                Your review has been submitted
-                and will appear on the Misuki
-                homepage.
+                Your review has been submitted.
             </p>
 
             <a
@@ -4134,7 +3931,7 @@ def like_review(
 
         return redirect(
             url_for(
-                "dashboard"
+                "login"
             )
         )
 
@@ -4195,15 +3992,6 @@ def cookies():
             advertising or analytics cookies.
         </p>
 
-        <h2>
-            3. Cookie Choices
-        </h2>
-
-        <p>
-            Visitors may choose their cookie
-            preferences through the cookie banner.
-        </p>
-
         <h2 id="terms">
             Terms of Service
         </h2>
@@ -4213,104 +4001,15 @@ def cookies():
             to these Terms of Service.
         </p>
 
-        <h3>
-            Misuki Service
-        </h3>
-
-        <p>
-            Misuki is a Discord bot and management
-            platform designed to provide tools and
-            features for Discord communities.
-        </p>
-
-        <h3>
-            Discord
-        </h3>
-
-        <p>
-            Misuki integrates with Discord and uses
-            Discord APIs. Your use of Discord remains
-            subject to Discord's own terms and rules.
-        </p>
-
-        <h3>
-            Server Permissions
-        </h3>
-
-        <p>
-            You are responsible for ensuring that you
-            have the necessary permissions to install,
-            configure or manage Misuki.
-        </p>
-
-        <h3>
-            Licenses
-        </h3>
-
-        <p>
-            Licenses are associated with individual
-            Discord servers.
-        </p>
-
-        <h3>
-            Reviews
-        </h3>
-
-        <p>
-            Reviews must be genuine and must not contain
-            unlawful, abusive, fraudulent or malicious
-            content.
-        </p>
-
         <h2 id="privacy">
             Privacy Policy
         </h2>
 
-        <h3>
-            Information We Receive
-        </h3>
-
-        <ul>
-
-            <li>
-                Discord user ID
-            </li>
-
-            <li>
-                Discord username or global name
-            </li>
-
-            <li>
-                Discord avatar information
-            </li>
-
-            <li>
-                Discord server information
-            </li>
-
-        </ul>
-
-        <h3>
-            How Information Is Used
-        </h3>
-
         <p>
-            Information is used to provide the Misuki
-            dashboard and determine which servers the
-            user can manage.
+            Discord information is used only to provide
+            the Misuki dashboard and determine which
+            servers the user can manage.
         </p>
-
-        <h3>
-            Storage
-        </h3>
-
-        <p>
-            Session information is stored server-side.
-        </p>
-
-        <h3>
-            Sharing
-        </h3>
 
         <p>
             Misuki does not intentionally sell personal
@@ -4436,7 +4135,7 @@ if __name__ == "__main__":
     )
 
     print(
-        "Misuki OAuth2 starting..."
+        "Misuki Dashboard starting..."
     )
 
     print(
@@ -4464,23 +4163,13 @@ if __name__ == "__main__":
     )
 
     print(
-        f"Redirect URI: "
-        f"{REDIRECT_URI}"
+        f"Login Redirect URI: "
+        f"{LOGIN_REDIRECT_URI}"
     )
 
     print(
         f"Database: "
         f"{DATABASE}"
-    )
-
-    print(
-        f"Review lifetime: "
-        f"{REVIEW_LIFETIME_DAYS} days"
-    )
-
-    print(
-        f"Port: "
-        f"{os.getenv('PORT', '5000')}"
     )
 
     print(
