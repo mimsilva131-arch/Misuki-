@@ -3,7 +3,7 @@
 # MISUKI OAUTH2
 # Login + Dashboard + Server Authorization + Licenses
 # Reviews + Likes + Expiration
-# Cookies + Legal Pages + Discord Contact
+# Persistent Sessions + Cookies + Legal Pages
 # =========================================================
 
 import os
@@ -62,9 +62,7 @@ DATABASE = os.path.join(
 # ENVIRONMENT
 # =========================================================
 
-load_dotenv(
-    ENV_FILE
-)
+load_dotenv(ENV_FILE)
 
 CLIENT_ID = os.getenv(
     "DISCORD_CLIENT_ID"
@@ -120,6 +118,7 @@ DISCORD_API = (
     "https://discord.com/api/v10"
 )
 
+# Administrator
 BOT_PERMISSIONS = "8"
 
 DISCORD_SUPPORT_SERVER = (
@@ -128,28 +127,18 @@ DISCORD_SUPPORT_SERVER = (
 
 
 # =========================================================
-# REVIEW SETTINGS
+# REVIEWS
 # =========================================================
 
 REVIEW_LIFETIME_DAYS = 30
-
 HOME_REVIEW_COUNT = 5
-
-
-# =========================================================
-# WEB SESSION SETTINGS
-# =========================================================
-
-SESSION_LIFETIME_DAYS = 30
 
 
 # =========================================================
 # FLASK
 # =========================================================
 
-app = Flask(
-    __name__
-)
+app = Flask(__name__)
 
 app.secret_key = FLASK_SECRET_KEY
 
@@ -159,16 +148,16 @@ app.config["SESSION_COOKIE_NAME"] = (
 
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 
+# Render usa HTTPS.
 app.config["SESSION_COOKIE_SECURE"] = True
 
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
 app.config["SESSION_COOKIE_PATH"] = "/"
 
+# Cookie persistente durante 30 dias.
 app.config["PERMANENT_SESSION_LIFETIME"] = (
-    timedelta(
-        days=SESSION_LIFETIME_DAYS
-    )
+    timedelta(days=30)
 )
 
 
@@ -208,10 +197,6 @@ def create_database():
 
     with database() as connection:
 
-        # =================================================
-        # LICENSES
-        # =================================================
-
         connection.execute(
             """
             CREATE TABLE IF NOT EXISTS licenses (
@@ -231,10 +216,6 @@ def create_database():
             """
         )
 
-        # =================================================
-        # WEB SESSIONS
-        # =================================================
-
         connection.execute(
             """
             CREATE TABLE IF NOT EXISTS web_sessions (
@@ -252,10 +233,6 @@ def create_database():
             )
             """
         )
-
-        # =================================================
-        # REVIEWS
-        # =================================================
 
         connection.execute(
             """
@@ -284,10 +261,6 @@ def create_database():
             """
         )
 
-        # =================================================
-        # REVIEW LIKES
-        # =================================================
-
         connection.execute(
             """
             CREATE TABLE IF NOT EXISTS review_likes (
@@ -307,110 +280,14 @@ def create_database():
             """
         )
 
-        # =================================================
-        # SAFE REVIEW MIGRATION
-        # =================================================
-
-        cursor = connection.execute(
-            "PRAGMA table_info(reviews)"
-        )
-
-        columns = {
-            row[1]
-            for row in cursor.fetchall()
-        }
-
-        migrations = {
-
-            "user_id":
-                "ALTER TABLE reviews ADD COLUMN user_id TEXT",
-
-            "username":
-                "ALTER TABLE reviews ADD COLUMN username TEXT",
-
-            "guild_id":
-                "ALTER TABLE reviews ADD COLUMN guild_id TEXT",
-
-            "rating":
-                "ALTER TABLE reviews ADD COLUMN rating INTEGER DEFAULT 5",
-
-            "review":
-                "ALTER TABLE reviews ADD COLUMN review TEXT DEFAULT ''",
-
-            "likes":
-                "ALTER TABLE reviews ADD COLUMN likes INTEGER DEFAULT 0",
-
-            "created_at":
-                "ALTER TABLE reviews ADD COLUMN created_at TEXT",
-
-            "expires_at":
-                "ALTER TABLE reviews ADD COLUMN expires_at TEXT"
-        }
-
-        for column, sql in migrations.items():
-
-            if column not in columns:
-
-                try:
-
-                    connection.execute(
-                        sql
-                    )
-
-                    print(
-                        f"Added reviews.{column}"
-                    )
-
-                except sqlite3.Error as error:
-
-                    print(
-                        f"Could not add reviews.{column}:",
-                        error
-                    )
-
-        # =================================================
-        # MIGRATE OLD REVIEWS
-        # =================================================
-
-        try:
-
-            connection.execute(
-                """
-                UPDATE reviews
-
-                SET expires_at = datetime(
-                    created_at,
-                    ?
-                )
-
-                WHERE expires_at IS NULL
-
-                AND created_at IS NOT NULL
-                """,
-                (
-                    f"+{REVIEW_LIFETIME_DAYS} days",
-                )
-            )
-
-        except sqlite3.Error as error:
-
-            print(
-                "Could not migrate review expiration:",
-                error
-            )
-
         connection.commit()
-
-    print(
-        "Database ready."
-    )
 
 
 create_database()
 
 
 # =========================================================
-# CREATE WEB SESSION
+# WEB SESSIONS
 # =========================================================
 
 def create_web_session(
@@ -426,9 +303,7 @@ def create_web_session(
 
     expires = (
         now
-        + timedelta(
-            days=SESSION_LIFETIME_DAYS
-        )
+        + timedelta(days=30)
     )
 
     with database() as connection:
@@ -470,16 +345,11 @@ def create_web_session(
     return session_id
 
 
-# =========================================================
-# GET WEB SESSION
-# =========================================================
-
 def get_web_session(
     session_id
 ):
 
     if not session_id:
-
         return None
 
     with database() as connection:
@@ -505,7 +375,6 @@ def get_web_session(
         row = cursor.fetchone()
 
     if not row:
-
         return None
 
     try:
@@ -536,11 +405,8 @@ def get_web_session(
     try:
 
         return {
-            "user":
-                json.loads(row[0]),
-
-            "guilds":
-                json.loads(row[1])
+            "user": json.loads(row[0]),
+            "guilds": json.loads(row[1])
         }
 
     except (
@@ -555,16 +421,11 @@ def get_web_session(
         return None
 
 
-# =========================================================
-# DELETE SESSION
-# =========================================================
-
 def delete_web_session(
     session_id
 ):
 
     if not session_id:
-
         return
 
     with database() as connection:
@@ -572,7 +433,6 @@ def delete_web_session(
         connection.execute(
             """
             DELETE FROM web_sessions
-
             WHERE session_id = ?
             """,
             (
@@ -583,10 +443,6 @@ def delete_web_session(
         connection.commit()
 
 
-# =========================================================
-# CLEANUP SESSIONS
-# =========================================================
-
 def cleanup_sessions():
 
     now = datetime.utcnow().isoformat()
@@ -596,7 +452,6 @@ def cleanup_sessions():
         connection.execute(
             """
             DELETE FROM web_sessions
-
             WHERE expires_at < ?
             """,
             (
@@ -607,48 +462,11 @@ def cleanup_sessions():
         connection.commit()
 
 
-# =========================================================
-# CURRENT SESSION
-# =========================================================
-
 def get_current_web_session():
 
     return get_web_session(
         session.get("sid")
     )
-
-
-# =========================================================
-# REFRESH DISCORD GUILDS
-# =========================================================
-
-def refresh_user_guilds():
-
-    current = get_current_web_session()
-
-    if current is None:
-
-        return None
-
-    user = current["user"]
-
-    # -----------------------------------------------------
-    # We do not have the Discord access token anymore.
-    #
-    # Therefore the original guild list is retained in
-    # the server-side session.
-    #
-    # Installation status is always checked separately
-    # using the bot account.
-    # -----------------------------------------------------
-
-    return {
-        "user": user,
-        "guilds": current.get(
-            "guilds",
-            []
-        )
-    }
 
 
 # =========================================================
@@ -661,9 +479,7 @@ def get_license(
 
     try:
 
-        guild_id = int(
-            guild_id
-        )
+        guild_id = int(guild_id)
 
     except (
         TypeError,
@@ -697,26 +513,9 @@ def get_license(
         return cursor.fetchone()
 
 
-# =========================================================
-# EXPIRE LICENSE
-# =========================================================
-
 def set_license_expired(
     guild_id
 ):
-
-    try:
-
-        guild_id = int(
-            guild_id
-        )
-
-    except (
-        TypeError,
-        ValueError
-    ):
-
-        return
 
     with database() as connection:
 
@@ -729,16 +528,12 @@ def set_license_expired(
             WHERE guild_id = ?
             """,
             (
-                guild_id,
+                int(guild_id),
             )
         )
 
         connection.commit()
 
-
-# =========================================================
-# LICENSE STATUS
-# =========================================================
 
 def license_status(
     guild_id
@@ -757,7 +552,6 @@ def license_status(
         }
 
     status = data[2]
-
     expires_at = data[3]
 
     if status == "active" and expires_at:
@@ -784,14 +578,9 @@ def license_status(
             status = "invalid"
 
     return {
-        "licensed":
-            status == "active",
-
-        "status":
-            status,
-
-        "expires_at":
-            expires_at
+        "licensed": status == "active",
+        "status": status,
+        "expires_at": expires_at
     }
 
 
@@ -812,14 +601,9 @@ def discord_headers(
     }
 
 
-# =========================================================
-# BOT HEADERS
-# =========================================================
-
 def bot_headers():
 
     if not BOT_TOKEN:
-
         return None
 
     return {
@@ -846,9 +630,7 @@ def get_bot_guild_ids():
 
         response = requests.get(
             f"{DISCORD_API}/users/@me/guilds",
-
             headers=bot_headers(),
-
             timeout=15
         )
 
@@ -887,7 +669,7 @@ def get_bot_guild_ids():
 
 
 # =========================================================
-# USER CAN MANAGE GUILD
+# USER CAN MANAGE SERVER
 # =========================================================
 
 def user_can_manage_guild(
@@ -899,7 +681,6 @@ def user_can_manage_guild(
     )
 
     if permissions is None:
-
         return False
 
     try:
@@ -928,7 +709,11 @@ def user_can_manage_guild(
 
 
 # =========================================================
-# BOT INVITE
+# BOT INSTALL URL
+#
+# IMPORTANT:
+# This is NOT the login OAuth2 callback.
+# There is intentionally NO redirect_uri here.
 # =========================================================
 
 def bot_invite_url(
@@ -960,7 +745,7 @@ def bot_invite_url(
 
 
 # =========================================================
-# REVIEW CLEANUP
+# REVIEWS
 # =========================================================
 
 def cleanup_reviews():
@@ -984,10 +769,6 @@ def cleanup_reviews():
 
         connection.commit()
 
-
-# =========================================================
-# GET REVIEWS
-# =========================================================
 
 def get_reviews(
     limit=5
@@ -1026,49 +807,35 @@ def get_reviews(
         return cursor.fetchall()
 
 
-# =========================================================
-# CAN REVIEW
-# =========================================================
-
 def can_user_review(
     user_id
 ):
 
-    session_data = get_current_web_session()
+    current = get_current_web_session()
 
-    if session_data is None:
-
+    if current is None:
         return False
 
-    guilds = session_data.get(
+    for guild in current.get(
         "guilds",
         []
-    )
-
-    for guild in guilds:
+    ):
 
         guild_id = guild.get(
             "id"
         )
 
         if not guild_id:
-
             continue
 
-        license_info = license_status(
+        if license_status(
             guild_id
-        )
-
-        if license_info["licensed"]:
+        )["licensed"]:
 
             return True
 
     return False
 
-
-# =========================================================
-# ADD REVIEW
-# =========================================================
 
 def add_review(
     user_id,
@@ -1118,10 +885,6 @@ def add_review(
 
         connection.commit()
 
-
-# =========================================================
-# REVIEW LIKES
-# =========================================================
 
 def toggle_like(
     review_id,
@@ -1228,8 +991,6 @@ def page(
 
     logged_in = current is not None
 
-    auth_button = ""
-
     if logged_in:
 
         auth_button = """
@@ -1279,11 +1040,8 @@ html {{
 }}
 
 body {{
-
     margin: 0;
-
     min-height: 100vh;
-
     font-family:
         Inter,
         -apple-system,
@@ -1291,9 +1049,7 @@ body {{
         "Segoe UI",
         Arial,
         sans-serif;
-
     color: #ffffff;
-
     background:
         radial-gradient(
             circle at 10% 0%,
@@ -1308,70 +1064,43 @@ a {{
 }}
 
 .navbar {{
-
     height: 72px;
-
     display: flex;
-
     align-items: center;
-
     justify-content: space-between;
-
     padding: 0 32px;
-
     position: sticky;
-
     top: 0;
-
     z-index: 100;
-
     background:
         rgba(10,11,16,0.82);
-
     border-bottom:
         1px solid
         rgba(255,255,255,0.08);
-
     backdrop-filter:
         blur(20px);
 }}
 
 .brand {{
-
     color: white;
-
     text-decoration: none;
-
     font-size: 21px;
-
     font-weight: 800;
 }}
 
 .hamburger {{
-
     width: 44px;
-
     height: 44px;
-
     display: flex;
-
     align-items: center;
-
     justify-content: center;
-
     border-radius: 12px;
-
     border:
         1px solid
         rgba(255,255,255,0.08);
-
-    background:
-        #1d2028;
-
+    background: #1d2028;
     color: white;
-
     cursor: pointer;
-
     font-size: 22px;
 }}
 
@@ -1380,32 +1109,19 @@ a {{
 }}
 
 .menu {{
-
     position: absolute;
-
     right: 24px;
-
     top: 62px;
-
     min-width: 190px;
-
     padding: 10px;
-
     display: none;
-
     flex-direction: column;
-
     gap: 4px;
-
     border-radius: 15px;
-
-    background:
-        #1b1e27;
-
+    background: #1b1e27;
     border:
         1px solid
         rgba(255,255,255,0.09);
-
     box-shadow:
         0 20px 60px
         rgba(0,0,0,0.45);
@@ -1416,52 +1132,34 @@ a {{
 }}
 
 .menu a {{
-
     padding: 11px 13px;
-
     border-radius: 9px;
-
     color: #bfc4d2;
-
     text-decoration: none;
-
     font-size: 14px;
 }}
 
 .menu a:hover {{
-
     color: white;
-
-    background:
-        #252934;
+    background: #252934;
 }}
 
 .container {{
-
     width: 100%;
-
     max-width: 1100px;
-
     margin: 0 auto;
-
     padding: 50px 22px;
 }}
 
 .card {{
-
     padding: 30px;
-
     margin-bottom: 20px;
-
     background:
         rgba(27,30,39,0.91);
-
     border:
         1px solid
         rgba(255,255,255,0.08);
-
     border-radius: 22px;
-
     box-shadow:
         0 25px 80px
         rgba(0,0,0,0.28);
@@ -1472,41 +1170,28 @@ a {{
 }}
 
 .logo {{
-
     width: 88px;
-
     height: 88px;
-
     margin:
         0 auto 24px;
-
     display: flex;
-
     align-items: center;
-
     justify-content: center;
-
     border-radius: 26px;
-
     font-size: 42px;
-
     background:
         linear-gradient(
             135deg,
             #5865f2,
             #8b5cf6
         );
-
     box-shadow:
         0 18px 50px
         rgba(88,101,242,0.35);
 }}
 
 h1 {{
-
-    margin:
-        0 0 14px;
-
+    margin: 0 0 14px;
     font-size:
         clamp(32px, 5vw, 48px);
 }}
@@ -1516,45 +1201,31 @@ h2 {{
 }}
 
 p {{
-
     color: #aeb3c0;
-
     line-height: 1.75;
 }}
 
 .button {{
-
     display: inline-block;
-
     margin-top: 18px;
-
     padding:
         13px 20px;
-
     border-radius: 12px;
-
     background: #5865f2;
-
     color: white;
-
     text-decoration: none;
-
     font-weight: 700;
-
     border:
         1px solid
         rgba(255,255,255,0.08);
-
     transition:
         transform .2s,
         background .2s;
 }}
 
 .button:hover {{
-
     transform:
         translateY(-2px);
-
     background:
         #4752c4;
 }}
@@ -1580,349 +1251,235 @@ p {{
 }}
 
 .server-grid {{
-
     display: grid;
-
     grid-template-columns:
         repeat(
             auto-fit,
             minmax(280px, 1fr)
         );
-
     gap: 18px;
-
     margin-top: 25px;
 }}
 
 .server {{
-
     padding: 22px;
-
     background:
         linear-gradient(
             145deg,
             #252933,
             #1e2129
         );
-
     border:
         1px solid
         rgba(255,255,255,0.07);
-
     border-radius: 18px;
-
     transition:
         transform .2s,
         border-color .2s;
 }}
 
 .server:hover {{
-
     transform:
         translateY(-3px);
-
     border-color:
         rgba(88,101,242,0.4);
 }}
 
 .server-header {{
-
     display: flex;
-
     align-items: center;
-
     gap: 14px;
-
     margin-bottom: 15px;
 }}
 
 .server-icon {{
-
     width: 48px;
-
     height: 48px;
-
     display: flex;
-
     align-items: center;
-
     justify-content: center;
-
     border-radius: 15px;
-
-    background:
-        #5865f2;
-
+    background: #5865f2;
     font-size: 22px;
-
     font-weight: 800;
 }}
 
 .server-name {{
-
     font-size: 17px;
-
     font-weight: 750;
 }}
 
 .server-id {{
-
     margin-top: 4px;
-
     color: #777d8c;
-
     font-size: 11px;
-
     word-break: break-all;
 }}
 
 .badge {{
-
     display: inline-block;
-
     margin-top: 12px;
-
     margin-right: 5px;
-
     padding:
         6px 10px;
-
     border-radius: 8px;
-
     font-size: 11px;
-
     font-weight: 700;
 }}
 
 .badge-green {{
-
     background:
         rgba(87,242,135,0.12);
-
     color:
         #57f287;
 }}
 
 .badge-red {{
-
     background:
         rgba(237,66,69,0.12);
-
     color:
         #ed4245;
 }}
 
 .badge-yellow {{
-
     background:
         rgba(254,231,92,0.12);
-
     color:
         #fee75c;
 }}
 
 .actions {{
-
     display: flex;
-
     gap: 9px;
-
     flex-wrap: wrap;
-
     margin-top: 16px;
 }}
 
 .actions .button {{
-
     margin-top: 0;
-
     font-size: 13px;
-
     padding:
         10px 14px;
 }}
 
 .profile {{
-
     display: flex;
-
     align-items: center;
-
     gap: 18px;
 }}
 
 .avatar {{
-
     width: 64px;
-
     height: 64px;
-
     border-radius: 50%;
-
     object-fit: cover;
 }}
 
 .notice {{
-
     padding: 17px 19px;
-
     margin-bottom: 20px;
-
     border-radius: 14px;
-
     background:
         rgba(88,101,242,0.10);
-
     border:
         1px solid
         rgba(88,101,242,0.20);
-
     color: #bfc4d2;
-
     line-height: 1.6;
 }}
 
 .review-grid {{
-
     display: grid;
-
     grid-template-columns:
         repeat(
             auto-fit,
             minmax(260px, 1fr)
         );
-
     gap: 18px;
-
     margin-top: 25px;
 }}
 
 .review {{
-
     padding: 22px;
-
     border-radius: 18px;
-
     background:
         linear-gradient(
             145deg,
             #252933,
             #1d2028
         );
-
     border:
         1px solid
         rgba(255,255,255,0.07);
 }}
 
 .review-header {{
-
     display: flex;
-
     align-items: center;
-
     justify-content: space-between;
-
     gap: 10px;
 }}
 
 .review-user {{
-
     font-weight: 750;
-
     color: white;
 }}
 
 .stars {{
-
     color: #fee75c;
-
     font-size: 15px;
-
     letter-spacing: 1px;
 }}
 
 .review-text {{
-
     margin-top: 15px;
-
     color: #b8bdc9;
-
     line-height: 1.7;
 }}
 
 .review-footer {{
-
     display: flex;
-
     align-items: center;
-
     justify-content: space-between;
-
     margin-top: 18px;
-
     color: #777d8c;
-
     font-size: 12px;
 }}
 
 .like-button {{
-
     display: inline-block;
-
     padding:
         7px 11px;
-
     border-radius: 9px;
-
-    background:
-        #252934;
-
+    background: #252934;
     color: #bfc4d2;
-
     text-decoration: none;
-
     border:
         1px solid
         rgba(255,255,255,0.07);
 }}
 
 .like-button:hover {{
-
-    background:
-        #303440;
-
+    background: #303440;
     color: white;
 }}
 
 .form-input {{
-
     width: 100%;
-
     margin-top: 8px;
-
     margin-bottom: 18px;
-
     padding: 12px 14px;
-
     border-radius: 11px;
-
     border:
         1px solid
         rgba(255,255,255,0.10);
-
-    background:
-        #171a21;
-
+    background: #171a21;
     color: white;
-
     font-family: inherit;
 }}
 
 textarea.form-input {{
-
     min-height: 130px;
-
     resize: vertical;
 }}
 
@@ -1935,17 +1492,13 @@ select.form-input {{
 }}
 
 .legal h2 {{
-
     margin-top: 34px;
-
     font-size: 21px;
 }}
 
 .legal p,
 .legal li {{
-
     color: #aeb3c0;
-
     line-height: 1.85;
 }}
 
@@ -1954,93 +1507,59 @@ select.form-input {{
 }}
 
 .cookie-banner {{
-
     position: fixed;
-
     left: 20px;
-
     right: 20px;
-
     bottom: 20px;
-
     z-index: 1000;
-
     max-width: 1000px;
-
     margin: auto;
-
     padding: 20px;
-
     display: flex;
-
     align-items: center;
-
     justify-content: space-between;
-
     gap: 20px;
-
     background:
         rgba(25,28,36,0.97);
-
     border:
         1px solid
         rgba(255,255,255,0.10);
-
     border-radius: 18px;
-
     box-shadow:
         0 20px 70px
         rgba(0,0,0,0.45);
-
     backdrop-filter:
         blur(20px);
 }}
 
 .cookie-text {{
-
     color: #aeb3c0;
-
     font-size: 13px;
-
     line-height: 1.6;
 }}
 
 .cookie-text a {{
-
     color: #8ea0ff;
-
     text-decoration: none;
 }}
 
 .cookie-actions {{
-
     display: flex;
-
     gap: 8px;
-
     flex-wrap: wrap;
-
     flex-shrink: 0;
 }}
 
 .cookie-actions button {{
-
     padding:
         10px 14px;
-
     border-radius: 10px;
-
     border:
         1px solid
         rgba(255,255,255,0.08);
-
-    background:
-        #252934;
-
+    background: #252934;
     color: white;
-
     cursor: pointer;
-
     font-weight: 700;
 }}
 
@@ -2049,26 +1568,18 @@ select.form-input {{
 }}
 
 footer {{
-
     margin-top: 45px;
-
     padding:
         25px 0 40px;
-
     text-align: center;
-
     color: #686d7a;
-
     font-size: 13px;
 }}
 
 footer a {{
-
     margin:
         0 8px;
-
     color: #858a98;
-
     text-decoration: none;
 }}
 
@@ -2077,13 +1588,9 @@ footer a:hover {{
 }}
 
 .contact-link {{
-
     display: inline-block;
-
     margin-top: 10px;
-
     color: #8ea0ff;
-
     text-decoration: none;
 }}
 
@@ -2107,15 +1614,10 @@ footer a:hover {{
     }}
 
     .cookie-banner {{
-
         left: 10px;
-
         right: 10px;
-
         bottom: 10px;
-
         flex-direction: column;
-
         align-items: stretch;
     }}
 
@@ -2237,6 +1739,8 @@ document.addEventListener(
             document.querySelector(".hamburger");
 
         if (
+            menu &&
+            button &&
             !menu.contains(event.target)
             &&
             !button.contains(event.target)
@@ -2289,21 +1793,15 @@ COOKIE_BANNER = """
     <div class="cookie-actions">
 
         <button
-            onclick="acceptAllCookies()"
-        >
-            Accept All
-        </button>
-
-        <button
             onclick="acceptNecessaryCookies()"
         >
             Necessary Only
         </button>
 
         <button
-            onclick="rejectCookies()"
+            onclick="acceptAllCookies()"
         >
-            Reject
+            Accept All
         </button>
 
     </div>
@@ -2337,13 +1835,6 @@ function acceptAllCookies() {{
 }}
 
 function acceptNecessaryCookies() {{
-
-    setCookieChoice(
-        "necessary"
-    );
-}}
-
-function rejectCookies() {{
 
     setCookieChoice(
         "necessary"
@@ -2409,11 +1900,22 @@ def render_reviews(
             expires_at
         ) = review
 
+        try:
+
+            rating = int(rating)
+
+        except (
+            TypeError,
+            ValueError
+        ):
+
+            rating = 5
+
         rating = max(
             1,
             min(
                 5,
-                int(rating)
+                rating
             )
         )
 
@@ -2451,7 +1953,6 @@ def render_reviews(
             pass
 
         html += f"""
-
         <div class="review">
 
             <div class="review-header">
@@ -2486,7 +1987,6 @@ def render_reviews(
             </div>
 
         </div>
-
         """
 
     return html
@@ -2528,7 +2028,6 @@ def home():
 
     </div>
 
-
     <div class="card">
 
         <h2>
@@ -2557,10 +2056,23 @@ def home():
 
 # =========================================================
 # LOGIN
+#
+# ONLY HERE is REDIRECT_URI used.
 # =========================================================
 
 @app.route("/login")
 def login():
+
+    current = get_current_web_session()
+
+    # Already logged in.
+    if current is not None:
+
+        return redirect(
+            url_for(
+                "dashboard"
+            )
+        )
 
     params = {
 
@@ -2707,6 +2219,7 @@ def callback():
 
         print(
             "Token response:",
+            response.status_code,
             response.text
         )
 
@@ -2718,6 +2231,11 @@ def callback():
                 <h1>
                     ❌ Discord rejected login
                 </h1>
+
+                <p>
+                    Check the Discord OAuth2
+                    redirect URI configuration.
+                </p>
 
                 <a
                     class="button"
@@ -2785,7 +2303,12 @@ def callback():
             timeout=15
         )
 
-    except requests.RequestException:
+    except requests.RequestException as error:
+
+        print(
+            "User request failed:",
+            error
+        )
 
         return page(
             "OAuth2 Error",
@@ -2801,6 +2324,12 @@ def callback():
         ), 500
 
     if user_response.status_code != 200:
+
+        print(
+            "User response:",
+            user_response.status_code,
+            user_response.text
+        )
 
         return page(
             "OAuth2 Error",
@@ -2821,6 +2350,8 @@ def callback():
     # GUILDS
     # =====================================================
 
+    guilds = []
+
     try:
 
         guild_response = requests.get(
@@ -2834,55 +2365,47 @@ def callback():
             timeout=15
         )
 
-    except requests.RequestException:
-
-        guild_response = None
-
-    if (
-        guild_response
-        and guild_response.status_code == 200
-    ):
-
-        try:
+        if guild_response.status_code == 200:
 
             guilds = guild_response.json()
 
-        except ValueError:
+    except (
+        requests.RequestException,
+        ValueError
+    ) as error:
 
-            guilds = []
-
-    else:
+        print(
+            "Guild request failed:",
+            error
+        )
 
         guilds = []
 
     # =====================================================
-    # SESSION
+    # CREATE PERSISTENT SERVER SESSION
     # =====================================================
 
     cleanup_sessions()
 
-    # -----------------------------------------------------
-    # Remove previous web session if one exists.
-    # -----------------------------------------------------
-
-    old_session_id = session.get(
+    old_sid = session.get(
         "sid"
     )
 
-    if old_session_id:
+    if old_sid:
 
         delete_web_session(
-            old_session_id
+            old_sid
         )
-
-    session.clear()
-
-    session.permanent = True
 
     session_id = create_web_session(
         user,
         guilds
     )
+
+    session.clear()
+
+    # This makes the Flask cookie persistent.
+    session.permanent = True
 
     session["sid"] = session_id
 
@@ -2912,34 +2435,15 @@ def dashboard():
             )
         )
 
-    user = current["user"]
+    user = current.get(
+        "user",
+        {}
+    )
 
     guilds = current.get(
         "guilds",
         []
     )
-
-    # -----------------------------------------------------
-    # IMPORTANT:
-    #
-    # Installation status is checked directly against the
-    # bot account every time the dashboard is opened.
-    #
-    # This means:
-    #
-    # Login
-    #   ↓
-    # Dashboard
-    #   ↓
-    # Add Misuki
-    #   ↓
-    # Discord authorization
-    #   ↓
-    # Return to dashboard
-    #   ↓
-    # Server appears as INSTALLED
-    #
-    # -----------------------------------------------------
 
     bot_guild_ids = get_bot_guild_ids()
 
@@ -2975,12 +2479,7 @@ def dashboard():
         )
 
     authorized = []
-
     available = []
-
-    # =====================================================
-    # CLASSIFY SERVERS
-    # =====================================================
 
     for guild in guilds:
 
@@ -2992,7 +2491,6 @@ def dashboard():
         )
 
         if not guild_id:
-
             continue
 
         if guild_id in bot_guild_ids:
@@ -3045,10 +2543,6 @@ def dashboard():
         status = license_info[
             "status"
         ]
-
-        # =================================================
-        # LICENSE BADGE
-        # =================================================
 
         if licensed:
 
@@ -3105,7 +2599,6 @@ def dashboard():
                 )
 
                 expiration_html = f"""
-
                 <div
                     style="
                         margin-top:10px;
@@ -3113,15 +2606,11 @@ def dashboard():
                         font-size:12px;
                     "
                 >
-
                     📅 Expires:
-
                     <strong>
                         <t:{timestamp}:F>
                     </strong>
-
                 </div>
-
                 """
 
             except (
@@ -3130,7 +2619,6 @@ def dashboard():
             ):
 
                 expiration_html = f"""
-
                 <div
                     style="
                         margin-top:10px;
@@ -3138,15 +2626,11 @@ def dashboard():
                         font-size:12px;
                     "
                 >
-
                     📅 Expires:
-
                     <strong>
                         {escape(str(expires_at))}
                     </strong>
-
                 </div>
-
                 """
 
         # =================================================
@@ -3212,7 +2696,6 @@ def dashboard():
         )
 
         return f"""
-
         <div class="server">
 
             <div class="server-header">
@@ -3252,11 +2735,40 @@ def dashboard():
             </div>
 
         </div>
-
         """
 
     # =====================================================
-    # AUTHORIZED SERVERS
+    # AVAILABLE
+    # =====================================================
+
+    available_html = ""
+
+    for guild in available:
+
+        available_html += render_server(
+            guild,
+            False
+        )
+
+    if not available_html:
+
+        available_html = """
+        <div class="notice">
+
+            No available servers found.
+
+            <br><br>
+
+            If you own/manage a server and it does
+            not appear here, make sure Discord has
+            provided the Manage Server permission
+            to your account.
+
+        </div>
+        """
+
+    # =====================================================
+    # AUTHORIZED
     # =====================================================
 
     authorized_html = ""
@@ -3275,35 +2787,6 @@ def dashboard():
 
             You currently have no servers where
             Misuki is installed.
-
-        </div>
-        """
-
-    # =====================================================
-    # AVAILABLE SERVERS
-    #
-    # THIS WAS MISSING IN THE ORIGINAL CODE.
-    #
-    # That missing variable was causing the 500 error
-    # immediately after login.
-    # =====================================================
-
-    available_html = ""
-
-    for guild in available:
-
-        available_html += render_server(
-            guild,
-            False
-        )
-
-    if not available_html:
-
-        available_html = """
-        <div class="notice">
-
-            🎉 Misuki is already installed on
-            every server you can manage.
 
         </div>
         """
@@ -3347,8 +2830,6 @@ def dashboard():
     </div>
 
 
-    <!-- AVAILABLE SERVERS FIRST -->
-
     <div class="card">
 
         <h2>
@@ -3368,8 +2849,6 @@ def dashboard():
     </div>
 
 
-    <!-- AUTHORIZED SERVERS SECOND -->
-
     <div class="card">
 
         <h2>
@@ -3377,8 +2856,7 @@ def dashboard():
         </h2>
 
         <p>
-            Servers where Misuki is already
-            installed.
+            Servers where Misuki is already installed.
         </p>
 
         <div class="server-grid">
@@ -3430,14 +2908,16 @@ def manage(
 
     guild = None
 
-    for item in current["guilds"]:
+    for item in current.get(
+        "guilds",
+        []
+    ):
 
         if str(
             item.get("id")
         ) == str(guild_id):
 
             guild = item
-
             break
 
     if guild is None:
@@ -3454,6 +2934,37 @@ def manage(
                 <p>
                     You do not have access to
                     this Discord server.
+                </p>
+
+                <a
+                    class="button"
+                    href="/dashboard"
+                >
+                    Back to Dashboard
+                </a>
+
+            </div>
+            """
+        ), 403
+
+    # Security:
+    # The bot must actually be installed.
+    bot_guild_ids = get_bot_guild_ids()
+
+    if str(guild_id) not in bot_guild_ids:
+
+        return page(
+            "Not Installed",
+            """
+            <div class="card center">
+
+                <h1>
+                    ⚠️ Misuki Not Installed
+                </h1>
+
+                <p>
+                    Misuki is not currently installed
+                    in this server.
                 </p>
 
                 <a
@@ -3612,14 +3123,16 @@ def review_page():
 
     guild_options = ""
 
-    for guild in current["guilds"]:
+    for guild in current.get(
+        "guilds",
+        []
+    ):
 
         guild_id = guild.get(
             "id"
         )
 
         if not guild_id:
-
             continue
 
         if license_status(
@@ -3877,10 +3390,6 @@ def submit_review():
             """
         ), 400
 
-    # =====================================================
-    # VERIFY LICENSE
-    # =====================================================
-
     if not license_status(
         guild_id
     )["licensed"]:
@@ -3903,20 +3412,18 @@ def submit_review():
             """
         ), 403
 
-    # =====================================================
-    # VERIFY USER ACTUALLY HAS THE SERVER
-    # =====================================================
-
     valid_guild = False
 
-    for guild in current["guilds"]:
+    for guild in current.get(
+        "guilds",
+        []
+    ):
 
         if str(
             guild.get("id")
         ) == str(guild_id):
 
             valid_guild = True
-
             break
 
     if not valid_guild:
@@ -4041,9 +3548,8 @@ def cookies():
 
         <p>
             Misuki uses an essential session cookie
-            to keep authenticated users signed in.
-            This cookie is required for the dashboard
-            and authentication system to function.
+            to keep authenticated users signed in
+            and maintain their session.
         </p>
 
         <h2>
@@ -4052,8 +3558,8 @@ def cookies():
 
         <p>
             Misuki does not currently require
-            advertising or analytics cookies for the
-            basic website.
+            advertising or analytics cookies for
+            the basic website.
         </p>
 
         <h2>
@@ -4061,9 +3567,8 @@ def cookies():
         </h2>
 
         <p>
-            Visitors may choose to accept all cookies,
-            use only necessary cookies, or reject
-            optional cookies through the cookie banner.
+            Visitors may choose their cookie
+            preference through the cookie banner.
         </p>
 
         <h2 id="terms">
@@ -4200,6 +3705,9 @@ def cookies():
 
 # =========================================================
 # LOGOUT
+#
+# Closing the browser/page does NOT call this.
+# Only an explicit visit to /logout destroys the session.
 # =========================================================
 
 @app.route("/logout")
@@ -4345,16 +3853,6 @@ if __name__ == "__main__":
     )
 
     print(
-        f"Session lifetime: "
-        f"{SESSION_LIFETIME_DAYS} days"
-    )
-
-    print(
-        f"Review lifetime: "
-        f"{REVIEW_LIFETIME_DAYS} days"
-    )
-
-    print(
         f"Port: "
         f"{os.getenv('PORT', '5000')}"
     )
@@ -4375,4 +3873,3 @@ if __name__ == "__main__":
 
         debug=False
     )
-
