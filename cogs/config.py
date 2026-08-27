@@ -1,14 +1,37 @@
 
-
 import sqlite3
 from datetime import datetime
+import os
 
 import discord
 from discord import app_commands
 from discord.ext import commands
 
 
-DATABASE = "data/misuki.db"
+# =========================================================
+# PATHS
+# =========================================================
+
+BASE_DIR = os.path.dirname(
+    os.path.dirname(
+        os.path.abspath(__file__)
+    )
+)
+
+DATA_DIR = os.path.join(
+    BASE_DIR,
+    "data"
+)
+
+os.makedirs(
+    DATA_DIR,
+    exist_ok=True
+)
+
+DATABASE = os.path.join(
+    DATA_DIR,
+    "misuki.db"
+)
 
 
 # =========================================================
@@ -28,14 +51,46 @@ ROLE_OPTIONS = [
 # =========================================================
 
 CHANNEL_OPTIONS = [
-    ("Configuration Logs", "configuration_log_channel_id", "📋"),
-    ("Transcript Channel", "transcript_log_channel_id", "🧾"),
-    ("Jail Logs", "jail_log_channel_id", "⛓️"),
-    ("Moderation Logs", "moderation_log_channel_id", "🛡️"),
-    ("Welcome Channel", "welcome_channel_id", "👋"),
-    ("Verification Channel", "verification_channel_id", "🔐"),
-    ("Verified Logs", "verified_log_channel_id", "✅"),
-    ("Unverified Logs", "unverified_log_channel_id", "❌"),
+    (
+        "Configuration Logs",
+        "configuration_log_channel_id",
+        "📋"
+    ),
+    (
+        "Transcript Channel",
+        "transcript_log_channel_id",
+        "🧾"
+    ),
+    (
+        "Jail Logs",
+        "jail_log_channel_id",
+        "⛓️"
+    ),
+    (
+        "Moderation Logs",
+        "moderation_log_channel_id",
+        "🛡️"
+    ),
+    (
+        "Welcome Channel",
+        "welcome_channel_id",
+        "👋"
+    ),
+    (
+        "Verification Channel",
+        "verification_channel_id",
+        "🔐"
+    ),
+    (
+        "Verified Logs",
+        "verified_log_channel_id",
+        "✅"
+    ),
+    (
+        "Unverified Logs",
+        "unverified_log_channel_id",
+        "❌"
+    ),
 ]
 
 
@@ -46,7 +101,9 @@ CHANNEL_OPTIONS = [
 class Config(commands.Cog):
 
     def __init__(self, bot):
+
         self.bot = bot
+
         self.create_database()
 
     # =====================================================
@@ -55,50 +112,79 @@ class Config(commands.Cog):
 
     def create_database(self):
 
-        connection = sqlite3.connect(DATABASE)
+        connection = sqlite3.connect(
+            DATABASE
+        )
+
         cursor = connection.cursor()
 
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS guild_config (
                 guild_id INTEGER PRIMARY KEY,
+
                 configuration_log_channel_id INTEGER,
+
                 transcript_log_channel_id INTEGER,
+
                 jail_log_channel_id INTEGER,
+
                 moderation_log_channel_id INTEGER,
+
                 welcome_channel_id INTEGER,
+
                 verification_channel_id INTEGER,
+
                 verified_log_channel_id INTEGER,
-                unverified_log_channel_id INTEGER
+
+                unverified_log_channel_id INTEGER,
+
+                ticket_category_id INTEGER
             )
         """)
 
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS role_permissions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+
                 guild_id INTEGER NOT NULL,
+
                 setting TEXT NOT NULL,
+
                 role_id INTEGER NOT NULL,
-                UNIQUE(guild_id, setting, role_id)
+
+                UNIQUE(
+                    guild_id,
+                    setting,
+                    role_id
+                )
             )
         """)
 
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS config_history (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+
                 guild_id INTEGER NOT NULL,
+
                 user_id INTEGER NOT NULL,
+
                 setting TEXT NOT NULL,
+
                 old_value TEXT,
+
                 new_value TEXT,
+
                 timestamp TEXT NOT NULL
             )
         """)
 
         # -------------------------------------------------
-        # DATABASE MIGRATION
+        # MIGRATIONS
         # -------------------------------------------------
 
-        cursor.execute("PRAGMA table_info(guild_config)")
+        cursor.execute(
+            "PRAGMA table_info(guild_config)"
+        )
 
         columns = {
             row[1]
@@ -109,6 +195,7 @@ class Config(commands.Cog):
             "transcript_log_channel_id": "INTEGER",
             "verified_log_channel_id": "INTEGER",
             "unverified_log_channel_id": "INTEGER",
+            "ticket_category_id": "INTEGER",
         }
 
         for column, data_type in migrations.items():
@@ -123,22 +210,59 @@ class Config(commands.Cog):
                 )
 
         connection.commit()
+
         connection.close()
 
     # =====================================================
-    # ROLE DATABASE
+    # GUILD ROW
     # =====================================================
 
-    def get_roles(self, guild_id, setting):
+    def ensure_guild(
+        self,
+        guild_id
+    ):
 
-        connection = sqlite3.connect(DATABASE)
+        connection = sqlite3.connect(
+            DATABASE
+        )
+
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            INSERT OR IGNORE INTO guild_config
+            (guild_id)
+            VALUES (?)
+        """, (
+            guild_id,
+        ))
+
+        connection.commit()
+
+        connection.close()
+
+    # =====================================================
+    # ROLES
+    # =====================================================
+
+    def get_roles(
+        self,
+        guild_id,
+        setting
+    ):
+
+        connection = sqlite3.connect(
+            DATABASE
+        )
+
         cursor = connection.cursor()
 
         cursor.execute("""
             SELECT role_id
             FROM role_permissions
+
             WHERE guild_id = ?
             AND setting = ?
+
             ORDER BY id
         """, (
             guild_id,
@@ -167,14 +291,22 @@ class Config(commands.Cog):
             setting
         )
 
-        connection = sqlite3.connect(DATABASE)
+        connection = sqlite3.connect(
+            DATABASE
+        )
+
         cursor = connection.cursor()
 
         for role in roles:
 
             cursor.execute("""
                 INSERT OR IGNORE INTO role_permissions
-                (guild_id, setting, role_id)
+                (
+                    guild_id,
+                    setting,
+                    role_id
+                )
+
                 VALUES (?, ?, ?)
             """, (
                 guild_id,
@@ -183,6 +315,7 @@ class Config(commands.Cog):
             ))
 
         connection.commit()
+
         connection.close()
 
         new_roles = self.get_roles(
@@ -219,11 +352,15 @@ class Config(commands.Cog):
             setting
         )
 
-        connection = sqlite3.connect(DATABASE)
+        connection = sqlite3.connect(
+            DATABASE
+        )
+
         cursor = connection.cursor()
 
         cursor.execute("""
             DELETE FROM role_permissions
+
             WHERE guild_id = ?
             AND setting = ?
             AND role_id = ?
@@ -234,6 +371,7 @@ class Config(commands.Cog):
         ))
 
         connection.commit()
+
         connection.close()
 
         new_roles = self.get_roles(
@@ -269,11 +407,15 @@ class Config(commands.Cog):
             setting
         )
 
-        connection = sqlite3.connect(DATABASE)
+        connection = sqlite3.connect(
+            DATABASE
+        )
+
         cursor = connection.cursor()
 
         cursor.execute("""
             DELETE FROM role_permissions
+
             WHERE guild_id = ?
             AND setting = ?
         """, (
@@ -282,6 +424,7 @@ class Config(commands.Cog):
         ))
 
         connection.commit()
+
         connection.close()
 
         await self.add_history(
@@ -301,7 +444,7 @@ class Config(commands.Cog):
         )
 
     # =====================================================
-    # CHANNEL DATABASE
+    # CHANNELS
     # =====================================================
 
     def get_channel_value(
@@ -316,18 +459,30 @@ class Config(commands.Cog):
         }
 
         if setting not in allowed_settings:
+
             return None
 
-        connection = sqlite3.connect(DATABASE)
+        self.ensure_guild(
+            guild_id
+        )
+
+        connection = sqlite3.connect(
+            DATABASE
+        )
+
         cursor = connection.cursor()
 
         cursor.execute(
             f"""
             SELECT {setting}
+
             FROM guild_config
+
             WHERE guild_id = ?
             """,
-            (guild_id,)
+            (
+                guild_id,
+            )
         )
 
         result = cursor.fetchone()
@@ -335,9 +490,155 @@ class Config(commands.Cog):
         connection.close()
 
         if result is None:
+
             return None
 
         return result[0]
+
+    # =====================================================
+    # TICKET CATEGORY
+    # =====================================================
+
+    def get_ticket_category(
+        self,
+        guild_id
+    ):
+
+        self.ensure_guild(
+            guild_id
+        )
+
+        connection = sqlite3.connect(
+            DATABASE
+        )
+
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            SELECT ticket_category_id
+
+            FROM guild_config
+
+            WHERE guild_id = ?
+        """, (
+            guild_id,
+        ))
+
+        result = cursor.fetchone()
+
+        connection.close()
+
+        if result is None:
+
+            return None
+
+        return result[0]
+
+    async def save_ticket_category(
+        self,
+        guild_id,
+        user_id,
+        category_id
+    ):
+
+        old_value = self.get_ticket_category(
+            guild_id
+        )
+
+        self.ensure_guild(
+            guild_id
+        )
+
+        connection = sqlite3.connect(
+            DATABASE
+        )
+
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            UPDATE guild_config
+
+            SET ticket_category_id = ?
+
+            WHERE guild_id = ?
+        """, (
+            category_id,
+            guild_id
+        ))
+
+        connection.commit()
+
+        connection.close()
+
+        await self.add_history(
+            guild_id,
+            user_id,
+            "ticket_category_id",
+            old_value,
+            category_id
+        )
+
+        await self.send_config_log(
+            guild_id,
+            user_id,
+            "ticket_category_id",
+            old_value,
+            category_id
+        )
+
+    async def remove_ticket_category(
+        self,
+        guild_id,
+        user_id
+    ):
+
+        old_value = self.get_ticket_category(
+            guild_id
+        )
+
+        self.ensure_guild(
+            guild_id
+        )
+
+        connection = sqlite3.connect(
+            DATABASE
+        )
+
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            UPDATE guild_config
+
+            SET ticket_category_id = NULL
+
+            WHERE guild_id = ?
+        """, (
+            guild_id,
+        ))
+
+        connection.commit()
+
+        connection.close()
+
+        await self.add_history(
+            guild_id,
+            user_id,
+            "ticket_category_id",
+            old_value,
+            None
+        )
+
+        await self.send_config_log(
+            guild_id,
+            user_id,
+            "ticket_category_id",
+            old_value,
+            None
+        )
+
+    # =====================================================
+    # SAVE CHANNEL
+    # =====================================================
 
     async def save_channel(
         self,
@@ -353,40 +654,30 @@ class Config(commands.Cog):
         }
 
         if setting not in allowed_settings:
+
             return
 
-        connection = sqlite3.connect(DATABASE)
-        cursor = connection.cursor()
+        old_value = self.get_channel_value(
+            guild_id,
+            setting
+        )
 
-        cursor.execute("""
-            INSERT OR IGNORE INTO guild_config
-            (guild_id)
-            VALUES (?)
-        """, (
+        self.ensure_guild(
             guild_id
-        ))
-
-        cursor.execute(
-            f"""
-            SELECT {setting}
-            FROM guild_config
-            WHERE guild_id = ?
-            """,
-            (guild_id,)
         )
 
-        result = cursor.fetchone()
-
-        old_value = (
-            result[0]
-            if result
-            else None
+        connection = sqlite3.connect(
+            DATABASE
         )
+
+        cursor = connection.cursor()
 
         cursor.execute(
             f"""
             UPDATE guild_config
+
             SET {setting} = ?
+
             WHERE guild_id = ?
             """,
             (
@@ -396,6 +687,7 @@ class Config(commands.Cog):
         )
 
         connection.commit()
+
         connection.close()
 
         await self.add_history(
@@ -427,6 +719,7 @@ class Config(commands.Cog):
         }
 
         if setting not in allowed_settings:
+
             return
 
         old_value = self.get_channel_value(
@@ -434,19 +727,31 @@ class Config(commands.Cog):
             setting
         )
 
-        connection = sqlite3.connect(DATABASE)
+        self.ensure_guild(
+            guild_id
+        )
+
+        connection = sqlite3.connect(
+            DATABASE
+        )
+
         cursor = connection.cursor()
 
         cursor.execute(
             f"""
             UPDATE guild_config
+
             SET {setting} = NULL
+
             WHERE guild_id = ?
             """,
-            (guild_id,)
+            (
+                guild_id,
+            )
         )
 
         connection.commit()
+
         connection.close()
 
         await self.add_history(
@@ -482,7 +787,10 @@ class Config(commands.Cog):
             "%Y-%m-%d %H:%M:%S"
         )
 
-        connection = sqlite3.connect(DATABASE)
+        connection = sqlite3.connect(
+            DATABASE
+        )
+
         cursor = connection.cursor()
 
         cursor.execute("""
@@ -495,6 +803,7 @@ class Config(commands.Cog):
                 new_value,
                 timestamp
             )
+
             VALUES (?, ?, ?, ?, ?, ?)
         """, (
             guild_id,
@@ -506,10 +815,11 @@ class Config(commands.Cog):
         ))
 
         connection.commit()
+
         connection.close()
 
     # =====================================================
-    # CONFIGURATION LOG
+    # CONFIG LOG
     # =====================================================
 
     async def send_config_log(
@@ -527,6 +837,7 @@ class Config(commands.Cog):
         )
 
         if not log_channel_id:
+
             return
 
         channel = self.bot.get_channel(
@@ -534,6 +845,7 @@ class Config(commands.Cog):
         )
 
         if channel is None:
+
             return
 
         guild = self.bot.get_guild(
@@ -541,6 +853,7 @@ class Config(commands.Cog):
         )
 
         if guild is None:
+
             return
 
         def format_value(value):
@@ -548,17 +861,28 @@ class Config(commands.Cog):
             if isinstance(value, list):
 
                 if not value:
+
                     return "None"
 
                 mentions = []
 
                 for role_id in value:
 
-                    role = guild.get_role(
-                        int(role_id)
-                    )
+                    try:
+
+                        role = guild.get_role(
+                            int(role_id)
+                        )
+
+                    except (
+                        TypeError,
+                        ValueError
+                    ):
+
+                        continue
 
                     if role:
+
                         mentions.append(
                             role.mention
                         )
@@ -570,23 +894,46 @@ class Config(commands.Cog):
                 )
 
             if value is None:
+
                 return "None"
 
             try:
+
                 value = int(value)
 
-            except (TypeError, ValueError):
+            except (
+                TypeError,
+                ValueError
+            ):
+
                 return str(value)
 
-            role = guild.get_role(value)
+            role = guild.get_role(
+                value
+            )
 
             if role:
+
                 return role.mention
 
-            channel_obj = guild.get_channel(value)
+            channel_obj = guild.get_channel(
+                value
+            )
 
             if channel_obj:
+
                 return channel_obj.mention
+
+            category = guild.get_channel(
+                value
+            )
+
+            if isinstance(
+                category,
+                discord.CategoryChannel
+            ):
+
+                return category.name
 
             return f"`{value}`"
 
@@ -621,11 +968,13 @@ class Config(commands.Cog):
         )
 
         try:
+
             await channel.send(
                 embed=embed
             )
 
         except discord.HTTPException:
+
             pass
 
     # =====================================================
@@ -643,6 +992,15 @@ class Config(commands.Cog):
         self,
         interaction: discord.Interaction
     ):
+
+        if interaction.guild is None:
+
+            await interaction.response.send_message(
+                "❌ This command can only be used in a server.",
+                ephemeral=True
+            )
+
+            return
 
         embed = discord.Embed(
             title="⚙️ Misuki Bot Setup",
@@ -756,7 +1114,10 @@ class RolesButton(discord.ui.Button):
             style=discord.ButtonStyle.primary
         )
 
-    async def callback(self, interaction):
+    async def callback(
+        self,
+        interaction
+    ):
 
         embed = discord.Embed(
             title="👥 Roles",
@@ -817,22 +1178,24 @@ class RoleFunctionButton(discord.ui.Button):
             style=discord.ButtonStyle.secondary
         )
 
-    async def callback(self, interaction):
+    async def callback(
+        self,
+        interaction
+    ):
 
         role_ids = self.config.get_roles(
             interaction.guild.id,
             self.setting
         )
 
-        if role_ids:
-
-            current = "\n".join(
+        current = (
+            "\n".join(
                 f"<@&{role_id}>"
                 for role_id in role_ids
             )
-
-        else:
-            current = "None"
+            if role_ids
+            else "None"
+        )
 
         embed = discord.Embed(
             title=f"👥 {self.label_name}",
@@ -915,7 +1278,10 @@ class MultiRoleSelect(discord.ui.RoleSelect):
             max_values=25
         )
 
-    async def callback(self, interaction):
+    async def callback(
+        self,
+        interaction
+    ):
 
         roles = self.values
 
@@ -967,7 +1333,10 @@ class ManageRolesButton(discord.ui.Button):
             style=discord.ButtonStyle.primary
         )
 
-    async def callback(self, interaction):
+    async def callback(
+        self,
+        interaction
+    ):
 
         role_ids = self.config.get_roles(
             interaction.guild.id,
@@ -1050,7 +1419,10 @@ class RemoveRoleSelect(discord.ui.RoleSelect):
             max_values=1
         )
 
-    async def callback(self, interaction):
+    async def callback(
+        self,
+        interaction
+    ):
 
         role = self.values[0]
 
@@ -1109,7 +1481,10 @@ class ClearRolesButton(discord.ui.Button):
             style=discord.ButtonStyle.danger
         )
 
-    async def callback(self, interaction):
+    async def callback(
+        self,
+        interaction
+    ):
 
         await self.config.clear_roles(
             interaction.guild.id,
@@ -1148,7 +1523,10 @@ class ChannelsButton(discord.ui.Button):
             style=discord.ButtonStyle.primary
         )
 
-    async def callback(self, interaction):
+    async def callback(
+        self,
+        interaction
+    ):
 
         embed = discord.Embed(
             title="📁 Channels",
@@ -1209,20 +1587,24 @@ class ChannelFunctionButton(discord.ui.Button):
             style=discord.ButtonStyle.secondary
         )
 
-    async def callback(self, interaction):
+    async def callback(
+        self,
+        interaction
+    ):
 
         current = self.config.get_channel_value(
             interaction.guild.id,
             self.setting
         )
 
-        if current:
-            current_text = f"<#{current}>"
-        else:
-            current_text = "None"
+        current_text = (
+            f"<#{current}>"
+            if current
+            else "None"
+        )
 
         embed = discord.Embed(
-            title=f"📁 {self.label_name}",
+            title=f"{self.emoji} {self.label_name}",
             description=(
                 f"**Current:** {current_text}\n\n"
                 "Select the channel below."
@@ -1296,7 +1678,10 @@ class ChannelPicker(discord.ui.ChannelSelect):
             max_values=1
         )
 
-    async def callback(self, interaction):
+    async def callback(
+        self,
+        interaction
+    ):
 
         channel = self.values[0]
 
@@ -1341,7 +1726,10 @@ class RemoveChannelButton(discord.ui.Button):
             style=discord.ButtonStyle.danger
         )
 
-    async def callback(self, interaction):
+    async def callback(
+        self,
+        interaction
+    ):
 
         current = self.config.get_channel_value(
             interaction.guild.id,
@@ -1402,9 +1790,10 @@ class SimpleCategoryButton(discord.ui.Button):
             style=style
         )
 
-    async def callback(self, interaction):
-
-        guild_id = interaction.guild.id
+    async def callback(
+        self,
+        interaction
+    ):
 
         # -------------------------------------------------
         # TICKETS
@@ -1415,16 +1804,20 @@ class SimpleCategoryButton(discord.ui.Button):
             embed = discord.Embed(
                 title="🎫 Tickets",
                 description=(
-                    "Ticket-related configuration.\n\n"
-                    "Select the channel where ticket "
-                    "transcripts will be stored."
+                    "Configure the ticket system.\n\n"
+                    "• Ticket Category — category where "
+                    "tickets will be created.\n"
+                    "• Transcript Channel — channel where "
+                    "ticket transcripts will be stored."
                 ),
                 color=discord.Color.blurple()
             )
 
             await interaction.response.edit_message(
                 embed=embed,
-                view=TicketConfigView(self.config)
+                view=TicketConfigView(
+                    self.config
+                )
             )
 
             return
@@ -1448,14 +1841,18 @@ class SimpleCategoryButton(discord.ui.Button):
                 view=CategoryConfigView(
                     self.config,
                     [
-                        ("Moderation Logs",
-                         "moderation_log_channel_id",
-                         "🛡️"),
+                        (
+                            "Moderation Logs",
+                            "moderation_log_channel_id",
+                            "🛡️"
+                        ),
                     ],
                     [
-                        ("Moderator Role",
-                         "moderator",
-                         "🛡️"),
+                        (
+                            "Moderator Role",
+                            "moderator",
+                            "🛡️"
+                        ),
                     ]
                 )
             )
@@ -1481,20 +1878,28 @@ class SimpleCategoryButton(discord.ui.Button):
                 view=CategoryConfigView(
                     self.config,
                     [
-                        ("Verification Channel",
-                         "verification_channel_id",
-                         "🔐"),
-                        ("Verified Logs",
-                         "verified_log_channel_id",
-                         "✅"),
-                        ("Unverified Logs",
-                         "unverified_log_channel_id",
-                         "❌"),
+                        (
+                            "Verification Channel",
+                            "verification_channel_id",
+                            "🔐"
+                        ),
+                        (
+                            "Verified Logs",
+                            "verified_log_channel_id",
+                            "✅"
+                        ),
+                        (
+                            "Unverified Logs",
+                            "unverified_log_channel_id",
+                            "❌"
+                        ),
                     ],
                     [
-                        ("Verified Role",
-                         "verified",
-                         "✅"),
+                        (
+                            "Verified Role",
+                            "verified",
+                            "✅"
+                        ),
                     ]
                 )
             )
@@ -1520,14 +1925,18 @@ class SimpleCategoryButton(discord.ui.Button):
                 view=CategoryConfigView(
                     self.config,
                     [
-                        ("Jail Logs",
-                         "jail_log_channel_id",
-                         "⛓️"),
+                        (
+                            "Jail Logs",
+                            "jail_log_channel_id",
+                            "⛓️"
+                        ),
                     ],
                     [
-                        ("Jailed Role",
-                         "jailed",
-                         "⛓️"),
+                        (
+                            "Jailed Role",
+                            "jailed",
+                            "⛓️"
+                        ),
                     ]
                 )
             )
@@ -1551,7 +1960,9 @@ class SimpleCategoryButton(discord.ui.Button):
 
             await interaction.response.edit_message(
                 embed=embed,
-                view=BackOnlyView(self.config)
+                view=BackOnlyView(
+                    self.config
+                )
             )
 
             return
@@ -1576,15 +1987,15 @@ class SimpleCategoryButton(discord.ui.Button):
                 view=CategoryConfigView(
                     self.config,
                     [
-                        ("Welcome Channel",
-                         "welcome_channel_id",
-                         "👋"),
+                        (
+                            "Welcome Channel",
+                            "welcome_channel_id",
+                            "👋"
+                        ),
                     ],
                     []
                 )
             )
-
-            return
 
 
 # =========================================================
@@ -1593,10 +2004,19 @@ class SimpleCategoryButton(discord.ui.Button):
 
 class TicketConfigView(discord.ui.View):
 
-    def __init__(self, config):
+    def __init__(
+        self,
+        config
+    ):
 
         super().__init__(
             timeout=600
+        )
+
+        self.add_item(
+            TicketCategoryButton(
+                config
+            )
         )
 
         self.add_item(
@@ -1613,11 +2033,238 @@ class TicketConfigView(discord.ui.View):
         )
 
 
+class TicketCategoryButton(discord.ui.Button):
+
+    def __init__(
+        self,
+        config
+    ):
+
+        self.config = config
+
+        super().__init__(
+            label="Ticket Category",
+            emoji="📂",
+            style=discord.ButtonStyle.secondary
+        )
+
+    async def callback(
+        self,
+        interaction
+    ):
+
+        category_id = self.config.get_ticket_category(
+            interaction.guild.id
+        )
+
+        current = (
+            f"<#{category_id}>"
+            if category_id
+            else "None"
+        )
+
+        embed = discord.Embed(
+            title="📂 Ticket Category",
+            description=(
+                f"**Current:** {current}\n\n"
+                "Select the category where new "
+                "tickets should be created."
+            ),
+            color=discord.Color.blurple()
+        )
+
+        await interaction.response.edit_message(
+            embed=embed,
+            view=TicketCategorySelectionView(
+                self.config
+            )
+        )
+
+
+class TicketCategorySelectionView(
+    discord.ui.View
+):
+
+    def __init__(
+        self,
+        config
+    ):
+
+        super().__init__(
+            timeout=600
+        )
+
+        self.add_item(
+            CategoryPicker(
+                config
+            )
+        )
+
+        self.add_item(
+            RemoveTicketCategoryButton(
+                config
+            )
+        )
+
+        self.add_item(
+            BackToTicketConfigButton(
+                config
+            )
+        )
+
+
+class CategoryPicker(
+    discord.ui.ChannelSelect
+):
+
+    def __init__(
+        self,
+        config
+    ):
+
+        self.config = config
+
+        super().__init__(
+            placeholder="Select ticket category...",
+            channel_types=[
+                discord.ChannelType.category
+            ],
+            min_values=1,
+            max_values=1
+        )
+
+    async def callback(
+        self,
+        interaction
+    ):
+
+        category = self.values[0]
+
+        await self.config.save_ticket_category(
+            interaction.guild.id,
+            interaction.user.id,
+            category.id
+        )
+
+        embed = discord.Embed(
+            title="✅ Ticket Category Saved",
+            description=(
+                f"Tickets will now be created in "
+                f"**{category.name}**."
+            ),
+            color=discord.Color.green()
+        )
+
+        await interaction.response.edit_message(
+            embed=embed,
+            view=TicketConfigView(
+                self.config
+            )
+        )
+
+
+class RemoveTicketCategoryButton(
+    discord.ui.Button
+):
+
+    def __init__(
+        self,
+        config
+    ):
+
+        self.config = config
+
+        super().__init__(
+            label="Remove",
+            emoji="🗑️",
+            style=discord.ButtonStyle.danger
+        )
+
+    async def callback(
+        self,
+        interaction
+    ):
+
+        current = self.config.get_ticket_category(
+            interaction.guild.id
+        )
+
+        if not current:
+
+            await interaction.response.send_message(
+                "❌ No ticket category is configured.",
+                ephemeral=True
+            )
+
+            return
+
+        await self.config.remove_ticket_category(
+            interaction.guild.id,
+            interaction.user.id
+        )
+
+        embed = discord.Embed(
+            title="🗑️ Ticket Category Removed",
+            description=(
+                "The ticket category configuration "
+                "has been removed."
+            ),
+            color=discord.Color.red()
+        )
+
+        await interaction.response.edit_message(
+            embed=embed,
+            view=TicketConfigView(
+                self.config
+            )
+        )
+
+
+class BackToTicketConfigButton(
+    discord.ui.Button
+):
+
+    def __init__(
+        self,
+        config
+    ):
+
+        self.config = config
+
+        super().__init__(
+            label="Back",
+            emoji="↩️",
+            style=discord.ButtonStyle.secondary
+        )
+
+    async def callback(
+        self,
+        interaction
+    ):
+
+        embed = discord.Embed(
+            title="🎫 Tickets",
+            description=(
+                "Configure the ticket system."
+            ),
+            color=discord.Color.blurple()
+        )
+
+        await interaction.response.edit_message(
+            embed=embed,
+            view=TicketConfigView(
+                self.config
+            )
+        )
+
+
 # =========================================================
 # CATEGORY CONFIG VIEW
 # =========================================================
 
-class CategoryConfigView(discord.ui.View):
+class CategoryConfigView(
+    discord.ui.View
+):
 
     def __init__(
         self,
@@ -1658,10 +2305,12 @@ class CategoryConfigView(discord.ui.View):
 
 
 # =========================================================
-# CATEGORY CHANNEL BUTTON
+# CATEGORY CHANNEL
 # =========================================================
 
-class CategoryChannelButton(discord.ui.Button):
+class CategoryChannelButton(
+    discord.ui.Button
+):
 
     def __init__(
         self,
@@ -1681,7 +2330,10 @@ class CategoryChannelButton(discord.ui.Button):
             style=discord.ButtonStyle.secondary
         )
 
-    async def callback(self, interaction):
+    async def callback(
+        self,
+        interaction
+    ):
 
         current = self.config.get_channel_value(
             interaction.guild.id,
@@ -1713,7 +2365,9 @@ class CategoryChannelButton(discord.ui.Button):
         )
 
 
-class CategoryChannelSelectionView(discord.ui.View):
+class CategoryChannelSelectionView(
+    discord.ui.View
+):
 
     def __init__(
         self,
@@ -1748,10 +2402,12 @@ class CategoryChannelSelectionView(discord.ui.View):
 
 
 # =========================================================
-# CATEGORY ROLE BUTTON
+# CATEGORY ROLE
 # =========================================================
 
-class CategoryRoleButton(discord.ui.Button):
+class CategoryRoleButton(
+    discord.ui.Button
+):
 
     def __init__(
         self,
@@ -1771,7 +2427,10 @@ class CategoryRoleButton(discord.ui.Button):
             style=discord.ButtonStyle.secondary
         )
 
-    async def callback(self, interaction):
+    async def callback(
+        self,
+        interaction
+    ):
 
         role_ids = self.config.get_roles(
             interaction.guild.id,
@@ -1806,7 +2465,9 @@ class CategoryRoleButton(discord.ui.Button):
         )
 
 
-class CategoryRoleSelectionView(discord.ui.View):
+class CategoryRoleSelectionView(
+    discord.ui.View
+):
 
     def __init__(
         self,
@@ -1844,9 +2505,14 @@ class CategoryRoleSelectionView(discord.ui.View):
 # BACK BUTTONS
 # =========================================================
 
-class BackButton(discord.ui.Button):
+class BackButton(
+    discord.ui.Button
+):
 
-    def __init__(self, config):
+    def __init__(
+        self,
+        config
+    ):
 
         self.config = config
 
@@ -1856,7 +2522,10 @@ class BackButton(discord.ui.Button):
             style=discord.ButtonStyle.secondary
         )
 
-    async def callback(self, interaction):
+    async def callback(
+        self,
+        interaction
+    ):
 
         embed = discord.Embed(
             title="⚙️ Misuki Bot Setup",
@@ -1869,13 +2538,20 @@ class BackButton(discord.ui.Button):
 
         await interaction.response.edit_message(
             embed=embed,
-            view=MainSetupView(self.config)
+            view=MainSetupView(
+                self.config
+            )
         )
 
 
-class BackToRolesButton(discord.ui.Button):
+class BackToRolesButton(
+    discord.ui.Button
+):
 
-    def __init__(self, config):
+    def __init__(
+        self,
+        config
+    ):
 
         self.config = config
 
@@ -1885,7 +2561,10 @@ class BackToRolesButton(discord.ui.Button):
             style=discord.ButtonStyle.secondary
         )
 
-    async def callback(self, interaction):
+    async def callback(
+        self,
+        interaction
+    ):
 
         embed = discord.Embed(
             title="👥 Roles",
@@ -1898,11 +2577,15 @@ class BackToRolesButton(discord.ui.Button):
 
         await interaction.response.edit_message(
             embed=embed,
-            view=RolesMenu(self.config)
+            view=RolesMenu(
+                self.config
+            )
         )
 
 
-class BackToRoleSelectionButton(discord.ui.Button):
+class BackToRoleSelectionButton(
+    discord.ui.Button
+):
 
     def __init__(
         self,
@@ -1921,7 +2604,10 @@ class BackToRoleSelectionButton(discord.ui.Button):
             style=discord.ButtonStyle.secondary
         )
 
-    async def callback(self, interaction):
+    async def callback(
+        self,
+        interaction
+    ):
 
         role_ids = self.config.get_roles(
             interaction.guild.id,
@@ -1957,9 +2643,14 @@ class BackToRoleSelectionButton(discord.ui.Button):
         )
 
 
-class BackToChannelsButton(discord.ui.Button):
+class BackToChannelsButton(
+    discord.ui.Button
+):
 
-    def __init__(self, config):
+    def __init__(
+        self,
+        config
+    ):
 
         self.config = config
 
@@ -1969,7 +2660,10 @@ class BackToChannelsButton(discord.ui.Button):
             style=discord.ButtonStyle.secondary
         )
 
-    async def callback(self, interaction):
+    async def callback(
+        self,
+        interaction
+    ):
 
         embed = discord.Embed(
             title="📁 Channels",
@@ -1982,13 +2676,20 @@ class BackToChannelsButton(discord.ui.Button):
 
         await interaction.response.edit_message(
             embed=embed,
-            view=ChannelsMenu(self.config)
+            view=ChannelsMenu(
+                self.config
+            )
         )
 
 
-class BackOnlyView(discord.ui.View):
+class BackOnlyView(
+    discord.ui.View
+):
 
-    def __init__(self, config):
+    def __init__(
+        self,
+        config
+    ):
 
         super().__init__(
             timeout=600
@@ -2003,7 +2704,9 @@ class BackOnlyView(discord.ui.View):
 # LOAD COG
 # =========================================================
 
-async def setup(bot):
+async def setup(
+    bot
+):
 
     await bot.add_cog(
         Config(bot)

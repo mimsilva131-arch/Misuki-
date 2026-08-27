@@ -1,109 +1,329 @@
 
+import asyncio
+import io
+import os
+import sqlite3
+
+from datetime import datetime
+
 import discord
 from discord import app_commands
 from discord.ext import commands
-
-from datetime import datetime
-import asyncio
-import io
-import sqlite3
-import os
 
 
 # =========================================================
 # DATABASE
 # =========================================================
 
-DATABASE = "data/tickets.db"
+BASE_DIR = os.path.dirname(
+    os.path.dirname(
+        os.path.abspath(__file__)
+    )
+)
 
+DATA_DIR = os.path.join(
+    BASE_DIR,
+    "data"
+)
+
+os.makedirs(
+    DATA_DIR,
+    exist_ok=True
+)
+
+DATABASE = os.path.join(
+    DATA_DIR,
+    "tickets.db"
+)
+
+
+# =========================================================
+# DATABASE INIT
+# =========================================================
 
 def init_database():
 
-    os.makedirs(
-        os.path.dirname(DATABASE),
-        exist_ok=True
+    connection = sqlite3.connect(
+        DATABASE
     )
 
-    with sqlite3.connect(DATABASE) as db:
+    cursor = connection.cursor()
 
-        db.execute("""
-            CREATE TABLE IF NOT EXISTS ticket_counter (
-                guild_id INTEGER PRIMARY KEY,
-                number INTEGER NOT NULL DEFAULT 0
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS ticket_counter (
+            guild_id INTEGER PRIMARY KEY,
+            number INTEGER NOT NULL DEFAULT 0
+        )
+    """)
+
+    connection.commit()
+
+    connection.close()
+
+
+def get_next_number(
+    guild_id
+):
+
+    connection = sqlite3.connect(
+        DATABASE
+    )
+
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT number
+
+        FROM ticket_counter
+
+        WHERE guild_id = ?
+    """, (
+        guild_id,
+    ))
+
+    result = cursor.fetchone()
+
+    if result is None:
+
+        number = 1
+
+        cursor.execute("""
+            INSERT INTO ticket_counter
+            (
+                guild_id,
+                number
             )
-        """)
 
-        db.commit()
+            VALUES (?, ?)
+        """, (
+            guild_id,
+            number
+        ))
 
+    else:
 
-def get_next_number(guild_id):
+        number = result[0] + 1
 
-    with sqlite3.connect(DATABASE) as db:
+        cursor.execute("""
+            UPDATE ticket_counter
 
-        cursor = db.cursor()
+            SET number = ?
 
-        cursor.execute(
-            """
-            SELECT number
-            FROM ticket_counter
             WHERE guild_id = ?
-            """,
-            (guild_id,)
+        """, (
+            number,
+            guild_id
+        ))
+
+    connection.commit()
+
+    connection.close()
+
+    return number
+
+
+# =========================================================
+# CONFIG
+# =========================================================
+
+def get_config(
+    bot
+):
+
+    return bot.get_cog(
+        "Config"
+    )
+
+
+# =========================================================
+# LICENSE
+# =========================================================
+
+def get_license_manager(
+    bot
+):
+
+    return bot.get_cog(
+        "LicenseManager"
+    )
+
+
+def check_license(
+    bot,
+    guild_id
+):
+
+    license_manager = get_license_manager(
+        bot
+    )
+
+    if license_manager is None:
+
+        print(
+            "❌ LicenseManager não está carregado."
         )
 
-        result = cursor.fetchone()
+        return False
 
-        if result is None:
+    try:
 
-            number = 1
-
-            cursor.execute(
-                """
-                INSERT INTO ticket_counter
-                (guild_id, number)
-                VALUES (?, ?)
-                """,
-                (
-                    guild_id,
-                    number
-                )
+        return (
+            license_manager.has_active_license(
+                guild_id
             )
+            is True
+        )
 
-        else:
+    except Exception as error:
 
-            number = result[0] + 1
+        print(
+            f"❌ License check error: {error}"
+        )
 
-            cursor.execute(
-                """
-                UPDATE ticket_counter
-                SET number = ?
-                WHERE guild_id = ?
-                """,
-                (
-                    number,
-                    guild_id
+        return False
+
+
+# =========================================================
+# STAFF
+# =========================================================
+
+def check_staff(
+    member,
+    config,
+    guild_id
+):
+
+    if member is None:
+
+        return False
+
+    permissions = member.guild_permissions
+
+    if permissions.administrator:
+
+        return True
+
+    if permissions.manage_guild:
+
+        return True
+
+    if config is None:
+
+        return False
+
+    try:
+
+        staff_roles = config.get_roles(
+            guild_id,
+            "staff"
+        )
+
+        moderator_roles = config.get_roles(
+            guild_id,
+            "moderator"
+        )
+
+        staff_roles = (
+            staff_roles
+            if staff_roles
+            else []
+        )
+
+        moderator_roles = (
+            moderator_roles
+            if moderator_roles
+            else []
+        )
+
+        allowed_roles = (
+            list(staff_roles)
+            + list(moderator_roles)
+        )
+
+        member_roles = {
+            role.id
+            for role in member.roles
+        }
+
+        for role_id in allowed_roles:
+
+            try:
+
+                role_id = int(
+                    role_id
                 )
-            )
 
-        db.commit()
+            except (
+                TypeError,
+                ValueError
+            ):
 
-        return number
+                continue
+
+            if role_id in member_roles:
+
+                return True
+
+    except Exception as error:
+
+        print(
+            f"❌ Staff check error: {error}"
+        )
+
+    return False
 
 
 # =========================================================
-# CONFIG HELPER
+# SETUP AUTHORIZATION
 # =========================================================
 
-def get_config(bot):
+def authorized_setup(
+    interaction,
+    config
+):
 
-    return bot.get_cog("Config")
+    guild = interaction.guild
+
+    if guild is None:
+
+        return False
+
+    if not check_staff(
+        interaction.user,
+        config,
+        guild.id
+    ):
+
+        print(
+            f"🚫 Unauthorized ticket setup: "
+            f"{interaction.user} "
+            f"({interaction.user.id})"
+        )
+
+        return False
+
+    if not check_license(
+        interaction.client,
+        guild.id
+    ):
+
+        print(
+            f"🔒 Invalid license for "
+            f"guild {guild.id}"
+        )
+
+        return False
+
+    return True
 
 
 # =========================================================
-# /TICKET GROUP
+# TICKET GROUP
 # =========================================================
 
-class TicketGroup(app_commands.Group):
+class TicketGroup(
+    app_commands.Group
+):
 
     def __init__(self):
 
@@ -118,79 +338,9 @@ class TicketGroup(app_commands.Group):
 
     @app_commands.command(
         name="setup",
-        description="Set up the ticket panel."
-    )
-    @app_commands.describe(
-        channel="Channel where the ticket panel will be sent."
-    )
-    @app_commands.default_permissions(
-        manage_guild=True
+        description="Create the ticket panel."
     )
     async def setup(
-        self,
-        interaction: discord.Interaction,
-        channel: discord.TextChannel
-    ):
-
-        embed = discord.Embed(
-            title="🎫 Support Tickets",
-            description=(
-                "Need help from the staff team?\n\n"
-                "Click **Create Ticket** below "
-                "to open a private support ticket."
-            ),
-            color=discord.Color.blurple()
-        )
-
-        embed.set_footer(
-            text="Misuki Ticket System"
-        )
-
-        await channel.send(
-            embed=embed,
-            view=TicketPanel()
-        )
-
-        await interaction.response.send_message(
-            f"✅ Ticket panel created in "
-            f"{channel.mention}.",
-            ephemeral=True
-        )
-
-
-# =========================================================
-# PANEL
-# =========================================================
-
-class TicketPanel(discord.ui.View):
-
-    def __init__(self):
-
-        super().__init__(
-            timeout=None
-        )
-
-        self.add_item(
-            CreateTicket()
-        )
-
-
-# =========================================================
-# CREATE TICKET BUTTON
-# =========================================================
-
-class CreateTicket(discord.ui.Button):
-
-    def __init__(self):
-
-        super().__init__(
-            label="Create Ticket",
-            emoji="🎫",
-            style=discord.ButtonStyle.primary,
-            custom_id="ticket_create"
-        )
-
-    async def callback(
         self,
         interaction: discord.Interaction
     ):
@@ -199,33 +349,12 @@ class CreateTicket(discord.ui.Button):
 
         if guild is None:
 
+            await interaction.response.send_message(
+                "❌ This command can only be used in a server.",
+                ephemeral=True
+            )
+
             return
-
-        # -------------------------------------------------
-        # Prevent multiple tickets
-        # -------------------------------------------------
-
-        for channel in guild.text_channels:
-
-            if not channel.name.startswith("ticket-"):
-
-                continue
-
-            if channel.topic == (
-                f"Ticket owner: {interaction.user.id}"
-            ):
-
-                await interaction.response.send_message(
-                    f"❌ You already have an open ticket: "
-                    f"{channel.mention}",
-                    ephemeral=True
-                )
-
-                return
-
-        # -------------------------------------------------
-        # Config
-        # -------------------------------------------------
 
         config = get_config(
             interaction.client
@@ -241,31 +370,311 @@ class CreateTicket(discord.ui.Button):
             return
 
         # -------------------------------------------------
-        # Category
+        # SECURITY
         # -------------------------------------------------
 
-        category_id = config.get_channel_value(
-            guild.id,
-            "ticket_category_id"
-        )
+        if not authorized_setup(
+            interaction,
+            config
+        ):
 
-        category = None
-
-        if category_id:
-
-            category = guild.get_channel(
-                int(category_id)
+            await interaction.response.send_message(
+                (
+                    "❌ **Staff only.**\n\n"
+                    "You do not have permission "
+                    "to use `/ticket setup`."
+                ),
+                ephemeral=True
             )
 
-            if not isinstance(
-                category,
-                discord.CategoryChannel
-            ):
-
-                category = None
+            return
 
         # -------------------------------------------------
-        # Number
+        # CONFIGURED CATEGORY
+        # -------------------------------------------------
+
+        category_id = config.get_ticket_category(
+            guild.id
+        )
+
+        if not category_id:
+
+            await interaction.response.send_message(
+                (
+                    "❌ **Ticket Category not configured.**\n\n"
+                    "Go to `/setup` → **Tickets** → "
+                    "**Ticket Category** first."
+                ),
+                ephemeral=True
+            )
+
+            return
+
+        category = guild.get_channel(
+            int(category_id)
+        )
+
+        if not isinstance(
+            category,
+            discord.CategoryChannel
+        ):
+
+            await interaction.response.send_message(
+                (
+                    "❌ The configured Ticket Category "
+                    "no longer exists."
+                ),
+                ephemeral=True
+            )
+
+            return
+
+        # -------------------------------------------------
+        # PANEL
+        # -------------------------------------------------
+
+        embed = discord.Embed(
+            title="🎫 Support Tickets",
+            description=(
+                "Need help from the staff team?\n\n"
+                "Click **Create Ticket** below "
+                "to open a private support ticket."
+            ),
+            color=discord.Color.blurple()
+        )
+
+        embed.set_footer(
+            text="Misuki Ticket System"
+        )
+
+        # -------------------------------------------------
+        # FINAL SECURITY CHECK
+        # -------------------------------------------------
+
+        if not check_staff(
+            interaction.user,
+            config,
+            guild.id
+        ):
+
+            await interaction.response.send_message(
+                "❌ Permission check failed.",
+                ephemeral=True
+            )
+
+            return
+
+        if not check_license(
+            interaction.client,
+            guild.id
+        ):
+
+            await interaction.response.send_message(
+                "🔒 Your server does not have an active license.",
+                ephemeral=True
+            )
+
+            return
+
+        # -------------------------------------------------
+        # SEND PANEL
+        # -------------------------------------------------
+
+        try:
+
+            await interaction.channel.send(
+                embed=embed,
+                view=TicketPanel()
+            )
+
+        except discord.Forbidden:
+
+            await interaction.response.send_message(
+                (
+                    "❌ I don't have permission "
+                    "to send messages in this channel."
+                ),
+                ephemeral=True
+            )
+
+            return
+
+        except discord.HTTPException as error:
+
+            await interaction.response.send_message(
+                (
+                    "❌ Discord returned an error:\n"
+                    f"`{error}`"
+                ),
+                ephemeral=True
+            )
+
+            return
+
+        await interaction.response.send_message(
+            (
+                "✅ **Ticket panel created.**\n"
+                f"📍 Channel: {interaction.channel.mention}\n"
+                f"📂 Category: {category.name}"
+            ),
+            ephemeral=True
+        )
+
+
+# =========================================================
+# PANEL
+# =========================================================
+
+class TicketPanel(
+    discord.ui.View
+):
+
+    def __init__(self):
+
+        super().__init__(
+            timeout=None
+        )
+
+        self.add_item(
+            CreateTicket()
+        )
+
+
+# =========================================================
+# CREATE TICKET
+# =========================================================
+
+class CreateTicket(
+    discord.ui.Button
+):
+
+    def __init__(self):
+
+        super().__init__(
+            label="Create Ticket",
+            emoji="🎫",
+            style=discord.ButtonStyle.primary,
+            custom_id="ticket_create"
+        )
+
+    async def callback(
+        self,
+        interaction
+    ):
+
+        guild = interaction.guild
+
+        if guild is None:
+
+            await interaction.response.send_message(
+                "❌ This can only be used in a server.",
+                ephemeral=True
+            )
+
+            return
+
+        # -------------------------------------------------
+        # LICENSE
+        # -------------------------------------------------
+
+        if not check_license(
+            interaction.client,
+            guild.id
+        ):
+
+            await interaction.response.send_message(
+                (
+                    "🔒 **License required.**\n\n"
+                    "This server does not have "
+                    "an active Misuki license."
+                ),
+                ephemeral=True
+            )
+
+            return
+
+        config = get_config(
+            interaction.client
+        )
+
+        if config is None:
+
+            await interaction.response.send_message(
+                "❌ Config cog is not loaded.",
+                ephemeral=True
+            )
+
+            return
+
+        # -------------------------------------------------
+        # CATEGORY
+        # -------------------------------------------------
+
+        category_id = config.get_ticket_category(
+            guild.id
+        )
+
+        if not category_id:
+
+            await interaction.response.send_message(
+                (
+                    "❌ Tickets are not configured.\n\n"
+                    "An administrator must configure "
+                    "the Ticket Category in `/setup`."
+                ),
+                ephemeral=True
+            )
+
+            return
+
+        category = guild.get_channel(
+            int(category_id)
+        )
+
+        if not isinstance(
+            category,
+            discord.CategoryChannel
+        ):
+
+            await interaction.response.send_message(
+                (
+                    "❌ The configured Ticket Category "
+                    "no longer exists."
+                ),
+                ephemeral=True
+            )
+
+            return
+
+        # -------------------------------------------------
+        # EXISTING TICKET
+        # -------------------------------------------------
+
+        for channel in guild.text_channels:
+
+            if not channel.name.startswith(
+                "ticket-"
+            ):
+
+                continue
+
+            if channel.topic == (
+                f"Ticket owner: "
+                f"{interaction.user.id}"
+            ):
+
+                await interaction.response.send_message(
+                    (
+                        "❌ You already have an "
+                        f"open ticket: {channel.mention}"
+                    ),
+                    ephemeral=True
+                )
+
+                return
+
+        # -------------------------------------------------
+        # NUMBER
         # -------------------------------------------------
 
         number = get_next_number(
@@ -277,7 +686,7 @@ class CreateTicket(discord.ui.Button):
         )
 
         # -------------------------------------------------
-        # Permissions
+        # PERMISSIONS
         # -------------------------------------------------
 
         overwrites = {
@@ -297,7 +706,9 @@ class CreateTicket(discord.ui.Button):
                 )
         }
 
-        # Bot
+        # -------------------------------------------------
+        # BOT
+        # -------------------------------------------------
 
         if guild.me:
 
@@ -307,12 +718,14 @@ class CreateTicket(discord.ui.Button):
                     send_messages=True,
                     read_message_history=True,
                     manage_channels=True,
-                    manage_messages=True
+                    manage_messages=True,
+                    attach_files=True,
+                    embed_links=True
                 )
             )
 
         # -------------------------------------------------
-        # Staff
+        # STAFF ROLES
         # -------------------------------------------------
 
         try:
@@ -327,32 +740,58 @@ class CreateTicket(discord.ui.Button):
                 "moderator"
             )
 
+            staff_roles = (
+                staff_roles
+                if staff_roles
+                else []
+            )
+
+            moderator_roles = (
+                moderator_roles
+                if moderator_roles
+                else []
+            )
+
             for role_id in (
-                staff_roles + moderator_roles
+                list(staff_roles)
+                + list(moderator_roles)
             ):
 
-                role = guild.get_role(
-                    int(role_id)
-                )
+                try:
 
-                if role:
-
-                    overwrites[role] = (
-                        discord.PermissionOverwrite(
-                            view_channel=True,
-                            send_messages=True,
-                            read_message_history=True,
-                            attach_files=True,
-                            embed_links=True
-                        )
+                    role = guild.get_role(
+                        int(role_id)
                     )
 
-        except Exception:
+                except (
+                    TypeError,
+                    ValueError
+                ):
 
-            pass
+                    continue
+
+                if role is None:
+
+                    continue
+
+                overwrites[role] = (
+                    discord.PermissionOverwrite(
+                        view_channel=True,
+                        send_messages=True,
+                        read_message_history=True,
+                        attach_files=True,
+                        embed_links=True
+                    )
+                )
+
+        except Exception as error:
+
+            print(
+                f"❌ Error loading ticket roles: {error}"
+            )
 
         # -------------------------------------------------
-        # Create channel
+        # CREATE CHANNEL
         # -------------------------------------------------
 
         try:
@@ -370,8 +809,10 @@ class CreateTicket(discord.ui.Button):
         except discord.Forbidden:
 
             await interaction.response.send_message(
-                "❌ I don't have permission to "
-                "create the ticket channel.",
+                (
+                    "❌ I don't have permission "
+                    "to create ticket channels."
+                ),
                 ephemeral=True
             )
 
@@ -380,15 +821,17 @@ class CreateTicket(discord.ui.Button):
         except discord.HTTPException as error:
 
             await interaction.response.send_message(
-                f"❌ Discord returned an error:\n"
-                f"`{error}`",
+                (
+                    "❌ Discord returned an error:\n"
+                    f"`{error}`"
+                ),
                 ephemeral=True
             )
 
             return
 
         # -------------------------------------------------
-        # Ticket embed
+        # EMBED
         # -------------------------------------------------
 
         embed = discord.Embed(
@@ -420,24 +863,47 @@ class CreateTicket(discord.ui.Button):
             text="Misuki Ticket System"
         )
 
-        await ticket.send(
-            content=interaction.user.mention,
-            embed=embed,
-            view=TicketControls()
-        )
+        try:
+
+            await ticket.send(
+                content=interaction.user.mention,
+                embed=embed,
+                view=TicketControls()
+            )
+
+        except discord.HTTPException:
+
+            try:
+
+                await ticket.delete()
+
+            except Exception:
+
+                pass
+
+            await interaction.response.send_message(
+                "❌ Failed to create the ticket message.",
+                ephemeral=True
+            )
+
+            return
 
         await interaction.response.send_message(
-            f"✅ Ticket created: "
-            f"{ticket.mention}",
+            (
+                "✅ Ticket created: "
+                f"{ticket.mention}"
+            ),
             ephemeral=True
         )
 
 
 # =========================================================
-# TICKET CONTROLS
+# CONTROLS
 # =========================================================
 
-class TicketControls(discord.ui.View):
+class TicketControls(
+    discord.ui.View
+):
 
     def __init__(self):
 
@@ -455,10 +921,71 @@ class TicketControls(discord.ui.View):
 
 
 # =========================================================
+# ACCESS
+# =========================================================
+
+def can_access_ticket(
+    interaction
+):
+
+    guild = interaction.guild
+    channel = interaction.channel
+
+    if guild is None:
+
+        return False
+
+    if channel is None:
+
+        return False
+
+    if not channel.name.startswith(
+        "ticket-"
+    ):
+
+        return False
+
+    config = get_config(
+        interaction.client
+    )
+
+    if config is None:
+
+        return False
+
+    # -----------------------------------------------------
+    # STAFF
+    # -----------------------------------------------------
+
+    if check_staff(
+        interaction.user,
+        config,
+        guild.id
+    ):
+
+        return True
+
+    # -----------------------------------------------------
+    # OWNER
+    # -----------------------------------------------------
+
+    if channel.topic == (
+        f"Ticket owner: "
+        f"{interaction.user.id}"
+    ):
+
+        return True
+
+    return False
+
+
+# =========================================================
 # TRANSCRIPT
 # =========================================================
 
-class Transcript(discord.ui.Button):
+class Transcript(
+    discord.ui.Button
+):
 
     def __init__(self):
 
@@ -471,8 +998,19 @@ class Transcript(discord.ui.Button):
 
     async def callback(
         self,
-        interaction: discord.Interaction
+        interaction
     ):
+
+        if not can_access_ticket(
+            interaction
+        ):
+
+            await interaction.response.send_message(
+                "❌ You do not have permission to use this ticket.",
+                ephemeral=True
+            )
+
+            return
 
         guild = interaction.guild
         channel = interaction.channel
@@ -499,7 +1037,7 @@ class Transcript(discord.ui.Button):
             return
 
         # -------------------------------------------------
-        # Transcript channel
+        # TRANSCRIPT CHANNEL
         # -------------------------------------------------
 
         channel_id = config.get_channel_value(
@@ -510,7 +1048,11 @@ class Transcript(discord.ui.Button):
         if not channel_id:
 
             await interaction.followup.send(
-                "❌ Transcript Logs has not been configured.",
+                (
+                    "❌ **Transcript Channel not configured.**\n\n"
+                    "Go to `/setup` → **Tickets** → "
+                    "**Transcript Channel**."
+                ),
                 ephemeral=True
             )
 
@@ -526,15 +1068,17 @@ class Transcript(discord.ui.Button):
         ):
 
             await interaction.followup.send(
-                "❌ The Transcript Logs channel "
-                "does not exist.",
+                (
+                    "❌ The configured Transcript Channel "
+                    "no longer exists."
+                ),
                 ephemeral=True
             )
 
             return
 
         # -------------------------------------------------
-        # Get messages
+        # HISTORY
         # -------------------------------------------------
 
         output = []
@@ -573,15 +1117,16 @@ class Transcript(discord.ui.Button):
                     "\nAnexos:\n"
                     +
                     "\n".join(
-                        a.url
-                        for a in message.attachments
+                        attachment.url
+                        for attachment
+                        in message.attachments
                     )
                     +
                     "\n"
                 )
 
         # -------------------------------------------------
-        # Transcript
+        # FILE
         # -------------------------------------------------
 
         text = (
@@ -595,7 +1140,9 @@ class Transcript(discord.ui.Button):
             "================================================\n\n"
         )
 
-        text += "\n".join(output)
+        text += "\n".join(
+            output
+        )
 
         file = discord.File(
             io.BytesIO(
@@ -605,10 +1152,6 @@ class Transcript(discord.ui.Button):
                 f"{channel.name}-transcript.txt"
             )
         )
-
-        # -------------------------------------------------
-        # Log
-        # -------------------------------------------------
 
         embed = discord.Embed(
             title="📄 Ticket Transcript",
@@ -629,6 +1172,10 @@ class Transcript(discord.ui.Button):
             text="Misuki Ticket System"
         )
 
+        # -------------------------------------------------
+        # SEND
+        # -------------------------------------------------
+
         try:
 
             await transcript_channel.send(
@@ -639,16 +1186,32 @@ class Transcript(discord.ui.Button):
         except discord.Forbidden:
 
             await interaction.followup.send(
-                "❌ Não tenho permissão para enviar "
-                "o transcript para esse canal.",
+                (
+                    "❌ I don't have permission to "
+                    "send transcripts to the configured channel."
+                ),
+                ephemeral=True
+            )
+
+            return
+
+        except discord.HTTPException as error:
+
+            await interaction.followup.send(
+                (
+                    "❌ Discord returned an error:\n"
+                    f"`{error}`"
+                ),
                 ephemeral=True
             )
 
             return
 
         await interaction.followup.send(
-            f"✅ Transcript enviado para "
-            f"{transcript_channel.mention}.",
+            (
+                "✅ Transcript enviado para "
+                f"{transcript_channel.mention}."
+            ),
             ephemeral=True
         )
 
@@ -657,7 +1220,9 @@ class Transcript(discord.ui.Button):
 # CLOSE
 # =========================================================
 
-class CloseTicket(discord.ui.Button):
+class CloseTicket(
+    discord.ui.Button
+):
 
     def __init__(self):
 
@@ -670,8 +1235,19 @@ class CloseTicket(discord.ui.Button):
 
     async def callback(
         self,
-        interaction: discord.Interaction
+        interaction
     ):
+
+        if not can_access_ticket(
+            interaction
+        ):
+
+            await interaction.response.send_message(
+                "❌ You do not have permission to close this ticket.",
+                ephemeral=True
+            )
+
+            return
 
         channel = interaction.channel
 
@@ -692,7 +1268,9 @@ class CloseTicket(discord.ui.Button):
             )
         )
 
-        await asyncio.sleep(5)
+        await asyncio.sleep(
+            5
+        )
 
         try:
 
@@ -716,7 +1294,9 @@ class CloseTicket(discord.ui.Button):
 # COG
 # =========================================================
 
-class Tickets(commands.Cog):
+class Tickets(
+    commands.Cog
+):
 
     def __init__(
         self,
@@ -730,7 +1310,9 @@ class Tickets(commands.Cog):
 # SETUP
 # =========================================================
 
-async def setup(bot):
+async def setup(
+    bot
+):
 
     init_database()
 
@@ -738,10 +1320,37 @@ async def setup(bot):
         Tickets(bot)
     )
 
-    # Add /ticket only if it doesn't already exist
-    if bot.tree.get_command("ticket") is None:
+    # -----------------------------------------------------
+    # REMOVE OLD TICKET COMMAND
+    # -----------------------------------------------------
 
-        bot.tree.add_command(
-            TicketGroup()
+    old_ticket = bot.tree.get_command(
+        "ticket"
+    )
+
+    if old_ticket is not None:
+
+        bot.tree.remove_command(
+            "ticket"
         )
+
+        print(
+            "🗑️ Removed existing /ticket command."
+        )
+
+    # -----------------------------------------------------
+    # REGISTER
+    # -----------------------------------------------------
+
+    bot.tree.add_command(
+        TicketGroup()
+    )
+
+    print(
+        "🎫 /ticket command registered."
+    )
+
+    print(
+        "🎫 Tickets cog loaded."
+    )
 

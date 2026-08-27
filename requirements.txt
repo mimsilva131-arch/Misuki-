@@ -1,5 +1,9 @@
 discord.py
 python-dotenv
 gunicorn
+<<<<<<< HEAD
 requests
 flask
+=======
+requests
+>>>>>>> 1104da2 (Update Misuki)

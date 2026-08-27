@@ -3141,6 +3141,7 @@ def dashboard():
         """
 
     # =====================================================
+<<<<<<< HEAD
     # AVAILABLE FIRST
     # =====================================================
 
@@ -3164,6 +3165,31 @@ def dashboard():
 
     # =====================================================
     # AUTHORIZED SECOND
+=======
+    # AVAILABLE SERVERS
+    # =====================================================
+
+    available_addable = []
+
+    available_unavailable = []
+
+    for guild in available:
+
+        if user_can_manage_guild(guild):
+
+            available_addable.append(
+                guild
+            )
+
+        else:
+
+            available_unavailable.append(
+                guild
+            )
+
+    # =====================================================
+    # AUTHORIZED SERVERS FIRST
+>>>>>>> 1104da2 (Update Misuki)
     # =====================================================
 
     authorized_html = ""
@@ -3185,6 +3211,40 @@ def dashboard():
         """
 
     # =====================================================
+<<<<<<< HEAD
+=======
+    # AVAILABLE SERVERS SECOND
+    # =====================================================
+
+    available_html = ""
+
+    # Servers where the user can add Misuki
+    for guild in available_addable:
+
+        available_html += render_server(
+            guild,
+            False
+        )
+
+    # Servers where the user cannot add Misuki
+    for guild in available_unavailable:
+
+        available_html += render_server(
+            guild,
+            False
+        )
+
+    if not available_html:
+
+        available_html = """
+        <div class="notice">
+            No additional Discord servers are
+            available for installation.
+        </div>
+        """
+
+    # =====================================================
+>>>>>>> 1104da2 (Update Misuki)
     # CONTENT
     # =====================================================
 
@@ -3223,11 +3283,16 @@ def dashboard():
     </div>
 
 
+<<<<<<< HEAD
     <!-- AVAILABLE SERVERS FIRST -->
+=======
+    <!-- AUTHORIZED SERVERS FIRST -->
+>>>>>>> 1104da2 (Update Misuki)
 
     <div class="card">
 
         <h2>
+<<<<<<< HEAD
             ➕ Available Servers
         </h2>
 
@@ -3250,6 +3315,9 @@ def dashboard():
 
         <h2>
             🟢 Authorized Servers
+=======
+            Authorized Servers
+>>>>>>> 1104da2 (Update Misuki)
         </h2>
 
         <p>
@@ -3266,6 +3334,30 @@ def dashboard():
     </div>
 
 
+<<<<<<< HEAD
+=======
+    <!-- AVAILABLE SERVERS SECOND -->
+
+    <div class="card">
+
+        <h2>
+            Available Servers
+        </h2>
+
+        <p>
+            Servers where you can add Misuki.
+        </p>
+
+        <div class="server-grid">
+
+            {available_html}
+
+        </div>
+
+    </div>
+
+
+>>>>>>> 1104da2 (Update Misuki)
     <div style="text-align:center;">
 
         <a
@@ -4226,12 +4318,29 @@ if __name__ == "__main__":
     )
 
     print(
+<<<<<<< HEAD
+=======
+        f"Port: "
+        f"{os.getenv('PORT', '5000')}"
+    )
+
+    print(
+>>>>>>> 1104da2 (Update Misuki)
         "========================================"
     )
 
     app.run(
         host="0.0.0.0",
+<<<<<<< HEAD
         port=5000,
+=======
+        port=int(
+            os.getenv(
+                "PORT",
+                "5000"
+            )
+        ),
+>>>>>>> 1104da2 (Update Misuki)
         debug=False
     )
 

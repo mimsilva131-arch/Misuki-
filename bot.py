@@ -47,6 +47,36 @@ async def on_ready():
         f"🟢 Bot status: {bot.status}"
     )
 
+    # =====================================================
+    # REGISTERED COMMANDS
+    # =====================================================
+
+    print(
+        "📋 Comandos registados:"
+    )
+
+    for command in bot.tree.get_commands():
+
+        print(
+            f"   /{command.name}"
+        )
+
+        if isinstance(
+            command,
+            discord.app_commands.Group
+        ):
+
+            for subcommand in command.commands:
+
+                print(
+                    f"      /{command.name} "
+                    f"{subcommand.name}"
+                )
+
+    # =====================================================
+    # SYNC
+    # =====================================================
+
     try:
 
         synced = await bot.tree.sync()
@@ -54,6 +84,28 @@ async def on_ready():
         print(
             f"⚡ {len(synced)} command(s) synced"
         )
+
+        print(
+            "📋 Comandos sincronizados:"
+        )
+
+        for command in synced:
+
+            print(
+                f"   /{command.name}"
+            )
+
+            if isinstance(
+                command,
+                discord.app_commands.Group
+            ):
+
+                for subcommand in command.commands:
+
+                    print(
+                        f"      /{command.name} "
+                        f"{subcommand.name}"
+                    )
 
     except Exception as error:
 
@@ -77,6 +129,8 @@ async def load_extensions():
         "cogs.moderation",
         "cogs.announcements",
         "cogs.utility",
+        "cogs.licenses",
+        "cogs.oauth2",
     ]
 
     for extension in extensions:
