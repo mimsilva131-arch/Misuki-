@@ -1,4 +1,3 @@
-
 # =========================================================
 # MISUKI OAUTH2
 # Dashboard + Discord Login + Bot Installation
@@ -97,6 +96,26 @@ BOT_TOKEN = os.getenv(
     "DISCORD_BOT_TOKEN"
 )
 
+# ---------------------------------------------------------
+# COOKIE SECURITY
+#
+# Production / HTTPS:
+#
+# COOKIE_SECURE=true
+#
+# Local HTTP testing:
+#
+# COOKIE_SECURE=false
+# ---------------------------------------------------------
+
+COOKIE_SECURE = (
+    os.getenv(
+        "COOKIE_SECURE",
+        "true"
+    ).lower()
+    == "true"
+)
+
 
 # =========================================================
 # VALIDATION
@@ -163,7 +182,9 @@ app.config["SESSION_COOKIE_NAME"] = (
 
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 
-app.config["SESSION_COOKIE_SECURE"] = True
+app.config["SESSION_COOKIE_SECURE"] = (
+    COOKIE_SECURE
+)
 
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
@@ -994,6 +1015,8 @@ def discord_login_url(
 
 # =========================================================
 # LOGIN
+#
+# OAuth2 ONLY FOR WEBSITE LOGIN.
 # =========================================================
 
 @app.route(
@@ -1001,7 +1024,9 @@ def discord_login_url(
 )
 def login():
 
-    if get_current_web_session() is not None:
+    current = get_current_web_session()
+
+    if current is not None:
 
         return redirect(
             url_for(
@@ -1009,9 +1034,15 @@ def login():
             )
         )
 
+    # -----------------------------------------------------
+    # Generate a fresh OAuth state
+    # -----------------------------------------------------
+
     state = secrets.token_urlsafe(
         32
     )
+
+    session.clear()
 
     session["login_state"] = state
 
@@ -1029,7 +1060,7 @@ def login():
 #
 # ONLY FOR USER LOGIN.
 #
-# NOT USED BY BOT INSTALLATION.
+# NEVER USED BY BOT INSTALLATION.
 # =========================================================
 
 @app.route(
@@ -1536,7 +1567,9 @@ def install_bot(
 
     try:
 
-        int(guild_id)
+        guild_id = str(
+            int(guild_id)
+        )
 
     except (
         TypeError,
@@ -1643,7 +1676,7 @@ def install_bot(
 
     bot_guild_ids = get_bot_guild_ids()
 
-    if str(guild_id) in bot_guild_ids:
+    if guild_id in bot_guild_ids:
 
         return redirect(
             url_for(
@@ -3277,6 +3310,7 @@ def render_reviews(
         """
 
     return html
+        return html
 
 
 # =========================================================
@@ -3286,18 +3320,15 @@ def render_reviews(
 @app.route("/")
 def home():
 
-    cleanup_reviews()
-
     reviews = get_reviews(
         HOME_REVIEW_COUNT
     )
 
-    reviews_html = render_reviews(
+    review_html = render_reviews(
         reviews
     )
 
     content = f"""
-
     <div class="card center">
 
         <div class="logo">
@@ -3309,35 +3340,47 @@ def home():
         </h1>
 
         <p>
-            A modern Discord management dashboard
-            for your servers.
+            A powerful Discord bot designed to make
+            your server easier to manage.
         </p>
+
+        <div class="actions" style="justify-content:center;">
+
+            <a
+                class="button"
+                href="/dashboard"
+            >
+                🚀 Open Dashboard
+            </a>
+
+            <a
+                class="button secondary"
+                href="/review"
+            >
+                ⭐ Reviews
+            </a>
+
+        </div>
 
     </div>
 
     <div class="card">
 
         <h2>
-            ⭐ What people say about Misuki
+            ⭐ What people say
         </h2>
 
-        <p>
-            Reviews from Misuki users.
-        </p>
-
         <div class="review-grid">
-
-            {reviews_html}
-
+            {review_html}
         </div>
 
     </div>
-
     """
 
     return page(
         "Home",
-        content + COOKIE_BANNER
+        content
+        + COOKIE_BANNER
     )
 
 
@@ -3345,96 +3388,68 @@ def home():
 # DASHBOARD
 # =========================================================
 
-@app.route(
-    "/dashboard"
-)
+@app.route("/dashboard")
 def dashboard():
 
     current = get_current_web_session()
 
     if current is None:
 
-        return page(
-            "Dashboard",
-            """
-            <div class="card center">
-
-                <div class="logo">
-                    🌸
-                </div>
-
-                <h1>
-                    Misuki Dashboard
-                </h1>
-
-                <p>
-                    Login with Discord to access
-                    your Misuki dashboard.
-                </p>
-
-                <a
-                    class="button"
-                    href="/login"
-                >
-                    🎮 Login with Discord
-                </a>
-
-            </div>
-            """
+        return redirect(
+            url_for(
+                "login"
+            )
         )
 
-    user = current["user"]
+    user = current.get(
+        "user",
+        {}
+    )
 
-    guilds = current["guilds"]
+    guilds = current.get(
+        "guilds",
+        []
+    )
+
+    # -----------------------------------------------------
+    # GET SERVERS WHERE MISUKI IS ALREADY INSTALLED
+    # -----------------------------------------------------
 
     bot_guild_ids = get_bot_guild_ids()
 
-    username = (
-        user.get("global_name")
-        or user.get("username")
-        or "Discord User"
-    )
-
-    user_id = str(
-        user.get(
-            "id",
-            ""
-        )
-    )
-
-    avatar = user.get(
-        "avatar"
-    )
-
-    if avatar:
-
-        avatar_url = (
-            "https://cdn.discordapp.com/"
-            f"avatars/{user_id}/{avatar}.png"
-        )
-
-    else:
-
-        avatar_url = (
-            "https://cdn.discordapp.com/"
-            "embed/avatars/0.png"
-        )
-
-    # =====================================================
-    # SERVER GROUPS
-    # =====================================================
-
     authorized = []
-
     available = []
+
+    # -----------------------------------------------------
+    # CLASSIFY SERVERS
+    #
+    # AUTHORIZED:
+    #   User can manage the server
+    #   AND Misuki is already installed
+    #
+    # AVAILABLE:
+    #   User can manage the server
+    #   AND Misuki is NOT installed
+    #
+    # Servers the user cannot manage are ignored.
+    # -----------------------------------------------------
 
     for guild in guilds:
 
+        guild_id = guild.get(
+            "id"
+        )
+
+        if not guild_id:
+            continue
+
+        if not user_can_manage_guild(
+            guild
+        ):
+            continue
+
         guild_id = str(
-            guild.get(
-                "id",
-                ""
-            )
+            guild_id
         )
 
         if guild_id in bot_guild_ids:
@@ -3449,66 +3464,139 @@ def dashboard():
                 guild
             )
 
-    # =====================================================
-    # SERVER CARD
-    # =====================================================
+    # -----------------------------------------------------
+    # USER
+    # -----------------------------------------------------
 
-    def render_server(
-        guild,
-        installed
-    ):
+    username = escape(
+        user.get(
+            "global_name"
+        )
+        or user.get(
+            "username"
+        )
+        or "Discord User"
+    )
+
+    avatar = user.get(
+        "avatar"
+    )
+
+    user_id = user.get(
+        "id"
+    )
+
+    avatar_url = None
+
+    if avatar and user_id:
+
+        avatar_url = (
+            "https://cdn.discordapp.com/"
+            f"avatars/{user_id}/{avatar}.png"
+        )
+
+    if avatar_url:
+
+        profile_html = f"""
+        <img
+            class="avatar"
+            src="{escape(avatar_url)}"
+            alt="Discord avatar"
+        >
+        """
+
+    else:
+
+        profile_html = """
+        <div
+            class="avatar"
+            style="
+                background:#5865f2;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                font-size:25px;
+            "
+        >
+            👤
+        </div>
+        """
+
+    # -----------------------------------------------------
+    # SERVER ICON
+    # -----------------------------------------------------
+
+    def guild_icon(guild):
+
+        guild_id = guild.get(
+            "id"
+        )
+
+        icon = guild.get(
+            "icon"
+        )
+
+        if icon and guild_id:
+
+            icon_url = (
+                "https://cdn.discordapp.com/"
+                f"icons/{guild_id}/{icon}.png"
+            )
+
+            return f"""
+            <img
+                src="{escape(icon_url)}"
+                alt="Server icon"
+            >
+            """
+
+        name = (
+            guild.get("name")
+            or "?"
+        )
+
+        return escape(
+            name[:1].upper()
+        )
+
+    # -----------------------------------------------------
+    # AUTHORIZED SERVERS
+    # -----------------------------------------------------
+
+    authorized_html = ""
+
+    for guild in authorized:
 
         guild_id = str(
-            guild.get(
-                "id",
-                ""
-            )
+            guild.get("id")
         )
 
         guild_name = escape(
-            guild.get(
-                "name",
-                "Unknown Server"
-            )
+            guild.get("name")
+            or "Unnamed Server"
+        )
+
+        icon = guild_icon(
+            guild
         )
 
         license_info = license_status(
             guild_id
         )
 
-        licensed = license_info[
-            "licensed"
-        ]
-
-        status = license_info[
-            "status"
-        ]
-
-        # -------------------------------------------------
-        # LICENSE BADGE
-        # -------------------------------------------------
-
-        if licensed:
+        if license_info["licensed"]:
 
             license_badge = """
             <span class="badge badge-green">
-                🟢 LICENSED
+                ✓ Licensed
             </span>
             """
 
-        elif status == "expired":
+        elif license_info["status"] == "expired":
 
             license_badge = """
             <span class="badge badge-red">
-                🔴 LICENSE EXPIRED
-            </span>
-            """
-
-        elif status == "revoked":
-
-            license_badge = """
-            <span class="badge badge-red">
-                ⛔ LICENSE REVOKED
+                ⚠ License Expired
             </span>
             """
 
@@ -3516,189 +3604,18 @@ def dashboard():
 
             license_badge = """
             <span class="badge badge-yellow">
-                🟡 NO LICENSE
+                ⚠ No License
             </span>
             """
 
-        # -------------------------------------------------
-        # EXPIRATION
-        # -------------------------------------------------
-
-        expiration_html = ""
-
-        expires_at = license_info[
-            "expires_at"
-        ]
-
-        if expires_at:
-
-            try:
-
-                expiration = datetime.fromisoformat(
-                    expires_at
-                )
-
-                timestamp = int(
-                    expiration.replace(
-                        tzinfo=timezone.utc
-                    ).timestamp()
-                )
-
-                expiration_html = f"""
-
-                <div
-                    style="
-                        margin-top:10px;
-                        color:#858a98;
-                        font-size:12px;
-                    "
-                >
-
-                    📅 Expires:
-
-                    <strong>
-                        <t:{timestamp}:F>
-                    </strong>
-
-                </div>
-
-                """
-
-            except (
-                ValueError,
-                TypeError
-            ):
-
-                expiration_html = f"""
-
-                <div
-                    style="
-                        margin-top:10px;
-                        color:#858a98;
-                        font-size:12px;
-                    "
-                >
-
-                    📅 Expires:
-
-                    <strong>
-                        {escape(str(expires_at))}
-                    </strong>
-
-                </div>
-
-                """
-
-        # =================================================
-        # INSTALLATION
-        # =================================================
-
-        if installed:
-
-            installation_badge = """
-            <span class="badge badge-green">
-                ✓ MISUKI INSTALLED
-            </span>
-            """
-
-            installation_button = f"""
-            <a
-                class="button secondary"
-                href="/manage/{escape(guild_id)}"
-            >
-                ⚙️ Manage
-            </a>
-            """
-
-        else:
-
-            if user_can_manage_guild(
-                guild
-            ):
-
-                installation_badge = """
-                <span class="badge badge-yellow">
-                    ⚠️ MISUKI NOT INSTALLED
-                </span>
-                """
-
-                installation_button = f"""
-                <a
-                    class="button green"
-                    href="/install/{escape(guild_id)}"
-                >
-                    ➕ Add Misuki
-                </a>
-                """
-
-            else:
-
-                installation_badge = """
-                <span class="badge badge-red">
-                    🔒 NO PERMISSION
-                </span>
-                """
-
-                installation_button = """
-                <span
-                    class="button secondary"
-                    style="
-                        cursor:not-allowed;
-                        opacity:0.6;
-                    "
-                >
-                    🔒 Cannot Add
-                </span>
-                """
-
-        # =================================================
-        # SERVER ICON
-        # =================================================
-
-        guild_icon = guild.get(
-            "icon"
-        )
-
-        if guild_icon:
-
-            icon_url = (
-                "https://cdn.discordapp.com/"
-                f"icons/{guild_id}/{guild_icon}.png"
-            )
-
-            server_icon = f"""
-            <img
-                src="{escape(icon_url)}"
-                alt="Server Icon"
-            >
-            """
-
-        else:
-
-            first_letter = escape(
-                (
-                    guild.get(
-                        "name",
-                        "?"
-                    )[:1]
-                    or "?"
-                ).upper()
-            )
-
-            server_icon = (
-                first_letter
-            )
-
-        return f"""
+        authorized_html += f"""
 
         <div class="server">
 
             <div class="server-header">
 
                 <div class="server-icon">
-
-                    {server_icon}
-
+                    {icon}
                 </div>
 
                 <div>
@@ -3708,80 +3625,123 @@ def dashboard():
                     </div>
 
                     <div class="server-id">
-                        ID: {escape(guild_id)}
+                        {escape(guild_id)}
                     </div>
 
                 </div>
 
             </div>
 
-            <div>
+            <span class="badge badge-green">
+                ✓ Misuki Installed
+            </span>
 
-                {license_badge}
-
-                {installation_badge}
-
-                {expiration_html}
-
-            </div>
+            {license_badge}
 
             <div class="actions">
 
-                {installation_button}
+                <a
+                    class="button green"
+                    href="/manage/{guild_id}"
+                >
+                    ⚙ Manage
+                </a>
 
             </div>
 
         </div>
 
         """
-
-    # =====================================================
-    # AUTHORIZED FIRST
-    # =====================================================
-
-    authorized_html = ""
-
-    for guild in authorized:
-
-        authorized_html += render_server(
-            guild,
-            True
-        )
 
     if not authorized_html:
 
         authorized_html = """
         <div class="notice">
-            You currently have no servers where
-            Misuki is installed.
+
+            You don't have any servers where
+            Misuki is currently installed.
+
         </div>
         """
 
-    # =====================================================
-    # AVAILABLE SECOND
-    # =====================================================
+    # -----------------------------------------------------
+    # AVAILABLE SERVERS
+    # -----------------------------------------------------
 
     available_html = ""
 
     for guild in available:
 
-        available_html += render_server(
-            guild,
-            False
+        guild_id = str(
+            guild.get("id")
         )
+
+        guild_name = escape(
+            guild.get("name")
+            or "Unnamed Server"
+        )
+
+        icon = guild_icon(
+            guild
+        )
+
+        available_html += f"""
+
+        <div class="server">
+
+            <div class="server-header">
+
+                <div class="server-icon">
+                    {icon}
+                </div>
+
+                <div>
+
+                    <div class="server-name">
+                        {guild_name}
+                    </div>
+
+                    <div class="server-id">
+                        {escape(guild_id)}
+                    </div>
+
+                </div>
+
+            </div>
+
+            <span class="badge badge-yellow">
+                Available
+            </span>
+
+            <div class="actions">
+
+                <a
+                    class="button"
+                    href="/install/{guild_id}"
+                >
+                    ➕ Add Misuki
+                </a>
+
+            </div>
+
+        </div>
+
+        """
 
     if not available_html:
 
         available_html = """
         <div class="notice">
-            There are currently no servers
-            available to your Discord account.
+
+            No additional servers are available
+            for you to manage.
+
         </div>
         """
 
-    # =====================================================
-    # CONTENT
-    # =====================================================
+    # -----------------------------------------------------
+    # DASHBOARD CONTENT
+    # -----------------------------------------------------
 
     content = f"""
 
@@ -3789,26 +3749,17 @@ def dashboard():
 
         <div class="profile">
 
-            <img
-                class="avatar"
-                src="{escape(avatar_url)}"
-                alt="Discord Avatar"
-            >
+            {profile_html}
 
             <div>
 
                 <h2 style="margin:0;">
-                    Welcome, {escape(username)}
+                    Welcome, {username}! 👋
                 </h2>
 
-                <p style="margin:5px 0 0;">
-
-                    Discord ID:
-
-                    <code>
-                        {escape(user_id)}
-                    </code>
-
+                <p style="margin-bottom:0;">
+                    Manage your Discord servers
+                    and Misuki installations.
                 </p>
 
             </div>
@@ -3818,14 +3769,20 @@ def dashboard():
     </div>
 
 
+    <!-- =================================================
+         AUTHORIZED
+         ================================================= -->
+
     <div class="card">
 
         <h2>
-            Authorized Servers
+            🟢 Authorized Servers
         </h2>
 
         <p>
-            Servers where Misuki is already installed.
+            Misuki is already installed in these
+            servers and you have permission to
+            manage them.
         </p>
 
         <div class="server-grid">
@@ -3837,14 +3794,18 @@ def dashboard():
     </div>
 
 
+    <!-- =================================================
+         AVAILABLE
+         ================================================= -->
+
     <div class="card">
 
         <h2>
-            Available Servers
+            🟡 Available Servers
         </h2>
 
         <p>
-            Servers where you can or cannot add Misuki.
+            These servers can be connected to Misuki.
         </p>
 
         <div class="server-grid">
@@ -3855,28 +3816,17 @@ def dashboard():
 
     </div>
 
-
-    <div style="text-align:center;">
-
-        <a
-            class="button"
-            href="/review"
-        >
-            ⭐ Leave a Review
-        </a>
-
-    </div>
-
     """
 
     return page(
         "Dashboard",
-        content + COOKIE_BANNER
+        content
+        + COOKIE_BANNER
     )
 
 
 # =========================================================
-# MANAGE
+# MANAGE SERVER
 # =========================================================
 
 @app.route(
@@ -3896,6 +3846,49 @@ def manage(
             )
         )
 
+    # -----------------------------------------------------
+    # NORMALIZE GUILD ID
+    # -----------------------------------------------------
+
+    try:
+
+        guild_id = str(
+            int(guild_id)
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        return page(
+            "Invalid Server",
+            """
+            <div class="card center">
+
+                <h1>
+                    ❌ Invalid Server
+                </h1>
+
+                <p>
+                    The server ID is invalid.
+                </p>
+
+                <a
+                    class="button"
+                    href="/dashboard"
+                >
+                    Back to Dashboard
+                </a>
+
+            </div>
+            """
+        ), 400
+
+    # -----------------------------------------------------
+    # CHECK USER SERVER
+    # -----------------------------------------------------
+
     guild = get_user_guild(
         current,
         guild_id
@@ -3913,8 +3906,7 @@ def manage(
                 </h1>
 
                 <p>
-                    You do not have access to
-                    this Discord server.
+                    You do not have access to this server.
                 </p>
 
                 <a
@@ -3927,6 +3919,10 @@ def manage(
             </div>
             """
         ), 403
+
+    # -----------------------------------------------------
+    # CHECK MANAGE PERMISSION
+    # -----------------------------------------------------
 
     if not user_can_manage_guild(
         guild
@@ -3958,593 +3954,682 @@ def manage(
         ), 403
 
     # -----------------------------------------------------
-    # Make sure bot is actually installed
+    # CHECK BOT INSTALLATION
     # -----------------------------------------------------
 
     bot_guild_ids = get_bot_guild_ids()
 
-    if str(guild_id) not in bot_guild_ids:
+    if guild_id not in bot_guild_ids:
 
         return redirect(
             url_for(
-                "dashboard"
+                "install_bot",
+                guild_id=guild_id
             )
         )
-
-    guild_name = escape(
-        guild.get(
-            "name",
-            "Discord Server"
-        )
-    )
-
-    info = license_status(
-        guild_id
-    )
-
-    if info["expires_at"]:
-
-        try:
-
-            expiration = datetime.fromisoformat(
-                info["expires_at"]
-            )
-
-            expiration_text = (
-                expiration.strftime(
-                    "%d/%m/%Y %H:%M UTC"
-                )
-            )
-
-        except (
-            ValueError,
-            TypeError
-        ):
-
-            expiration_text = info[
-                "expires_at"
-            ]
-
-    else:
-
-        expiration_text = "Never"
-
-    content = f"""
-
-    <div class="card">
-
-        <h1>
-            ⚙️ Manage {guild_name}
-        </h1>
-
-        <p>
-            Misuki server management.
-        </p>
-
-        <div class="notice">
-
-            <strong>
-                License status:
-            </strong>
-
-            {escape(info["status"])}
-
-            <br><br>
-
-            <strong>
-                📅 Expiration:
-            </strong>
-
-            {escape(
-                str(expiration_text)
-            )}
-
-        </div>
-
-        <a
-            class="button secondary"
-            href="/dashboard"
-        >
-            ← Back to Dashboard
-        </a>
-
-    </div>
-
-    """
-
-    return page(
-        "Manage",
-        content + COOKIE_BANNER
-    )
-
-
-# =========================================================
-# REVIEW PAGE
-# =========================================================
-
-@app.route(
-    "/review"
-)
-def review_page():
-
-    current = get_current_web_session()
-
-    if current is None:
-
-        return redirect(
-            url_for(
-                "login"
-            )
-        )
-
-    user = current["user"]
-
-    user_id = str(
-        user.get(
-            "id",
-            ""
-        )
-    )
-
-    if not can_user_review(
-        user_id
-    ):
-
-        return page(
-            "Review",
-            """
-            <div class="card center">
-
-                <h1>
-                    🔒 Review Unavailable
-                </h1>
-
-                <p>
-                    You can only leave a review
-                    after having an active Misuki
-                    license.
-                </p>
-
-                <a
-                    class="button"
-                    href="/dashboard"
-                >
-                    Back to Dashboard
-                </a>
-
-            </div>
-            """
-        )
-
-    guild_options = ""
-
-    for guild in current["guilds"]:
-
-        guild_id = guild.get(
-            "id"
-        )
-
-        if not guild_id:
-            continue
-
-        if not user_can_manage_guild(
-            guild
-        ):
-            continue
-
-        if license_status(
-            guild_id
-        )["licensed"]:
-
-            guild_options += f"""
-            <option value="{escape(str(guild_id))}">
-                {escape(
-                    guild.get(
-                        "name",
-                        "Server"
-                    )
-                )}
-            </option>
-            """
-
-    if not guild_options:
-
-        return page(
-            "Review",
-            """
-            <div class="card center">
-
-                <h1>
-                    🔒 Review Unavailable
-                </h1>
-
-                <p>
-                    You do not currently have an
-                    eligible licensed server.
-                </p>
-
-                <a
-                    class="button"
-                    href="/dashboard"
-                >
-                    Back to Dashboard
-                </a>
-
-            </div>
-            """
-        )
-
-    content = f"""
-
-    <div class="card">
-
-        <h1>
-            ⭐ Leave a Review
-        </h1>
-
-        <p>
-            Tell us what you think about Misuki.
-        </p>
-
-        <form
-            method="POST"
-            action="/review"
-        >
-
-            <label>
-                Server
-            </label>
-
-            <select
-                class="form-input"
-                name="guild_id"
-                required
-            >
-
-                {guild_options}
-
-            </select>
-
-            <label>
-                Rating
-            </label>
-
-            <select
-                class="form-input"
-                name="rating"
-                required
-            >
-
-                <option value="5">
-                    ⭐⭐⭐⭐⭐
-                </option>
-
-                <option value="4">
-                    ⭐⭐⭐⭐
-                </option>
-
-                <option value="3">
-                    ⭐⭐⭐
-                </option>
-
-                <option value="2">
-                    ⭐⭐
-                </option>
-
-                <option value="1">
-                    ⭐
-                </option>
-
-            </select>
-
-            <label>
-                Review
-            </label>
-
-            <textarea
-                class="form-input"
-                name="review"
-                maxlength="1000"
-                placeholder="Write your review..."
-                required
-            ></textarea>
-
-            <button
-                class="button"
-                type="submit"
-            >
-                ⭐ Submit Review
-            </button>
-
-        </form>
-
-    </div>
-
-    """
-
-    return page(
-        "Review",
-        content + COOKIE_BANNER
-    )
-
-
-# =========================================================
-# SUBMIT REVIEW
-# =========================================================
-
-@app.route(
-    "/review",
-    methods=["POST"]
-)
-def submit_review():
-
-    current = get_current_web_session()
-
-    if current is None:
-
-        return redirect(
-            url_for(
-                "login"
-            )
-        )
-
-    user = current["user"]
-
-    user_id = str(
-        user.get(
-            "id",
-            ""
-        )
-    )
-
-    guild_id = request.form.get(
-        "guild_id",
-        ""
-    ).strip()
-
-    rating_value = request.form.get(
-        "rating"
-    )
-
-    review_text = (
-        request.form.get(
-            "review",
-            ""
-        )
-        .strip()
-    )
-
-    # -----------------------------------------------------
-    # VALIDATE SERVER
-    # -----------------------------------------------------
-
-    guild = get_user_guild(
-        current,
-        guild_id
-    )
-
-    if guild is None:
-
-        return page(
-            "Review",
-            """
-            <div class="card center">
-
-                <h1>
-                    ❌ Invalid Server
-                </h1>
-
-                <p>
-                    The selected server is not
-                    available to your account.
-                </p>
-
-                <a
-                    class="button"
-                    href="/review"
-                >
-                    Back
-                </a>
-
-            </div>
-            """
-        ), 403
-
-    if not user_can_manage_guild(
-        guild
-    ):
-
-        return page(
-            "Review",
-            """
-            <div class="card center">
-
-                <h1>
-                    🔒 Permission Required
-                </h1>
-
-                <p>
-                    You must have permission to
-                    manage the selected server.
-                </p>
-
-            </div>
-            """
-        ), 403
 
     # -----------------------------------------------------
     # LICENSE
     # -----------------------------------------------------
 
-    if not license_status(
+    license_info = license_status(
         guild_id
-    )["licensed"]:
+    )
 
-        return page(
-            "Review",
-            """
-            <div class="card center">
+    if license_info["licensed"]:
 
-                <h1>
-                    🔒 License Required
-                </h1>
+        license_status_html = """
+        <span class="badge badge-green">
+            ✓ Active
+        </span>
+        """
 
-                <p>
-                    You need an active license
-                    to review Misuki.
-                </p>
-
-            </div>
-            """
-        ), 403
-
-    # -----------------------------------------------------
-    # RATING
-    # -----------------------------------------------------
-
-    try:
-
-        rating = int(
-            rating_value
+        expires_at = license_info.get(
+            "expires_at"
         )
 
-    except (
-        TypeError,
-        ValueError
-    ):
+        if expires_at:
 
-        rating = 0
+            try:
 
-    if rating < 1 or rating > 5:
+                expiration = datetime.fromisoformat(
+                    expires_at
+                )
 
-        return page(
-            "Review",
-            """
-            <div class="card center">
+                expiration_text = (
+                    expiration.strftime(
+                        "%d/%m/%Y %H:%M UTC"
+                    )
+                )
 
-                <h1>
-                    ❌ Invalid Rating
-                </h1>
+            except (
+                ValueError,
+                TypeError
+            ):
 
-                <a
-                    class="button"
-                    href="/review"
-                >
-                    Back
-                </a>
+                expiration_text = escape(
+                    str(expires_at)
+                )
 
-            </div>
-            """
-        ), 400
+        else:
 
-    # -----------------------------------------------------
-    # REVIEW TEXT
-    # -----------------------------------------------------
+            expiration_text = "No expiration"
 
-    if not review_text:
+    elif license_info["status"] == "expired":
 
-        return page(
-            "Review",
-            """
-            <div class="card center">
-
-                <h1>
-                    ❌ Review Cannot Be Empty
-                </h1>
-
-                <a
-                    class="button"
-                    href="/review"
-                >
-                    Back
-                </a>
-
-            </div>
-            """
-        ), 400
-
-    if len(review_text) > 1000:
-
-        return page(
-            "Review",
-            """
-            <div class="card center">
-
-                <h1>
-                    ❌ Review Too Long
-                </h1>
-
-                <p>
-                    Your review cannot exceed 1000
-                    characters.
-                </p>
-
-                <a
-                    class="button"
-                    href="/review"
-                >
-                    Back
-                </a>
-
-            </div>
-            """
-        ), 400
-
-    # -----------------------------------------------------
-    # USERNAME
-    # -----------------------------------------------------
-
-    username = (
-        user.get("global_name")
-        or user.get("username")
-        or "Discord User"
-    )
-
-    username = str(
-        username
-    )[:100]
-
-    # -----------------------------------------------------
-    # SAVE
-    # -----------------------------------------------------
-
-    add_review(
-        user_id,
-        username,
-        guild_id,
-        rating,
-        review_text
-    )
-
-    return page(
-        "Review Submitted",
+        license_status_html = """
+        <span class="badge badge-red">
+            ✕ Expired
+        </span>
         """
-        <div class="card center">
 
-            <h1>
-                ⭐ Thank You!
-            </h1>
+        expiration_text = "License expired"
 
-            <p>
-                Your review has been submitted
-                and will appear on the Misuki
-                homepage.
-            </p>
+    else:
+
+        license_status_html = """
+        <span class="badge badge-yellow">
+            ⚠ Not Licensed
+        </span>
+        """
+
+        expiration_text = "No active license"
+
+    guild_name = escape(
+        guild.get(
+            "name"
+        )
+        or "Discord Server"
+    )
+
+    content = f"""
+
+    <div class="card">
+
+        <h1>
+            ⚙ {guild_name}
+        </h1>
+
+        <p>
+            Manage your Misuki installation.
+        </p>
+
+        <div class="notice">
+
+            <strong>
+                Server ID:
+            </strong>
+
+            {escape(guild_id)}
+
+            <br><br>
+
+            <strong>
+                Bot:
+            </strong>
+
+            <span class="badge badge-green">
+                ✓ Installed
+            </span>
+
+            <br>
+
+            <strong>
+                License:
+            </strong>
+
+            {license_status_html}
+
+            <br><br>
+
+            <strong>
+                Expiration:
+            </strong>
+
+            {escape(expiration_text)}
+
+        </div>
+
+        <div class="actions">
 
             <a
-                class="button"
-                href="/"
+                class="button secondary"
+                href="/dashboard"
             >
-                Return Home
+                ← Dashboard
             </a>
 
         </div>
-        """
+
+    </div>
+
+    """
+
+    return page(
+        f"Manage {guild_name}",
+        content
+        + COOKIE_BANNER
     )
 
 
 # =========================================================
-# LIKE
+# REVIEWS PAGE
+# =========================================================
+
+@app.route(
+    "/review",
+    methods=["GET", "POST"]
+)
+def review():
+
+    current = get_current_web_session()
+
+    # -----------------------------------------------------
+    # POST REVIEW
+    # -----------------------------------------------------
+
+    if request.method == "POST":
+
+        if current is None:
+
+            return redirect(
+                url_for(
+                    "login"
+                )
+            )
+
+        user = current.get(
+            "user",
+            {}
+        )
+
+        user_id = user.get(
+            "id"
+        )
+
+        username = (
+            user.get("global_name")
+            or user.get("username")
+            or "Discord User"
+        )
+
+        if not user_id:
+
+            return page(
+                "Review Error",
+                """
+                <div class="card center">
+
+                    <h1>
+                        ❌ Review Error
+                    </h1>
+
+                    <p>
+                        Your Discord account could
+                        not be identified.
+                    </p>
+
+                </div>
+                """
+            ), 400
+
+        if not can_user_review(
+            user_id
+        ):
+
+            return page(
+                "Review Not Available",
+                """
+                <div class="card center">
+
+                    <h1>
+                        🔒 Review Unavailable
+                    </h1>
+
+                    <p>
+                        You need to have an active
+                        Misuki license on a server
+                        you manage before submitting
+                        a review.
+                    </p>
+
+                    <a
+                        class="button"
+                        href="/dashboard"
+                    >
+                        Dashboard
+                    </a>
+
+                </div>
+                """
+            ), 403
+
+        guild_id = request.form.get(
+            "guild_id"
+        )
+
+        rating = request.form.get(
+            "rating",
+            "5"
+        )
+
+        review_text = request.form.get(
+            "review",
+            ""
+        ).strip()
+
+        # -------------------------------------------------
+        # VALIDATE RATING
+        # -------------------------------------------------
+
+        try:
+
+            rating = int(
+                rating
+            )
+
+        except (
+            TypeError,
+            ValueError
+        ):
+
+            rating = 0
+
+        if rating < 1 or rating > 5:
+
+            return page(
+                "Invalid Rating",
+                """
+                <div class="card center">
+
+                    <h1>
+                        ❌ Invalid Rating
+                    </h1>
+
+                    <p>
+                        Rating must be between
+                        1 and 5 stars.
+                    </p>
+
+                    <a
+                        class="button"
+                        href="/review"
+                    >
+                        Back
+                    </a>
+
+                </div>
+                """
+            ), 400
+
+        # -------------------------------------------------
+        # VALIDATE TEXT
+        # -------------------------------------------------
+
+        if not review_text:
+
+            return page(
+                "Empty Review",
+                """
+                <div class="card center">
+
+                    <h1>
+                        ❌ Empty Review
+                    </h1>
+
+                    <p>
+                        Please write something
+                        before submitting.
+                    </p>
+
+                    <a
+                        class="button"
+                        href="/review"
+                    >
+                        Back
+                    </a>
+
+                </div>
+                """
+            ), 400
+
+        if len(review_text) > 1000:
+
+            return page(
+                "Review Too Long",
+                """
+                <div class="card center">
+
+                    <h1>
+                        ❌ Review Too Long
+                    </h1>
+
+                    <p>
+                        Your review must contain
+                        1000 characters or fewer.
+                    </p>
+
+                    <a
+                        class="button"
+                        href="/review"
+                    >
+                        Back
+                    </a>
+
+                </div>
+                """
+            ), 400
+
+        # -------------------------------------------------
+        # FIND A VALID LICENSED SERVER
+        # -------------------------------------------------
+
+        selected_guild = None
+
+        for guild in current.get(
+            "guilds",
+            []
+        ):
+
+            gid = guild.get(
+                "id"
+            )
+
+            if guild_id and str(
+                gid
+            ) != str(
+                guild_id
+            ):
+
+                continue
+
+            if not user_can_manage_guild(
+                guild
+            ):
+
+                continue
+
+            license_info = license_status(
+                gid
+            )
+
+            if license_info["licensed"]:
+
+                selected_guild = str(
+                    gid
+                )
+
+                break
+
+        if selected_guild is None:
+
+            return page(
+                "Invalid Server",
+                """
+                <div class="card center">
+
+                    <h1>
+                        ❌ Invalid Server
+                    </h1>
+
+                    <p>
+                        Select a server with an
+                        active Misuki license.
+                    </p>
+
+                    <a
+                        class="button"
+                        href="/review"
+                    >
+                        Back
+                    </a>
+
+                </div>
+                """
+            ), 400
+
+        add_review(
+            user_id,
+            username,
+            selected_guild,
+            rating,
+            review_text
+        )
+
+        return redirect(
+            url_for(
+                "review"
+            )
+        )
+
+    # -----------------------------------------------------
+    # GET REVIEWS
+    # -----------------------------------------------------
+
+    reviews = get_reviews(
+        20
+    )
+
+    review_html = render_reviews(
+        reviews
+    )
+
+    # -----------------------------------------------------
+    # REVIEW FORM
+    # -----------------------------------------------------
+
+    form_html = ""
+
+    if current is not None:
+
+        licensed_guilds = []
+
+        for guild in current.get(
+            "guilds",
+            []
+        ):
+
+            gid = guild.get(
+                "id"
+            )
+
+            if not gid:
+                continue
+
+            if not user_can_manage_guild(
+                guild
+            ):
+                continue
+
+            license_info = license_status(
+                gid
+            )
+
+            if license_info["licensed"]:
+
+                licensed_guilds.append(
+                    guild
+                )
+
+        if licensed_guilds:
+
+            options = ""
+
+            for guild in licensed_guilds:
+
+                gid = escape(
+                    str(
+                        guild.get("id")
+                    )
+                )
+
+                name = escape(
+                    guild.get("name")
+                    or "Server"
+                )
+
+                options += f"""
+                <option value="{gid}">
+                    {name}
+                </option>
+                """
+
+            form_html = f"""
+
+            <div class="card">
+
+                <h2>
+                    ✍️ Leave a Review
+                </h2>
+
+                <form
+                    method="POST"
+                    action="/review"
+                >
+
+                    <label>
+                        Server
+                    </label>
+
+                    <select
+                        class="form-input"
+                        name="guild_id"
+                        required
+                    >
+                        {options}
+                    </select>
+
+                    <label>
+                        Rating
+                    </label>
+
+                    <select
+                        class="form-input"
+                        name="rating"
+                        required
+                    >
+
+                        <option value="5">
+                            ⭐⭐⭐⭐⭐ — 5
+                        </option>
+
+                        <option value="4">
+                            ⭐⭐⭐⭐☆ — 4
+                        </option>
+
+                        <option value="3">
+                            ⭐⭐⭐☆☆ — 3
+                        </option>
+
+                        <option value="2">
+                            ⭐⭐☆☆☆ — 2
+                        </option>
+
+                        <option value="1">
+                            ⭐☆☆☆☆ — 1
+                        </option>
+
+                    </select>
+
+                    <label>
+                        Review
+                    </label>
+
+                    <textarea
+                        class="form-input"
+                        name="review"
+                        maxlength="1000"
+                        placeholder="Tell us what you think about Misuki..."
+                        required
+                    ></textarea>
+
+                    <button
+                        class="button"
+                        type="submit"
+                    >
+                        ⭐ Submit Review
+                    </button>
+
+                </form>
+
+            </div>
+
+            """
+
+        else:
+
+            form_html = """
+            <div class="notice">
+
+                You need an active Misuki license
+                on a server you manage to leave
+                a review.
+
+            </div>
+            """
+
+    else:
+
+        form_html = """
+        <div class="notice">
+
+            🎮
+            <a
+                href="/login"
+                style="
+                    color:#8ea0ff;
+                    text-decoration:none;
+                "
+            >
+                Log in with Discord
+            </a>
+            to leave a review.
+
+        </div>
+        """
+
+    content = f"""
+
+    <div class="card center">
+
+        <h1>
+            ⭐ Misuki Reviews
+        </h1>
+
+        <p>
+            See what Discord server owners think
+            about Misuki.
+        </p>
+
+    </div>
+
+    {form_html}
+
+    <div class="card">
+
+        <h2>
+            💬 Community Reviews
+        </h2>
+
+        <div class="review-grid">
+
+            {review_html}
+
+        </div>
+
+    </div>
+
+    """
+
+    return page(
+        "Reviews",
+        content
+        + COOKIE_BANNER
+    )
+
+
+# =========================================================
+# LIKE REVIEW
 # =========================================================
 
 @app.route(
@@ -4565,194 +4650,42 @@ def like_review(
             )
         )
 
-    user = current["user"]
+    user = current.get(
+        "user",
+        {}
+    )
 
-    user_id = str(
-        user.get(
-            "id",
-            ""
+    user_id = user.get(
+        "id"
+    )
+
+    if not user_id:
+
+        return redirect(
+            url_for(
+                "review"
+            )
         )
-    )
 
-    toggle_like(
-        review_id,
-        user_id
-    )
+    try:
+
+        toggle_like(
+            review_id,
+            user_id
+        )
+
+    except sqlite3.Error as error:
+
+        print(
+            "Could not toggle review like:",
+            error
+        )
 
     return redirect(
         request.referrer
-        or url_for("home")
-    )
-
-
-# =========================================================
-# COOKIES
-# =========================================================
-
-@app.route(
-    "/cookies"
-)
-def cookies():
-
-    content = """
-
-    <div class="card legal">
-
-        <h1>
-            Cookie Policy
-        </h1>
-
-        <p>
-            Last updated: 27 August 2026
-        </p>
-
-        <h2>
-            1. Essential Cookies
-        </h2>
-
-        <p>
-            Misuki uses an essential session cookie
-            to keep authenticated users signed in.
-        </p>
-
-        <h2>
-            2. Optional Cookies
-        </h2>
-
-        <p>
-            Misuki does not currently require
-            advertising or analytics cookies.
-        </p>
-
-        <h2>
-            3. Cookie Choices
-        </h2>
-
-        <p>
-            Visitors may choose their cookie
-            preferences through the cookie banner.
-        </p>
-
-        <h2 id="terms">
-            Terms of Service
-        </h2>
-
-        <p>
-            By accessing or using Misuki, you agree
-            to these Terms of Service.
-        </p>
-
-        <h3>
-            Misuki Service
-        </h3>
-
-        <p>
-            Misuki is a Discord bot and management
-            platform designed to provide tools and
-            features for Discord communities.
-        </p>
-
-        <h3>
-            Discord
-        </h3>
-
-        <p>
-            Misuki integrates with Discord and uses
-            Discord APIs. Your use of Discord remains
-            subject to Discord's own terms and rules.
-        </p>
-
-        <h3>
-            Server Permissions
-        </h3>
-
-        <p>
-            You are responsible for ensuring that you
-            have the necessary permissions to install,
-            configure or manage Misuki.
-        </p>
-
-        <h3>
-            Licenses
-        </h3>
-
-        <p>
-            Licenses are associated with individual
-            Discord servers.
-        </p>
-
-        <h3>
-            Reviews
-        </h3>
-
-        <p>
-            Reviews must be genuine and must not contain
-            unlawful, abusive, fraudulent or malicious
-            content.
-        </p>
-
-        <h2 id="privacy">
-            Privacy Policy
-        </h2>
-
-        <h3>
-            Information We Receive
-        </h3>
-
-        <ul>
-
-            <li>
-                Discord user ID
-            </li>
-
-            <li>
-                Discord username or global name
-            </li>
-
-            <li>
-                Discord avatar information
-            </li>
-
-            <li>
-                Discord server information
-            </li>
-
-        </ul>
-
-        <h3>
-            How Information Is Used
-        </h3>
-
-        <p>
-            Information is used to provide the Misuki
-            dashboard and determine which servers the
-            user can manage.
-        </p>
-
-        <h3>
-            Storage
-        </h3>
-
-        <p>
-            Session information is stored server-side.
-        </p>
-
-        <h3>
-            Sharing
-        </h3>
-
-        <p>
-            Misuki does not intentionally sell personal
-            information to third parties.
-        </p>
-
-    </div>
-
-    """
-
-    return page(
-        "Cookies",
-        content + COOKIE_BANNER
+        or url_for(
+            "review"
+        )
     )
 
 
@@ -4785,30 +4718,126 @@ def logout():
 
 
 # =========================================================
-# 404
+# COOKIES / TERMS / PRIVACY
+# =========================================================
+
+@app.route(
+    "/cookies"
+)
+def cookies():
+
+    content = """
+
+    <div class="card legal">
+
+        <h1>
+            🍪 Cookies
+        </h1>
+
+        <p>
+            Misuki uses cookies and browser storage
+            to provide essential website functionality.
+        </p>
+
+
+        <h2>
+            Essential Cookies
+        </h2>
+
+        <p>
+            The Misuki session cookie is used to keep
+            you signed in and maintain your authenticated
+            website session.
+        </p>
+
+
+        <h2 id="terms">
+            Terms of Service
+        </h2>
+
+        <p>
+            By using Misuki, you agree to use the
+            service responsibly and in accordance
+            with Discord's rules and applicable law.
+        </p>
+
+
+        <h2 id="privacy">
+            Privacy Policy
+        </h2>
+
+        <p>
+            When you authenticate with Discord, Misuki
+            receives information necessary to identify
+            your Discord account and determine which
+            servers you can manage.
+        </p>
+
+        <p>
+            Information required for the website session
+            may be stored temporarily in the Misuki
+            database.
+        </p>
+
+        <p>
+            Misuki does not request unnecessary Discord
+            permissions for website authentication.
+        </p>
+
+
+        <h2>
+            Cookie Preferences
+        </h2>
+
+        <p>
+            You can change your cookie preference by
+            clearing the Misuki cookie preference from
+            your browser's local storage.
+        </p>
+
+    </div>
+
+    """
+
+    return page(
+        "Cookies & Privacy",
+        content
+        + COOKIE_BANNER
+    )
+
+
+# =========================================================
+# ERROR HANDLERS
 # =========================================================
 
 @app.errorhandler(404)
-def not_found(error):
+def not_found(
+    error
+):
 
     return page(
-        "404",
+        "Page Not Found",
         """
         <div class="card center">
+
+            <div class="logo">
+                🌸
+            </div>
 
             <h1>
                 404
             </h1>
 
             <p>
-                The page you requested does not exist.
+                The page you're looking for
+                doesn't exist.
             </p>
 
             <a
                 class="button"
                 href="/"
             >
-                Return Home
+                🏠 Return Home
             </a>
 
         </div>
@@ -4816,17 +4845,10 @@ def not_found(error):
     ), 404
 
 
-# =========================================================
-# 500
-# =========================================================
-
 @app.errorhandler(500)
-def internal_error(error):
-
-    print(
-        "INTERNAL SERVER ERROR:",
-        error
-    )
+def internal_error(
+    error
+):
 
     traceback.print_exc()
 
@@ -4835,20 +4857,24 @@ def internal_error(error):
         """
         <div class="card center">
 
+            <div class="logo">
+                ⚠️
+            </div>
+
             <h1>
-                ❌ Server Error
+                Something went wrong
             </h1>
 
             <p>
-                Something went wrong while processing
-                your request.
+                Misuki encountered an internal
+                server error.
             </p>
 
             <a
                 class="button"
                 href="/"
             >
-                Return Home
+                🏠 Return Home
             </a>
 
         </div>
@@ -4857,78 +4883,41 @@ def internal_error(error):
 
 
 # =========================================================
-# START
+# MAIN
 # =========================================================
 
 if __name__ == "__main__":
 
-    print(
-        "========================================"
+    port = int(
+        os.getenv(
+            "PORT",
+            "5000"
+        )
+    )
+
+    host = os.getenv(
+        "HOST",
+        "0.0.0.0"
     )
 
     print(
-        "Misuki OAuth2 starting..."
+        "=========================================="
     )
 
     print(
-        "========================================"
+        "🌸 Misuki Web Server"
     )
 
     print(
-        f"Client ID loaded: "
-        f"{bool(CLIENT_ID)}"
+        f"Running on {host}:{port}"
     )
 
     print(
-        f"Client Secret loaded: "
-        f"{bool(CLIENT_SECRET)}"
-    )
-
-    print(
-        f"Flask Secret loaded: "
-        f"{bool(FLASK_SECRET_KEY)}"
-    )
-
-    print(
-        f"Bot Token loaded: "
-        f"{bool(BOT_TOKEN)}"
-    )
-
-    print(
-        f"Login Redirect URI: "
-        f"{LOGIN_REDIRECT_URI}"
-    )
-
-    print(
-        f"Database: "
-        f"{DATABASE}"
-    )
-
-    print(
-        f"Review lifetime: "
-        f"{REVIEW_LIFETIME_DAYS} days"
-    )
-
-    print(
-        f"Port: "
-        f"{os.getenv('PORT', '5000')}"
-    )
-
-    print(
-        "========================================"
+        "=========================================="
     )
 
     app.run(
-
-        host="0.0.0.0",
-
-        port=int(
-            os.getenv(
-                "PORT",
-                "5000"
-            )
-        ),
-
+        host=host,
+        port=port,
         debug=False
     )
-
