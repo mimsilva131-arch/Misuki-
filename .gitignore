@@ -4,3 +4,19 @@ __pycache__/
 .venv/
 venv/
 data/*.db
+
+# Environment / secrets
+.env
+*.env
+*.env.save
+
+# Python
+__pycache__/
+*.pyc
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+data/
+.python-version
