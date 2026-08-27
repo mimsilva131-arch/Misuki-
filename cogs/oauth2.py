@@ -137,6 +137,13 @@ HOME_REVIEW_COUNT = 5
 
 
 # =========================================================
+# WEB SESSION SETTINGS
+# =========================================================
+
+SESSION_LIFETIME_DAYS = 30
+
+
+# =========================================================
 # FLASK
 # =========================================================
 
@@ -159,7 +166,9 @@ app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["SESSION_COOKIE_PATH"] = "/"
 
 app.config["PERMANENT_SESSION_LIFETIME"] = (
-    timedelta(days=7)
+    timedelta(
+        days=SESSION_LIFETIME_DAYS
+    )
 )
 
 
@@ -401,7 +410,7 @@ create_database()
 
 
 # =========================================================
-# WEB SESSION
+# CREATE WEB SESSION
 # =========================================================
 
 def create_web_session(
@@ -417,7 +426,9 @@ def create_web_session(
 
     expires = (
         now
-        + timedelta(days=7)
+        + timedelta(
+            days=SESSION_LIFETIME_DAYS
+        )
     )
 
     with database() as connection:
@@ -608,12 +619,58 @@ def get_current_web_session():
 
 
 # =========================================================
+# REFRESH DISCORD GUILDS
+# =========================================================
+
+def refresh_user_guilds():
+
+    current = get_current_web_session()
+
+    if current is None:
+
+        return None
+
+    user = current["user"]
+
+    # -----------------------------------------------------
+    # We do not have the Discord access token anymore.
+    #
+    # Therefore the original guild list is retained in
+    # the server-side session.
+    #
+    # Installation status is always checked separately
+    # using the bot account.
+    # -----------------------------------------------------
+
+    return {
+        "user": user,
+        "guilds": current.get(
+            "guilds",
+            []
+        )
+    }
+
+
+# =========================================================
 # LICENSE
 # =========================================================
 
 def get_license(
     guild_id
 ):
+
+    try:
+
+        guild_id = int(
+            guild_id
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        return None
 
     with database() as connection:
 
@@ -633,7 +690,7 @@ def get_license(
             WHERE guild_id = ?
             """,
             (
-                int(guild_id),
+                guild_id,
             )
         )
 
@@ -648,6 +705,19 @@ def set_license_expired(
     guild_id
 ):
 
+    try:
+
+        guild_id = int(
+            guild_id
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        return
+
     with database() as connection:
 
         connection.execute(
@@ -659,7 +729,7 @@ def set_license_expired(
             WHERE guild_id = ?
             """,
             (
-                int(guild_id),
+                guild_id,
             )
         )
 
@@ -698,7 +768,7 @@ def license_status(
                 expires_at
             )
 
-            if datetime.now() >= expiration:
+            if datetime.utcnow() >= expiration:
 
                 set_license_expired(
                     guild_id
@@ -776,7 +846,9 @@ def get_bot_guild_ids():
 
         response = requests.get(
             f"{DISCORD_API}/users/@me/guilds",
+
             headers=bot_headers(),
+
             timeout=15
         )
 
@@ -1175,10 +1247,6 @@ def page(
         auth_button = """
         <a href="/login">
             Sign In
-        </a>
-
-        <a href="/login">
-            Log In
         </a>
         """
 
@@ -2793,14 +2861,28 @@ def callback():
 
     cleanup_sessions()
 
-    session_id = create_web_session(
-        user,
-        guilds
+    # -----------------------------------------------------
+    # Remove previous web session if one exists.
+    # -----------------------------------------------------
+
+    old_session_id = session.get(
+        "sid"
     )
+
+    if old_session_id:
+
+        delete_web_session(
+            old_session_id
+        )
 
     session.clear()
 
     session.permanent = True
+
+    session_id = create_web_session(
+        user,
+        guilds
+    )
 
     session["sid"] = session_id
 
@@ -2832,7 +2914,32 @@ def dashboard():
 
     user = current["user"]
 
-    guilds = current["guilds"]
+    guilds = current.get(
+        "guilds",
+        []
+    )
+
+    # -----------------------------------------------------
+    # IMPORTANT:
+    #
+    # Installation status is checked directly against the
+    # bot account every time the dashboard is opened.
+    #
+    # This means:
+    #
+    # Login
+    #   ↓
+    # Dashboard
+    #   ↓
+    # Add Misuki
+    #   ↓
+    # Discord authorization
+    #   ↓
+    # Return to dashboard
+    #   ↓
+    # Server appears as INSTALLED
+    #
+    # -----------------------------------------------------
 
     bot_guild_ids = get_bot_guild_ids()
 
@@ -2871,6 +2978,10 @@ def dashboard():
 
     available = []
 
+    # =====================================================
+    # CLASSIFY SERVERS
+    # =====================================================
+
     for guild in guilds:
 
         guild_id = str(
@@ -2879,6 +2990,10 @@ def dashboard():
                 ""
             )
         )
+
+        if not guild_id:
+
+            continue
 
         if guild_id in bot_guild_ids:
 
@@ -3141,9 +3256,7 @@ def dashboard():
         """
 
     # =====================================================
-
-    # AVAILABLE FIRST
-    # 
+    # AUTHORIZED SERVERS
     # =====================================================
 
     authorized_html = ""
@@ -3159,14 +3272,43 @@ def dashboard():
 
         authorized_html = """
         <div class="notice">
+
             You currently have no servers where
             Misuki is installed.
+
         </div>
         """
 
     # =====================================================
+    # AVAILABLE SERVERS
+    #
+    # THIS WAS MISSING IN THE ORIGINAL CODE.
+    #
+    # That missing variable was causing the 500 error
+    # immediately after login.
+    # =====================================================
 
+    available_html = ""
 
+    for guild in available:
+
+        available_html += render_server(
+            guild,
+            False
+        )
+
+    if not available_html:
+
+        available_html = """
+        <div class="notice">
+
+            🎉 Misuki is already installed on
+            every server you can manage.
+
+        </div>
+        """
+
+    # =====================================================
     # CONTENT
     # =====================================================
 
@@ -3205,14 +3347,11 @@ def dashboard():
     </div>
 
 
-
     <!-- AVAILABLE SERVERS FIRST -->
-
 
     <div class="card">
 
         <h2>
-
             ➕ Available Servers
         </h2>
 
@@ -3235,7 +3374,6 @@ def dashboard():
 
         <h2>
             🟢 Authorized Servers
-
         </h2>
 
         <p>
@@ -3250,8 +3388,6 @@ def dashboard():
         </div>
 
     </div>
-
-
 
 
     <div style="text-align:center;">
@@ -4135,7 +4271,7 @@ def internal_error(error):
     traceback.print_exc()
 
     return page(
-        "Server Error",
+        "500",
         """
         <div class="card center">
 
@@ -4209,18 +4345,21 @@ if __name__ == "__main__":
     )
 
     print(
+        f"Session lifetime: "
+        f"{SESSION_LIFETIME_DAYS} days"
+    )
+
+    print(
         f"Review lifetime: "
         f"{REVIEW_LIFETIME_DAYS} days"
     )
 
     print(
-
         f"Port: "
         f"{os.getenv('PORT', '5000')}"
     )
 
     print(
-
         "========================================"
     )
 
