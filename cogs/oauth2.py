@@ -219,10 +219,6 @@ def create_database():
 
     with database() as connection:
 
-        # =================================================
-        # LICENSES
-        # =================================================
-
         connection.execute(
             """
             CREATE TABLE IF NOT EXISTS licenses (
@@ -242,10 +238,6 @@ def create_database():
             """
         )
 
-        # =================================================
-        # WEB SESSIONS
-        # =================================================
-
         connection.execute(
             """
             CREATE TABLE IF NOT EXISTS web_sessions (
@@ -264,13 +256,6 @@ def create_database():
             """
         )
 
-        # =================================================
-        # OLD INSTALLATION STATES
-        #
-        # Kept for compatibility with an existing DB.
-        # The new installation flow does NOT use this.
-        # =================================================
-
         connection.execute(
             """
             CREATE TABLE IF NOT EXISTS installation_states (
@@ -286,10 +271,6 @@ def create_database():
             )
             """
         )
-
-        # =================================================
-        # REVIEWS
-        # =================================================
 
         connection.execute(
             """
@@ -318,10 +299,6 @@ def create_database():
             """
         )
 
-        # =================================================
-        # REVIEW LIKES
-        # =================================================
-
         connection.execute(
             """
             CREATE TABLE IF NOT EXISTS review_likes (
@@ -340,10 +317,6 @@ def create_database():
             )
             """
         )
-
-        # =================================================
-        # REVIEW MIGRATION
-        # =================================================
 
         cursor = connection.execute(
             "PRAGMA table_info(reviews)"
@@ -397,10 +370,6 @@ def create_database():
                         f"Could not add reviews.{column}:",
                         error
                     )
-
-        # =================================================
-        # MIGRATE OLD REVIEW EXPIRATION
-        # =================================================
 
         try:
 
@@ -956,10 +925,6 @@ def discord_login_url(
 )
 def login():
 
-    # -----------------------------------------------------
-    # Already logged in
-    # -----------------------------------------------------
-
     if get_current_web_session() is not None:
 
         return redirect(
@@ -967,10 +932,6 @@ def login():
                 "dashboard"
             )
         )
-
-    # -----------------------------------------------------
-    # CSRF state
-    # -----------------------------------------------------
 
     state = secrets.token_urlsafe(
         32
@@ -1035,7 +996,6 @@ def login_callback():
             """
         ), 400
 
-
     if not received_state:
 
         return page(
@@ -1054,7 +1014,6 @@ def login_callback():
             </div>
             """
         ), 400
-
 
     if not secrets.compare_digest(
         expected_state,
@@ -1086,7 +1045,6 @@ def login_callback():
             """
         ), 400
 
-
     error = request.args.get(
         "error"
     )
@@ -1117,7 +1075,6 @@ def login_callback():
             """
         ), 400
 
-
     code = request.args.get(
         "code"
     )
@@ -1142,7 +1099,6 @@ def login_callback():
             """
         ), 400
 
-
     # =====================================================
     # EXCHANGE LOGIN CODE
     # =====================================================
@@ -1164,7 +1120,6 @@ def login_callback():
         "redirect_uri":
             LOGIN_REDIRECT_URI
     }
-
 
     try:
 
@@ -1213,7 +1168,6 @@ def login_callback():
             """
         ), 500
 
-
     if response.status_code != 200:
 
         print(
@@ -1246,7 +1200,6 @@ def login_callback():
             """
         ), 400
 
-
     try:
 
         token_json = response.json()
@@ -1266,11 +1219,9 @@ def login_callback():
             """
         ), 400
 
-
     access_token = token_json.get(
         "access_token"
     )
-
 
     if not access_token:
 
@@ -1286,7 +1237,6 @@ def login_callback():
             </div>
             """
         ), 400
-
 
     # =====================================================
     # GET DISCORD USER
@@ -1340,7 +1290,6 @@ def login_callback():
             """
         ), 500
 
-
     if user_response.status_code != 200:
 
         print(
@@ -1361,7 +1310,6 @@ def login_callback():
             </div>
             """
         ), 400
-
 
     if guild_response.status_code != 200:
 
@@ -1384,7 +1332,6 @@ def login_callback():
             """
         ), 400
 
-
     try:
 
         user = user_response.json()
@@ -1406,7 +1353,6 @@ def login_callback():
             """
         ), 400
 
-
     # =====================================================
     # CREATE WEB SESSION
     # =====================================================
@@ -1421,7 +1367,6 @@ def login_callback():
             old_session_id
         )
 
-
     session_id = create_web_session(
         user,
         guilds
@@ -1432,7 +1377,6 @@ def login_callback():
     session["sid"] = session_id
 
     session.permanent = True
-
 
     return redirect(
         url_for(
@@ -1459,7 +1403,6 @@ def login_callback():
 # There is NO:
 #
 #     /login/callback
-#
 # =========================================================
 
 def bot_install_url(
@@ -1492,9 +1435,6 @@ def bot_install_url(
 
 # =========================================================
 # INSTALL BOT
-#
-# This simply opens Discord's official bot
-# authorization/install screen.
 # =========================================================
 
 @app.route(
@@ -1506,10 +1446,6 @@ def install_bot(
 
     current = get_current_web_session()
 
-    # -----------------------------------------------------
-    # LOGIN REQUIRED
-    # -----------------------------------------------------
-
     if current is None:
 
         return redirect(
@@ -1517,7 +1453,6 @@ def install_bot(
                 "login"
             )
         )
-
 
     # -----------------------------------------------------
     # FIND SERVER
@@ -1534,7 +1469,6 @@ def install_bot(
             guild = item
 
             break
-
 
     if guild is None:
 
@@ -1562,7 +1496,6 @@ def install_bot(
             </div>
             """
         ), 403
-
 
     # -----------------------------------------------------
     # PERMISSION CHECK
@@ -1598,7 +1531,6 @@ def install_bot(
             """
         ), 403
 
-
     # -----------------------------------------------------
     # ALREADY INSTALLED?
     # -----------------------------------------------------
@@ -1613,7 +1545,6 @@ def install_bot(
                 guild_id=guild_id
             )
         )
-
 
     # -----------------------------------------------------
     # OPEN DISCORD INSTALLATION
@@ -1807,7 +1738,6 @@ def toggle_like(
 
         existing = cursor.fetchone()
 
-
         if existing:
 
             connection.execute(
@@ -1836,7 +1766,6 @@ def toggle_like(
                     review_id,
                 )
             )
-
 
         else:
 
@@ -1871,7 +1800,6 @@ def toggle_like(
                 )
             )
 
-
         connection.commit()
 
 
@@ -1887,7 +1815,6 @@ def page(
     current = get_current_web_session()
 
     logged_in = current is not None
-
 
     if logged_in:
 
@@ -1908,7 +1835,6 @@ def page(
             🎮 Login with Discord
         </a>
         """
-
 
     return f"""
 <!DOCTYPE html>
@@ -3080,7 +3006,6 @@ def render_reviews(
             expires_at
         ) = review
 
-
         rating = max(
             1,
             min(
@@ -3089,23 +3014,19 @@ def render_reviews(
             )
         )
 
-
         stars = (
             "★" * rating
             +
             "☆" * (5 - rating)
         )
 
-
         safe_username = escape(
             username or "Discord User"
         )
 
-
         safe_text = escape(
             text or ""
         )
-
 
         date_text = ""
 
@@ -3125,7 +3046,6 @@ def render_reviews(
         ):
 
             pass
-
 
         html += f"""
 
@@ -3166,7 +3086,6 @@ def render_reviews(
 
         """
 
-
     return html
 
 
@@ -3205,7 +3124,6 @@ def home():
         </p>
 
     </div>
-
 
     <div class="card">
 
@@ -3275,20 +3193,17 @@ def dashboard():
             """
         )
 
-
     user = current["user"]
 
     guilds = current["guilds"]
 
     bot_guild_ids = get_bot_guild_ids()
 
-
     username = (
         user.get("global_name")
         or user.get("username")
         or "Discord User"
     )
-
 
     user_id = str(
         user.get(
@@ -3297,11 +3212,9 @@ def dashboard():
         )
     )
 
-
     avatar = user.get(
         "avatar"
     )
-
 
     if avatar:
 
@@ -3317,11 +3230,22 @@ def dashboard():
             "embed/avatars/0.png"
         )
 
+    # =====================================================
+    # SERVER GROUPS
+    #
+    # AUTHORIZED:
+    #   Bot already installed.
+    #
+    # AVAILABLE:
+    #   Every other server returned by Discord.
+    #
+    # This intentionally includes servers where the
+    # user does NOT have Manage Server permission.
+    # =====================================================
 
     authorized = []
 
     available = []
-
 
     for guild in guilds:
 
@@ -3332,21 +3256,17 @@ def dashboard():
             )
         )
 
-
         if guild_id in bot_guild_ids:
 
             authorized.append(
                 guild
             )
 
-        elif user_can_manage_guild(
-            guild
-        ):
+        else:
 
             available.append(
                 guild
             )
-
 
     # =====================================================
     # SERVER CARD
@@ -3364,7 +3284,6 @@ def dashboard():
             )
         )
 
-
         guild_name = escape(
             guild.get(
                 "name",
@@ -3372,21 +3291,21 @@ def dashboard():
             )
         )
 
-
         license_info = license_status(
             guild_id
         )
-
 
         licensed = license_info[
             "licensed"
         ]
 
-
         status = license_info[
             "status"
         ]
 
+        # -------------------------------------------------
+        # LICENSE BADGE
+        # -------------------------------------------------
 
         if licensed:
 
@@ -3420,13 +3339,15 @@ def dashboard():
             </span>
             """
 
+        # -------------------------------------------------
+        # EXPIRATION
+        # -------------------------------------------------
 
         expiration_html = ""
 
         expires_at = license_info[
             "expires_at"
         ]
-
 
         if expires_at:
 
@@ -3485,7 +3406,6 @@ def dashboard():
 
                 """
 
-
         # =================================================
         # INSTALLATION
         # =================================================
@@ -3498,7 +3418,6 @@ def dashboard():
             </span>
             """
 
-
             installation_button = f"""
             <a
                 class="button secondary"
@@ -3508,25 +3427,46 @@ def dashboard():
             </a>
             """
 
-
         else:
 
-            installation_badge = """
-            <span class="badge badge-yellow">
-                ⚠️ MISUKI NOT INSTALLED
-            </span>
-            """
+            if user_can_manage_guild(
+                guild
+            ):
 
+                installation_badge = """
+                <span class="badge badge-yellow">
+                    ⚠️ MISUKI NOT INSTALLED
+                </span>
+                """
 
-            installation_button = f"""
-            <a
-                class="button green"
-                href="/install/{escape(guild_id)}"
-            >
-                ➕ Add Misuki
-            </a>
-            """
+                installation_button = f"""
+                <a
+                    class="button green"
+                    href="/install/{escape(guild_id)}"
+                >
+                    ➕ Add Misuki
+                </a>
+                """
 
+            else:
+
+                installation_badge = """
+                <span class="badge badge-red">
+                    🔒 NO PERMISSION
+                </span>
+                """
+
+                installation_button = """
+                <span
+                    class="button secondary"
+                    style="
+                        cursor:not-allowed;
+                        opacity:0.6;
+                    "
+                >
+                    🔒 Cannot Add
+                </span>
+                """
 
         # =================================================
         # SERVER ICON
@@ -3535,7 +3475,6 @@ def dashboard():
         guild_icon = guild.get(
             "icon"
         )
-
 
         if guild_icon:
 
@@ -3566,7 +3505,6 @@ def dashboard():
             server_icon = (
                 first_letter
             )
-
 
         return f"""
 
@@ -3614,13 +3552,11 @@ def dashboard():
 
         """
 
-
     # =====================================================
     # AUTHORIZED FIRST
     # =====================================================
 
     authorized_html = ""
-
 
     for guild in authorized:
 
@@ -3628,7 +3564,6 @@ def dashboard():
             guild,
             True
         )
-
 
     if not authorized_html:
 
@@ -3639,13 +3574,11 @@ def dashboard():
         </div>
         """
 
-
     # =====================================================
     # AVAILABLE SECOND
     # =====================================================
 
     available_html = ""
-
 
     for guild in available:
 
@@ -3654,16 +3587,14 @@ def dashboard():
             False
         )
 
-
     if not available_html:
 
         available_html = """
         <div class="notice">
-            There are currently no available
-            servers where you can install Misuki.
+            There are currently no servers
+            available to your Discord account.
         </div>
         """
-
 
     # =====================================================
     # CONTENT
@@ -3709,7 +3640,7 @@ def dashboard():
     <div class="card">
 
         <h2>
-            🟢 Authorized Servers
+            Authorized Servers
         </h2>
 
         <p>
@@ -3730,11 +3661,11 @@ def dashboard():
     <div class="card">
 
         <h2>
-            ➕ Available Servers
+            Available Servers
         </h2>
 
         <p>
-            Servers where you can add Misuki.
+            Servers where you can or cannot add Misuki.
         </p>
 
         <div class="server-grid">
@@ -3758,7 +3689,6 @@ def dashboard():
     </div>
 
     """
-
 
     return page(
         "Dashboard",
@@ -3787,9 +3717,7 @@ def manage(
             )
         )
 
-
     guild = None
-
 
     for item in current["guilds"]:
 
@@ -3800,7 +3728,6 @@ def manage(
             guild = item
 
             break
-
 
     if guild is None:
 
@@ -3828,7 +3755,6 @@ def manage(
             </div>
             """
         ), 403
-
 
     if not user_can_manage_guild(
         guild
@@ -3859,7 +3785,6 @@ def manage(
             """
         ), 403
 
-
     # -----------------------------------------------------
     # Make sure bot is actually installed
     # -----------------------------------------------------
@@ -3874,7 +3799,6 @@ def manage(
             )
         )
 
-
     guild_name = escape(
         guild.get(
             "name",
@@ -3882,11 +3806,9 @@ def manage(
         )
     )
 
-
     info = license_status(
         guild_id
     )
-
 
     if info["expires_at"]:
 
@@ -3914,7 +3836,6 @@ def manage(
     else:
 
         expiration_text = "Never"
-
 
     content = f"""
 
@@ -3959,7 +3880,6 @@ def manage(
 
     """
 
-
     return page(
         "Manage",
         content + COOKIE_BANNER
@@ -3985,9 +3905,7 @@ def review_page():
             )
         )
 
-
     user = current["user"]
-
 
     user_id = str(
         user.get(
@@ -3995,7 +3913,6 @@ def review_page():
             ""
         )
     )
-
 
     if not can_user_review(
         user_id
@@ -4027,9 +3944,7 @@ def review_page():
             """
         )
 
-
     guild_options = ""
-
 
     for guild in current["guilds"]:
 
@@ -4040,7 +3955,6 @@ def review_page():
         if not guild_id:
 
             continue
-
 
         if license_status(
             guild_id
@@ -4056,7 +3970,6 @@ def review_page():
                 )}
             </option>
             """
-
 
     content = f"""
 
@@ -4146,7 +4059,6 @@ def review_page():
 
     """
 
-
     return page(
         "Review",
         content + COOKIE_BANNER
@@ -4173,9 +4085,7 @@ def submit_review():
             )
         )
 
-
     user = current["user"]
-
 
     user_id = str(
         user.get(
@@ -4183,7 +4093,6 @@ def submit_review():
             ""
         )
     )
-
 
     if not can_user_review(
         user_id
@@ -4207,16 +4116,13 @@ def submit_review():
             """
         ), 403
 
-
     guild_id = request.form.get(
         "guild_id"
     )
 
-
     rating = request.form.get(
         "rating"
     )
-
 
     review_text = (
         request.form.get(
@@ -4225,7 +4131,6 @@ def submit_review():
         )
         .strip()
     )
-
 
     try:
 
@@ -4239,7 +4144,6 @@ def submit_review():
     ):
 
         rating = 0
-
 
     if rating < 1 or rating > 5:
 
@@ -4263,7 +4167,6 @@ def submit_review():
             """
         ), 400
 
-
     if not review_text:
 
         return page(
@@ -4285,7 +4188,6 @@ def submit_review():
             </div>
             """
         ), 400
-
 
     if not guild_id:
 
@@ -4309,7 +4211,6 @@ def submit_review():
             """
         ), 400
 
-
     if not license_status(
         guild_id
     )["licensed"]:
@@ -4332,9 +4233,7 @@ def submit_review():
             """
         ), 403
 
-
     valid_guild = False
-
 
     for guild in current["guilds"]:
 
@@ -4345,7 +4244,6 @@ def submit_review():
             valid_guild = True
 
             break
-
 
     if not valid_guild:
 
@@ -4362,13 +4260,11 @@ def submit_review():
             """
         ), 403
 
-
     username = (
         user.get("global_name")
         or user.get("username")
         or "Discord User"
     )
-
 
     add_review(
         user_id,
@@ -4377,7 +4273,6 @@ def submit_review():
         rating,
         review_text
     )
-
 
     return page(
         "Review Submitted",
@@ -4427,9 +4322,7 @@ def like_review(
             )
         )
 
-
     user = current["user"]
-
 
     user_id = str(
         user.get(
@@ -4438,12 +4331,10 @@ def like_review(
         )
     )
 
-
     toggle_like(
         review_id,
         user_id
     )
-
 
     return redirect(
         request.referrer
@@ -4635,16 +4526,13 @@ def logout():
         "sid"
     )
 
-
     if session_id:
 
         delete_web_session(
             session_id
         )
 
-
     session.clear()
-
 
     return redirect(
         url_for(
@@ -4786,7 +4674,6 @@ if __name__ == "__main__":
     print(
         "========================================"
     )
-
 
     app.run(
 
