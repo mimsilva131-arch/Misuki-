@@ -19,13 +19,14 @@
 import os
 import json
 import secrets
-import sqlite3
 import traceback
 
+from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from html import escape
 from urllib.parse import urlencode
 
+import psycopg2
 import requests
 
 from flask import (
@@ -57,16 +58,6 @@ ENV_FILE = os.path.join(
     ".env"
 )
 
-DATA_DIR = os.path.join(
-    PROJECT_DIR,
-    "data"
-)
-
-DATABASE = os.path.join(
-    DATA_DIR,
-    "misuki.db"
-)
-
 
 # =========================================================
 # ENVIRONMENT
@@ -94,6 +85,10 @@ FLASK_SECRET_KEY = os.getenv(
 
 BOT_TOKEN = os.getenv(
     "DISCORD_BOT_TOKEN"
+)
+
+DATABASE_URL = os.getenv(
+    "DATABASE_URL"
 )
 
 # ---------------------------------------------------------
@@ -139,6 +134,11 @@ if not CLIENT_SECRET:
 if not LOGIN_REDIRECT_URI:
     raise RuntimeError(
         "DISCORD_LOGIN_REDIRECT_URI is not configured."
+    )
+
+if not DATABASE_URL:
+    raise RuntimeError(
+        "DATABASE_URL is not configured."
     )
 
 
@@ -217,9 +217,9 @@ def utc_now():
     """
     Returns the current UTC time as a naive datetime.
 
-    SQLite stores our timestamps without timezone
-    information, so all internal comparisons use
-    the same UTC-naive representation.
+    Timestamps are stored without timezone information,
+    so all internal comparisons use the same UTC-naive
+    representation.
     """
 
     return datetime.now(
@@ -231,24 +231,27 @@ def utc_now():
 
 # =========================================================
 # DATABASE
+#
+# Postgres (Supabase). Every call opens a short-lived
+# connection and always closes it afterwards, since
+# free-tier Postgres plans enforce a low connection
+# limit.
 # =========================================================
 
+@contextmanager
 def database():
 
-    os.makedirs(
-        DATA_DIR,
-        exist_ok=True
+    connection = psycopg2.connect(
+        DATABASE_URL
     )
 
-    connection = sqlite3.connect(
-        DATABASE
-    )
+    try:
 
-    connection.execute(
-        "PRAGMA foreign_keys = ON"
-    )
+        yield connection
 
-    return connection
+    finally:
+
+        connection.close()
 
 
 # =========================================================
@@ -259,11 +262,13 @@ def create_database():
 
     with database() as connection:
 
-        connection.execute(
+        cursor = connection.cursor()
+
+        cursor.execute(
             """
             CREATE TABLE IF NOT EXISTS licenses (
 
-                guild_id INTEGER PRIMARY KEY,
+                guild_id BIGINT PRIMARY KEY,
 
                 license_key TEXT UNIQUE NOT NULL,
 
@@ -278,7 +283,7 @@ def create_database():
             """
         )
 
-        connection.execute(
+        cursor.execute(
             """
             CREATE TABLE IF NOT EXISTS web_sessions (
 
@@ -296,7 +301,7 @@ def create_database():
             """
         )
 
-        connection.execute(
+        cursor.execute(
             """
             CREATE TABLE IF NOT EXISTS installation_states (
 
@@ -312,11 +317,11 @@ def create_database():
             """
         )
 
-        connection.execute(
+        cursor.execute(
             """
             CREATE TABLE IF NOT EXISTS reviews (
 
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
 
                 user_id TEXT NOT NULL,
 
@@ -339,7 +344,7 @@ def create_database():
             """
         )
 
-        connection.execute(
+        cursor.execute(
             """
             CREATE TABLE IF NOT EXISTS review_likes (
 
@@ -364,16 +369,24 @@ def create_database():
             """
         )
 
+        connection.commit()
+
         # -------------------------------------------------
-        # REVIEWS MIGRATION
+        # REVIEWS COLUMN MIGRATION
         # -------------------------------------------------
 
-        cursor = connection.execute(
-            "PRAGMA table_info(reviews)"
+        cursor.execute(
+            """
+            SELECT column_name
+
+            FROM information_schema.columns
+
+            WHERE table_name = 'reviews'
+            """
         )
 
         columns = {
-            row[1]
+            row[0]
             for row in cursor.fetchall()
         }
 
@@ -410,11 +423,15 @@ def create_database():
 
                 try:
 
-                    connection.execute(
+                    cursor.execute(
                         sql
                     )
 
-                except sqlite3.Error as error:
+                    connection.commit()
+
+                except psycopg2.Error as error:
+
+                    connection.rollback()
 
                     print(
                         f"Could not add reviews.{column}:",
@@ -423,36 +440,77 @@ def create_database():
 
         # -------------------------------------------------
         # REVIEW EXPIRATION MIGRATION
+        #
+        # Done in Python (not raw SQL) to avoid date-math
+        # syntax differences between database engines.
         # -------------------------------------------------
 
         try:
 
-            connection.execute(
+            cursor.execute(
                 """
-                UPDATE reviews
+                SELECT id, created_at
 
-                SET expires_at = datetime(
-                    created_at,
-                    ?
-                )
+                FROM reviews
 
                 WHERE expires_at IS NULL
 
                 AND created_at IS NOT NULL
-                """,
-                (
-                    f"+{REVIEW_LIFETIME_DAYS} days",
-                )
+                """
             )
 
-        except sqlite3.Error as error:
+            pending = cursor.fetchall()
+
+            for review_id, created_at in pending:
+
+                try:
+
+                    created = datetime.fromisoformat(
+                        created_at
+                    )
+
+                    expires = (
+                        created
+                        + timedelta(
+                            days=REVIEW_LIFETIME_DAYS
+                        )
+                    )
+
+                    cursor.execute(
+                        """
+                        UPDATE reviews
+
+                        SET expires_at = %s
+
+                        WHERE id = %s
+                        """,
+                        (
+                            expires.isoformat(),
+                            review_id
+                        )
+                    )
+
+                except (
+                    ValueError,
+                    TypeError
+                ) as error:
+
+                    print(
+                        "Could not migrate review expiration for id",
+                        review_id,
+                        error
+                    )
+
+            connection.commit()
+
+        except psycopg2.Error as error:
+
+            connection.rollback()
 
             print(
                 "Could not migrate review expiration:",
                 error
             )
-
-        connection.commit()
 
     print(
         "Database ready."
@@ -484,7 +542,9 @@ def create_web_session(
 
     with database() as connection:
 
-        connection.execute(
+        cursor = connection.cursor()
+
+        cursor.execute(
             """
             INSERT INTO web_sessions
             (
@@ -495,7 +555,7 @@ def create_web_session(
                 expires_at
             )
 
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s)
             """,
             (
                 session_id,
@@ -545,7 +605,7 @@ def get_web_session(
 
             FROM web_sessions
 
-            WHERE session_id = ?
+            WHERE session_id = %s
             """,
             (
                 session_id,
@@ -617,11 +677,13 @@ def delete_web_session(
 
     with database() as connection:
 
-        connection.execute(
+        cursor = connection.cursor()
+
+        cursor.execute(
             """
             DELETE FROM web_sessions
 
-            WHERE session_id = ?
+            WHERE session_id = %s
             """,
             (
                 session_id,
@@ -641,11 +703,13 @@ def cleanup_sessions():
 
     with database() as connection:
 
-        connection.execute(
+        cursor = connection.cursor()
+
+        cursor.execute(
             """
             DELETE FROM web_sessions
 
-            WHERE expires_at < ?
+            WHERE expires_at < %s
             """,
             (
                 now,
@@ -871,7 +935,7 @@ def get_license(
 
             FROM licenses
 
-            WHERE guild_id = ?
+            WHERE guild_id = %s
             """,
             (
                 guild_id,
@@ -904,13 +968,15 @@ def set_license_expired(
 
     with database() as connection:
 
-        connection.execute(
+        cursor = connection.cursor()
+
+        cursor.execute(
             """
             UPDATE licenses
 
             SET status = 'expired'
 
-            WHERE guild_id = ?
+            WHERE guild_id = %s
             """,
             (
                 guild_id,
@@ -1017,6 +1083,11 @@ def discord_login_url(
 # LOGIN
 #
 # OAuth2 ONLY FOR WEBSITE LOGIN.
+#
+# Reuses a pending "login_state" instead of always
+# generating a new one, so double clicks / parallel
+# tabs / slow cold-starts don't invalidate a request
+# that is already in flight with Discord.
 # =========================================================
 
 @app.route(
@@ -1034,15 +1105,21 @@ def login():
             )
         )
 
-    # -----------------------------------------------------
-    # Generate a fresh OAuth state
-    # -----------------------------------------------------
+    existing_state = session.get(
+        "login_state"
+    )
+
+    if existing_state:
+
+        return redirect(
+            discord_login_url(
+                existing_state
+            )
+        )
 
     state = secrets.token_urlsafe(
         32
     )
-
-    session.clear()
 
     session["login_state"] = state
 
@@ -1638,6 +1715,11 @@ def install_bot(
 
     # -----------------------------------------------------
     # PERMISSION CHECK
+    #
+    # This is the authoritative check. The dashboard only
+    # hides/disables the "Add Misuki" button as a UX hint;
+    # this server-side check is what actually blocks
+    # unauthorized installs.
     # -----------------------------------------------------
 
     if not user_can_manage_guild(
@@ -1708,13 +1790,15 @@ def cleanup_reviews():
 
     with database() as connection:
 
-        connection.execute(
+        cursor = connection.cursor()
+
+        cursor.execute(
             """
             DELETE FROM reviews
 
             WHERE expires_at IS NOT NULL
 
-            AND expires_at < ?
+            AND expires_at < %s
             """,
             (
                 now,
@@ -1772,7 +1856,7 @@ def get_reviews(
 
             ORDER BY RANDOM()
 
-            LIMIT ?
+            LIMIT %s
             """,
             (
                 limit,
@@ -1840,7 +1924,9 @@ def add_review(
 
     with database() as connection:
 
-        connection.execute(
+        cursor = connection.cursor()
+
+        cursor.execute(
             """
             INSERT INTO reviews
             (
@@ -1854,7 +1940,7 @@ def add_review(
                 expires_at
             )
 
-            VALUES (?, ?, ?, ?, ?, 0, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, 0, %s, %s)
             """,
             (
                 str(user_id),
@@ -1889,7 +1975,7 @@ def toggle_like(
 
             FROM reviews
 
-            WHERE id = ?
+            WHERE id = %s
             """,
             (
                 review_id,
@@ -1906,9 +1992,9 @@ def toggle_like(
 
             FROM review_likes
 
-            WHERE review_id = ?
+            WHERE review_id = %s
 
-            AND user_id = ?
+            AND user_id = %s
             """,
             (
                 review_id,
@@ -1920,13 +2006,13 @@ def toggle_like(
 
         if existing:
 
-            connection.execute(
+            cursor.execute(
                 """
                 DELETE FROM review_likes
 
-                WHERE review_id = ?
+                WHERE review_id = %s
 
-                AND user_id = ?
+                AND user_id = %s
                 """,
                 (
                     review_id,
@@ -1934,13 +2020,13 @@ def toggle_like(
                 )
             )
 
-            connection.execute(
+            cursor.execute(
                 """
                 UPDATE reviews
 
-                SET likes = MAX(likes - 1, 0)
+                SET likes = GREATEST(likes - 1, 0)
 
-                WHERE id = ?
+                WHERE id = %s
                 """,
                 (
                     review_id,
@@ -1951,7 +2037,7 @@ def toggle_like(
 
             return False
 
-        connection.execute(
+        cursor.execute(
             """
             INSERT INTO review_likes
             (
@@ -1960,7 +2046,7 @@ def toggle_like(
                 created_at
             )
 
-            VALUES (?, ?, ?)
+            VALUES (%s, %s, %s)
             """,
             (
                 review_id,
@@ -1969,13 +2055,13 @@ def toggle_like(
             )
         )
 
-        connection.execute(
+        cursor.execute(
             """
             UPDATE reviews
 
             SET likes = likes + 1
 
-            WHERE id = ?
+            WHERE id = %s
             """,
             (
                 review_id,
@@ -2329,6 +2415,27 @@ p {{
         #4752c4;
 }}
 
+.button.disabled {{
+
+    background: #2b2e37;
+
+    color: #6c7181;
+
+    cursor: not-allowed;
+
+    pointer-events: none;
+
+    border-color:
+        rgba(255,255,255,0.05);
+}}
+
+.button.disabled:hover {{
+
+    transform: none;
+
+    background: #2b2e37;
+}}
+
 .secondary {{
     background: #252934;
 }}
@@ -2428,6 +2535,8 @@ p {{
     font-weight: 800;
 
     overflow: hidden;
+
+    flex-shrink: 0;
 }}
 
 .server-icon img {{
@@ -2500,6 +2609,15 @@ p {{
 
     color:
         #fee75c;
+}}
+
+.badge-gray {{
+
+    background:
+        rgba(148,155,171,0.12);
+
+    color:
+        #949bab;
 }}
 
 .actions {{
@@ -3310,7 +3428,6 @@ def render_reviews(
         """
 
     return html
-        
 
 
 # =========================================================
@@ -3386,6 +3503,27 @@ def home():
 
 # =========================================================
 # DASHBOARD
+#
+# Layout rules:
+#
+# - AVAILABLE SERVERS are listed FIRST.
+#   Shows every server the user belongs to where Misuki
+#   is NOT installed. "Add Misuki" is only clickable if
+#   the user has Manage Server / Administrator permission
+#   there; otherwise a disabled "Missing Permissions"
+#   indicator is shown instead (the /install route is the
+#   real, authoritative permission check).
+#
+# - AUTHORIZED SERVERS are listed SECOND.
+#   Shows every server the user belongs to where Misuki
+#   IS installed, regardless of the user's permission
+#   level, with a badge for install status and license
+#   status. "Manage" is only clickable if the user has
+#   permission; otherwise a "No Permission" badge is shown
+#   (the /manage route is the real, authoritative
+#   permission check). The license expiration date is
+#   shown directly on the card, and "Manage" leads to
+#   full license details.
 # =========================================================
 
 @app.route("/dashboard")
@@ -3424,14 +3562,13 @@ def dashboard():
     # CLASSIFY SERVERS
     #
     # AUTHORIZED:
-    #   User can manage the server
-    #   AND Misuki is already installed
+    #   Misuki is already installed
+    #   (shown even if the user cannot manage it)
     #
     # AVAILABLE:
-    #   User can manage the server
-    #   AND Misuki is NOT installed
-    #
-    # Servers the user cannot manage are ignored.
+    #   Misuki is NOT installed
+    #   (shown even if the user cannot manage it, but
+    #   the "Add" action is blocked without permission)
     # -----------------------------------------------------
 
     for guild in guilds:
@@ -3441,11 +3578,6 @@ def dashboard():
         )
 
         if not guild_id:
-            continue
-
-        if not user_can_manage_guild(
-            guild
-        ):
             continue
 
         guild_id = str(
@@ -3560,112 +3692,8 @@ def dashboard():
         )
 
     # -----------------------------------------------------
-    # AUTHORIZED SERVERS
-    # -----------------------------------------------------
-
-    authorized_html = ""
-
-    for guild in authorized:
-
-        guild_id = str(
-            guild.get("id")
-        )
-
-        guild_name = escape(
-            guild.get("name")
-            or "Unnamed Server"
-        )
-
-        icon = guild_icon(
-            guild
-        )
-
-        license_info = license_status(
-            guild_id
-        )
-
-        if license_info["licensed"]:
-
-            license_badge = """
-            <span class="badge badge-green">
-                ✓ Licensed
-            </span>
-            """
-
-        elif license_info["status"] == "expired":
-
-            license_badge = """
-            <span class="badge badge-red">
-                ⚠ License Expired
-            </span>
-            """
-
-        else:
-
-            license_badge = """
-            <span class="badge badge-yellow">
-                ⚠ No License
-            </span>
-            """
-
-        authorized_html += f"""
-
-        <div class="server">
-
-            <div class="server-header">
-
-                <div class="server-icon">
-                    {icon}
-                </div>
-
-                <div>
-
-                    <div class="server-name">
-                        {guild_name}
-                    </div>
-
-                    <div class="server-id">
-                        {escape(guild_id)}
-                    </div>
-
-                </div>
-
-            </div>
-
-            <span class="badge badge-green">
-                ✓ Misuki Installed
-            </span>
-
-            {license_badge}
-
-            <div class="actions">
-
-                <a
-                    class="button green"
-                    href="/manage/{guild_id}"
-                >
-                    ⚙ Manage
-                </a>
-
-            </div>
-
-        </div>
-
-        """
-
-    if not authorized_html:
-
-        authorized_html = """
-        <div class="notice">
-
-            You don't have any servers where
-            Misuki is currently installed.
-
-        </div>
-        """
-
-    # -----------------------------------------------------
     # AVAILABLE SERVERS
+    # (listed first, per layout rules above)
     # -----------------------------------------------------
 
     available_html = ""
@@ -3684,6 +3712,33 @@ def dashboard():
         icon = guild_icon(
             guild
         )
+
+        has_permission = user_can_manage_guild(
+            guild
+        )
+
+        if has_permission:
+
+            action_html = f"""
+            <a
+                class="button"
+                href="/install/{guild_id}"
+            >
+                ➕ Add Misuki
+            </a>
+            """
+
+        else:
+
+            action_html = """
+            <span
+                class="button disabled"
+                aria-disabled="true"
+                title="You need Manage Server or Administrator permission"
+            >
+                🔒 Missing Permissions
+            </span>
+            """
 
         available_html += f"""
 
@@ -3715,12 +3770,7 @@ def dashboard():
 
             <div class="actions">
 
-                <a
-                    class="button"
-                    href="/install/{guild_id}"
-                >
-                    ➕ Add Misuki
-                </a>
+                {action_html}
 
             </div>
 
@@ -3734,7 +3784,175 @@ def dashboard():
         <div class="notice">
 
             No additional servers are available
-            for you to manage.
+            for Misuki to be added to.
+
+        </div>
+        """
+
+    # -----------------------------------------------------
+    # AUTHORIZED SERVERS
+    # (listed second, per layout rules above)
+    # -----------------------------------------------------
+
+    authorized_html = ""
+
+    for guild in authorized:
+
+        guild_id = str(
+            guild.get("id")
+        )
+
+        guild_name = escape(
+            guild.get("name")
+            or "Unnamed Server"
+        )
+
+        icon = guild_icon(
+            guild
+        )
+
+        has_permission = user_can_manage_guild(
+            guild
+        )
+
+        license_info = license_status(
+            guild_id
+        )
+
+        if license_info["licensed"]:
+
+            license_badge = """
+            <span class="badge badge-green">
+                ✓ Licensed
+            </span>
+            """
+
+        elif license_info["status"] == "expired":
+
+            license_badge = """
+            <span class="badge badge-red">
+                ⚠ License Expired
+            </span>
+            """
+
+        else:
+
+            license_badge = """
+            <span class="badge badge-yellow">
+                ⚠ No License
+            </span>
+            """
+
+        # ---------------------------------------------
+        # EXPIRATION DATE PREVIEW
+        #
+        # Shown directly on the card so the most
+        # important detail (when the license ends)
+        # doesn't require an extra click.
+        # ---------------------------------------------
+
+        expiry_html = ""
+
+        expires_at = license_info.get(
+            "expires_at"
+        )
+
+        if expires_at:
+
+            try:
+
+                expiration = datetime.fromisoformat(
+                    expires_at
+                )
+
+                expiry_text = expiration.strftime(
+                    "%d/%m/%Y"
+                )
+
+                expiry_html = f"""
+                <div class="server-id">
+                    Expires: {escape(expiry_text)}
+                </div>
+                """
+
+            except (
+                ValueError,
+                TypeError
+            ):
+
+                pass
+
+        if has_permission:
+
+            action_html = f"""
+            <a
+                class="button green"
+                href="/manage/{guild_id}"
+            >
+                ⚙ Manage
+            </a>
+            """
+
+        else:
+
+            action_html = """
+            <span
+                class="badge badge-gray"
+                title="You need Manage Server or Administrator permission"
+            >
+                🔒 No Permission
+            </span>
+            """
+
+        authorized_html += f"""
+
+        <div class="server">
+
+            <div class="server-header">
+
+                <div class="server-icon">
+                    {icon}
+                </div>
+
+                <div>
+
+                    <div class="server-name">
+                        {guild_name}
+                    </div>
+
+                    <div class="server-id">
+                        {escape(guild_id)}
+                    </div>
+
+                    {expiry_html}
+
+                </div>
+
+            </div>
+
+            <span class="badge badge-green">
+                ✓ Misuki Installed
+            </span>
+
+            {license_badge}
+
+            <div class="actions">
+
+                {action_html}
+
+            </div>
+
+        </div>
+
+        """
+
+    if not authorized_html:
+
+        authorized_html = """
+        <div class="notice">
+
+            Misuki is not installed in any of
+            your servers yet.
 
         </div>
         """
@@ -3770,32 +3988,7 @@ def dashboard():
 
 
     <!-- =================================================
-         AUTHORIZED
-         ================================================= -->
-
-    <div class="card">
-
-        <h2>
-            🟢 Authorized Servers
-        </h2>
-
-        <p>
-            Misuki is already installed in these
-            servers and you have permission to
-            manage them.
-        </p>
-
-        <div class="server-grid">
-
-            {authorized_html}
-
-        </div>
-
-    </div>
-
-
-    <!-- =================================================
-         AVAILABLE
+         AVAILABLE (shown first)
          ================================================= -->
 
     <div class="card">
@@ -3806,11 +3999,38 @@ def dashboard():
 
         <p>
             These servers can be connected to Misuki.
+            You need Manage Server or Administrator
+            permission to add the bot.
         </p>
 
         <div class="server-grid">
 
             {available_html}
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         AUTHORIZED (shown second)
+         ================================================= -->
+
+    <div class="card">
+
+        <h2>
+            🟢 Authorized Servers
+        </h2>
+
+        <p>
+            Misuki is already installed in these
+            servers. Select "Manage" to view license
+            details, including the expiration date.
+        </p>
+
+        <div class="server-grid">
+
+            {authorized_html}
 
         </div>
 
@@ -3922,6 +4142,11 @@ def manage(
 
     # -----------------------------------------------------
     # CHECK MANAGE PERMISSION
+    #
+    # Authoritative server-side check. The dashboard only
+    # shows a "No Permission" badge instead of the
+    # "Manage" button as a UX hint; this is what actually
+    # blocks access.
     # -----------------------------------------------------
 
     if not user_can_manage_guild(
@@ -4083,7 +4308,7 @@ def manage(
             <br><br>
 
             <strong>
-                Expiration:
+                Expiration Date:
             </strong>
 
             {escape(expiration_text)}
@@ -4674,7 +4899,7 @@ def like_review(
             user_id
         )
 
-    except sqlite3.Error as error:
+    except psycopg2.Error as error:
 
         print(
             "Could not toggle review like:",
