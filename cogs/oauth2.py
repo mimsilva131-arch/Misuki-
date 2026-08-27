@@ -23,7 +23,7 @@ import secrets
 import sqlite3
 import traceback
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from html import escape
 from urllib.parse import urlencode
 
@@ -103,28 +103,21 @@ BOT_TOKEN = os.getenv(
 # =========================================================
 
 if not FLASK_SECRET_KEY:
-
     raise RuntimeError(
         "FLASK_SECRET_KEY is not configured."
     )
 
-
 if not CLIENT_ID:
-
     raise RuntimeError(
         "DISCORD_CLIENT_ID is not configured."
     )
 
-
 if not CLIENT_SECRET:
-
     raise RuntimeError(
         "DISCORD_CLIENT_SECRET is not configured."
     )
 
-
 if not LOGIN_REDIRECT_URI:
-
     raise RuntimeError(
         "DISCORD_LOGIN_REDIRECT_URI is not configured."
     )
@@ -196,6 +189,26 @@ app.wsgi_app = ProxyFix(
 
 
 # =========================================================
+# TIME
+# =========================================================
+
+def utc_now():
+    """
+    Returns the current UTC time as a naive datetime.
+
+    SQLite stores our timestamps without timezone
+    information, so all internal comparisons use
+    the same UTC-naive representation.
+    """
+
+    return datetime.now(
+        timezone.utc
+    ).replace(
+        tzinfo=None
+    )
+
+
+# =========================================================
 # DATABASE
 # =========================================================
 
@@ -206,9 +219,15 @@ def database():
         exist_ok=True
     )
 
-    return sqlite3.connect(
+    connection = sqlite3.connect(
         DATABASE
     )
+
+    connection.execute(
+        "PRAGMA foreign_keys = ON"
+    )
+
+    return connection
 
 
 # =========================================================
@@ -312,11 +331,21 @@ def create_database():
                 PRIMARY KEY (
                     review_id,
                     user_id
+                ),
+
+                FOREIGN KEY (
+                    review_id
                 )
+                REFERENCES reviews(id)
+                ON DELETE CASCADE
 
             )
             """
         )
+
+        # -------------------------------------------------
+        # REVIEWS MIGRATION
+        # -------------------------------------------------
 
         cursor = connection.execute(
             "PRAGMA table_info(reviews)"
@@ -371,6 +400,10 @@ def create_database():
                         error
                     )
 
+        # -------------------------------------------------
+        # REVIEW EXPIRATION MIGRATION
+        # -------------------------------------------------
+
         try:
 
             connection.execute(
@@ -421,7 +454,7 @@ def create_web_session(
         32
     )
 
-    now = datetime.utcnow()
+    now = utc_now()
 
     expires = (
         now
@@ -476,7 +509,6 @@ def get_web_session(
 ):
 
     if not session_id:
-
         return None
 
     with database() as connection:
@@ -502,7 +534,6 @@ def get_web_session(
         row = cursor.fetchone()
 
     if not row:
-
         return None
 
     try:
@@ -522,7 +553,7 @@ def get_web_session(
 
         return None
 
-    if datetime.utcnow() >= expiration:
+    if utc_now() >= expiration:
 
         delete_web_session(
             session_id
@@ -561,7 +592,6 @@ def delete_web_session(
 ):
 
     if not session_id:
-
         return
 
     with database() as connection:
@@ -586,7 +616,7 @@ def delete_web_session(
 
 def cleanup_sessions():
 
-    now = datetime.utcnow().isoformat()
+    now = utc_now().isoformat()
 
     with database() as connection:
 
@@ -641,12 +671,14 @@ def discord_headers(
 def bot_headers():
 
     if not BOT_TOKEN:
-
         return None
 
     return {
         "Authorization":
-            f"Bot {BOT_TOKEN}"
+            f"Bot {BOT_TOKEN}",
+
+        "Content-Type":
+            "application/json"
     }
 
 
@@ -664,13 +696,15 @@ def get_bot_guild_ids():
 
         return set()
 
+    headers = bot_headers()
+
     try:
 
         response = requests.get(
 
             f"{DISCORD_API}/users/@me/guilds",
 
-            headers=bot_headers(),
+            headers=headers,
 
             timeout=15
         )
@@ -722,7 +756,6 @@ def user_can_manage_guild(
     )
 
     if permissions is None:
-
         return False
 
     try:
@@ -749,6 +782,36 @@ def user_can_manage_guild(
             | MANAGE_GUILD
         )
     )
+
+
+# =========================================================
+# FIND USER GUILD
+# =========================================================
+
+def get_user_guild(
+    current,
+    guild_id
+):
+
+    if current is None:
+        return None
+
+    target = str(
+        guild_id
+    )
+
+    for guild in current.get(
+        "guilds",
+        []
+    ):
+
+        if str(
+            guild.get("id")
+        ) == target:
+
+            return guild
+
+    return None
 
 
 # =========================================================
@@ -805,6 +868,19 @@ def set_license_expired(
     guild_id
 ):
 
+    try:
+
+        guild_id = int(
+            guild_id
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        return
+
     with database() as connection:
 
         connection.execute(
@@ -816,7 +892,7 @@ def set_license_expired(
             WHERE guild_id = ?
             """,
             (
-                int(guild_id),
+                guild_id,
             )
         )
 
@@ -855,7 +931,7 @@ def license_status(
                 expires_at
             )
 
-            if datetime.now() >= expiration:
+            if utc_now() >= expiration:
 
                 set_license_expired(
                     guild_id
@@ -1455,20 +1531,50 @@ def install_bot(
         )
 
     # -----------------------------------------------------
+    # VALIDATE SERVER ID
+    # -----------------------------------------------------
+
+    try:
+
+        int(guild_id)
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        return page(
+            "Invalid Server",
+            """
+            <div class="card center">
+
+                <h1>
+                    ❌ Invalid Server
+                </h1>
+
+                <p>
+                    The Discord server ID is invalid.
+                </p>
+
+                <a
+                    class="button"
+                    href="/dashboard"
+                >
+                    Back to Dashboard
+                </a>
+
+            </div>
+            """
+        ), 400
+
+    # -----------------------------------------------------
     # FIND SERVER
     # -----------------------------------------------------
 
-    guild = None
-
-    for item in current["guilds"]:
-
-        if str(
-            item.get("id")
-        ) == str(guild_id):
-
-            guild = item
-
-            break
+    guild = get_user_guild(
+        current,
+        guild_id
+    )
 
     if guild is None:
 
@@ -1565,7 +1671,7 @@ def install_bot(
 
 def cleanup_reviews():
 
-    now = datetime.utcnow().isoformat()
+    now = utc_now().isoformat()
 
     with database() as connection:
 
@@ -1590,6 +1696,27 @@ def get_reviews(
 ):
 
     cleanup_reviews()
+
+    try:
+
+        limit = int(
+            limit
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        limit = 5
+
+    limit = max(
+        1,
+        min(
+            limit,
+            50
+        )
+    )
 
     with database() as connection:
 
@@ -1629,7 +1756,6 @@ def can_user_review(
     session_data = get_current_web_session()
 
     if session_data is None:
-
         return False
 
     guilds = session_data.get(
@@ -1644,7 +1770,11 @@ def can_user_review(
         )
 
         if not guild_id:
+            continue
 
+        if not user_can_manage_guild(
+            guild
+        ):
             continue
 
         license_info = license_status(
@@ -1666,7 +1796,7 @@ def add_review(
     review_text
 ):
 
-    now = datetime.utcnow()
+    now = utc_now()
 
     expires = (
         now
@@ -1724,6 +1854,23 @@ def toggle_like(
             """
             SELECT 1
 
+            FROM reviews
+
+            WHERE id = ?
+            """,
+            (
+                review_id,
+            )
+        )
+
+        if cursor.fetchone() is None:
+
+            return False
+
+        cursor.execute(
+            """
+            SELECT 1
+
             FROM review_likes
 
             WHERE review_id = ?
@@ -1767,40 +1914,44 @@ def toggle_like(
                 )
             )
 
-        else:
+            connection.commit()
 
-            connection.execute(
-                """
-                INSERT INTO review_likes
-                (
-                    review_id,
-                    user_id,
-                    created_at
-                )
+            return False
 
-                VALUES (?, ?, ?)
-                """,
-                (
-                    review_id,
-                    str(user_id),
-                    datetime.utcnow().isoformat()
-                )
+        connection.execute(
+            """
+            INSERT INTO review_likes
+            (
+                review_id,
+                user_id,
+                created_at
             )
 
-            connection.execute(
-                """
-                UPDATE reviews
-
-                SET likes = likes + 1
-
-                WHERE id = ?
-                """,
-                (
-                    review_id,
-                )
+            VALUES (?, ?, ?)
+            """,
+            (
+                review_id,
+                str(user_id),
+                utc_now().isoformat()
             )
+        )
+
+        connection.execute(
+            """
+            UPDATE reviews
+
+            SET likes = likes + 1
+
+            WHERE id = ?
+            """,
+            (
+                review_id,
+            )
+        )
 
         connection.commit()
+
+        return True
 
 
 # =========================================================
@@ -2446,6 +2597,10 @@ p {{
     color: #b8bdc9;
 
     line-height: 1.7;
+
+    white-space: pre-wrap;
+
+    word-break: break-word;
 }}
 
 .review-footer {{
@@ -3006,13 +3161,40 @@ def render_reviews(
             expires_at
         ) = review
 
+        try:
+
+            rating = int(
+                rating
+            )
+
+        except (
+            TypeError,
+            ValueError
+        ):
+
+            rating = 1
+
         rating = max(
             1,
             min(
                 5,
-                int(rating)
+                rating
             )
         )
+
+        try:
+
+            likes = max(
+                0,
+                int(likes)
+            )
+
+        except (
+            TypeError,
+            ValueError
+        ):
+
+            likes = 0
 
         stars = (
             "★" * rating
@@ -3073,12 +3255,20 @@ def render_reviews(
                     {date_text}
                 </span>
 
-                <a
-                    class="like-button"
-                    href="/like/{review_id}"
+                <form
+                    method="POST"
+                    action="/like/{int(review_id)}"
+                    style="margin:0;"
                 >
-                    👍 {likes}
-                </a>
+
+                    <button
+                        class="like-button"
+                        type="submit"
+                    >
+                        👍 {likes}
+                    </button>
+
+                </form>
 
             </div>
 
@@ -3232,15 +3422,6 @@ def dashboard():
 
     # =====================================================
     # SERVER GROUPS
-    #
-    # AUTHORIZED:
-    #   Bot already installed.
-    #
-    # AVAILABLE:
-    #   Every other server returned by Discord.
-    #
-    # This intentionally includes servers where the
-    # user does NOT have Manage Server permission.
     # =====================================================
 
     authorized = []
@@ -3358,7 +3539,9 @@ def dashboard():
                 )
 
                 timestamp = int(
-                    expiration.timestamp()
+                    expiration.replace(
+                        tzinfo=timezone.utc
+                    ).timestamp()
                 )
 
                 expiration_html = f"""
@@ -3635,8 +3818,6 @@ def dashboard():
     </div>
 
 
-    <!-- AUTHORIZED FIRST -->
-
     <div class="card">
 
         <h2>
@@ -3655,8 +3836,6 @@ def dashboard():
 
     </div>
 
-
-    <!-- AVAILABLE SECOND -->
 
     <div class="card">
 
@@ -3717,17 +3896,10 @@ def manage(
             )
         )
 
-    guild = None
-
-    for item in current["guilds"]:
-
-        if str(
-            item.get("id")
-        ) == str(guild_id):
-
-            guild = item
-
-            break
+    guild = get_user_guild(
+        current,
+        guild_id
+    )
 
     if guild is None:
 
@@ -3820,7 +3992,7 @@ def manage(
 
             expiration_text = (
                 expiration.strftime(
-                    "%d/%m/%Y %H:%M"
+                    "%d/%m/%Y %H:%M UTC"
                 )
             )
 
@@ -3953,7 +4125,11 @@ def review_page():
         )
 
         if not guild_id:
+            continue
 
+        if not user_can_manage_guild(
+            guild
+        ):
             continue
 
         if license_status(
@@ -3970,6 +4146,33 @@ def review_page():
                 )}
             </option>
             """
+
+    if not guild_options:
+
+        return page(
+            "Review",
+            """
+            <div class="card center">
+
+                <h1>
+                    🔒 Review Unavailable
+                </h1>
+
+                <p>
+                    You do not currently have an
+                    eligible licensed server.
+                </p>
+
+                <a
+                    class="button"
+                    href="/dashboard"
+                >
+                    Back to Dashboard
+                </a>
+
+            </div>
+            """
+        )
 
     content = f"""
 
@@ -4094,33 +4297,12 @@ def submit_review():
         )
     )
 
-    if not can_user_review(
-        user_id
-    ):
-
-        return page(
-            "Review",
-            """
-            <div class="card center">
-
-                <h1>
-                    🔒 Review Unavailable
-                </h1>
-
-                <p>
-                    You need an active Misuki
-                    license to leave a review.
-                </p>
-
-            </div>
-            """
-        ), 403
-
     guild_id = request.form.get(
-        "guild_id"
-    )
+        "guild_id",
+        ""
+    ).strip()
 
-    rating = request.form.get(
+    rating_value = request.form.get(
         "rating"
     )
 
@@ -4132,10 +4314,98 @@ def submit_review():
         .strip()
     )
 
+    # -----------------------------------------------------
+    # VALIDATE SERVER
+    # -----------------------------------------------------
+
+    guild = get_user_guild(
+        current,
+        guild_id
+    )
+
+    if guild is None:
+
+        return page(
+            "Review",
+            """
+            <div class="card center">
+
+                <h1>
+                    ❌ Invalid Server
+                </h1>
+
+                <p>
+                    The selected server is not
+                    available to your account.
+                </p>
+
+                <a
+                    class="button"
+                    href="/review"
+                >
+                    Back
+                </a>
+
+            </div>
+            """
+        ), 403
+
+    if not user_can_manage_guild(
+        guild
+    ):
+
+        return page(
+            "Review",
+            """
+            <div class="card center">
+
+                <h1>
+                    🔒 Permission Required
+                </h1>
+
+                <p>
+                    You must have permission to
+                    manage the selected server.
+                </p>
+
+            </div>
+            """
+        ), 403
+
+    # -----------------------------------------------------
+    # LICENSE
+    # -----------------------------------------------------
+
+    if not license_status(
+        guild_id
+    )["licensed"]:
+
+        return page(
+            "Review",
+            """
+            <div class="card center">
+
+                <h1>
+                    🔒 License Required
+                </h1>
+
+                <p>
+                    You need an active license
+                    to review Misuki.
+                </p>
+
+            </div>
+            """
+        ), 403
+
+    # -----------------------------------------------------
+    # RATING
+    # -----------------------------------------------------
+
     try:
 
         rating = int(
-            rating
+            rating_value
         )
 
     except (
@@ -4167,6 +4437,10 @@ def submit_review():
             """
         ), 400
 
+    # -----------------------------------------------------
+    # REVIEW TEXT
+    # -----------------------------------------------------
+
     if not review_text:
 
         return page(
@@ -4189,7 +4463,7 @@ def submit_review():
             """
         ), 400
 
-    if not guild_id:
+    if len(review_text) > 1000:
 
         return page(
             "Review",
@@ -4197,8 +4471,13 @@ def submit_review():
             <div class="card center">
 
                 <h1>
-                    ❌ Server Not Selected
+                    ❌ Review Too Long
                 </h1>
+
+                <p>
+                    Your review cannot exceed 1000
+                    characters.
+                </p>
 
                 <a
                     class="button"
@@ -4211,60 +4490,23 @@ def submit_review():
             """
         ), 400
 
-    if not license_status(
-        guild_id
-    )["licensed"]:
-
-        return page(
-            "Review",
-            """
-            <div class="card center">
-
-                <h1>
-                    🔒 License Required
-                </h1>
-
-                <p>
-                    You need an active license
-                    to review Misuki.
-                </p>
-
-            </div>
-            """
-        ), 403
-
-    valid_guild = False
-
-    for guild in current["guilds"]:
-
-        if str(
-            guild.get("id")
-        ) == str(guild_id):
-
-            valid_guild = True
-
-            break
-
-    if not valid_guild:
-
-        return page(
-            "Review",
-            """
-            <div class="card center">
-
-                <h1>
-                    ❌ Invalid Server
-                </h1>
-
-            </div>
-            """
-        ), 403
+    # -----------------------------------------------------
+    # USERNAME
+    # -----------------------------------------------------
 
     username = (
         user.get("global_name")
         or user.get("username")
         or "Discord User"
     )
+
+    username = str(
+        username
+    )[:100]
+
+    # -----------------------------------------------------
+    # SAVE
+    # -----------------------------------------------------
 
     add_review(
         user_id,
@@ -4306,7 +4548,8 @@ def submit_review():
 # =========================================================
 
 @app.route(
-    "/like/<int:review_id>"
+    "/like/<int:review_id>",
+    methods=["POST"]
 )
 def like_review(
     review_id
