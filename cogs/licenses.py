@@ -1,38 +1,28 @@
+# =========================================================
+# MISUKI LICENSE SYSTEM
+# PostgreSQL / Neon
+# =========================================================
 
 import os
-import sqlite3
 import secrets
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
+import asyncpg
 
 import discord
+
 from discord import app_commands
+
 from discord.ext import commands
 
 
 # =========================================================
-# PATHS
+# ENVIRONMENT
 # =========================================================
 
-BASE_DIR = os.path.dirname(
-    os.path.dirname(
-        os.path.abspath(__file__)
-    )
-)
-
-DATA_DIR = os.path.join(
-    BASE_DIR,
-    "data"
-)
-
-os.makedirs(
-    DATA_DIR,
-    exist_ok=True
-)
-
-DATABASE = os.path.join(
-    DATA_DIR,
-    "misuki.db"
+DATABASE_URL = os.getenv(
+    "DATABASE_URL"
 )
 
 
@@ -53,78 +43,125 @@ class LicenseManager(commands.Cog):
 
         self.bot = bot
 
-        self.create_database()
+        self.pool = None
+
 
     # =====================================================
     # DATABASE
     # =====================================================
 
-    def create_database(self):
+    async def create_database(self):
 
-        with sqlite3.connect(DATABASE) as connection:
+        if not DATABASE_URL:
 
-            connection.execute("""
+            raise RuntimeError(
+                "DATABASE_URL não está configurado."
+            )
+
+        self.pool = await asyncpg.create_pool(
+            DATABASE_URL,
+            min_size=1,
+            max_size=5
+        )
+
+        async with self.pool.acquire() as connection:
+
+            await connection.execute("""
                 CREATE TABLE IF NOT EXISTS licenses (
 
-                    guild_id INTEGER PRIMARY KEY,
+                    guild_id BIGINT PRIMARY KEY,
 
                     license_key TEXT UNIQUE NOT NULL,
 
                     status TEXT NOT NULL
                     DEFAULT 'active',
 
-                    expires_at TEXT,
+                    expires_at TIMESTAMPTZ,
 
-                    created_at TEXT NOT NULL
+                    created_at TIMESTAMPTZ NOT NULL
 
                 )
             """)
 
-            connection.commit()
+
+    # =====================================================
+    # COG LOAD
+    # =====================================================
+
+    async def cog_load(self):
+
+        await self.create_database()
+
+        print(
+            "🗄️ LicenseManager conectado ao Neon."
+        )
+
+
+    # =====================================================
+    # COG UNLOAD
+    # =====================================================
+
+    async def cog_unload(self):
+
+        if self.pool:
+
+            await self.pool.close()
+
 
     # =====================================================
     # GENERATE KEY
     # =====================================================
 
-    def generate_license_key(self):
+    async def generate_license_key(self):
 
         while True:
 
             parts = [
+
                 secrets.token_hex(4).upper(),
+
                 secrets.token_hex(4).upper(),
+
                 secrets.token_hex(4).upper(),
+
                 secrets.token_hex(4).upper()
+
             ]
 
-            key = "MISUKI-" + "-".join(parts)
+            key = (
+                "MISUKI-"
+                + "-".join(parts)
+            )
 
-            with sqlite3.connect(DATABASE) as connection:
+            async with self.pool.acquire() as connection:
 
-                result = connection.execute(
+                result = await connection.fetchrow(
                     """
                     SELECT 1
                     FROM licenses
-                    WHERE license_key = ?
+                    WHERE license_key = $1
                     """,
-                    (key,)
-                ).fetchone()
+                    key
+                )
 
             if result is None:
 
                 return key
 
+
     # =====================================================
     # GET LICENSE
     # =====================================================
 
-    def get_license(self, guild_id):
+    async def get_license(
+        self,
+        guild_id
+    ):
 
-        with sqlite3.connect(DATABASE) as connection:
+        async with self.pool.acquire() as connection:
 
-            cursor = connection.cursor()
-
-            cursor.execute("""
+            return await connection.fetchrow(
+                """
                 SELECT
                     guild_id,
                     license_key,
@@ -132,48 +169,48 @@ class LicenseManager(commands.Cog):
                     expires_at,
                     created_at
                 FROM licenses
-                WHERE guild_id = ?
-            """, (
-                guild_id,
-            ))
+                WHERE guild_id = $1
+                """,
+                guild_id
+            )
 
-            return cursor.fetchone()
 
     # =====================================================
     # ACTIVE LICENSE
     # =====================================================
 
-    def has_active_license(self, guild_id):
+    async def has_active_license(
+        self,
+        guild_id
+    ):
 
-        license_data = self.get_license(
+        license_data = await self.get_license(
             guild_id
         )
 
         if license_data is None:
+
             return False
 
-        status = license_data[2]
-        expires_at = license_data[3]
+        status = license_data["status"]
+
+        expires_at = license_data["expires_at"]
 
         if status != "active":
+
             return False
 
-        if not expires_at:
+        if expires_at is None:
+
             return True
 
-        try:
+        now = datetime.now(
+            timezone.utc
+        )
 
-            expiration = datetime.fromisoformat(
-                expires_at
-            )
+        if now >= expires_at:
 
-        except ValueError:
-
-            return False
-
-        if datetime.now() >= expiration:
-
-            self.set_expired(
+            await self.set_expired(
                 guild_id
             )
 
@@ -181,35 +218,39 @@ class LicenseManager(commands.Cog):
 
         return True
 
+
     # =====================================================
     # EXPIRE
     # =====================================================
 
-    def set_expired(self, guild_id):
+    async def set_expired(
+        self,
+        guild_id
+    ):
 
-        with sqlite3.connect(DATABASE) as connection:
+        async with self.pool.acquire() as connection:
 
-            connection.execute("""
+            await connection.execute(
+                """
                 UPDATE licenses
                 SET status = 'expired'
-                WHERE guild_id = ?
-            """, (
-                guild_id,
-            ))
+                WHERE guild_id = $1
+                """,
+                guild_id
+            )
 
-            connection.commit()
 
     # =====================================================
     # CREATE
     # =====================================================
 
-    def create_license(
+    async def create_license(
         self,
         guild_id,
         days
     ):
 
-        existing = self.get_license(
+        existing = await self.get_license(
             guild_id
         )
 
@@ -217,20 +258,21 @@ class LicenseManager(commands.Cog):
 
             return None
 
-        created_at = datetime.now()
+        now = datetime.now(
+            timezone.utc
+        )
 
         expires_at = (
-            created_at
+            now
             + timedelta(days=days)
         )
 
-        license_key = (
-            self.generate_license_key()
-        )
+        license_key = await self.generate_license_key()
 
-        with sqlite3.connect(DATABASE) as connection:
+        async with self.pool.acquire() as connection:
 
-            connection.execute("""
+            await connection.execute(
+                """
                 INSERT INTO licenses
                 (
                     guild_id,
@@ -239,157 +281,168 @@ class LicenseManager(commands.Cog):
                     expires_at,
                     created_at
                 )
-                VALUES (?, ?, ?, ?, ?)
-            """, (
+
+                VALUES ($1, $2, $3, $4, $5)
+                """,
+
                 guild_id,
                 license_key,
                 "active",
-                expires_at.isoformat(),
-                created_at.isoformat()
-            ))
-
-            connection.commit()
+                expires_at,
+                now
+            )
 
         return license_key
+
 
     # =====================================================
     # REVOKE
     # =====================================================
 
-    def revoke_license(self, guild_id):
+    async def revoke_license(
+        self,
+        guild_id
+    ):
 
-        existing = self.get_license(
+        existing = await self.get_license(
             guild_id
         )
 
         if existing is None:
+
             return False
 
-        with sqlite3.connect(DATABASE) as connection:
+        async with self.pool.acquire() as connection:
 
-            connection.execute("""
+            await connection.execute(
+                """
                 UPDATE licenses
                 SET status = 'revoked'
-                WHERE guild_id = ?
-            """, (
-                guild_id,
-            ))
-
-            connection.commit()
+                WHERE guild_id = $1
+                """,
+                guild_id
+            )
 
         return True
+
 
     # =====================================================
     # EXTEND
     # =====================================================
 
-    def extend_license(
+    async def extend_license(
         self,
         guild_id,
         days
     ):
 
-        existing = self.get_license(
+        existing = await self.get_license(
             guild_id
         )
 
         if existing is None:
+
             return False
 
-        status = existing[2]
-        expires_at = existing[3]
+        status = existing["status"]
+
+        expires_at = existing["expires_at"]
 
         if status != "active":
-            return False
-
-        if not expires_at:
-            return False
-
-        try:
-
-            expiration = datetime.fromisoformat(
-                expires_at
-            )
-
-        except ValueError:
 
             return False
 
-        if datetime.now() >= expiration:
+        if expires_at is None:
 
-            self.set_expired(
+            return False
+
+        now = datetime.now(
+            timezone.utc
+        )
+
+        if now >= expires_at:
+
+            await self.set_expired(
                 guild_id
             )
 
             return False
 
         new_expiration = (
-            expiration
+            expires_at
             + timedelta(days=days)
         )
 
-        with sqlite3.connect(DATABASE) as connection:
+        async with self.pool.acquire() as connection:
 
-            connection.execute("""
+            await connection.execute(
+                """
                 UPDATE licenses
-                SET expires_at = ?
-                WHERE guild_id = ?
-            """, (
-                new_expiration.isoformat(),
+                SET expires_at = $1
+                WHERE guild_id = $2
+                """,
+                new_expiration,
                 guild_id
-            ))
-
-            connection.commit()
+            )
 
         return True
+
 
     # =====================================================
     # DELETE
     # =====================================================
 
-    def delete_license(self, guild_id):
+    async def delete_license(
+        self,
+        guild_id
+    ):
 
-        existing = self.get_license(
+        existing = await self.get_license(
             guild_id
         )
 
         if existing is None:
+
             return False
 
-        with sqlite3.connect(DATABASE) as connection:
+        async with self.pool.acquire() as connection:
 
-            connection.execute("""
+            await connection.execute(
+                """
                 DELETE FROM licenses
-                WHERE guild_id = ?
-            """, (
-                guild_id,
-            ))
-
-            connection.commit()
+                WHERE guild_id = $1
+                """,
+                guild_id
+            )
 
         return True
+
 
     # =====================================================
     # OWNER
     # =====================================================
 
-    def is_owner(self, interaction):
+    def is_owner(
+        self,
+        interaction
+    ):
 
         return (
             interaction.user.id
             == OWNER_ID
         )
 
+
     # =====================================================
     # LICENSE EMBED
     # =====================================================
 
-    def build_license_embed(
+    async def build_license_embed(
         self,
         guild_id
     ):
 
-        license_data = self.get_license(
+        license_data = await self.get_license(
             guild_id
         )
 
@@ -412,37 +465,36 @@ class LicenseManager(commands.Cog):
 
             return embed
 
-        (
-            stored_guild_id,
-            license_key,
-            status,
-            expires_at,
-            created_at
-        ) = license_data
+        status = license_data["status"]
+
+        expires_at = license_data["expires_at"]
+
+        created_at = license_data["created_at"]
+
+        license_key = license_data["license_key"]
+
 
         # -------------------------------------------------
         # CHECK EXPIRATION
         # -------------------------------------------------
 
-        if status == "active" and expires_at:
+        if (
+            status == "active"
+            and expires_at
+        ):
 
-            try:
+            now = datetime.now(
+                timezone.utc
+            )
 
-                expiration = datetime.fromisoformat(
-                    expires_at
+            if now >= expires_at:
+
+                await self.set_expired(
+                    guild_id
                 )
 
-                if datetime.now() >= expiration:
+                status = "expired"
 
-                    self.set_expired(
-                        guild_id
-                    )
-
-                    status = "expired"
-
-            except ValueError:
-
-                status = "invalid"
 
         # -------------------------------------------------
         # STATUS
@@ -451,16 +503,19 @@ class LicenseManager(commands.Cog):
         if status == "active":
 
             status_text = "🟢 Active"
+
             color = discord.Color.green()
 
         elif status == "expired":
 
             status_text = "🔴 Expired"
+
             color = discord.Color.red()
 
         elif status == "revoked":
 
             status_text = "⛔ Revoked"
+
             color = discord.Color.red()
 
         else:
@@ -471,29 +526,21 @@ class LicenseManager(commands.Cog):
 
             color = discord.Color.orange()
 
+
         # -------------------------------------------------
         # EXPIRATION
         # -------------------------------------------------
 
         if expires_at:
 
-            try:
-
-                expiration = datetime.fromisoformat(
-                    expires_at
-                )
-
-                expiration_text = (
-                    f"<t:{int(expiration.timestamp())}:F>"
-                )
-
-            except ValueError:
-
-                expiration_text = expires_at
+            expiration_text = (
+                f"<t:{int(expires_at.timestamp())}:F>"
+            )
 
         else:
 
             expiration_text = "Never"
+
 
         # -------------------------------------------------
         # EMBED
@@ -530,7 +577,9 @@ class LicenseManager(commands.Cog):
 
         embed.add_field(
             name="Created",
-            value=created_at,
+            value=(
+                f"<t:{int(created_at.timestamp())}:F>"
+            ),
             inline=False
         )
 
@@ -539,6 +588,7 @@ class LicenseManager(commands.Cog):
         )
 
         return embed
+
 
     # =====================================================
     # /LICENSE
@@ -565,7 +615,7 @@ class LicenseManager(commands.Cog):
 
             return
 
-        embed = self.build_license_embed(
+        embed = await self.build_license_embed(
             interaction.guild.id
         )
 
@@ -573,6 +623,7 @@ class LicenseManager(commands.Cog):
             embed=embed,
             ephemeral=True
         )
+
 
     # =====================================================
     # /CREATELICENSE
@@ -619,7 +670,7 @@ class LicenseManager(commands.Cog):
 
             return
 
-        license_key = self.create_license(
+        license_key = await self.create_license(
             guild_id,
             days
         )
@@ -643,13 +694,11 @@ class LicenseManager(commands.Cog):
             else "Unknown / Bot not in server"
         )
 
-        license_data = self.get_license(
+        license_data = await self.get_license(
             guild_id
         )
 
-        expiration = datetime.fromisoformat(
-            license_data[3]
-        )
+        expiration = license_data["expires_at"]
 
         embed = discord.Embed(
             title="✅ License Created",
@@ -697,6 +746,7 @@ class LicenseManager(commands.Cog):
             ephemeral=True
         )
 
+
     # =====================================================
     # /REVOKELICENSE
     # =====================================================
@@ -740,7 +790,7 @@ class LicenseManager(commands.Cog):
 
             return
 
-        success = self.revoke_license(
+        success = await self.revoke_license(
             guild_id
         )
 
@@ -761,6 +811,7 @@ class LicenseManager(commands.Cog):
             ),
             ephemeral=True
         )
+
 
     # =====================================================
     # /EXTENDLICENSE
@@ -807,7 +858,7 @@ class LicenseManager(commands.Cog):
 
             return
 
-        success = self.extend_license(
+        success = await self.extend_license(
             guild_id,
             days
         )
@@ -824,13 +875,11 @@ class LicenseManager(commands.Cog):
 
             return
 
-        license_data = self.get_license(
+        license_data = await self.get_license(
             guild_id
         )
 
-        expiration = datetime.fromisoformat(
-            license_data[3]
-        )
+        expiration = license_data["expires_at"]
 
         await interaction.response.send_message(
             (
@@ -841,6 +890,7 @@ class LicenseManager(commands.Cog):
             ),
             ephemeral=True
         )
+
 
     # =====================================================
     # /DELETELICENSE
@@ -885,7 +935,7 @@ class LicenseManager(commands.Cog):
 
             return
 
-        success = self.delete_license(
+        success = await self.delete_license(
             guild_id
         )
 
@@ -941,4 +991,3 @@ async def setup(bot):
         print(
             f"   /{command.name}"
         )
-

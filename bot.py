@@ -1,4 +1,3 @@
-
 # =========================================================
 # MISUKI BOT
 # Main Bot File
@@ -8,7 +7,17 @@ import os
 import asyncio
 
 import discord
+
 from discord.ext import commands
+
+from dotenv import load_dotenv
+
+
+# =========================================================
+# ENVIRONMENT
+# =========================================================
+
+load_dotenv()
 
 
 # =========================================================
@@ -52,10 +61,6 @@ async def on_ready():
     print(
         f"🟢 Bot status: {bot.status}"
     )
-
-    # =====================================================
-    # REGISTERED COMMANDS
-    # =====================================================
 
     print(
         "📋 Comandos registados:"
@@ -121,49 +126,6 @@ async def on_ready():
 
 
 # =========================================================
-# MESSAGE HANDLER
-# =========================================================
-
-@bot.event
-async def on_message(
-    message: discord.Message
-):
-
-    # -----------------------------------------------------
-    # IGNORE BOTS
-    # -----------------------------------------------------
-
-    if message.author.bot:
-        return
-
-    # -----------------------------------------------------
-    # DEBUG
-    # -----------------------------------------------------
-
-    print(
-        f"📩 Mensagem recebida: "
-        f"{message.content!r}"
-    )
-
-    print(
-        f"👤 Autor: {message.author}"
-    )
-
-    print(
-        f"🏠 Guild: "
-        f"{message.guild.id if message.guild else None}"
-    )
-
-    # -----------------------------------------------------
-    # PROCESS COMMANDS
-    # -----------------------------------------------------
-
-    await bot.process_commands(
-        message
-    )
-
-
-# =========================================================
 # LOAD EXTENSIONS
 # =========================================================
 
@@ -208,13 +170,17 @@ async def load_extensions():
 
 async def main():
 
-    # -----------------------------------------------------
-    # TOKEN
-    # -----------------------------------------------------
-
     token = os.getenv(
         "DISCORD_TOKEN"
     )
+
+    database_url = os.getenv(
+        "DATABASE_URL"
+    )
+
+    # -----------------------------------------------------
+    # TOKEN
+    # -----------------------------------------------------
 
     if not token:
 
@@ -228,10 +194,6 @@ async def main():
     # DATABASE
     # -----------------------------------------------------
 
-    database_url = os.getenv(
-        "DATABASE_URL"
-    )
-
     if not database_url:
 
         print(
@@ -244,15 +206,7 @@ async def main():
         "🗄️ DATABASE_URL encontrada."
     )
 
-    # -----------------------------------------------------
-    # LOAD COGS
-    # -----------------------------------------------------
-
     await load_extensions()
-
-    # -----------------------------------------------------
-    # START
-    # -----------------------------------------------------
 
     print(
         "🚀 Starting Discord bot..."
@@ -269,15 +223,6 @@ async def main():
 
 if __name__ == "__main__":
 
-    try:
-
-        asyncio.run(
-            main()
-        )
-
-    except KeyboardInterrupt:
-
-        print(
-            "\n🛑 Bot stopped."
-        )
-
+    asyncio.run(
+        main()
+    )
