@@ -771,8 +771,18 @@ class TriggerManager(commands.Cog):
         # -------------------------------------------------
 
         print(
-            f"📩 Mensagem recebida: "
-            f"{message.content!r}"
+            "📩 Mensagem recebida:",
+            repr(message.content)
+        )
+
+        print(
+            "👤 Autor:",
+            message.author
+        )
+
+        print(
+            "🏠 Guild:",
+            message.guild
         )
 
         # -------------------------------------------------
@@ -807,12 +817,6 @@ class TriggerManager(commands.Cog):
             message.guild.id
         )
 
-        print(
-            f"🔎 Triggers ativos "
-            f"para {message.guild.name}: "
-            f"{len(triggers)}"
-        )
-
         if not triggers:
 
             return
@@ -823,17 +827,7 @@ class TriggerManager(commands.Cog):
 
         for trigger, response in triggers:
 
-            print(
-                f"🔍 A verificar trigger: "
-                f"{trigger!r}"
-            )
-
             if trigger in content_lower:
-
-                print(
-                    f"🎯 Trigger encontrado: "
-                    f"{trigger!r}"
-                )
 
                 try:
 
@@ -847,23 +841,24 @@ class TriggerManager(commands.Cog):
                     )
 
                     print(
-                        "✅ Resposta do trigger enviada."
+                        f"✅ Trigger ativado: {trigger}"
                     )
 
                 except discord.Forbidden:
 
                     print(
                         (
-                            "❌ Sem permissão para "
-                            f"responder em #{message.channel.name} "
-                            f"em {message.guild.name}"
+                            "❌ Missing permission "
+                            f"to respond in #{message.channel} "
+                            f"in {message.guild.name}"
                         )
                     )
 
                 except discord.HTTPException as error:
 
                     print(
-                        f"❌ Erro Discord ao responder: {error}"
+                        "❌ Trigger response failed:",
+                        error
                     )
 
                 break
@@ -916,60 +911,3 @@ async def setup(
                     f"{subcommand.name}"
                 )
 
-
-
-
-
-
-@commands.Cog.listener()
-async def on_message(self, message: discord.Message):
-
-    if message.author.bot:
-        return
-
-    print(
-        f"📩 Mensagem recebida: "
-        f"{message.content!r}"
-    )
-
-    if message.guild is None:
-        return
-
-    content = message.content.strip().lower()
-
-    if not content:
-        return
-
-    triggers = self.get_active_triggers(
-        message.guild.id
-    )
-
-    for trigger, response in triggers:
-
-        if trigger.lower() in content:
-
-            print(
-                f"🎯 Trigger encontrado: {trigger}"
-            )
-
-            try:
-
-                await message.channel.send(
-                    response,
-                    allowed_mentions=discord.AllowedMentions.none()
-                )
-
-            except discord.Forbidden:
-
-                print(
-                    "❌ Sem permissão para enviar "
-                    "mensagens neste canal."
-                )
-
-            except discord.HTTPException as error:
-
-                print(
-                    f"❌ Erro ao enviar resposta: {error}"
-                )
-
-            break
