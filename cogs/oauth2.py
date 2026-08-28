@@ -701,7 +701,10 @@ def get_bot_guilds():
 
             f"{DISCORD_API}/users/@me/guilds",
 
-            headers=discord_bot_headers(),
+            headers={
+                "Authorization":
+                    f"Bot {BOT_TOKEN}"
+            },
 
             timeout=10
 
@@ -720,7 +723,8 @@ def get_bot_guilds():
 
         print(
             f"❌ Bot guild request returned "
-            f"{response.status_code}"
+            f"{response.status_code}: "
+            f"{response.text}"
         )
 
         return []
@@ -3048,6 +3052,7 @@ def dashboard():
 
         # -------------------------------------------------
         # AUTHORIZED
+        # BOT ALREADY IN SERVER
         # -------------------------------------------------
 
         if guild_id in bot_guild_ids:
@@ -3061,6 +3066,7 @@ def dashboard():
 
         # -------------------------------------------------
         # AVAILABLE
+        # BOT NOT IN SERVER
         # -------------------------------------------------
 
         guild[
@@ -3084,6 +3090,7 @@ def dashboard():
 
     # -----------------------------------------------------
     # AVAILABLE ORDER
+    # SERVERS USER CAN ADD BOT TO FIRST
     # -----------------------------------------------------
 
     available.sort(
@@ -4667,7 +4674,7 @@ if __name__ == "__main__":
 
         port=port,
 
-        debug=False
+        debug=True
 
     )
 

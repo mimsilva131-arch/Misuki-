@@ -130,7 +130,7 @@ async def load_extensions():
         "cogs.announcements",
         "cogs.utility",
         "cogs.licenses",
-        "cogs.oauth2",
+        "cogs.triggers",
     ]
 
     for extension in extensions:
