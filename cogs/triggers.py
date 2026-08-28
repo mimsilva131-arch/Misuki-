@@ -1,15 +1,12 @@
 
 # =========================================================
-# MISUKI
-# TRIGGER MANAGER
-# PostgreSQL / NEON
+# MISUKI - TRIGGERS
 # =========================================================
 
 import os
 import psycopg2
 
 import discord
-
 from discord import app_commands
 from discord.ext import commands
 
@@ -25,11 +22,15 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 # TRIGGER MANAGER
 # =========================================================
 
-class TriggerManager(commands.Cog):
+class TriggerManager(commands.GroupCog, group_name="trigger"):
 
     def __init__(self, bot):
 
         self.bot = bot
+
+        if not DATABASE_URL:
+            print("❌ DATABASE_URL não está configurado.")
+            return
 
         self.create_database()
 
@@ -38,12 +39,6 @@ class TriggerManager(commands.Cog):
     # =====================================================
 
     def get_connection(self):
-
-        if not DATABASE_URL:
-
-            raise RuntimeError(
-                "DATABASE_URL não está configurado."
-            )
 
         return psycopg2.connect(
             DATABASE_URL
@@ -55,70 +50,45 @@ class TriggerManager(commands.Cog):
 
     def create_database(self):
 
-        with self.get_connection() as connection:
+        try:
 
-            with connection.cursor() as cursor:
+            with self.get_connection() as connection:
 
-                cursor.execute("""
-                    CREATE TABLE IF NOT EXISTS triggers (
+                with connection.cursor() as cursor:
 
-                        id SERIAL PRIMARY KEY,
+                    cursor.execute("""
+                        CREATE TABLE IF NOT EXISTS triggers (
 
-                        guild_id BIGINT NOT NULL,
+                            id SERIAL PRIMARY KEY,
 
-                        trigger TEXT NOT NULL,
+                            guild_id BIGINT NOT NULL,
 
-                        response TEXT NOT NULL,
+                            trigger TEXT NOT NULL,
 
-                        enabled BOOLEAN NOT NULL
-                        DEFAULT TRUE,
+                            response TEXT NOT NULL,
 
-                        UNIQUE (
-                            guild_id,
-                            trigger
+                            enabled BOOLEAN NOT NULL
+                            DEFAULT TRUE,
+
+                            UNIQUE(guild_id, trigger)
+
                         )
-                    )
-                """)
+                    """)
 
-            connection.commit()
+                connection.commit()
 
-        print(
-            "⚡ Tabela de triggers verificada."
-        )
+            print(
+                "⚡ Trigger database ready."
+            )
 
-    # =====================================================
-    # GET TRIGGER
-    # =====================================================
+        except Exception as error:
 
-    def get_trigger(
-        self,
-        guild_id,
-        trigger
-    ):
-
-        with self.get_connection() as connection:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute("""
-                    SELECT
-                        id,
-                        guild_id,
-                        trigger,
-                        response,
-                        enabled
-                    FROM triggers
-                    WHERE guild_id = %s
-                    AND LOWER(trigger) = LOWER(%s)
-                """, (
-                    guild_id,
-                    trigger
-                ))
-
-                return cursor.fetchone()
+            print(
+                f"❌ Trigger database error: {error}"
+            )
 
     # =====================================================
-    # GET ALL TRIGGERS
+    # GET TRIGGERS
     # =====================================================
 
     def get_triggers(
@@ -146,632 +116,37 @@ class TriggerManager(commands.Cog):
                 return cursor.fetchall()
 
     # =====================================================
-    # ADD TRIGGER
+    # GET SINGLE TRIGGER
     # =====================================================
 
-    def add_trigger(
+    def get_trigger(
         self,
         guild_id,
-        trigger,
-        response
+        trigger
     ):
 
-        try:
+        with self.get_connection() as connection:
 
-            with self.get_connection() as connection:
+            with connection.cursor() as cursor:
 
-                with connection.cursor() as cursor:
-
-                    cursor.execute("""
-                        INSERT INTO triggers
-                        (
-                            guild_id,
-                            trigger,
-                            response,
-                            enabled
-                        )
-                        VALUES (
-                            %s,
-                            %s,
-                            %s,
-                            TRUE
-                        )
-                        RETURNING id
-                    """, (
-                        guild_id,
+                cursor.execute("""
+                    SELECT
+                        id,
                         trigger,
-                        response
-                    ))
-
-                    trigger_id = cursor.fetchone()[0]
-
-                connection.commit()
-
-            return trigger_id
-
-        except psycopg2.errors.UniqueViolation:
-
-            return None
-
-    # =====================================================
-    # REMOVE TRIGGER
-    # =====================================================
-
-    def remove_trigger(
-        self,
-        guild_id,
-        trigger
-    ):
-
-        with self.get_connection() as connection:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute("""
-                    DELETE FROM triggers
+                        response,
+                        enabled
+                    FROM triggers
                     WHERE guild_id = %s
                     AND LOWER(trigger) = LOWER(%s)
-                    RETURNING id
                 """, (
                     guild_id,
                     trigger
                 ))
 
-                result = cursor.fetchone()
-
-            connection.commit()
-
-        return result is not None
+                return cursor.fetchone()
 
     # =====================================================
-    # EDIT TRIGGER
-    # =====================================================
-
-    def edit_trigger(
-        self,
-        guild_id,
-        trigger,
-        response
-    ):
-
-        with self.get_connection() as connection:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute("""
-                    UPDATE triggers
-                    SET response = %s
-                    WHERE guild_id = %s
-                    AND LOWER(trigger) = LOWER(%s)
-                    RETURNING id
-                """, (
-                    response,
-                    guild_id,
-                    trigger
-                ))
-
-                result = cursor.fetchone()
-
-            connection.commit()
-
-        return result is not None
-
-    # =====================================================
-    # ENABLE
-    # =====================================================
-
-    def enable_trigger(
-        self,
-        guild_id,
-        trigger
-    ):
-
-        with self.get_connection() as connection:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute("""
-                    UPDATE triggers
-                    SET enabled = TRUE
-                    WHERE guild_id = %s
-                    AND LOWER(trigger) = LOWER(%s)
-                    RETURNING id
-                """, (
-                    guild_id,
-                    trigger
-                ))
-
-                result = cursor.fetchone()
-
-            connection.commit()
-
-        return result is not None
-
-    # =====================================================
-    # DISABLE
-    # =====================================================
-
-    def disable_trigger(
-        self,
-        guild_id,
-        trigger
-    ):
-
-        with self.get_connection() as connection:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute("""
-                    UPDATE triggers
-                    SET enabled = FALSE
-                    WHERE guild_id = %s
-                    AND LOWER(trigger) = LOWER(%s)
-                    RETURNING id
-                """, (
-                    guild_id,
-                    trigger
-                ))
-
-                result = cursor.fetchone()
-
-            connection.commit()
-
-        return result is not None
-
-    # =====================================================
-    # /TRIGGER
-    # =====================================================
-
-    trigger_group = app_commands.Group(
-        name="trigger",
-        description="Manage server triggers."
-    )
-
-    # =====================================================
-    # /TRIGGER ADD
-    # =====================================================
-
-    @trigger_group.command(
-        name="add",
-        description="Add a new trigger."
-    )
-    @app_commands.describe(
-        trigger="The word or phrase that activates the trigger.",
-        response="The message the bot will send."
-    )
-    @app_commands.default_permissions(
-        manage_guild=True
-    )
-    async def trigger_add(
-        self,
-        interaction: discord.Interaction,
-        trigger: str,
-        response: str
-    ):
-
-        if interaction.guild is None:
-
-            await interaction.response.send_message(
-                "❌ This command can only be used in a server.",
-                ephemeral=True
-            )
-
-            return
-
-        trigger = trigger.strip()
-
-        if not trigger:
-
-            await interaction.response.send_message(
-                "❌ The trigger cannot be empty.",
-                ephemeral=True
-            )
-
-            return
-
-        try:
-
-            trigger_id = self.add_trigger(
-                interaction.guild.id,
-                trigger,
-                response
-            )
-
-        except Exception as error:
-
-            print(
-                f"❌ Trigger database error: {error}"
-            )
-
-            await interaction.response.send_message(
-                "❌ Failed to save the trigger.",
-                ephemeral=True
-            )
-
-            return
-
-        if trigger_id is None:
-
-            await interaction.response.send_message(
-                (
-                    "❌ This trigger already exists "
-                    "in this server."
-                ),
-                ephemeral=True
-            )
-
-            return
-
-        await interaction.response.send_message(
-            (
-                "✅ **Trigger added.**\n\n"
-                f"Trigger: `{trigger}`\n"
-                f"Response: {response}"
-            ),
-            ephemeral=True
-        )
-
-    # =====================================================
-    # /TRIGGER REMOVE
-    # =====================================================
-
-    @trigger_group.command(
-        name="remove",
-        description="Remove a trigger."
-    )
-    @app_commands.describe(
-        trigger="The trigger to remove."
-    )
-    @app_commands.default_permissions(
-        manage_guild=True
-    )
-    async def trigger_remove(
-        self,
-        interaction: discord.Interaction,
-        trigger: str
-    ):
-
-        if interaction.guild is None:
-
-            await interaction.response.send_message(
-                "❌ This command can only be used in a server.",
-                ephemeral=True
-            )
-
-            return
-
-        try:
-
-            success = self.remove_trigger(
-                interaction.guild.id,
-                trigger.strip()
-            )
-
-        except Exception as error:
-
-            print(
-                f"❌ Trigger database error: {error}"
-            )
-
-            await interaction.response.send_message(
-                "❌ Failed to remove the trigger.",
-                ephemeral=True
-            )
-
-            return
-
-        if not success:
-
-            await interaction.response.send_message(
-                "❌ Trigger not found.",
-                ephemeral=True
-            )
-
-            return
-
-        await interaction.response.send_message(
-            (
-                "🗑️ **Trigger removed.**\n\n"
-                f"Trigger: `{trigger}`"
-            ),
-            ephemeral=True
-        )
-
-    # =====================================================
-    # /TRIGGER EDIT
-    # =====================================================
-
-    @trigger_group.command(
-        name="edit",
-        description="Edit a trigger response."
-    )
-    @app_commands.describe(
-        trigger="The trigger to edit.",
-        response="The new response."
-    )
-    @app_commands.default_permissions(
-        manage_guild=True
-    )
-    async def trigger_edit(
-        self,
-        interaction: discord.Interaction,
-        trigger: str,
-        response: str
-    ):
-
-        if interaction.guild is None:
-
-            await interaction.response.send_message(
-                "❌ This command can only be used in a server.",
-                ephemeral=True
-            )
-
-            return
-
-        try:
-
-            success = self.edit_trigger(
-                interaction.guild.id,
-                trigger.strip(),
-                response
-            )
-
-        except Exception as error:
-
-            print(
-                f"❌ Trigger database error: {error}"
-            )
-
-            await interaction.response.send_message(
-                "❌ Failed to edit the trigger.",
-                ephemeral=True
-            )
-
-            return
-
-        if not success:
-
-            await interaction.response.send_message(
-                "❌ Trigger not found.",
-                ephemeral=True
-            )
-
-            return
-
-        await interaction.response.send_message(
-            (
-                "✏️ **Trigger updated.**\n\n"
-                f"Trigger: `{trigger}`\n"
-                f"New response: {response}"
-            ),
-            ephemeral=True
-        )
-
-    # =====================================================
-    # /TRIGGER LIST
-    # =====================================================
-
-    @trigger_group.command(
-        name="list",
-        description="List all triggers."
-    )
-    @app_commands.default_permissions(
-        manage_guild=True
-    )
-    async def trigger_list(
-        self,
-        interaction: discord.Interaction
-    ):
-
-        if interaction.guild is None:
-
-            await interaction.response.send_message(
-                "❌ This command can only be used in a server.",
-                ephemeral=True
-            )
-
-            return
-
-        try:
-
-            triggers = self.get_triggers(
-                interaction.guild.id
-            )
-
-        except Exception as error:
-
-            print(
-                f"❌ Trigger database error: {error}"
-            )
-
-            await interaction.response.send_message(
-                "❌ Failed to load triggers.",
-                ephemeral=True
-            )
-
-            return
-
-        if not triggers:
-
-            await interaction.response.send_message(
-                "📭 This server has no triggers.",
-                ephemeral=True
-            )
-
-            return
-
-        lines = []
-
-        for (
-            trigger_id,
-            trigger,
-            response,
-            enabled
-        ) in triggers:
-
-            status = (
-                "🟢"
-                if enabled
-                else "🔴"
-            )
-
-            lines.append(
-                f"{status} `{trigger}` → {response}"
-            )
-
-        description = "\n".join(
-            lines
-        )
-
-        embed = discord.Embed(
-            title="⚡ Misuki Triggers",
-            description=description,
-            color=discord.Color.blurple()
-        )
-
-        embed.set_footer(
-            text="Misuki • Trigger System"
-        )
-
-        await interaction.response.send_message(
-            embed=embed,
-            ephemeral=True
-        )
-
-    # =====================================================
-    # /TRIGGER ENABLE
-    # =====================================================
-
-    @trigger_group.command(
-        name="enable",
-        description="Enable a trigger."
-    )
-    @app_commands.describe(
-        trigger="The trigger to enable."
-    )
-    @app_commands.default_permissions(
-        manage_guild=True
-    )
-    async def trigger_enable(
-        self,
-        interaction: discord.Interaction,
-        trigger: str
-    ):
-
-        if interaction.guild is None:
-
-            await interaction.response.send_message(
-                "❌ This command can only be used in a server.",
-                ephemeral=True
-            )
-
-            return
-
-        try:
-
-            success = self.enable_trigger(
-                interaction.guild.id,
-                trigger.strip()
-            )
-
-        except Exception as error:
-
-            print(
-                f"❌ Trigger database error: {error}"
-            )
-
-            await interaction.response.send_message(
-                "❌ Failed to enable the trigger.",
-                ephemeral=True
-            )
-
-            return
-
-        if not success:
-
-            await interaction.response.send_message(
-                "❌ Trigger not found.",
-                ephemeral=True
-            )
-
-            return
-
-        await interaction.response.send_message(
-            (
-                "🟢 **Trigger enabled.**\n\n"
-                f"Trigger: `{trigger}`"
-            ),
-            ephemeral=True
-        )
-
-    # =====================================================
-    # /TRIGGER DISABLE
-    # =====================================================
-
-    @trigger_group.command(
-        name="disable",
-        description="Disable a trigger."
-    )
-    @app_commands.describe(
-        trigger="The trigger to disable."
-    )
-    @app_commands.default_permissions(
-        manage_guild=True
-    )
-    async def trigger_disable(
-        self,
-        interaction: discord.Interaction,
-        trigger: str
-    ):
-
-        if interaction.guild is None:
-
-            await interaction.response.send_message(
-                "❌ This command can only be used in a server.",
-                ephemeral=True
-            )
-
-            return
-
-        try:
-
-            success = self.disable_trigger(
-                interaction.guild.id,
-                trigger.strip()
-            )
-
-        except Exception as error:
-
-            print(
-                f"❌ Trigger database error: {error}"
-            )
-
-            await interaction.response.send_message(
-                "❌ Failed to disable the trigger.",
-                ephemeral=True
-            )
-
-            return
-
-        if not success:
-
-            await interaction.response.send_message(
-                "❌ Trigger not found.",
-                ephemeral=True
-            )
-
-            return
-
-        await interaction.response.send_message(
-            (
-                "🔴 **Trigger disabled.**\n\n"
-                f"Trigger: `{trigger}`"
-            ),
-            ephemeral=True
-        )
-
-    # =====================================================
-    # MESSAGE LISTENER
+    # ON MESSAGE
     # =====================================================
 
     @commands.Cog.listener()
@@ -779,6 +154,22 @@ class TriggerManager(commands.Cog):
         self,
         message: discord.Message
     ):
+
+        print(
+            "📩 EVENTO on_message RECEBIDO"
+        )
+
+        print(
+            f"👤 Autor: {message.author}"
+        )
+
+        print(
+            f"🏠 Guild: {message.guild}"
+        )
+
+        print(
+            f"📝 Conteúdo: {message.content!r}"
+        )
 
         # -------------------------------------------------
         # IGNORE BOTS
@@ -797,12 +188,8 @@ class TriggerManager(commands.Cog):
             return
 
         # -------------------------------------------------
-        # EMPTY MESSAGE
+        # MESSAGE CONTENT
         # -------------------------------------------------
-
-        if not message.content:
-
-            return
 
         content = (
             message.content
@@ -810,18 +197,14 @@ class TriggerManager(commands.Cog):
             .lower()
         )
 
-        print(
-            f"📩 Mensagem recebida: "
-            f"{message.content!r}"
-        )
+        if not content:
 
-        print(
-            f"👤 Autor: {message.author}"
-        )
+            print(
+                "⚠️ Discord entregou a mensagem "
+                "sem conteúdo."
+            )
 
-        print(
-            f"🏠 Guild: {message.guild}"
-        )
+            return
 
         # -------------------------------------------------
         # GET TRIGGERS
@@ -862,22 +245,25 @@ class TriggerManager(commands.Cog):
                 .lower()
             )
 
-            # Exact message match
+            print(
+                f"🔎 A verificar: "
+                f"{content!r} == {trigger_text!r}"
+            )
+
+            # -------------------------------------------------
+            # EXACT MATCH
+            # -------------------------------------------------
+
             if content == trigger_text:
 
                 try:
-
-                    # -------------------------------------------------
-                    # PUBLIC CHANNEL MESSAGE
-                    # -------------------------------------------------
 
                     await message.channel.send(
                         response
                     )
 
                     print(
-                        f"⚡ Trigger ativado: "
-                        f"{trigger}"
+                        f"⚡ Trigger ativado: {trigger}"
                     )
 
                 except discord.Forbidden:
@@ -901,6 +287,474 @@ class TriggerManager(commands.Cog):
 
         await self.bot.process_commands(
             message
+        )
+
+    # =====================================================
+    # /TRIGGER ADD
+    # =====================================================
+
+    @app_commands.command(
+        name="add",
+        description="Add a new trigger."
+    )
+    @app_commands.describe(
+        trigger="The word or phrase that activates the response.",
+        response="The message the bot should send."
+    )
+    async def add(
+        self,
+        interaction: discord.Interaction,
+        trigger: str,
+        response: str
+    ):
+
+        if interaction.guild is None:
+
+            await interaction.response.send_message(
+                "❌ This command can only be used in a server.",
+                ephemeral=True
+            )
+
+            return
+
+        trigger = trigger.strip()
+
+        if not trigger:
+
+            await interaction.response.send_message(
+                "❌ The trigger cannot be empty.",
+                ephemeral=True
+            )
+
+            return
+
+        try:
+
+            with self.get_connection() as connection:
+
+                with connection.cursor() as cursor:
+
+                    cursor.execute("""
+                        INSERT INTO triggers
+                        (
+                            guild_id,
+                            trigger,
+                            response,
+                            enabled
+                        )
+                        VALUES (%s, %s, %s, TRUE)
+                    """, (
+                        interaction.guild.id,
+                        trigger,
+                        response
+                    ))
+
+                connection.commit()
+
+        except psycopg2.errors.UniqueViolation:
+
+            await interaction.response.send_message(
+                "❌ This trigger already exists.",
+                ephemeral=True
+            )
+
+            return
+
+        except Exception as error:
+
+            print(
+                f"❌ Error adding trigger: {error}"
+            )
+
+            await interaction.response.send_message(
+                "❌ Failed to add the trigger.",
+                ephemeral=True
+            )
+
+            return
+
+        await interaction.response.send_message(
+            (
+                "✅ **Trigger added.**\n\n"
+                f"Trigger: `{trigger}`\n"
+                f"Response: {response}"
+            ),
+            ephemeral=True
+        )
+
+    # =====================================================
+    # /TRIGGER REMOVE
+    # =====================================================
+
+    @app_commands.command(
+        name="remove",
+        description="Remove a trigger."
+    )
+    @app_commands.describe(
+        trigger="The trigger to remove."
+    )
+    async def remove(
+        self,
+        interaction: discord.Interaction,
+        trigger: str
+    ):
+
+        if interaction.guild is None:
+
+            await interaction.response.send_message(
+                "❌ This command can only be used in a server.",
+                ephemeral=True
+            )
+
+            return
+
+        try:
+
+            with self.get_connection() as connection:
+
+                with connection.cursor() as cursor:
+
+                    cursor.execute("""
+                        DELETE FROM triggers
+                        WHERE guild_id = %s
+                        AND LOWER(trigger) = LOWER(%s)
+                    """, (
+                        interaction.guild.id,
+                        trigger.strip()
+                    ))
+
+                    deleted = cursor.rowcount
+
+                connection.commit()
+
+        except Exception as error:
+
+            print(
+                f"❌ Error removing trigger: {error}"
+            )
+
+            await interaction.response.send_message(
+                "❌ Failed to remove the trigger.",
+                ephemeral=True
+            )
+
+            return
+
+        if deleted == 0:
+
+            await interaction.response.send_message(
+                "❌ Trigger not found.",
+                ephemeral=True
+            )
+
+            return
+
+        await interaction.response.send_message(
+            f"🗑️ Trigger `{trigger}` removed.",
+            ephemeral=True
+        )
+
+    # =====================================================
+    # /TRIGGER EDIT
+    # =====================================================
+
+    @app_commands.command(
+        name="edit",
+        description="Edit an existing trigger."
+    )
+    @app_commands.describe(
+        trigger="The trigger to edit.",
+        response="The new response."
+    )
+    async def edit(
+        self,
+        interaction: discord.Interaction,
+        trigger: str,
+        response: str
+    ):
+
+        if interaction.guild is None:
+
+            await interaction.response.send_message(
+                "❌ This command can only be used in a server.",
+                ephemeral=True
+            )
+
+            return
+
+        try:
+
+            with self.get_connection() as connection:
+
+                with connection.cursor() as cursor:
+
+                    cursor.execute("""
+                        UPDATE triggers
+                        SET response = ?
+                        WHERE guild_id = ?
+                        AND LOWER(trigger) = LOWER(?)
+                    """.replace("?", "%s"), (
+                        response,
+                        interaction.guild.id,
+                        trigger.strip()
+                    ))
+
+                    updated = cursor.rowcount
+
+                connection.commit()
+
+        except Exception as error:
+
+            print(
+                f"❌ Error editing trigger: {error}"
+            )
+
+            await interaction.response.send_message(
+                "❌ Failed to edit the trigger.",
+                ephemeral=True
+            )
+
+            return
+
+        if updated == 0:
+
+            await interaction.response.send_message(
+                "❌ Trigger not found.",
+                ephemeral=True
+            )
+
+            return
+
+        await interaction.response.send_message(
+            f"✅ Trigger `{trigger}` updated.",
+            ephemeral=True
+        )
+
+    # =====================================================
+    # /TRIGGER LIST
+    # =====================================================
+
+    @app_commands.command(
+        name="list",
+        description="List all triggers."
+    )
+    async def list(
+        self,
+        interaction: discord.Interaction
+    ):
+
+        if interaction.guild is None:
+
+            await interaction.response.send_message(
+                "❌ This command can only be used in a server.",
+                ephemeral=True
+            )
+
+            return
+
+        try:
+
+            triggers = self.get_triggers(
+                interaction.guild.id
+            )
+
+        except Exception as error:
+
+            print(
+                f"❌ Error listing triggers: {error}"
+            )
+
+            await interaction.response.send_message(
+                "❌ Failed to load triggers.",
+                ephemeral=True
+            )
+
+            return
+
+        if not triggers:
+
+            await interaction.response.send_message(
+                "📭 No triggers have been configured.",
+                ephemeral=True
+            )
+
+            return
+
+        lines = []
+
+        for (
+            trigger_id,
+            trigger,
+            response,
+            enabled
+        ) in triggers:
+
+            status = (
+                "🟢 Enabled"
+                if enabled
+                else "🔴 Disabled"
+            )
+
+            lines.append(
+                f"**{trigger}** — {status}\n"
+                f"└ {response}"
+            )
+
+        embed = discord.Embed(
+            title="⚡ Misuki Triggers",
+            description="\n\n".join(lines),
+            color=discord.Color.blurple()
+        )
+
+        await interaction.response.send_message(
+            embed=embed,
+            ephemeral=True
+        )
+
+    # =====================================================
+    # /TRIGGER ENABLE
+    # =====================================================
+
+    @app_commands.command(
+        name="enable",
+        description="Enable a trigger."
+    )
+    @app_commands.describe(
+        trigger="The trigger to enable."
+    )
+    async def enable(
+        self,
+        interaction: discord.Interaction,
+        trigger: str
+    ):
+
+        if interaction.guild is None:
+
+            await interaction.response.send_message(
+                "❌ This command can only be used in a server.",
+                ephemeral=True
+            )
+
+            return
+
+        try:
+
+            with self.get_connection() as connection:
+
+                with connection.cursor() as cursor:
+
+                    cursor.execute("""
+                        UPDATE triggers
+                        SET enabled = TRUE
+                        WHERE guild_id = %s
+                        AND LOWER(trigger) = LOWER(%s)
+                    """, (
+                        interaction.guild.id,
+                        trigger.strip()
+                    ))
+
+                    updated = cursor.rowcount
+
+                connection.commit()
+
+        except Exception as error:
+
+            print(
+                f"❌ Error enabling trigger: {error}"
+            )
+
+            await interaction.response.send_message(
+                "❌ Failed to enable the trigger.",
+                ephemeral=True
+            )
+
+            return
+
+        if updated == 0:
+
+            await interaction.response.send_message(
+                "❌ Trigger not found.",
+                ephemeral=True
+            )
+
+            return
+
+        await interaction.response.send_message(
+            f"🟢 Trigger `{trigger}` enabled.",
+            ephemeral=True
+        )
+
+    # =====================================================
+    # /TRIGGER DISABLE
+    # =====================================================
+
+    @app_commands.command(
+        name="disable",
+        description="Disable a trigger."
+    )
+    @app_commands.describe(
+        trigger="The trigger to disable."
+    )
+    async def disable(
+        self,
+        interaction: discord.Interaction,
+        trigger: str
+    ):
+
+        if interaction.guild is None:
+
+            await interaction.response.send_message(
+                "❌ This command can only be used in a server.",
+                ephemeral=True
+            )
+
+            return
+
+        try:
+
+            with self.get_connection() as connection:
+
+                with connection.cursor() as cursor:
+
+                    cursor.execute("""
+                        UPDATE triggers
+                        SET enabled = FALSE
+                        WHERE guild_id = %s
+                        AND LOWER(trigger) = LOWER(%s)
+                    """, (
+                        interaction.guild.id,
+                        trigger.strip()
+                    ))
+
+                    updated = cursor.rowcount
+
+                connection.commit()
+
+        except Exception as error:
+
+            print(
+                f"❌ Error disabling trigger: {error}"
+            )
+
+            await interaction.response.send_message(
+                "❌ Failed to disable the trigger.",
+                ephemeral=True
+            )
+
+            return
+
+        if updated == 0:
+
+            await interaction.response.send_message(
+                "❌ Trigger not found.",
+                ephemeral=True
+            )
+
+            return
+
+        await interaction.response.send_message(
+            f"🔴 Trigger `{trigger}` disabled.",
+            ephemeral=True
         )
 
 
