@@ -4,51 +4,80 @@
 # =========================================================
 
 import os
+
 import psycopg2
 
 import discord
 from discord import app_commands
 from discord.ext import commands
 
+from dotenv import load_dotenv
+
 
 # =========================================================
-# DATABASE
+# ENVIRONMENT
 # =========================================================
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+load_dotenv()
+
+DATABASE_URL = os.getenv(
+    "DATABASE_URL"
+)
 
 
 # =========================================================
 # TRIGGER MANAGER
 # =========================================================
 
-class TriggerManager(commands.GroupCog, group_name="trigger"):
+class TriggerManager(
+    commands.GroupCog,
+    group_name="trigger"
+):
 
-    def __init__(self, bot):
+    def __init__(
+        self,
+        bot
+    ):
 
         self.bot = bot
 
         if not DATABASE_URL:
-            print("❌ DATABASE_URL não está configurado.")
+
+            print(
+                "❌ DATABASE_URL não está configurado."
+            )
+
             return
 
         self.create_database()
+
 
     # =====================================================
     # DATABASE CONNECTION
     # =====================================================
 
-    def get_connection(self):
+    def get_connection(
+        self
+    ):
+
+        if not DATABASE_URL:
+
+            raise RuntimeError(
+                "DATABASE_URL não está configurado."
+            )
 
         return psycopg2.connect(
             DATABASE_URL
         )
 
+
     # =====================================================
     # DATABASE SETUP
     # =====================================================
 
-    def create_database(self):
+    def create_database(
+        self
+    ):
 
         try:
 
@@ -56,7 +85,8 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
 
                 with connection.cursor() as cursor:
 
-                    cursor.execute("""
+                    cursor.execute(
+                        """
                         CREATE TABLE IF NOT EXISTS triggers (
 
                             id SERIAL PRIMARY KEY,
@@ -68,12 +98,16 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
                             response TEXT NOT NULL,
 
                             enabled BOOLEAN NOT NULL
-                            DEFAULT TRUE,
+                                DEFAULT TRUE,
 
-                            UNIQUE(guild_id, trigger)
+                            UNIQUE(
+                                guild_id,
+                                trigger
+                            )
 
                         )
-                    """)
+                        """
+                    )
 
                 connection.commit()
 
@@ -86,6 +120,7 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
             print(
                 f"❌ Trigger database error: {error}"
             )
+
 
     # =====================================================
     # GET TRIGGERS
@@ -100,20 +135,27 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
 
             with connection.cursor() as cursor:
 
-                cursor.execute("""
+                cursor.execute(
+                    """
                     SELECT
                         id,
                         trigger,
                         response,
                         enabled
+
                     FROM triggers
+
                     WHERE guild_id = %s
+
                     ORDER BY id ASC
-                """, (
-                    guild_id,
-                ))
+                    """,
+                    (
+                        guild_id,
+                    )
+                )
 
                 return cursor.fetchall()
+
 
     # =====================================================
     # GET SINGLE TRIGGER
@@ -129,24 +171,38 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
 
             with connection.cursor() as cursor:
 
-                cursor.execute("""
+                cursor.execute(
+                    """
                     SELECT
                         id,
                         trigger,
                         response,
                         enabled
+
                     FROM triggers
+
                     WHERE guild_id = %s
+
                     AND LOWER(trigger) = LOWER(%s)
-                """, (
-                    guild_id,
-                    trigger
-                ))
+                    """,
+                    (
+                        guild_id,
+                        trigger
+                    )
+                )
 
                 return cursor.fetchone()
 
+
     # =====================================================
     # ON MESSAGE
+    #
+    # IMPORTANT:
+    #
+    # This listener receives messages sent by Discord.
+    #
+    # Bots are ignored BEFORE checking triggers.
+    #
     # =====================================================
 
     @commands.Cog.listener()
@@ -160,7 +216,12 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
         )
 
         print(
-            f"👤 Autor: {message.author}"
+            f"👤 Autor: {message.author} "
+            f"(ID: {message.author.id})"
+        )
+
+        print(
+            f"🤖 É bot: {message.author.bot}"
         )
 
         print(
@@ -171,13 +232,19 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
             f"📝 Conteúdo: {message.content!r}"
         )
 
+
         # -------------------------------------------------
-        # IGNORE BOTS
+        # IGNORE BOT MESSAGES
         # -------------------------------------------------
 
         if message.author.bot:
 
+            print(
+                "🤖 Mensagem ignorada: autor é um bot."
+            )
+
             return
+
 
         # -------------------------------------------------
         # IGNORE DMs
@@ -185,10 +252,15 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
 
         if message.guild is None:
 
+            print(
+                "📨 Mensagem ignorada: DM."
+            )
+
             return
 
+
         # -------------------------------------------------
-        # MESSAGE CONTENT
+        # CHECK MESSAGE CONTENT
         # -------------------------------------------------
 
         content = (
@@ -197,14 +269,25 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
             .lower()
         )
 
+
         if not content:
 
             print(
-                "⚠️ Discord entregou a mensagem "
-                "sem conteúdo."
+                "⚠️ A mensagem chegou sem conteúdo."
+            )
+
+            print(
+                "⚠️ Confirma o Message Content Intent "
+                "no Discord Developer Portal."
             )
 
             return
+
+
+        print(
+            f"🔤 Conteúdo processado: {content!r}"
+        )
+
 
         # -------------------------------------------------
         # GET TRIGGERS
@@ -224,6 +307,13 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
 
             return
 
+
+        print(
+            f"📋 Triggers encontrados: "
+            f"{len(triggers)}"
+        )
+
+
         # -------------------------------------------------
         # CHECK TRIGGERS
         # -------------------------------------------------
@@ -235,9 +325,11 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
             enabled
         ) in triggers:
 
+
             if not enabled:
 
                 continue
+
 
             trigger_text = (
                 trigger
@@ -245,49 +337,57 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
                 .lower()
             )
 
+
             print(
                 f"🔎 A verificar: "
                 f"{content!r} == {trigger_text!r}"
             )
 
+
             # -------------------------------------------------
             # EXACT MATCH
             # -------------------------------------------------
 
-            if content == trigger_text:
+            if content != trigger_text:
 
-                try:
+                continue
 
-                    await message.channel.send(
-                        response
-                    )
 
-                    print(
-                        f"⚡ Trigger ativado: {trigger}"
-                    )
+            print(
+                f"⚡ Trigger encontrado: {trigger}"
+            )
 
-                except discord.Forbidden:
 
-                    print(
-                        "❌ Não tenho permissão "
-                        "para enviar mensagens neste canal."
-                    )
+            # -------------------------------------------------
+            # SEND RESPONSE
+            # -------------------------------------------------
 
-                except discord.HTTPException as error:
+            try:
 
-                    print(
-                        f"❌ Discord API error: {error}"
-                    )
+                await message.channel.send(
+                    response
+                )
 
-                break
+                print(
+                    f"✅ Resposta enviada para "
+                    f"'{trigger}'."
+                )
 
-        # -------------------------------------------------
-        # COMMAND PROCESSING
-        # -------------------------------------------------
+            except discord.Forbidden:
 
-        await self.bot.process_commands(
-            message
-        )
+                print(
+                    "❌ Não tenho permissão "
+                    "para enviar mensagens neste canal."
+                )
+
+            except discord.HTTPException as error:
+
+                print(
+                    f"❌ Discord API error: {error}"
+                )
+
+            break
+
 
     # =====================================================
     # /TRIGGER ADD
@@ -317,7 +417,9 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
 
             return
 
+
         trigger = trigger.strip()
+
 
         if not trigger:
 
@@ -328,13 +430,15 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
 
             return
 
+
         try:
 
             with self.get_connection() as connection:
 
                 with connection.cursor() as cursor:
 
-                    cursor.execute("""
+                    cursor.execute(
+                        """
                         INSERT INTO triggers
                         (
                             guild_id,
@@ -342,14 +446,23 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
                             response,
                             enabled
                         )
-                        VALUES (%s, %s, %s, TRUE)
-                    """, (
-                        interaction.guild.id,
-                        trigger,
-                        response
-                    ))
+
+                        VALUES (
+                            %s,
+                            %s,
+                            %s,
+                            TRUE
+                        )
+                        """,
+                        (
+                            interaction.guild.id,
+                            trigger,
+                            response
+                        )
+                    )
 
                 connection.commit()
+
 
         except psycopg2.errors.UniqueViolation:
 
@@ -359,6 +472,7 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
             )
 
             return
+
 
         except Exception as error:
 
@@ -373,6 +487,7 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
 
             return
 
+
         await interaction.response.send_message(
             (
                 "✅ **Trigger added.**\n\n"
@@ -381,6 +496,7 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
             ),
             ephemeral=True
         )
+
 
     # =====================================================
     # /TRIGGER REMOVE
@@ -408,24 +524,34 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
 
             return
 
+
+        trigger = trigger.strip()
+
+
         try:
 
             with self.get_connection() as connection:
 
                 with connection.cursor() as cursor:
 
-                    cursor.execute("""
+                    cursor.execute(
+                        """
                         DELETE FROM triggers
+
                         WHERE guild_id = %s
+
                         AND LOWER(trigger) = LOWER(%s)
-                    """, (
-                        interaction.guild.id,
-                        trigger.strip()
-                    ))
+                        """,
+                        (
+                            interaction.guild.id,
+                            trigger
+                        )
+                    )
 
                     deleted = cursor.rowcount
 
                 connection.commit()
+
 
         except Exception as error:
 
@@ -440,6 +566,7 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
 
             return
 
+
         if deleted == 0:
 
             await interaction.response.send_message(
@@ -449,10 +576,12 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
 
             return
 
+
         await interaction.response.send_message(
             f"🗑️ Trigger `{trigger}` removed.",
             ephemeral=True
         )
+
 
     # =====================================================
     # /TRIGGER EDIT
@@ -482,26 +611,37 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
 
             return
 
+
+        trigger = trigger.strip()
+
+
         try:
 
             with self.get_connection() as connection:
 
                 with connection.cursor() as cursor:
 
-                    cursor.execute("""
+                    cursor.execute(
+                        """
                         UPDATE triggers
-                        SET response = ?
-                        WHERE guild_id = ?
-                        AND LOWER(trigger) = LOWER(?)
-                    """.replace("?", "%s"), (
-                        response,
-                        interaction.guild.id,
-                        trigger.strip()
-                    ))
+
+                        SET response = %s
+
+                        WHERE guild_id = %s
+
+                        AND LOWER(trigger) = LOWER(%s)
+                        """,
+                        (
+                            response,
+                            interaction.guild.id,
+                            trigger
+                        )
+                    )
 
                     updated = cursor.rowcount
 
                 connection.commit()
+
 
         except Exception as error:
 
@@ -516,6 +656,7 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
 
             return
 
+
         if updated == 0:
 
             await interaction.response.send_message(
@@ -525,10 +666,12 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
 
             return
 
+
         await interaction.response.send_message(
             f"✅ Trigger `{trigger}` updated.",
             ephemeral=True
         )
+
 
     # =====================================================
     # /TRIGGER LIST
@@ -552,6 +695,7 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
 
             return
 
+
         try:
 
             triggers = self.get_triggers(
@@ -571,6 +715,7 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
 
             return
 
+
         if not triggers:
 
             await interaction.response.send_message(
@@ -580,7 +725,9 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
 
             return
 
+
         lines = []
+
 
         for (
             trigger_id,
@@ -595,10 +742,12 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
                 else "🔴 Disabled"
             )
 
+
             lines.append(
                 f"**{trigger}** — {status}\n"
                 f"└ {response}"
             )
+
 
         embed = discord.Embed(
             title="⚡ Misuki Triggers",
@@ -606,10 +755,12 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
             color=discord.Color.blurple()
         )
 
+
         await interaction.response.send_message(
             embed=embed,
             ephemeral=True
         )
+
 
     # =====================================================
     # /TRIGGER ENABLE
@@ -637,25 +788,36 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
 
             return
 
+
+        trigger = trigger.strip()
+
+
         try:
 
             with self.get_connection() as connection:
 
                 with connection.cursor() as cursor:
 
-                    cursor.execute("""
+                    cursor.execute(
+                        """
                         UPDATE triggers
+
                         SET enabled = TRUE
+
                         WHERE guild_id = %s
+
                         AND LOWER(trigger) = LOWER(%s)
-                    """, (
-                        interaction.guild.id,
-                        trigger.strip()
-                    ))
+                        """,
+                        (
+                            interaction.guild.id,
+                            trigger
+                        )
+                    )
 
                     updated = cursor.rowcount
 
                 connection.commit()
+
 
         except Exception as error:
 
@@ -670,6 +832,7 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
 
             return
 
+
         if updated == 0:
 
             await interaction.response.send_message(
@@ -679,10 +842,12 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
 
             return
 
+
         await interaction.response.send_message(
             f"🟢 Trigger `{trigger}` enabled.",
             ephemeral=True
         )
+
 
     # =====================================================
     # /TRIGGER DISABLE
@@ -710,25 +875,36 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
 
             return
 
+
+        trigger = trigger.strip()
+
+
         try:
 
             with self.get_connection() as connection:
 
                 with connection.cursor() as cursor:
 
-                    cursor.execute("""
+                    cursor.execute(
+                        """
                         UPDATE triggers
+
                         SET enabled = FALSE
+
                         WHERE guild_id = %s
+
                         AND LOWER(trigger) = LOWER(%s)
-                    """, (
-                        interaction.guild.id,
-                        trigger.strip()
-                    ))
+                        """,
+                        (
+                            interaction.guild.id,
+                            trigger
+                        )
+                    )
 
                     updated = cursor.rowcount
 
                 connection.commit()
+
 
         except Exception as error:
 
@@ -743,6 +919,7 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
 
             return
 
+
         if updated == 0:
 
             await interaction.response.send_message(
@@ -751,6 +928,7 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
             )
 
             return
+
 
         await interaction.response.send_message(
             f"🔴 Trigger `{trigger}` disabled.",
@@ -762,7 +940,9 @@ class TriggerManager(commands.GroupCog, group_name="trigger"):
 # SETUP
 # =========================================================
 
-async def setup(bot):
+async def setup(
+    bot
+):
 
     cog = TriggerManager(
         bot
@@ -776,14 +956,21 @@ async def setup(bot):
         "⚡ TriggerManager carregado."
     )
 
+
+    # -----------------------------------------------------
+    # DEBUG
+    # -----------------------------------------------------
+
     commands_list = (
         cog.get_app_commands()
     )
+
 
     print(
         f"Comandos do TriggerManager: "
         f"{len(commands_list)}"
     )
+
 
     for command in commands_list:
 
