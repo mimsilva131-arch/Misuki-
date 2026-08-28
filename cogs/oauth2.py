@@ -182,6 +182,41 @@ def create_reviews_database():
             """
         )
 
+        # -------------------------------------------------
+        # DATABASE MIGRATION
+        #
+        # If the old reviews table was created before the
+        # avatar column existed, CREATE TABLE IF NOT EXISTS
+        # will NOT add it.
+        #
+        # Therefore check the existing columns and add
+        # avatar when necessary.
+        # -------------------------------------------------
+
+        cursor = connection.cursor()
+
+        cursor.execute(
+            "PRAGMA table_info(reviews)"
+        )
+
+        columns = {
+            row[1]
+            for row in cursor.fetchall()
+        }
+
+        if "avatar" not in columns:
+
+            connection.execute(
+                """
+                ALTER TABLE reviews
+                ADD COLUMN avatar TEXT
+                """
+            )
+
+            print(
+                "🛠️ Added missing 'avatar' column to reviews."
+            )
+
         connection.commit()
 
 
@@ -246,10 +281,18 @@ def license_is_active(guild_id):
     expires_at = license_data[3]
 
 
+    # -----------------------------------------------------
+    # STATUS
+    # -----------------------------------------------------
+
     if status != "active":
 
         return False
 
+
+    # -----------------------------------------------------
+    # EXPIRATION
+    # -----------------------------------------------------
 
     if expires_at:
 
@@ -259,7 +302,10 @@ def license_is_active(guild_id):
                 expires_at
             )
 
-        except ValueError:
+        except (
+            ValueError,
+            TypeError
+        ):
 
             return False
 
@@ -1084,6 +1130,104 @@ header {
 }
 
 
+/* SERVER BADGES */
+
+.server-badges {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 7px;
+
+    margin-top: 2px;
+}
+
+.badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    padding:
+        5px 9px;
+
+    border-radius: 999px;
+
+    font-size: 11px;
+
+    font-weight: 750;
+
+    border:
+        1px solid transparent;
+}
+
+.badge-success {
+
+    color: #57f287;
+
+    background:
+        rgba(
+            87,
+            242,
+            135,
+            .10
+        );
+
+    border-color:
+        rgba(
+            87,
+            242,
+            135,
+            .18
+        );
+}
+
+.badge-danger {
+
+    color: #ed4245;
+
+    background:
+        rgba(
+            237,
+            66,
+            69,
+            .10
+        );
+
+    border-color:
+        rgba(
+            237,
+            66,
+            69,
+            .18
+        );
+}
+
+.badge-warning {
+
+    color: #faa61a;
+
+    background:
+        rgba(
+            250,
+            166,
+            26,
+            .10
+        );
+
+    border-color:
+        rgba(
+            250,
+            166,
+            26,
+            .18
+        );
+}
+
+
 /* BUTTONS */
 
 .button {
@@ -1190,6 +1334,10 @@ header {
     color: #c9ccd5;
 
     line-height: 1.6;
+
+    white-space: pre-wrap;
+
+    word-break: break-word;
 }
 
 .stars {
@@ -2456,9 +2604,6 @@ def callback():
         )
 
 
-    token_json = response.json()
-
-
     return render_page(
 
         """
@@ -2724,11 +2869,38 @@ def dashboard():
         )
 
 
+        # -------------------------------------------------
+        # LICENSE STATUS
+        # -------------------------------------------------
+
+        has_license = license_is_active(
+            guild_id
+        )
+
+        guild[
+            "has_license"
+        ] = has_license
+
+
+        # -------------------------------------------------
+        # BOT ALREADY IN SERVER
+        # -------------------------------------------------
+
         if guild_id in bot_guild_ids:
+
+            guild[
+                "can_manage"
+            ] = can_manage_guild(
+                guild
+            )
 
             authorized.append(
                 guild
             )
+
+        # -------------------------------------------------
+        # BOT NOT IN SERVER
+        # -------------------------------------------------
 
         else:
 
@@ -2748,6 +2920,12 @@ def dashboard():
                 guild
             )
 
+
+    # -----------------------------------------------------
+    # AVAILABLE SERVERS
+    #
+    # Servers where the user CAN add the bot come first.
+    # -----------------------------------------------------
 
     available.sort(
 
@@ -2769,7 +2947,7 @@ def dashboard():
             <div class="container">
 
                 <h1>
-                     Dashboard
+                    Dashboard
                 </h1>
 
 
@@ -2783,6 +2961,10 @@ def dashboard():
 
                 </p>
 
+
+                <!-- =================================================
+                     AUTHORIZED SERVERS
+                     ================================================= -->
 
                 <h2
                     class="section-title"
@@ -2835,6 +3017,50 @@ def dashboard():
                                 </div>
 
 
+                                <!-- BADGES -->
+
+                                <div class="server-badges">
+
+                                    {% if guild.has_license %}
+
+                                        <span
+                                            class="badge badge-success"
+                                        >
+                                            License 🟢
+                                        </span>
+
+                                    {% else %}
+
+                                        <span
+                                            class="badge badge-danger"
+                                        >
+                                            License 🔴
+                                        </span>
+
+                                    {% endif %}
+
+
+                                    {% if guild.can_manage %}
+
+                                        <span
+                                            class="badge badge-success"
+                                        >
+                                            Manage 🟢
+                                        </span>
+
+                                    {% else %}
+
+                                        <span
+                                            class="badge badge-warning"
+                                        >
+                                            Manage ⚠️
+                                        </span>
+
+                                    {% endif %}
+
+                                </div>
+
+
                                 <a
                                     class="button manage"
                                     href="/manage/{{ guild.id }}"
@@ -2856,6 +3082,10 @@ def dashboard():
 
                 {% endif %}
 
+
+                <!-- =================================================
+                     AVAILABLE SERVERS
+                     ================================================= -->
 
                 <h2
                     class="section-title"
@@ -2904,6 +3134,50 @@ def dashboard():
                                         </div>
 
                                     </div>
+
+                                </div>
+
+
+                                <!-- BADGES -->
+
+                                <div class="server-badges">
+
+                                    {% if guild.has_license %}
+
+                                        <span
+                                            class="badge badge-success"
+                                        >
+                                            License 🟢
+                                        </span>
+
+                                    {% else %}
+
+                                        <span
+                                            class="badge badge-danger"
+                                        >
+                                            License 🔴
+                                        </span>
+
+                                    {% endif %}
+
+
+                                    {% if guild.can_add %}
+
+                                        <span
+                                            class="badge badge-success"
+                                        >
+                                            Add 🟢
+                                        </span>
+
+                                    {% else %}
+
+                                        <span
+                                            class="badge badge-warning"
+                                        >
+                                            Add ⚠️
+                                        </span>
+
+                                    {% endif %}
 
                                 </div>
 
@@ -3078,6 +3352,27 @@ def manage(guild_id):
     )
 
 
+    # -----------------------------------------------------
+    # FORCE EXPIRATION CHECK
+    # -----------------------------------------------------
+
+    active_license = license_is_active(
+        guild_id
+    )
+
+    if active_license:
+
+        license_data = get_license(
+            guild_id
+        )
+
+    else:
+
+        license_data = get_license(
+            guild_id
+        )
+
+
     return render_page(
 
         """
@@ -3182,9 +3477,11 @@ def manage(guild_id):
 
 
                         <p>
+
                             <strong>
                                 License Key
                             </strong>
+
                         </p>
 
 
@@ -3584,6 +3881,10 @@ def submit_review():
         )
 
 
+    # -----------------------------------------------------
+    # LICENSE REQUIRED
+    # -----------------------------------------------------
+
     if not user_has_license():
 
         return render_page(
@@ -3717,45 +4018,97 @@ def submit_review():
         avatar = None
 
 
-    with database_connection() as connection:
+    try:
 
-        connection.execute(
+        with database_connection() as connection:
+
+            connection.execute(
+
+                """
+
+                INSERT INTO reviews
+                (
+                    user_id,
+                    username,
+                    avatar,
+                    review,
+                    rating,
+                    created_at
+                )
+
+                VALUES (?, ?, ?, ?, ?, ?)
+
+                """,
+
+                (
+
+                    user_id,
+
+                    username,
+
+                    avatar,
+
+                    review,
+
+                    rating,
+
+                    datetime.now().isoformat()
+
+                )
+
+            )
+
+            connection.commit()
+
+    except Exception as error:
+
+        print(
+            f"❌ Review insert error: {error}"
+        )
+
+        return render_page(
 
             """
 
-            INSERT INTO reviews
-            (
-                user_id,
-                username,
-                avatar,
-                review,
-                rating,
-                created_at
-            )
+            <section class="section">
 
-            VALUES (?, ?, ?, ?, ?, ?)
+                <div class="container">
+
+                    <div class="card">
+
+                        <h1>
+                            ❌ Review Error
+                        </h1>
+
+                        <p>
+                            Your review could not be
+                            saved right now.
+                        </p>
+
+                        <p>
+                            {{ error }}
+                        </p>
+
+                        <a
+                            href="/reviews"
+                            class="button manage"
+                        >
+                            Back to Reviews
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </section>
 
             """,
 
-            (
+            user=user,
 
-                user_id,
+            error=str(error)
 
-                username,
-
-                avatar,
-
-                review,
-
-                rating,
-
-                datetime.now().isoformat()
-
-            )
-
-        )
-
-        connection.commit()
+        ), 500
 
 
     return redirect(
