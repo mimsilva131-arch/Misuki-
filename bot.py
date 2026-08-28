@@ -3,26 +3,19 @@ import os
 import asyncio
 import discord
 from discord.ext import commands
-
-
-# =========================================================
+#=========================================================
 # INTENTS
-# =========================================================
+#=========================================================
+intents = discord.Intents.default()
 
-intents = discord.Intents.all()
-
-
-# =========================================================
+intents.members = True
+intents.message_content = True
+#=========================================================
 # BOT
-# =========================================================
-
+#=========================================================
 bot = commands.Bot(
     command_prefix="!",
     intents=intents
-)
-print(
-    "Message Content Intent:",
-    bot.intents.message_content
 )
 
 # =========================================================
