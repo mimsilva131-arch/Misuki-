@@ -211,7 +211,10 @@ async def main():
     print(
         "🚀 Starting Discord bot..."
     )
-
+    print(
+        f"🧪 Message Content Intent: "
+        f"{bot.intents.message_content}"
+    )
     await bot.start(
         token
     )
