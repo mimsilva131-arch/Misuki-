@@ -2,11 +2,12 @@
 # =========================================================
 # MISUKI TRIGGERS
 # Text Triggers + Automatic Responses
-# Premium System
 # =========================================================
 
 import os
 import sqlite3
+
+from datetime import datetime
 
 import discord
 
@@ -46,10 +47,7 @@ DATABASE = os.path.join(
 
 class TriggerManager(commands.Cog):
 
-    def __init__(
-        self,
-        bot
-    ):
+    def __init__(self, bot):
 
         self.bot = bot
 
@@ -96,190 +94,6 @@ class TriggerManager(commands.Cog):
             connection.commit()
 
     # =====================================================
-    # PREMIUM
-    # =====================================================
-
-    def has_premium(
-        self,
-        guild_id
-    ):
-
-        """
-        Verifica se o servidor possui uma licença
-        Premium ativa.
-
-        Usa a tabela 'licenses' criada pelo
-        LicenseManager.
-        """
-
-        try:
-
-            with sqlite3.connect(
-                DATABASE
-            ) as connection:
-
-                cursor = connection.execute(
-                    """
-                    SELECT
-                        status,
-                        expires_at
-
-                    FROM licenses
-
-                    WHERE guild_id = ?
-                    """,
-                    (
-                        guild_id,
-                    )
-                )
-
-                license_data = cursor.fetchone()
-
-        except sqlite3.Error as error:
-
-            print(
-                f"❌ Trigger premium check failed: {error}"
-            )
-
-            return False
-
-        if license_data is None:
-
-            return False
-
-        status = license_data[0]
-
-        expires_at = license_data[1]
-
-        if status != "active":
-
-            return False
-
-        # -------------------------------------------------
-        # CHECK EXPIRATION
-        # -------------------------------------------------
-
-        if expires_at:
-
-            from datetime import datetime
-
-            try:
-
-                expiration = datetime.fromisoformat(
-                    expires_at
-                )
-
-            except ValueError:
-
-                return False
-
-            if datetime.now() >= expiration:
-
-                try:
-
-                    with sqlite3.connect(
-                        DATABASE
-                    ) as connection:
-
-                        connection.execute(
-                            """
-                            UPDATE licenses
-
-                            SET status = 'expired'
-
-                            WHERE guild_id = ?
-                            """,
-                            (
-                                guild_id,
-                            )
-                        )
-
-                        connection.commit()
-
-                except sqlite3.Error as error:
-
-                    print(
-                        f"❌ Failed to expire license: {error}"
-                    )
-
-                return False
-
-        return True
-
-    # =====================================================
-    # STAFF / ADMIN PERMISSION
-    # =====================================================
-
-    def member_is_staff(
-        self,
-        member: discord.Member
-    ):
-
-        # -------------------------------------------------
-        # ADMINISTRATOR
-        # -------------------------------------------------
-
-        if member.guild_permissions.administrator:
-
-            return True
-
-        # -------------------------------------------------
-        # GET STAFF ROLES FROM SETUP
-        # -------------------------------------------------
-
-        try:
-
-            with sqlite3.connect(
-                DATABASE
-            ) as connection:
-
-                cursor = connection.execute(
-                    """
-                    SELECT role_id
-
-                    FROM role_permissions
-
-                    WHERE guild_id = ?
-
-                    AND setting = 'staff'
-                    """,
-                    (
-                        member.guild.id,
-                    )
-                )
-
-                staff_roles = {
-                    row[0]
-                    for row in cursor.fetchall()
-                }
-
-        except sqlite3.Error as error:
-
-            print(
-                f"❌ Staff permission check failed: {error}"
-            )
-
-            return False
-
-        if not staff_roles:
-
-            return False
-
-        # -------------------------------------------------
-        # CHECK MEMBER ROLES
-        # -------------------------------------------------
-
-        member_role_ids = {
-            role.id
-            for role in member.roles
-        }
-
-        return bool(
-            staff_roles
-            & member_role_ids
-        )
-
-    # =====================================================
     # ADD TRIGGER
     # =====================================================
 
@@ -290,8 +104,6 @@ class TriggerManager(commands.Cog):
         response,
         created_by
     ):
-
-        from datetime import datetime
 
         trigger = trigger.strip().lower()
 
@@ -513,86 +325,6 @@ class TriggerManager(commands.Cog):
             return cursor.fetchall()
 
     # =====================================================
-    # CHECK MANAGEMENT PERMISSION
-    # =====================================================
-
-    async def check_management_permission(
-        self,
-        interaction
-    ):
-
-        # -------------------------------------------------
-        # SERVER
-        # -------------------------------------------------
-
-        if interaction.guild is None:
-
-            await interaction.response.send_message(
-                "❌ This command can only be used in a server.",
-                ephemeral=True
-            )
-
-            return False
-
-        # -------------------------------------------------
-        # PREMIUM
-        # -------------------------------------------------
-
-        if not self.has_premium(
-            interaction.guild.id
-        ):
-
-            await interaction.response.send_message(
-                (
-                    "💎 **Trigger System Premium**\n\n"
-                    "This server does not have an "
-                    "active Misuki Premium license."
-                ),
-                ephemeral=True
-            )
-
-            return False
-
-        # -------------------------------------------------
-        # MEMBER
-        # -------------------------------------------------
-
-        if not isinstance(
-            interaction.user,
-            discord.Member
-        ):
-
-            await interaction.response.send_message(
-                "❌ Unable to verify your permissions.",
-                ephemeral=True
-            )
-
-            return False
-
-        # -------------------------------------------------
-        # STAFF / ADMIN
-        # -------------------------------------------------
-
-        if not self.member_is_staff(
-            interaction.user
-        ):
-
-            await interaction.response.send_message(
-                (
-                    "❌ You do not have permission "
-                    "to manage triggers.\n\n"
-                    "You must be an Administrator or "
-                    "have a Staff role configured in "
-                    "`/setup`."
-                ),
-                ephemeral=True
-            )
-
-            return False
-
-        return True
-
-    # =====================================================
     # /TRIGGER
     # =====================================================
 
@@ -609,6 +341,9 @@ class TriggerManager(commands.Cog):
         name="add",
         description="Create a new automatic trigger."
     )
+    @app_commands.default_permissions(
+        administrator=True
+    )
     @app_commands.describe(
         trigger="Text that activates the response.",
         response="Text the bot will send."
@@ -616,18 +351,20 @@ class TriggerManager(commands.Cog):
     async def trigger_add(
         self,
         interaction: discord.Interaction,
-        trigger: str,
-        response: str
+        trigger: app_commands.Range[str, 1, 100],
+        response: app_commands.Range[str, 1, 2000]
     ):
 
-        if not await self.check_management_permission(
-            interaction
-        ):
+        if interaction.guild is None:
+
+            await interaction.response.send_message(
+                "❌ This command can only be used in a server.",
+                ephemeral=True
+            )
 
             return
 
         trigger = trigger.strip()
-
         response = response.strip()
 
         if not trigger:
@@ -668,7 +405,7 @@ class TriggerManager(commands.Cog):
             return
 
         embed = discord.Embed(
-            title="✅ Trigger Created",
+            title="Trigger Created",
             color=discord.Color.green()
         )
 
@@ -703,6 +440,9 @@ class TriggerManager(commands.Cog):
         name="remove",
         description="Remove an automatic trigger."
     )
+    @app_commands.default_permissions(
+        administrator=True
+    )
     @app_commands.describe(
         trigger="Trigger to remove."
     )
@@ -712,9 +452,12 @@ class TriggerManager(commands.Cog):
         trigger: str
     ):
 
-        if not await self.check_management_permission(
-            interaction
-        ):
+        if interaction.guild is None:
+
+            await interaction.response.send_message(
+                "❌ This command can only be used in a server.",
+                ephemeral=True
+            )
 
             return
 
@@ -751,6 +494,9 @@ class TriggerManager(commands.Cog):
         name="edit",
         description="Change the response of a trigger."
     )
+    @app_commands.default_permissions(
+        administrator=True
+    )
     @app_commands.describe(
         trigger="Trigger to edit.",
         response="New response."
@@ -759,25 +505,19 @@ class TriggerManager(commands.Cog):
         self,
         interaction: discord.Interaction,
         trigger: str,
-        response: str
+        response: app_commands.Range[str, 1, 2000]
     ):
 
-        if not await self.check_management_permission(
-            interaction
-        ):
-
-            return
-
-        response = response.strip()
-
-        if not response:
+        if interaction.guild is None:
 
             await interaction.response.send_message(
-                "❌ The response cannot be empty.",
+                "❌ This command can only be used in a server.",
                 ephemeral=True
             )
 
             return
+
+        response = response.strip()
 
         success = self.edit_trigger(
             interaction.guild.id,
@@ -813,14 +553,20 @@ class TriggerManager(commands.Cog):
         name="list",
         description="List all triggers in this server."
     )
+    @app_commands.default_permissions(
+        administrator=True
+    )
     async def trigger_list(
         self,
         interaction: discord.Interaction
     ):
 
-        if not await self.check_management_permission(
-            interaction
-        ):
+        if interaction.guild is None:
+
+            await interaction.response.send_message(
+                "❌ This command can only be used in a server.",
+                ephemeral=True
+            )
 
             return
 
@@ -841,7 +587,7 @@ class TriggerManager(commands.Cog):
             return
 
         embed = discord.Embed(
-            title="📋 Server Triggers",
+            title="Server Triggers",
             color=discord.Color.blurple()
         )
 
@@ -908,6 +654,9 @@ class TriggerManager(commands.Cog):
         name="enable",
         description="Enable an automatic trigger."
     )
+    @app_commands.default_permissions(
+        administrator=True
+    )
     @app_commands.describe(
         trigger="Trigger to enable."
     )
@@ -917,9 +666,12 @@ class TriggerManager(commands.Cog):
         trigger: str
     ):
 
-        if not await self.check_management_permission(
-            interaction
-        ):
+        if interaction.guild is None:
+
+            await interaction.response.send_message(
+                "❌ This command can only be used in a server.",
+                ephemeral=True
+            )
 
             return
 
@@ -957,6 +709,9 @@ class TriggerManager(commands.Cog):
         name="disable",
         description="Disable an automatic trigger."
     )
+    @app_commands.default_permissions(
+        administrator=True
+    )
     @app_commands.describe(
         trigger="Trigger to disable."
     )
@@ -966,9 +721,12 @@ class TriggerManager(commands.Cog):
         trigger: str
     ):
 
-        if not await self.check_management_permission(
-            interaction
-        ):
+        if interaction.guild is None:
+
+            await interaction.response.send_message(
+                "❌ This command can only be used in a server.",
+                ephemeral=True
+            )
 
             return
 
@@ -982,8 +740,8 @@ class TriggerManager(commands.Cog):
 
             await interaction.response.send_message(
                 (
-                    f"🔴 Trigger `{trigger}` "
-                    "has been disabled."
+                    "❌ No trigger with that name "
+                    "was found."
                 ),
                 ephemeral=True
             )
@@ -1009,6 +767,15 @@ class TriggerManager(commands.Cog):
     ):
 
         # -------------------------------------------------
+        # DEBUG
+        # -------------------------------------------------
+
+        print(
+            f"📩 Mensagem recebida: "
+            f"{message.content!r}"
+        )
+
+        # -------------------------------------------------
         # IGNORE BOTS
         # -------------------------------------------------
 
@@ -1023,20 +790,6 @@ class TriggerManager(commands.Cog):
         if message.guild is None:
 
             return
-
-        # -------------------------------------------------
-        # PREMIUM
-        # -------------------------------------------------
-
-        if not self.has_premium(
-            message.guild.id
-        ):
-
-            return
-
-        # -------------------------------------------------
-        # MESSAGE CONTENT
-        # -------------------------------------------------
 
         content = message.content.strip()
 
@@ -1054,6 +807,12 @@ class TriggerManager(commands.Cog):
             message.guild.id
         )
 
+        print(
+            f"🔎 Triggers ativos "
+            f"para {message.guild.name}: "
+            f"{len(triggers)}"
+        )
+
         if not triggers:
 
             return
@@ -1064,7 +823,17 @@ class TriggerManager(commands.Cog):
 
         for trigger, response in triggers:
 
+            print(
+                f"🔍 A verificar trigger: "
+                f"{trigger!r}"
+            )
+
             if trigger in content_lower:
+
+                print(
+                    f"🎯 Trigger encontrado: "
+                    f"{trigger!r}"
+                )
 
                 try:
 
@@ -1077,29 +846,25 @@ class TriggerManager(commands.Cog):
                         )
                     )
 
+                    print(
+                        "✅ Resposta do trigger enviada."
+                    )
+
                 except discord.Forbidden:
 
                     print(
                         (
-                            "❌ Missing permission "
-                            f"to respond in "
-                            f"#{message.channel.name} "
-                            f"in {message.guild.name}"
+                            "❌ Sem permissão para "
+                            f"responder em #{message.channel.name} "
+                            f"em {message.guild.name}"
                         )
                     )
 
                 except discord.HTTPException as error:
 
                     print(
-                        (
-                            "❌ Trigger response "
-                            f"failed: {error}"
-                        )
+                        f"❌ Erro Discord ao responder: {error}"
                     )
-
-                # -------------------------------------------------
-                # ONLY ONE TRIGGER PER MESSAGE
-                # -------------------------------------------------
 
                 break
 
