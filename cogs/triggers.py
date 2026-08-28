@@ -916,3 +916,60 @@ async def setup(
                     f"{subcommand.name}"
                 )
 
+
+
+
+
+
+@commands.Cog.listener()
+async def on_message(self, message: discord.Message):
+
+    if message.author.bot:
+        return
+
+    print(
+        f"📩 Mensagem recebida: "
+        f"{message.content!r}"
+    )
+
+    if message.guild is None:
+        return
+
+    content = message.content.strip().lower()
+
+    if not content:
+        return
+
+    triggers = self.get_active_triggers(
+        message.guild.id
+    )
+
+    for trigger, response in triggers:
+
+        if trigger.lower() in content:
+
+            print(
+                f"🎯 Trigger encontrado: {trigger}"
+            )
+
+            try:
+
+                await message.channel.send(
+                    response,
+                    allowed_mentions=discord.AllowedMentions.none()
+                )
+
+            except discord.Forbidden:
+
+                print(
+                    "❌ Sem permissão para enviar "
+                    "mensagens neste canal."
+                )
+
+            except discord.HTTPException as error:
+
+                print(
+                    f"❌ Erro ao enviar resposta: {error}"
+                )
+
+            break
