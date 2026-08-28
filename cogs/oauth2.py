@@ -1,12 +1,13 @@
 
 import os
-import sqlite3
 import random
 import secrets
 
 from datetime import datetime
 
 import requests
+import psycopg2
+import psycopg2.extras
 
 from flask import (
     Flask,
@@ -53,9 +54,9 @@ BOT_TOKEN = os.getenv(
     "DISCORD_TOKEN"
 )
 
-DATABASE = os.getenv(
-    "DATABASE_PATH",
-    "data/misuki.db"
+# PostgreSQL
+DATABASE_URL = os.getenv(
+    "DATABASE_URL"
 )
 
 SECRET_KEY = os.getenv(
@@ -81,6 +82,21 @@ if not SECRET_KEY:
 
     print(
         "⚠️ Set FLASK_SECRET_KEY permanently in Render."
+    )
+
+
+# =========================================================
+# DATABASE CHECK
+# =========================================================
+
+if not DATABASE_URL:
+
+    print(
+        "❌ DATABASE_URL is missing."
+    )
+
+    print(
+        "❌ PostgreSQL is required for Misuki."
     )
 
 
@@ -136,91 +152,109 @@ DISCORD_API = (
 
 def database_connection():
 
-    directory = os.path.dirname(
-        DATABASE
-    )
+    if not DATABASE_URL:
 
-    if directory:
-
-        os.makedirs(
-            directory,
-            exist_ok=True
+        raise RuntimeError(
+            "DATABASE_URL is not configured."
         )
 
-    return sqlite3.connect(
-        DATABASE
+    return psycopg2.connect(
+        DATABASE_URL,
+        sslmode="require"
     )
 
 
 # =========================================================
-# REVIEWS DATABASE
+# DATABASE SETUP
 # =========================================================
 
-def create_reviews_database():
+def create_database():
 
-    with database_connection() as connection:
+    try:
 
-        connection.execute(
-            """
-            CREATE TABLE IF NOT EXISTS reviews (
+        with database_connection() as connection:
 
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+            with connection.cursor() as cursor:
 
-                user_id TEXT NOT NULL,
+                # -------------------------------------------------
+                # LICENSES
+                # -------------------------------------------------
 
-                username TEXT NOT NULL,
+                cursor.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS licenses (
 
-                avatar TEXT,
+                        guild_id BIGINT PRIMARY KEY,
 
-                review TEXT NOT NULL,
+                        license_key TEXT UNIQUE NOT NULL,
 
-                rating INTEGER NOT NULL,
+                        status TEXT NOT NULL
+                            DEFAULT 'active',
 
-                created_at TEXT NOT NULL
+                        expires_at TEXT,
 
-            )
-            """
+                        created_at TEXT NOT NULL
+
+                    )
+                    """
+                )
+
+
+                # -------------------------------------------------
+                # REVIEWS
+                # -------------------------------------------------
+
+                cursor.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS reviews (
+
+                        id SERIAL PRIMARY KEY,
+
+                        user_id TEXT NOT NULL,
+
+                        username TEXT NOT NULL,
+
+                        avatar TEXT,
+
+                        review TEXT NOT NULL,
+
+                        rating INTEGER NOT NULL,
+
+                        created_at TEXT NOT NULL
+
+                    )
+                    """
+                )
+
+
+                # -------------------------------------------------
+                # MIGRATION FOR OLD REVIEWS TABLE
+                # -------------------------------------------------
+
+                cursor.execute(
+                    """
+                    ALTER TABLE reviews
+                    ADD COLUMN IF NOT EXISTS avatar TEXT
+                    """
+                )
+
+
+                connection.commit()
+
+
+        print(
+            "✅ PostgreSQL database initialized."
         )
 
-        # -------------------------------------------------
-        # DATABASE MIGRATION
-        #
-        # If the old reviews table was created before the
-        # avatar column existed, CREATE TABLE IF NOT EXISTS
-        # will NOT add it.
-        #
-        # Therefore check the existing columns and add
-        # avatar when necessary.
-        # -------------------------------------------------
 
-        cursor = connection.cursor()
+    except Exception as error:
 
-        cursor.execute(
-            "PRAGMA table_info(reviews)"
+        print(
+            f"❌ Database initialization error: {error}"
         )
 
-        columns = {
-            row[1]
-            for row in cursor.fetchall()
-        }
 
-        if "avatar" not in columns:
-
-            connection.execute(
-                """
-                ALTER TABLE reviews
-                ADD COLUMN avatar TEXT
-                """
-            )
-
-            print(
-                "🛠️ Added missing 'avatar' column to reviews."
-            )
-
-        connection.commit()
-
-
-create_reviews_database()
+create_database()
 
 
 # =========================================================
@@ -231,27 +265,59 @@ def get_license(guild_id):
 
     try:
 
+        guild_id = int(
+            guild_id
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        return None
+
+
+    try:
+
         with database_connection() as connection:
 
-            cursor = connection.cursor()
+            with connection.cursor(
+                cursor_factory=psycopg2.extras.RealDictCursor
+            ) as cursor:
 
-            cursor.execute(
-                """
-                SELECT
-                    guild_id,
-                    license_key,
-                    status,
-                    expires_at,
-                    created_at
-                FROM licenses
-                WHERE guild_id = ?
-                """,
-                (
-                    guild_id,
+                cursor.execute(
+                    """
+                    SELECT
+                        guild_id,
+                        license_key,
+                        status,
+                        expires_at,
+                        created_at
+                    FROM licenses
+                    WHERE guild_id = %s
+                    LIMIT 1
+                    """,
+                    (
+                        guild_id,
+                    )
                 )
-            )
 
-            return cursor.fetchone()
+                row = cursor.fetchone()
+
+
+                if not row:
+
+                    return None
+
+
+                return (
+                    row["guild_id"],
+                    row["license_key"],
+                    row["status"],
+                    row["expires_at"],
+                    row["created_at"]
+                )
+
 
     except Exception as error:
 
@@ -263,7 +329,7 @@ def get_license(guild_id):
 
 
 # =========================================================
-# ACTIVE LICENSE
+# CHECK ACTIVE LICENSE
 # =========================================================
 
 def license_is_active(guild_id):
@@ -272,9 +338,11 @@ def license_is_active(guild_id):
         guild_id
     )
 
+
     if not license_data:
 
         return False
+
 
     status = license_data[2]
 
@@ -299,13 +367,18 @@ def license_is_active(guild_id):
         try:
 
             expiration = datetime.fromisoformat(
-                expires_at
+                str(expires_at)
             )
 
         except (
             ValueError,
             TypeError
         ):
+
+            print(
+                f"⚠️ Invalid expiration for guild "
+                f"{guild_id}: {expires_at}"
+            )
 
             return False
 
@@ -316,26 +389,30 @@ def license_is_active(guild_id):
 
                 with database_connection() as connection:
 
-                    connection.execute(
-                        """
-                        UPDATE licenses
+                    with connection.cursor() as cursor:
 
-                        SET status = 'expired'
+                        cursor.execute(
+                            """
+                            UPDATE licenses
 
-                        WHERE guild_id = ?
-                        """,
-                        (
-                            guild_id,
+                            SET status = 'expired'
+
+                            WHERE guild_id = %s
+                            """,
+                            (
+                                int(guild_id),
+                            )
                         )
-                    )
 
                     connection.commit()
+
 
             except Exception as error:
 
                 print(
                     f"❌ License expiration error: {error}"
                 )
+
 
             return False
 
@@ -344,12 +421,13 @@ def license_is_active(guild_id):
 
 
 # =========================================================
-# USER LICENSE
+# USER HAS ACTIVE LICENSE
 # =========================================================
 
 def user_has_license():
 
     guilds = get_user_guilds()
+
 
     for guild in guilds:
 
@@ -357,13 +435,131 @@ def user_has_license():
             "id"
         )
 
+
+        if not guild_id:
+
+            continue
+
+
         if license_is_active(
             guild_id
         ):
 
             return True
 
+
     return False
+
+
+# =========================================================
+# GET ALL ACTIVE LICENSE GUILD IDS
+# =========================================================
+
+def get_active_license_guild_ids():
+
+    active_ids = set()
+
+
+    try:
+
+        with database_connection() as connection:
+
+            with connection.cursor() as cursor:
+
+                cursor.execute(
+                    """
+                    SELECT
+                        guild_id,
+                        status,
+                        expires_at
+                    FROM licenses
+                    """
+                )
+
+                rows = cursor.fetchall()
+
+
+    except Exception as error:
+
+        print(
+            f"❌ Could not load licenses: {error}"
+        )
+
+        return active_ids
+
+
+    now = datetime.now()
+
+
+    for row in rows:
+
+        guild_id = row[0]
+
+        status = row[1]
+
+        expires_at = row[2]
+
+
+        if status != "active":
+
+            continue
+
+
+        if expires_at:
+
+            try:
+
+                expiration = datetime.fromisoformat(
+                    str(expires_at)
+                )
+
+            except (
+                ValueError,
+                TypeError
+            ):
+
+                continue
+
+
+            if now >= expiration:
+
+                try:
+
+                    with database_connection() as connection:
+
+                        with connection.cursor() as cursor:
+
+                            cursor.execute(
+                                """
+                                UPDATE licenses
+
+                                SET status = 'expired'
+
+                                WHERE guild_id = %s
+                                """,
+                                (
+                                    int(guild_id),
+                                )
+                            )
+
+                        connection.commit()
+
+                except Exception as error:
+
+                    print(
+                        f"❌ Failed to expire "
+                        f"license {guild_id}: {error}"
+                    )
+
+                continue
+
+
+        active_ids.add(
+            str(guild_id)
+        )
+
+
+    return active_ids
 
 
 # =========================================================
@@ -392,6 +588,7 @@ def get_user():
     access_token = session.get(
         "access_token"
     )
+
 
     if not access_token:
 
@@ -440,6 +637,7 @@ def get_user_guilds():
         "access_token"
     )
 
+
     if not access_token:
 
         return []
@@ -470,6 +668,11 @@ def get_user_guilds():
 
 
     if response.status_code != 200:
+
+        print(
+            f"❌ Discord guild request returned "
+            f"{response.status_code}"
+        )
 
         return []
 
@@ -630,9 +833,7 @@ body {
 }
 
 a {
-
     color: inherit;
-
     text-decoration: none;
 }
 
@@ -645,9 +846,6 @@ a {
 
     margin: auto;
 }
-
-
-/* HEADER */
 
 header {
 
@@ -678,7 +876,6 @@ header {
 }
 
 .logo span {
-
     color: #7289da;
 }
 
@@ -688,7 +885,6 @@ header {
 .hamburger {
 
     width: 45px;
-
     height: 40px;
 
     border:
@@ -725,7 +921,6 @@ header {
 .hamburger span {
 
     width: 20px;
-
     height: 2px;
 
     background: #ffffff;
@@ -741,11 +936,9 @@ header {
     position: fixed;
 
     top: 0;
-
     right: -360px;
 
     width: 350px;
-
     height: 100vh;
 
     background: #10131d;
@@ -778,7 +971,6 @@ header {
 }
 
 .menu.open {
-
     right: 0;
 }
 
@@ -833,7 +1025,6 @@ header {
 }
 
 .menu a:hover {
-
     color: #7289da;
 }
 
@@ -891,7 +1082,6 @@ header {
 .discord-icon {
 
     width: 21px;
-
     height: 21px;
 
     display: block;
@@ -922,7 +1112,6 @@ header {
 }
 
 .overlay.show {
-
     display: block;
 }
 
@@ -952,7 +1141,6 @@ header {
 }
 
 .hero h1 span {
-
     color: #7289da;
 }
 
@@ -1000,7 +1188,6 @@ header {
 /* SECTIONS */
 
 .section {
-
     padding:
         55px 0;
 }
@@ -1078,7 +1265,6 @@ header {
 .server-icon {
 
     width: 52px;
-
     height: 52px;
 
     border-radius: 15px;
@@ -1091,7 +1277,6 @@ header {
 .server-icon-placeholder {
 
     width: 52px;
-
     height: 52px;
 
     border-radius: 15px;
@@ -1130,17 +1315,17 @@ header {
 }
 
 
-/* SERVER BADGES */
+/* LICENSE BADGES */
 
-.server-badges {
+.badges {
 
     display: flex;
 
+    align-items: center;
+
+    gap: 8px;
+
     flex-wrap: wrap;
-
-    gap: 7px;
-
-    margin-top: 2px;
 }
 
 .badge {
@@ -1149,82 +1334,76 @@ header {
 
     align-items: center;
 
-    gap: 5px;
+    gap: 6px;
 
     padding:
-        5px 9px;
+        6px 9px;
 
-    border-radius: 999px;
+    border-radius: 8px;
 
-    font-size: 11px;
+    font-size: 12px;
 
     font-weight: 750;
 
     border:
-        1px solid transparent;
+        1px solid rgba(
+            255,
+            255,
+            255,
+            .08
+        );
 }
 
-.badge-success {
+.badge-active {
+
+    background:
+        rgba(
+            87,
+            242,
+            135,
+            .10
+        );
 
     color: #57f287;
-
-    background:
-        rgba(
-            87,
-            242,
-            135,
-            .10
-        );
-
-    border-color:
-        rgba(
-            87,
-            242,
-            135,
-            .18
-        );
 }
 
-.badge-danger {
-
-    color: #ed4245;
+.badge-none {
 
     background:
         rgba(
-            237,
-            66,
-            69,
-            .10
+            255,
+            255,
+            255,
+            .05
         );
 
-    border-color:
-        rgba(
-            237,
-            66,
-            69,
-            .18
-        );
+    color: #9da3b2;
 }
 
 .badge-warning {
 
-    color: #faa61a;
-
     background:
         rgba(
-            250,
-            166,
-            26,
+            255,
+            209,
+            102,
             .10
         );
 
-    border-color:
+    color: #ffd166;
+}
+
+.badge-expired {
+
+    background:
         rgba(
-            250,
-            166,
-            26,
-            .18
+            237,
+            66,
+            69,
+            .10
         );
+
+    color: #ed4245;
 }
 
 
@@ -1249,22 +1428,18 @@ header {
 }
 
 .manage {
-
     background: #5865f2;
 }
 
 .manage:hover {
-
     background: #6875ff;
 }
 
 .add {
-
     background: #3ba55d;
 }
 
 .add:hover {
-
     background: #43b968;
 }
 
@@ -1303,7 +1478,6 @@ header {
 }
 
 .review-card {
-
     min-height: 170px;
 }
 
@@ -1321,7 +1495,6 @@ header {
 .review-avatar {
 
     width: 42px;
-
     height: 42px;
 
     border-radius: 50%;
@@ -1334,10 +1507,6 @@ header {
     color: #c9ccd5;
 
     line-height: 1.6;
-
-    white-space: pre-wrap;
-
-    word-break: break-word;
 }
 
 .stars {
@@ -1405,7 +1574,6 @@ footer {
 }
 
 .footer-links a:hover {
-
     color: #7289da;
 }
 
@@ -1417,7 +1585,6 @@ footer {
     position: fixed;
 
     left: 20px;
-
     right: 20px;
 
     bottom: 20px;
@@ -1459,7 +1626,6 @@ footer {
 }
 
 .cookie h3 {
-
     margin-top: 0;
 }
 
@@ -1468,6 +1634,25 @@ footer {
     color: #aeb3c0;
 
     line-height: 1.5;
+}
+
+.cookie-links {
+
+    display: flex;
+
+    gap: 15px;
+
+    flex-wrap: wrap;
+
+    margin:
+        10px 0 18px;
+}
+
+.cookie-links a {
+
+    color: #8f98ff;
+
+    font-size: 13px;
 }
 
 .cookie-buttons {
@@ -1583,17 +1768,14 @@ footer {
 }
 
 .status-active {
-
     color: #57f287;
 }
 
 .status-expired {
-
     color: #ed4245;
 }
 
 .status-revoked {
-
     color: #ed4245;
 }
 
@@ -1603,13 +1785,11 @@ footer {
 @media (max-width: 600px) {
 
     .hero {
-
         padding:
             70px 0 50px;
     }
 
     .menu {
-
         width: 90%;
     }
 
@@ -1860,6 +2040,23 @@ COOKIE_BANNER = """
     </p>
 
 
+    <div class="cookie-links">
+
+        <a href="/cookies">
+            Cookie Policy
+        </a>
+
+        <a href="/privacy">
+            Privacy
+        </a>
+
+        <a href="/data">
+            Data
+        </a>
+
+    </div>
+
+
     <div class="cookie-buttons">
 
         <button
@@ -2081,7 +2278,6 @@ def login_callback():
         return render_page(
 
             """
-
             <section class="section">
 
                 <div class="container">
@@ -2109,7 +2305,6 @@ def login_callback():
                 </div>
 
             </section>
-
             """,
 
             error=error
@@ -2127,15 +2322,11 @@ def login_callback():
         return (
 
             """
-
-            <h1>
-                ❌ OAuth2 Error
-            </h1>
+            <h1>❌ OAuth2 Error</h1>
 
             <p>
                 No authorization code was received.
             </p>
-
             """,
 
             400
@@ -2158,10 +2349,6 @@ def login_callback():
             500
         )
 
-
-    # -----------------------------------------------------
-    # EXCHANGE LOGIN CODE
-    # -----------------------------------------------------
 
     token_data = {
 
@@ -2205,7 +2392,6 @@ def login_callback():
         return render_page(
 
             """
-
             <section class="section">
 
                 <div class="container">
@@ -2229,7 +2415,6 @@ def login_callback():
                 </div>
 
             </section>
-
             """,
 
             error=str(error)
@@ -2251,7 +2436,6 @@ def login_callback():
         return render_page(
 
             """
-
             <section class="section">
 
                 <div class="container">
@@ -2274,7 +2458,6 @@ def login_callback():
                 </div>
 
             </section>
-
             """,
 
             response=response.text
@@ -2293,11 +2476,8 @@ def login_callback():
     if not access_token:
 
         return (
-
             "❌ Discord did not return an access token.",
-
             400
-
         )
 
 
@@ -2323,22 +2503,16 @@ def login_callback():
     except Exception as error:
 
         return (
-
             f"❌ Failed to retrieve Discord user: {error}",
-
             500
-
         )
 
 
     if user_response.status_code != 200:
 
         return (
-
             "❌ Failed to retrieve Discord user.",
-
             400
-
         )
 
 
@@ -2346,7 +2520,7 @@ def login_callback():
 
 
     # -----------------------------------------------------
-    # SAVE NEXT URL BEFORE SESSION RESET
+    # NEXT URL
     # -----------------------------------------------------
 
     next_url = session.get(
@@ -2369,15 +2543,11 @@ def login_callback():
 
 
     # -----------------------------------------------------
-    # RESET OLD SESSION
+    # SESSION
     # -----------------------------------------------------
 
     session.clear()
 
-
-    # -----------------------------------------------------
-    # CREATE NEW SESSION
-    # -----------------------------------------------------
 
     session[
         "access_token"
@@ -2433,18 +2603,11 @@ def login_callback():
 
 
 # =========================================================
-# SEPARATE /callback
+# NORMAL OAUTH2 CALLBACK
 # =========================================================
 
 @app.route("/callback")
 def callback():
-
-    """
-    This endpoint is intentionally separate
-    from Discord login.
-
-    It belongs to the normal OAuth2/add-bot flow.
-    """
 
     error = request.args.get(
         "error"
@@ -2456,7 +2619,6 @@ def callback():
         return render_page(
 
             """
-
             <section class="section">
 
                 <div class="container">
@@ -2484,7 +2646,6 @@ def callback():
                 </div>
 
             </section>
-
             """,
 
             error=error
@@ -2500,21 +2661,9 @@ def callback():
     if not code:
 
         return (
-
-            """
-
-            <h1>
-                ❌ OAuth2 Error
-            </h1>
-
-            <p>
-                No authorization code was received.
-            </p>
-
-            """,
-
+            "<h1>❌ OAuth2 Error</h1>"
+            "<p>No authorization code was received.</p>",
             400
-
         )
 
 
@@ -2574,11 +2723,8 @@ def callback():
     except Exception as error:
 
         return (
-
             f"❌ OAuth2 request failed: {error}",
-
             500
-
         )
 
 
@@ -2594,20 +2740,15 @@ def callback():
 
 
         return (
-
             "<h1>❌ OAuth2 Error</h1>"
-            "<p>Failed to exchange "
-            "authorization code.</p>",
-
+            "<p>Failed to exchange authorization code.</p>",
             400
-
         )
 
 
     return render_page(
 
         """
-
         <section class="section">
 
             <div class="container">
@@ -2623,10 +2764,6 @@ def callback():
                         successfully completed.
                     </p>
 
-                    <p>
-                        You can return to Misuki.
-                    </p>
-
                     <a
                         href="/"
                         class="button manage"
@@ -2639,7 +2776,6 @@ def callback():
             </div>
 
         </section>
-
         """,
 
         user=get_user()
@@ -2678,7 +2814,6 @@ def index():
     return render_page(
 
         """
-
         <section class="hero">
 
             <div class="container">
@@ -2757,9 +2892,7 @@ def index():
                                         <div class="stars">
 
                                             {% for i in range(review.rating) %}
-
                                                 ★
-
                                             {% endfor %}
 
                                         </div>
@@ -2770,9 +2903,7 @@ def index():
 
 
                                 <div class="review-text">
-
                                     {{ review.review }}
-
                                 </div>
 
                             </div>
@@ -2792,7 +2923,6 @@ def index():
             </div>
 
         </section>
-
         """,
 
         user=user,
@@ -2823,28 +2953,14 @@ def dashboard():
         )
 
 
-    print(
-        "========== DASHBOARD =========="
-    )
-
-    print(
-        f"👤 User: {user.get('username')}"
-    )
-
-    print(
-        f"🔐 Session keys: "
-        f"{list(session.keys())}"
-    )
-
-    print(
-        "================================"
-    )
-
-
     user_guilds = get_user_guilds()
 
     bot_guilds = get_bot_guilds()
 
+
+    # -----------------------------------------------------
+    # BOT SERVER IDS
+    # -----------------------------------------------------
 
     bot_guild_ids = {
 
@@ -2854,7 +2970,18 @@ def dashboard():
 
         for guild in bot_guilds
 
+        if guild.get("id")
+
     }
+
+
+    # -----------------------------------------------------
+    # ACTIVE LICENSE IDS
+    # -----------------------------------------------------
+
+    active_license_ids = (
+        get_active_license_guild_ids()
+    )
 
 
     authorized = []
@@ -2862,69 +2989,101 @@ def dashboard():
     available = []
 
 
-    for guild in user_guilds:
+    # -----------------------------------------------------
+    # BUILD SERVER LIST
+    # -----------------------------------------------------
+
+    for original_guild in user_guilds:
+
+        guild = dict(
+            original_guild
+        )
+
 
         guild_id = str(
             guild.get("id")
         )
 
 
+        if not guild_id:
+
+            continue
+
+
         # -------------------------------------------------
         # LICENSE STATUS
         # -------------------------------------------------
 
-        has_license = license_is_active(
+        license_data = get_license(
             guild_id
         )
 
+
         guild[
-            "has_license"
-        ] = has_license
+            "license_data"
+        ] = license_data
+
+
+        guild[
+            "license_active"
+        ] = (
+            guild_id
+            in active_license_ids
+        )
+
+
+        if license_data:
+
+            status = license_data[2]
+
+        else:
+
+            status = "none"
+
+
+        guild[
+            "license_status"
+        ] = status
 
 
         # -------------------------------------------------
-        # BOT ALREADY IN SERVER
+        # AUTHORIZED
         # -------------------------------------------------
 
         if guild_id in bot_guild_ids:
-
-            guild[
-                "can_manage"
-            ] = can_manage_guild(
-                guild
-            )
 
             authorized.append(
                 guild
             )
 
+            continue
+
+
         # -------------------------------------------------
-        # BOT NOT IN SERVER
+        # AVAILABLE
         # -------------------------------------------------
 
-        else:
+        guild[
+            "can_add"
+        ] = can_manage_guild(
+            guild
+        )
 
-            guild[
-                "can_add"
-            ] = can_manage_guild(
-                guild
-            )
 
-            guild[
-                "invite_url"
-            ] = get_invite_url(
-                guild_id
-            )
+        guild[
+            "invite_url"
+        ] = get_invite_url(
+            guild_id
+        )
 
-            available.append(
-                guild
-            )
+
+        available.append(
+            guild
+        )
 
 
     # -----------------------------------------------------
-    # AVAILABLE SERVERS
-    #
-    # Servers where the user CAN add the bot come first.
+    # AVAILABLE ORDER
     # -----------------------------------------------------
 
     available.sort(
@@ -2941,7 +3100,6 @@ def dashboard():
     return render_page(
 
         """
-
         <section class="section">
 
             <div class="container">
@@ -2962,9 +3120,9 @@ def dashboard():
                 </p>
 
 
-                <!-- =================================================
-                     AUTHORIZED SERVERS
-                     ================================================= -->
+                <!-- ================================================= -->
+                <!-- AUTHORIZED -->
+                <!-- ================================================= -->
 
                 <h2
                     class="section-title"
@@ -3002,7 +3160,7 @@ def dashboard():
                                     {% endif %}
 
 
-                                    <div>
+                                    <div style="min-width:0;">
 
                                         <div class="server-name">
                                             {{ guild.name }}
@@ -3017,43 +3175,38 @@ def dashboard():
                                 </div>
 
 
-                                <!-- BADGES -->
+                                <div class="badges">
 
-                                <div class="server-badges">
-
-                                    {% if guild.has_license %}
+                                    {% if guild.license_active %}
 
                                         <span
-                                            class="badge badge-success"
+                                            class="badge badge-active"
                                         >
                                             License 🟢
                                         </span>
 
-                                    {% else %}
+                                    {% elif guild.license_status == "expired" %}
 
                                         <span
-                                            class="badge badge-danger"
+                                            class="badge badge-expired"
                                         >
                                             License 🔴
                                         </span>
 
-                                    {% endif %}
-
-
-                                    {% if guild.can_manage %}
+                                    {% elif guild.license_status == "revoked" %}
 
                                         <span
-                                            class="badge badge-success"
+                                            class="badge badge-expired"
                                         >
-                                            Manage 🟢
+                                            License ⛔
                                         </span>
 
                                     {% else %}
 
                                         <span
-                                            class="badge badge-warning"
+                                            class="badge badge-none"
                                         >
-                                            Manage ⚠️
+                                            License ⚪
                                         </span>
 
                                     {% endif %}
@@ -3083,9 +3236,9 @@ def dashboard():
                 {% endif %}
 
 
-                <!-- =================================================
-                     AVAILABLE SERVERS
-                     ================================================= -->
+                <!-- ================================================= -->
+                <!-- AVAILABLE -->
+                <!-- ================================================= -->
 
                 <h2
                     class="section-title"
@@ -3123,7 +3276,7 @@ def dashboard():
                                     {% endif %}
 
 
-                                    <div>
+                                    <div style="min-width:0;">
 
                                         <div class="server-name">
                                             {{ guild.name }}
@@ -3138,24 +3291,38 @@ def dashboard():
                                 </div>
 
 
-                                <!-- BADGES -->
+                                <div class="badges">
 
-                                <div class="server-badges">
-
-                                    {% if guild.has_license %}
+                                    {% if guild.license_active %}
 
                                         <span
-                                            class="badge badge-success"
+                                            class="badge badge-active"
                                         >
                                             License 🟢
+                                        </span>
+
+                                    {% elif guild.license_status == "expired" %}
+
+                                        <span
+                                            class="badge badge-expired"
+                                        >
+                                            License 🔴
+                                        </span>
+
+                                    {% elif guild.license_status == "revoked" %}
+
+                                        <span
+                                            class="badge badge-expired"
+                                        >
+                                            License ⛔
                                         </span>
 
                                     {% else %}
 
                                         <span
-                                            class="badge badge-danger"
+                                            class="badge badge-none"
                                         >
-                                            License 🔴
+                                            License ⚪
                                         </span>
 
                                     {% endif %}
@@ -3164,9 +3331,9 @@ def dashboard():
                                     {% if guild.can_add %}
 
                                         <span
-                                            class="badge badge-success"
+                                            class="badge badge-warning"
                                         >
-                                            Add 🟢
+                                            Add permission ✓
                                         </span>
 
                                     {% else %}
@@ -3174,7 +3341,7 @@ def dashboard():
                                         <span
                                             class="badge badge-warning"
                                         >
-                                            Add ⚠️
+                                            ⚠️ No authorization
                                         </span>
 
                                     {% endif %}
@@ -3196,7 +3363,7 @@ def dashboard():
                                     <div
                                         class="button blocked"
                                     >
-                                        🔒 Cannot Add
+                                        ⚠️ Cannot Add
                                     </div>
 
                                 {% endif %}
@@ -3235,7 +3402,6 @@ def dashboard():
             </div>
 
         </section>
-
         """,
 
         user=user,
@@ -3297,7 +3463,6 @@ def manage(guild_id):
         return render_page(
 
             """
-
             <section class="section">
 
                 <div class="container">
@@ -3318,7 +3483,6 @@ def manage(guild_id):
                 </div>
 
             </section>
-
             """,
 
             user=user
@@ -3337,6 +3501,8 @@ def manage(guild_id):
 
         for g in bot_guilds
 
+        if g.get("id")
+
     }
 
 
@@ -3352,31 +3518,14 @@ def manage(guild_id):
     )
 
 
-    # -----------------------------------------------------
-    # FORCE EXPIRATION CHECK
-    # -----------------------------------------------------
-
-    active_license = license_is_active(
+    license_active = license_is_active(
         guild_id
     )
-
-    if active_license:
-
-        license_data = get_license(
-            guild_id
-        )
-
-    else:
-
-        license_data = get_license(
-            guild_id
-        )
 
 
     return render_page(
 
         """
-
         <section class="section">
 
             <div class="container">
@@ -3441,7 +3590,7 @@ def manage(guild_id):
                             Status:
 
 
-                            {% if status == "active" %}
+                            {% if license_active %}
 
                                 <span
                                     class="status-active"
@@ -3468,7 +3617,7 @@ def manage(guild_id):
                             {% else %}
 
                                 <span>
-                                    {{ status }}
+                                    ⚪ {{ status }}
                                 </span>
 
                             {% endif %}
@@ -3477,24 +3626,18 @@ def manage(guild_id):
 
 
                         <p>
-
                             <strong>
                                 License Key
                             </strong>
-
                         </p>
 
 
                         <div class="license-key">
-
                             {{ license_data[1] }}
-
                         </div>
 
 
-                        <p
-                            style="margin-top:20px;"
-                        >
+                        <p style="margin-top:20px;">
 
                             <strong>
                                 Expires
@@ -3534,14 +3677,15 @@ def manage(guild_id):
             </div>
 
         </section>
-
         """,
 
         user=user,
 
         guild=guild,
 
-        license_data=license_data
+        license_data=license_data,
+
+        license_active=license_active
 
     )
 
@@ -3558,23 +3702,27 @@ def get_random_reviews(
 
         with database_connection() as connection:
 
-            cursor = connection.cursor()
+            with connection.cursor(
+                cursor_factory=psycopg2.extras.RealDictCursor
+            ) as cursor:
 
-            cursor.execute(
-                """
-                SELECT
-                    id,
-                    user_id,
-                    username,
-                    avatar,
-                    review,
-                    rating,
-                    created_at
-                FROM reviews
-                """
-            )
+                cursor.execute(
+                    """
+                    SELECT
+                        id,
+                        user_id,
+                        username,
+                        avatar,
+                        review,
+                        rating,
+                        created_at
+                    FROM reviews
+                    ORDER BY id DESC
+                    """
+                )
 
-            rows = cursor.fetchall()
+                rows = cursor.fetchall()
+
 
     except Exception as error:
 
@@ -3590,27 +3738,30 @@ def get_random_reviews(
 
     for row in rows:
 
-        reviews.append(
+        reviews.append({
 
-            {
+            "id":
+                row["id"],
 
-                "id": row[0],
+            "user_id":
+                row["user_id"],
 
-                "user_id": row[1],
+            "username":
+                row["username"],
 
-                "username": row[2],
+            "avatar":
+                row["avatar"],
 
-                "avatar": row[3],
+            "review":
+                row["review"],
 
-                "review": row[4],
+            "rating":
+                row["rating"],
 
-                "rating": row[5],
+            "created_at":
+                row["created_at"]
 
-                "created_at": row[6]
-
-            }
-
-        )
+        })
 
 
     random.shuffle(
@@ -3645,7 +3796,6 @@ def reviews():
     return render_page(
 
         """
-
         <section class="section">
 
             <div class="container">
@@ -3806,13 +3956,10 @@ def reviews():
                                             {{ review.username }}
                                         </strong>
 
-
                                         <div class="stars">
 
                                             {% for i in range(review.rating) %}
-
                                                 ★
-
                                             {% endfor %}
 
                                         </div>
@@ -3845,7 +3992,6 @@ def reviews():
             </div>
 
         </section>
-
         """,
 
         user=user,
@@ -3881,16 +4027,11 @@ def submit_review():
         )
 
 
-    # -----------------------------------------------------
-    # LICENSE REQUIRED
-    # -----------------------------------------------------
-
     if not user_has_license():
 
         return render_page(
 
             """
-
             <section class="section">
 
                 <div class="container">
@@ -3907,7 +4048,6 @@ def submit_review():
                             reviews.
                         </p>
 
-
                         <a
                             href="/reviews"
                             class="button manage"
@@ -3920,7 +4060,6 @@ def submit_review():
                 </div>
 
             </section>
-
             """,
 
             user=user
@@ -3946,7 +4085,10 @@ def submit_review():
             rating_raw
         )
 
-    except ValueError:
+    except (
+        ValueError,
+        TypeError
+    ):
 
         rating = 5
 
@@ -4022,43 +4164,51 @@ def submit_review():
 
         with database_connection() as connection:
 
-            connection.execute(
+            with connection.cursor() as cursor:
 
-                """
+                cursor.execute(
 
-                INSERT INTO reviews
-                (
-                    user_id,
-                    username,
-                    avatar,
-                    review,
-                    rating,
-                    created_at
+                    """
+                    INSERT INTO reviews
+                    (
+                        user_id,
+                        username,
+                        avatar,
+                        review,
+                        rating,
+                        created_at
+                    )
+
+                    VALUES (
+                        %s,
+                        %s,
+                        %s,
+                        %s,
+                        %s,
+                        %s
+                    )
+                    """,
+
+                    (
+
+                        user_id,
+
+                        username,
+
+                        avatar,
+
+                        review,
+
+                        rating,
+
+                        datetime.now().isoformat()
+
+                    )
+
                 )
-
-                VALUES (?, ?, ?, ?, ?, ?)
-
-                """,
-
-                (
-
-                    user_id,
-
-                    username,
-
-                    avatar,
-
-                    review,
-
-                    rating,
-
-                    datetime.now().isoformat()
-
-                )
-
-            )
 
             connection.commit()
+
 
     except Exception as error:
 
@@ -4069,7 +4219,6 @@ def submit_review():
         return render_page(
 
             """
-
             <section class="section">
 
                 <div class="container">
@@ -4081,8 +4230,7 @@ def submit_review():
                         </h1>
 
                         <p>
-                            Your review could not be
-                            saved right now.
+                            The review could not be saved.
                         </p>
 
                         <p>
@@ -4101,7 +4249,6 @@ def submit_review():
                 </div>
 
             </section>
-
             """,
 
             user=user,
@@ -4126,7 +4273,6 @@ def documentation():
     return render_page(
 
         """
-
         <section class="section">
 
             <div class="container">
@@ -4152,7 +4298,6 @@ def documentation():
             </div>
 
         </section>
-
         """
 
     )
@@ -4168,7 +4313,6 @@ def support():
     return render_page(
 
         """
-
         <section class="section">
 
             <div class="container">
@@ -4193,7 +4337,6 @@ def support():
             </div>
 
         </section>
-
         """
 
     )
@@ -4209,7 +4352,6 @@ def terms():
     return render_page(
 
         """
-
         <section class="section">
 
             <div class="container">
@@ -4237,7 +4379,6 @@ def terms():
             </div>
 
         </section>
-
         """
 
     )
@@ -4253,7 +4394,6 @@ def privacy():
     return render_page(
 
         """
-
         <section class="section">
 
             <div class="container">
@@ -4286,7 +4426,6 @@ def privacy():
             </div>
 
         </section>
-
         """
 
     )
@@ -4302,7 +4441,6 @@ def data_page():
     return render_page(
 
         """
-
         <section class="section">
 
             <div class="container">
@@ -4330,7 +4468,6 @@ def data_page():
             </div>
 
         </section>
-
         """
 
     )
@@ -4346,7 +4483,6 @@ def cookies_page():
     return render_page(
 
         """
-
         <section class="section">
 
             <div class="container">
@@ -4378,7 +4514,6 @@ def cookies_page():
             </div>
 
         </section>
-
         """
 
     )
@@ -4499,6 +4634,11 @@ if __name__ == "__main__":
     print(
         f"🤖 Bot Token configured: "
         f"{bool(BOT_TOKEN)}"
+    )
+
+    print(
+        f"🗄️ PostgreSQL configured: "
+        f"{bool(DATABASE_URL)}"
     )
 
     print(
