@@ -185,7 +185,7 @@ async def main():
     if not token:
 
         print(
-            "❌ DISCORD_TOKEN não está configurado."
+            "❌ DISCORD_BOT_TOKEN não está configurado."
         )
 
         return
