@@ -171,7 +171,7 @@ async def load_extensions():
 async def main():
 
     token = os.getenv(
-        "DISCORD_TOKEN"
+        "DISCORD_BOT_TOKEN"
     )
 
     database_url = os.getenv(
