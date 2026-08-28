@@ -2,3 +2,5 @@ gunicorn
 requests
 flask
 python-dotenv
+asyncpg
+psycopg2-binary
