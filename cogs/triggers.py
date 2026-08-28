@@ -54,7 +54,7 @@ class TriggerManager(commands.Cog):
         self.create_database()
 
     # =====================================================
-    # DATABASE SETUP
+    # DATABASE
     # =====================================================
 
     def create_database(self):
@@ -86,12 +86,99 @@ class TriggerManager(commands.Cog):
                         guild_id,
                         trigger
                     )
-
                 )
                 """
             )
 
             connection.commit()
+
+    # =====================================================
+    # GET CONFIG COG
+    # =====================================================
+
+    def get_config_cog(self):
+
+        return self.bot.get_cog(
+            "Config"
+        )
+
+    # =====================================================
+    # CHECK STAFF ACCESS
+    # =====================================================
+
+    def has_staff_access(
+        self,
+        interaction
+    ):
+
+        if interaction.guild is None:
+
+            return False
+
+        # -------------------------------------------------
+        # ADMINISTRATOR
+        # -------------------------------------------------
+
+        if interaction.user.guild_permissions.administrator:
+
+            return True
+
+        # -------------------------------------------------
+        # CONFIG COG
+        # -------------------------------------------------
+
+        config = self.get_config_cog()
+
+        if config is None:
+
+            return False
+
+        # -------------------------------------------------
+        # STAFF ROLES FROM SETUP
+        # -------------------------------------------------
+
+        staff_roles = config.get_roles(
+            interaction.guild.id,
+            "staff"
+        )
+
+        if not staff_roles:
+
+            return False
+
+        # -------------------------------------------------
+        # MEMBER ROLES
+        # -------------------------------------------------
+
+        user_role_ids = {
+            role.id
+            for role in interaction.user.roles
+        }
+
+        return bool(
+            user_role_ids.intersection(
+                staff_roles
+            )
+        )
+
+    # =====================================================
+    # ACCESS DENIED
+    # =====================================================
+
+    async def deny_access(
+        self,
+        interaction
+    ):
+
+        await interaction.response.send_message(
+            (
+                "❌ **Access denied.**\n\n"
+                "Only administrators or members "
+                "with a configured **Staff Role** "
+                "can manage triggers."
+            ),
+            ephemeral=True
+        )
 
     # =====================================================
     # ADD TRIGGER
@@ -132,7 +219,7 @@ class TriggerManager(commands.Cog):
                         trigger,
                         response,
                         created_by,
-                        datetime.utcnow().isoformat()
+                        datetime.now().isoformat()
                     )
                 )
 
@@ -341,9 +428,6 @@ class TriggerManager(commands.Cog):
         name="add",
         description="Create a new automatic trigger."
     )
-    @app_commands.default_permissions(
-        administrator=True
-    )
     @app_commands.describe(
         trigger="Text that activates the response.",
         response="Text the bot will send."
@@ -364,22 +448,23 @@ class TriggerManager(commands.Cog):
 
             return
 
-        trigger = trigger.strip()
-        response = response.strip()
+        if not self.has_staff_access(
+            interaction
+        ):
 
-        if not trigger:
-
-            await interaction.response.send_message(
-                "❌ The trigger cannot be empty.",
-                ephemeral=True
+            await self.deny_access(
+                interaction
             )
 
             return
 
-        if not response:
+        trigger = trigger.strip()
+        response = response.strip()
+
+        if not trigger or not response:
 
             await interaction.response.send_message(
-                "❌ The response cannot be empty.",
+                "❌ Trigger and response cannot be empty.",
                 ephemeral=True
             )
 
@@ -395,17 +480,14 @@ class TriggerManager(commands.Cog):
         if not success:
 
             await interaction.response.send_message(
-                (
-                    "❌ This trigger already exists "
-                    "in this server."
-                ),
+                "❌ This trigger already exists in this server.",
                 ephemeral=True
             )
 
             return
 
         embed = discord.Embed(
-            title="Trigger Created",
+            title="✅ Trigger Created",
             color=discord.Color.green()
         )
 
@@ -440,12 +522,6 @@ class TriggerManager(commands.Cog):
         name="remove",
         description="Remove an automatic trigger."
     )
-    @app_commands.default_permissions(
-        administrator=True
-    )
-    @app_commands.describe(
-        trigger="Trigger to remove."
-    )
     async def trigger_remove(
         self,
         interaction: discord.Interaction,
@@ -461,6 +537,16 @@ class TriggerManager(commands.Cog):
 
             return
 
+        if not self.has_staff_access(
+            interaction
+        ):
+
+            await self.deny_access(
+                interaction
+            )
+
+            return
+
         success = self.remove_trigger(
             interaction.guild.id,
             trigger
@@ -469,20 +555,14 @@ class TriggerManager(commands.Cog):
         if not success:
 
             await interaction.response.send_message(
-                (
-                    "❌ No trigger with that name "
-                    "was found."
-                ),
+                "❌ No trigger with that name was found.",
                 ephemeral=True
             )
 
             return
 
         await interaction.response.send_message(
-            (
-                f"🗑️ Trigger `{trigger}` "
-                "has been removed."
-            ),
+            f"🗑️ Trigger `{trigger}` has been removed.",
             ephemeral=True
         )
 
@@ -493,13 +573,6 @@ class TriggerManager(commands.Cog):
     @trigger_group.command(
         name="edit",
         description="Change the response of a trigger."
-    )
-    @app_commands.default_permissions(
-        administrator=True
-    )
-    @app_commands.describe(
-        trigger="Trigger to edit.",
-        response="New response."
     )
     async def trigger_edit(
         self,
@@ -517,31 +590,33 @@ class TriggerManager(commands.Cog):
 
             return
 
-        response = response.strip()
+        if not self.has_staff_access(
+            interaction
+        ):
+
+            await self.deny_access(
+                interaction
+            )
+
+            return
 
         success = self.edit_trigger(
             interaction.guild.id,
             trigger,
-            response
+            response.strip()
         )
 
         if not success:
 
             await interaction.response.send_message(
-                (
-                    "❌ No trigger with that name "
-                    "was found."
-                ),
+                "❌ No trigger with that name was found.",
                 ephemeral=True
             )
 
             return
 
         await interaction.response.send_message(
-            (
-                f"✏️ Trigger `{trigger}` "
-                "has been updated."
-            ),
+            f"✏️ Trigger `{trigger}` has been updated.",
             ephemeral=True
         )
 
@@ -552,9 +627,6 @@ class TriggerManager(commands.Cog):
     @trigger_group.command(
         name="list",
         description="List all triggers in this server."
-    )
-    @app_commands.default_permissions(
-        administrator=True
     )
     async def trigger_list(
         self,
@@ -570,6 +642,16 @@ class TriggerManager(commands.Cog):
 
             return
 
+        if not self.has_staff_access(
+            interaction
+        ):
+
+            await self.deny_access(
+                interaction
+            )
+
+            return
+
         triggers = self.get_triggers(
             interaction.guild.id
         )
@@ -577,17 +659,14 @@ class TriggerManager(commands.Cog):
         if not triggers:
 
             await interaction.response.send_message(
-                (
-                    "📭 This server does not have "
-                    "any triggers."
-                ),
+                "📭 This server does not have any triggers.",
                 ephemeral=True
             )
 
             return
 
         embed = discord.Embed(
-            title="Server Triggers",
+            title="📋 Server Triggers",
             color=discord.Color.blurple()
         )
 
@@ -654,12 +733,6 @@ class TriggerManager(commands.Cog):
         name="enable",
         description="Enable an automatic trigger."
     )
-    @app_commands.default_permissions(
-        administrator=True
-    )
-    @app_commands.describe(
-        trigger="Trigger to enable."
-    )
     async def trigger_enable(
         self,
         interaction: discord.Interaction,
@@ -675,6 +748,16 @@ class TriggerManager(commands.Cog):
 
             return
 
+        if not self.has_staff_access(
+            interaction
+        ):
+
+            await self.deny_access(
+                interaction
+            )
+
+            return
+
         success = self.set_enabled(
             interaction.guild.id,
             trigger,
@@ -684,20 +767,14 @@ class TriggerManager(commands.Cog):
         if not success:
 
             await interaction.response.send_message(
-                (
-                    "❌ No trigger with that name "
-                    "was found."
-                ),
+                "❌ No trigger with that name was found.",
                 ephemeral=True
             )
 
             return
 
         await interaction.response.send_message(
-            (
-                f"🟢 Trigger `{trigger}` "
-                "has been enabled."
-            ),
+            f"🟢 Trigger `{trigger}` has been enabled.",
             ephemeral=True
         )
 
@@ -708,12 +785,6 @@ class TriggerManager(commands.Cog):
     @trigger_group.command(
         name="disable",
         description="Disable an automatic trigger."
-    )
-    @app_commands.default_permissions(
-        administrator=True
-    )
-    @app_commands.describe(
-        trigger="Trigger to disable."
     )
     async def trigger_disable(
         self,
@@ -730,6 +801,16 @@ class TriggerManager(commands.Cog):
 
             return
 
+        if not self.has_staff_access(
+            interaction
+        ):
+
+            await self.deny_access(
+                interaction
+            )
+
+            return
+
         success = self.set_enabled(
             interaction.guild.id,
             trigger,
@@ -739,20 +820,14 @@ class TriggerManager(commands.Cog):
         if not success:
 
             await interaction.response.send_message(
-                (
-                    "❌ No trigger with that name "
-                    "was found."
-                ),
+                "❌ No trigger with that name was found.",
                 ephemeral=True
             )
 
             return
 
         await interaction.response.send_message(
-            (
-                f"🔴 Trigger `{trigger}` "
-                "has been disabled."
-            ),
+            f"🔴 Trigger `{trigger}` has been disabled.",
             ephemeral=True
         )
 
@@ -766,23 +841,37 @@ class TriggerManager(commands.Cog):
         message: discord.Message
     ):
 
-        # -------------------------------------------------
-        # DEBUG
-        # -------------------------------------------------
+        print(
+            "========== TRIGGER MESSAGE =========="
+        )
 
         print(
-            "📩 Mensagem recebida:",
+            "CONTENT:",
             repr(message.content)
         )
 
         print(
-            "👤 Autor:",
+            "AUTHOR:",
             message.author
         )
 
         print(
-            "🏠 Guild:",
+            "GUILD:",
             message.guild
+        )
+
+        print(
+            "CHANNEL:",
+            message.channel
+        )
+
+        print(
+            "IS BOT:",
+            message.author.bot
+        )
+
+        print(
+            "====================================="
         )
 
         # -------------------------------------------------
@@ -800,6 +889,10 @@ class TriggerManager(commands.Cog):
         if message.guild is None:
 
             return
+
+        # -------------------------------------------------
+        # CONTENT
+        # -------------------------------------------------
 
         content = message.content.strip()
 
@@ -822,7 +915,7 @@ class TriggerManager(commands.Cog):
             return
 
         # -------------------------------------------------
-        # CHECK TRIGGERS
+        # CHECK
         # -------------------------------------------------
 
         for trigger, response in triggers:
@@ -841,7 +934,10 @@ class TriggerManager(commands.Cog):
                     )
 
                     print(
-                        f"✅ Trigger ativado: {trigger}"
+                        (
+                            f"✅ Trigger activated: "
+                            f"{trigger}"
+                        )
                     )
 
                 except discord.Forbidden:
@@ -849,16 +945,17 @@ class TriggerManager(commands.Cog):
                     print(
                         (
                             "❌ Missing permission "
-                            f"to respond in #{message.channel} "
-                            f"in {message.guild.name}"
+                            "to send messages."
                         )
                     )
 
                 except discord.HTTPException as error:
 
                     print(
-                        "❌ Trigger response failed:",
-                        error
+                        (
+                            "❌ Trigger response "
+                            f"failed: {error}"
+                        )
                     )
 
                 break
@@ -896,7 +993,7 @@ async def setup(
     for command in commands_list:
 
         print(
-            f"   /{command.name}"
+            f"/{command.name}"
         )
 
         if isinstance(
@@ -907,7 +1004,7 @@ async def setup(
             for subcommand in command.commands:
 
                 print(
-                    f"      /{command.name} "
+                    f"   /{command.name} "
                     f"{subcommand.name}"
                 )
 

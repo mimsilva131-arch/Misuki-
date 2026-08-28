@@ -33,78 +33,6 @@ bot = commands.Bot(
 
 
 # =========================================================
-# MESSAGE DEBUG
-# =========================================================
-
-@bot.event
-async def on_message(
-    message: discord.Message
-):
-
-    print(
-        "========== MESSAGE EVENT =========="
-    )
-
-    print(
-        "CONTENT:",
-        repr(message.content)
-    )
-
-    print(
-        "AUTHOR:",
-        message.author
-    )
-
-    print(
-        "AUTHOR ID:",
-        message.author.id
-    )
-
-    print(
-        "GUILD:",
-        message.guild
-    )
-
-    print(
-        "GUILD ID:",
-        (
-            message.guild.id
-            if message.guild
-            else None
-        )
-    )
-
-    print(
-        "CHANNEL:",
-        message.channel
-    )
-
-    print(
-        "CHANNEL ID:",
-        message.channel.id
-    )
-
-    print(
-        "IS BOT:",
-        message.author.bot
-    )
-
-    print(
-        "==================================="
-    )
-
-    # -----------------------------------------------------
-    # IMPORTANT
-    # Allow normal prefix commands and Cogs to process
-    # the message.
-    # -----------------------------------------------------
-
-    await bot.process_commands(
-        message
-    )
-
-
-# =========================================================
 # READY
 # =========================================================
 
@@ -210,6 +138,7 @@ async def load_extensions():
         "cogs.utility",
         "cogs.licenses",
         "cogs.triggers",
+        "cogs.oauth2",
     ]
 
     for extension in extensions:
