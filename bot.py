@@ -8,7 +8,6 @@ import os
 import asyncio
 
 import discord
-
 from discord.ext import commands
 
 
@@ -122,6 +121,49 @@ async def on_ready():
 
 
 # =========================================================
+# MESSAGE HANDLER
+# =========================================================
+
+@bot.event
+async def on_message(
+    message: discord.Message
+):
+
+    # -----------------------------------------------------
+    # IGNORE BOTS
+    # -----------------------------------------------------
+
+    if message.author.bot:
+        return
+
+    # -----------------------------------------------------
+    # DEBUG
+    # -----------------------------------------------------
+
+    print(
+        f"📩 Mensagem recebida: "
+        f"{message.content!r}"
+    )
+
+    print(
+        f"👤 Autor: {message.author}"
+    )
+
+    print(
+        f"🏠 Guild: "
+        f"{message.guild.id if message.guild else None}"
+    )
+
+    # -----------------------------------------------------
+    # PROCESS COMMANDS
+    # -----------------------------------------------------
+
+    await bot.process_commands(
+        message
+    )
+
+
+# =========================================================
 # LOAD EXTENSIONS
 # =========================================================
 
@@ -166,6 +208,10 @@ async def load_extensions():
 
 async def main():
 
+    # -----------------------------------------------------
+    # TOKEN
+    # -----------------------------------------------------
+
     token = os.getenv(
         "DISCORD_TOKEN"
     )
@@ -178,7 +224,35 @@ async def main():
 
         return
 
+    # -----------------------------------------------------
+    # DATABASE
+    # -----------------------------------------------------
+
+    database_url = os.getenv(
+        "DATABASE_URL"
+    )
+
+    if not database_url:
+
+        print(
+            "❌ DATABASE_URL não está configurado."
+        )
+
+        return
+
+    print(
+        "🗄️ DATABASE_URL encontrada."
+    )
+
+    # -----------------------------------------------------
+    # LOAD COGS
+    # -----------------------------------------------------
+
     await load_extensions()
+
+    # -----------------------------------------------------
+    # START
+    # -----------------------------------------------------
 
     print(
         "🚀 Starting Discord bot..."
@@ -195,7 +269,15 @@ async def main():
 
 if __name__ == "__main__":
 
-    asyncio.run(
-        main()
-    )
+    try:
+
+        asyncio.run(
+            main()
+        )
+
+    except KeyboardInterrupt:
+
+        print(
+            "\n🛑 Bot stopped."
+        )
 

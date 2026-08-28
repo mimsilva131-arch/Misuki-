@@ -1,15 +1,15 @@
 
 # =========================================================
-# MISUKI TRIGGERS
-# Text Triggers + Automatic Responses
+# MISUKI
+# Trigger Manager
 # =========================================================
 
 import os
-import sqlite3
 
 from datetime import datetime
 
 import discord
+import psycopg2
 
 from discord import app_commands
 from discord.ext import commands
@@ -19,25 +19,8 @@ from discord.ext import commands
 # DATABASE
 # =========================================================
 
-BASE_DIR = os.path.dirname(
-    os.path.dirname(
-        os.path.abspath(__file__)
-    )
-)
-
-DATA_DIR = os.path.join(
-    BASE_DIR,
-    "data"
-)
-
-os.makedirs(
-    DATA_DIR,
-    exist_ok=True
-)
-
-DATABASE = os.path.join(
-    DATA_DIR,
-    "misuki.db"
+DATABASE_URL = os.getenv(
+    "DATABASE_URL"
 )
 
 
@@ -47,138 +30,233 @@ DATABASE = os.path.join(
 
 class TriggerManager(commands.Cog):
 
-    def __init__(self, bot):
+    def __init__(
+        self,
+        bot
+    ):
 
         self.bot = bot
 
         self.create_database()
 
+        print(
+            "TriggerManager carregado."
+        )
+
+
     # =====================================================
-    # DATABASE
+    # DATABASE CONNECTION
+    # =====================================================
+
+    def get_connection(self):
+
+        if not DATABASE_URL:
+
+            raise RuntimeError(
+                "DATABASE_URL não está configurado."
+            )
+
+        return psycopg2.connect(
+            DATABASE_URL
+        )
+
+
+    # =====================================================
+    # CREATE DATABASE
     # =====================================================
 
     def create_database(self):
 
-        with sqlite3.connect(
-            DATABASE
-        ) as connection:
+        with self.get_connection() as connection:
 
-            connection.execute(
-                """
-                CREATE TABLE IF NOT EXISTS triggers (
+            with connection.cursor() as cursor:
 
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                cursor.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS triggers (
 
-                    guild_id INTEGER NOT NULL,
+                        id SERIAL PRIMARY KEY,
 
-                    trigger TEXT NOT NULL,
+                        guild_id BIGINT NOT NULL,
 
-                    response TEXT NOT NULL,
+                        trigger TEXT NOT NULL,
 
-                    enabled INTEGER NOT NULL
-                    DEFAULT 1,
+                        response TEXT NOT NULL,
 
-                    created_by INTEGER NOT NULL,
+                        enabled BOOLEAN NOT NULL
+                        DEFAULT TRUE,
 
-                    created_at TEXT NOT NULL,
+                        created_at TIMESTAMP NOT NULL
+                        DEFAULT CURRENT_TIMESTAMP,
 
-                    UNIQUE (
+                        UNIQUE (
+                            guild_id,
+                            trigger
+                        )
+
+                    )
+                    """
+                )
+
+            connection.commit()
+
+
+    # =====================================================
+    # CHECK LICENSE
+    # =====================================================
+
+    def has_active_license(
+        self,
+        guild_id
+    ):
+
+        with self.get_connection() as connection:
+
+            with connection.cursor() as cursor:
+
+                cursor.execute(
+                    """
+                    SELECT
+                        status,
+                        expires_at
+                    FROM licenses
+                    WHERE guild_id = %s
+                    """,
+                    (
+                        guild_id,
+                    )
+                )
+
+                license_data = cursor.fetchone()
+
+        if license_data is None:
+
+            return False
+
+        status = license_data[0]
+        expires_at = license_data[1]
+
+        if status != "active":
+
+            return False
+
+        if expires_at is None:
+
+            return True
+
+        # PostgreSQL pode devolver diretamente
+        # um datetime.
+
+        if isinstance(
+            expires_at,
+            datetime
+        ):
+
+            expiration = expires_at
+
+        else:
+
+            try:
+
+                expiration = datetime.fromisoformat(
+                    str(expires_at)
+                )
+
+            except ValueError:
+
+                return False
+
+        if datetime.now() >= expiration:
+
+            with self.get_connection() as connection:
+
+                with connection.cursor() as cursor:
+
+                    cursor.execute(
+                        """
+                        UPDATE licenses
+                        SET status = 'expired'
+                        WHERE guild_id = %s
+                        """,
+                        (
+                            guild_id,
+                        )
+                    )
+
+                connection.commit()
+
+            return False
+
+        return True
+
+
+    # =====================================================
+    # GET TRIGGER
+    # =====================================================
+
+    def get_trigger(
+        self,
+        guild_id,
+        trigger
+    ):
+
+        with self.get_connection() as connection:
+
+            with connection.cursor() as cursor:
+
+                cursor.execute(
+                    """
+                    SELECT
+                        id,
+                        guild_id,
+                        trigger,
+                        response,
+                        enabled,
+                        created_at
+                    FROM triggers
+                    WHERE guild_id = %s
+                    AND LOWER(trigger) = LOWER(%s)
+                    """,
+                    (
                         guild_id,
                         trigger
                     )
                 )
-                """
-            )
 
-            connection.commit()
+                return cursor.fetchone()
 
-    # =====================================================
-    # GET CONFIG COG
-    # =====================================================
-
-    def get_config_cog(self):
-
-        return self.bot.get_cog(
-            "Config"
-        )
 
     # =====================================================
-    # CHECK STAFF ACCESS
+    # GET ALL TRIGGERS
     # =====================================================
 
-    def has_staff_access(
+    def get_triggers(
         self,
-        interaction
+        guild_id
     ):
 
-        if interaction.guild is None:
+        with self.get_connection() as connection:
 
-            return False
+            with connection.cursor() as cursor:
 
-        # -------------------------------------------------
-        # ADMINISTRATOR
-        # -------------------------------------------------
+                cursor.execute(
+                    """
+                    SELECT
+                        id,
+                        trigger,
+                        response,
+                        enabled
+                    FROM triggers
+                    WHERE guild_id = %s
+                    ORDER BY trigger ASC
+                    """,
+                    (
+                        guild_id,
+                    )
+                )
 
-        if interaction.user.guild_permissions.administrator:
+                return cursor.fetchall()
 
-            return True
-
-        # -------------------------------------------------
-        # CONFIG COG
-        # -------------------------------------------------
-
-        config = self.get_config_cog()
-
-        if config is None:
-
-            return False
-
-        # -------------------------------------------------
-        # STAFF ROLES FROM SETUP
-        # -------------------------------------------------
-
-        staff_roles = config.get_roles(
-            interaction.guild.id,
-            "staff"
-        )
-
-        if not staff_roles:
-
-            return False
-
-        # -------------------------------------------------
-        # MEMBER ROLES
-        # -------------------------------------------------
-
-        user_role_ids = {
-            role.id
-            for role in interaction.user.roles
-        }
-
-        return bool(
-            user_role_ids.intersection(
-                staff_roles
-            )
-        )
-
-    # =====================================================
-    # ACCESS DENIED
-    # =====================================================
-
-    async def deny_access(
-        self,
-        interaction
-    ):
-
-        await interaction.response.send_message(
-            (
-                "❌ **Access denied.**\n\n"
-                "Only administrators or members "
-                "with a configured **Staff Role** "
-                "can manage triggers."
-            ),
-            ephemeral=True
-        )
 
     # =====================================================
     # ADD TRIGGER
@@ -188,48 +266,39 @@ class TriggerManager(commands.Cog):
         self,
         guild_id,
         trigger,
-        response,
-        created_by
+        response
     ):
 
-        trigger = trigger.strip().lower()
+        with self.get_connection() as connection:
 
-        with sqlite3.connect(
-            DATABASE
-        ) as connection:
+            with connection.cursor() as cursor:
 
-            try:
-
-                connection.execute(
+                cursor.execute(
                     """
                     INSERT INTO triggers
                     (
                         guild_id,
                         trigger,
                         response,
-                        enabled,
-                        created_by,
-                        created_at
+                        enabled
                     )
-
-                    VALUES (?, ?, ?, 1, ?, ?)
+                    VALUES
+                    (
+                        %s,
+                        %s,
+                        %s,
+                        TRUE
+                    )
                     """,
                     (
                         guild_id,
                         trigger,
-                        response,
-                        created_by,
-                        datetime.now().isoformat()
+                        response
                     )
                 )
 
-                connection.commit()
+            connection.commit()
 
-                return True
-
-            except sqlite3.IntegrityError:
-
-                return False
 
     # =====================================================
     # REMOVE TRIGGER
@@ -241,29 +310,30 @@ class TriggerManager(commands.Cog):
         trigger
     ):
 
-        trigger = trigger.strip().lower()
+        with self.get_connection() as connection:
 
-        with sqlite3.connect(
-            DATABASE
-        ) as connection:
+            with connection.cursor() as cursor:
 
-            cursor = connection.execute(
-                """
-                DELETE FROM triggers
-
-                WHERE guild_id = ?
-
-                AND trigger = ?
-                """,
-                (
-                    guild_id,
-                    trigger
+                cursor.execute(
+                    """
+                    DELETE FROM triggers
+                    WHERE guild_id = %s
+                    AND LOWER(trigger) = LOWER(%s)
+                    """,
+                    (
+                        guild_id,
+                        trigger
+                    )
                 )
-            )
+
+                deleted = (
+                    cursor.rowcount > 0
+                )
 
             connection.commit()
 
-            return cursor.rowcount > 0
+        return deleted
+
 
     # =====================================================
     # EDIT TRIGGER
@@ -276,149 +346,114 @@ class TriggerManager(commands.Cog):
         response
     ):
 
-        trigger = trigger.strip().lower()
+        with self.get_connection() as connection:
 
-        with sqlite3.connect(
-            DATABASE
-        ) as connection:
+            with connection.cursor() as cursor:
 
-            cursor = connection.execute(
-                """
-                UPDATE triggers
-
-                SET response = ?
-
-                WHERE guild_id = ?
-
-                AND trigger = ?
-                """,
-                (
-                    response,
-                    guild_id,
-                    trigger
+                cursor.execute(
+                    """
+                    UPDATE triggers
+                    SET response = %s
+                    WHERE guild_id = %s
+                    AND LOWER(trigger) = LOWER(%s)
+                    """,
+                    (
+                        response,
+                        guild_id,
+                        trigger
+                    )
                 )
-            )
+
+                updated = (
+                    cursor.rowcount > 0
+                )
 
             connection.commit()
 
-            return cursor.rowcount > 0
+        return updated
+
 
     # =====================================================
-    # ENABLE / DISABLE
+    # ENABLE
     # =====================================================
 
-    def set_enabled(
+    def enable_trigger(
         self,
         guild_id,
-        trigger,
-        enabled
+        trigger
     ):
 
-        trigger = trigger.strip().lower()
+        with self.get_connection() as connection:
 
-        with sqlite3.connect(
-            DATABASE
-        ) as connection:
+            with connection.cursor() as cursor:
 
-            cursor = connection.execute(
-                """
-                UPDATE triggers
-
-                SET enabled = ?
-
-                WHERE guild_id = ?
-
-                AND trigger = ?
-                """,
-                (
-                    1 if enabled else 0,
-                    guild_id,
-                    trigger
+                cursor.execute(
+                    """
+                    UPDATE triggers
+                    SET enabled = TRUE
+                    WHERE guild_id = %s
+                    AND LOWER(trigger) = LOWER(%s)
+                    """,
+                    (
+                        guild_id,
+                        trigger
+                    )
                 )
-            )
+
+                updated = (
+                    cursor.rowcount > 0
+                )
 
             connection.commit()
 
-            return cursor.rowcount > 0
+        return updated
+
 
     # =====================================================
-    # GET TRIGGERS
+    # DISABLE
     # =====================================================
 
-    def get_triggers(
+    def disable_trigger(
         self,
-        guild_id
+        guild_id,
+        trigger
     ):
 
-        with sqlite3.connect(
-            DATABASE
-        ) as connection:
+        with self.get_connection() as connection:
 
-            cursor = connection.execute(
-                """
-                SELECT
-                    id,
-                    trigger,
-                    response,
-                    enabled,
-                    created_by,
-                    created_at
+            with connection.cursor() as cursor:
 
-                FROM triggers
-
-                WHERE guild_id = ?
-
-                ORDER BY id ASC
-                """,
-                (
-                    guild_id,
+                cursor.execute(
+                    """
+                    UPDATE triggers
+                    SET enabled = FALSE
+                    WHERE guild_id = %s
+                    AND LOWER(trigger) = LOWER(%s)
+                    """,
+                    (
+                        guild_id,
+                        trigger
+                    )
                 )
-            )
 
-            return cursor.fetchall()
-
-    # =====================================================
-    # GET ACTIVE TRIGGERS
-    # =====================================================
-
-    def get_active_triggers(
-        self,
-        guild_id
-    ):
-
-        with sqlite3.connect(
-            DATABASE
-        ) as connection:
-
-            cursor = connection.execute(
-                """
-                SELECT
-                    trigger,
-                    response
-
-                FROM triggers
-
-                WHERE guild_id = ?
-
-                AND enabled = 1
-
-                ORDER BY LENGTH(trigger) DESC
-                """,
-                (
-                    guild_id,
+                updated = (
+                    cursor.rowcount > 0
                 )
-            )
 
-            return cursor.fetchall()
+            connection.commit()
+
+        return updated
+
 
     # =====================================================
-    # /TRIGGER
+    # TRIGGER GROUP
     # =====================================================
 
     trigger_group = app_commands.Group(
         name="trigger",
-        description="Manage automatic text triggers."
+        description="Manage Misuki triggers."
     )
+
 
     # =====================================================
     # /TRIGGER ADD
@@ -426,17 +461,20 @@ class TriggerManager(commands.Cog):
 
     @trigger_group.command(
         name="add",
-        description="Create a new automatic trigger."
+        description="Create a new trigger."
     )
     @app_commands.describe(
-        trigger="Text that activates the response.",
-        response="Text the bot will send."
+        trigger="The word or phrase that activates the trigger.",
+        response="The response sent by Misuki."
+    )
+    @app_commands.default_permissions(
+        manage_guild=True
     )
     async def trigger_add(
         self,
         interaction: discord.Interaction,
-        trigger: app_commands.Range[str, 1, 100],
-        response: app_commands.Range[str, 1, 2000]
+        trigger: str,
+        response: str
     ):
 
         if interaction.guild is None:
@@ -448,39 +486,74 @@ class TriggerManager(commands.Cog):
 
             return
 
-        if not self.has_staff_access(
-            interaction
+        if not self.has_active_license(
+            interaction.guild.id
         ):
 
-            await self.deny_access(
-                interaction
-            )
-
-            return
-
-        trigger = trigger.strip()
-        response = response.strip()
-
-        if not trigger or not response:
-
             await interaction.response.send_message(
-                "❌ Trigger and response cannot be empty.",
+                (
+                    "🔒 **Premium feature**\n\n"
+                    "This server does not have "
+                    "an active Misuki license."
+                ),
                 ephemeral=True
             )
 
             return
 
-        success = self.add_trigger(
-            interaction.guild.id,
-            trigger,
-            response,
-            interaction.user.id
-        )
+        trigger = trigger.strip()
 
-        if not success:
+        if not trigger:
 
             await interaction.response.send_message(
-                "❌ This trigger already exists in this server.",
+                "❌ The trigger cannot be empty.",
+                ephemeral=True
+            )
+
+            return
+
+        if not response.strip():
+
+            await interaction.response.send_message(
+                "❌ The response cannot be empty.",
+                ephemeral=True
+            )
+
+            return
+
+        existing = self.get_trigger(
+            interaction.guild.id,
+            trigger
+        )
+
+        if existing:
+
+            await interaction.response.send_message(
+                (
+                    f"❌ The trigger "
+                    f"`{trigger}` already exists."
+                ),
+                ephemeral=True
+            )
+
+            return
+
+        try:
+
+            self.add_trigger(
+                interaction.guild.id,
+                trigger,
+                response
+            )
+
+        except Exception as error:
+
+            print(
+                f"❌ Error adding trigger: {error}"
+            )
+
+            await interaction.response.send_message(
+                "❌ Could not create the trigger.",
                 ephemeral=True
             )
 
@@ -514,13 +587,20 @@ class TriggerManager(commands.Cog):
             ephemeral=True
         )
 
+
     # =====================================================
     # /TRIGGER REMOVE
     # =====================================================
 
     @trigger_group.command(
         name="remove",
-        description="Remove an automatic trigger."
+        description="Remove a trigger."
+    )
+    @app_commands.describe(
+        trigger="The trigger to remove."
+    )
+    @app_commands.default_permissions(
+        manage_guild=True
     )
     async def trigger_remove(
         self,
@@ -537,34 +617,46 @@ class TriggerManager(commands.Cog):
 
             return
 
-        if not self.has_staff_access(
-            interaction
+        if not self.has_active_license(
+            interaction.guild.id
         ):
 
-            await self.deny_access(
-                interaction
+            await interaction.response.send_message(
+                (
+                    "🔒 **Premium feature**\n\n"
+                    "This server does not have "
+                    "an active Misuki license."
+                ),
+                ephemeral=True
             )
 
             return
 
         success = self.remove_trigger(
             interaction.guild.id,
-            trigger
+            trigger.strip()
         )
 
         if not success:
 
             await interaction.response.send_message(
-                "❌ No trigger with that name was found.",
+                (
+                    f"❌ Trigger `{trigger}` "
+                    "was not found."
+                ),
                 ephemeral=True
             )
 
             return
 
         await interaction.response.send_message(
-            f"🗑️ Trigger `{trigger}` has been removed.",
+            (
+                f"🗑️ Trigger `{trigger}` "
+                "**removed successfully.**"
+            ),
             ephemeral=True
         )
+
 
     # =====================================================
     # /TRIGGER EDIT
@@ -572,13 +664,20 @@ class TriggerManager(commands.Cog):
 
     @trigger_group.command(
         name="edit",
-        description="Change the response of a trigger."
+        description="Edit a trigger response."
+    )
+    @app_commands.describe(
+        trigger="The trigger to edit.",
+        response="The new response."
+    )
+    @app_commands.default_permissions(
+        manage_guild=True
     )
     async def trigger_edit(
         self,
         interaction: discord.Interaction,
         trigger: str,
-        response: app_commands.Range[str, 1, 2000]
+        response: str
     ):
 
         if interaction.guild is None:
@@ -590,35 +689,56 @@ class TriggerManager(commands.Cog):
 
             return
 
-        if not self.has_staff_access(
-            interaction
+        if not self.has_active_license(
+            interaction.guild.id
         ):
 
-            await self.deny_access(
-                interaction
+            await interaction.response.send_message(
+                (
+                    "🔒 **Premium feature**\n\n"
+                    "This server does not have "
+                    "an active Misuki license."
+                ),
+                ephemeral=True
+            )
+
+            return
+
+        if not response.strip():
+
+            await interaction.response.send_message(
+                "❌ The response cannot be empty.",
+                ephemeral=True
             )
 
             return
 
         success = self.edit_trigger(
             interaction.guild.id,
-            trigger,
-            response.strip()
+            trigger.strip(),
+            response
         )
 
         if not success:
 
             await interaction.response.send_message(
-                "❌ No trigger with that name was found.",
+                (
+                    f"❌ Trigger `{trigger}` "
+                    "was not found."
+                ),
                 ephemeral=True
             )
 
             return
 
         await interaction.response.send_message(
-            f"✏️ Trigger `{trigger}` has been updated.",
+            (
+                f"✏️ Trigger `{trigger}` "
+                "**updated successfully.**"
+            ),
             ephemeral=True
         )
+
 
     # =====================================================
     # /TRIGGER LIST
@@ -626,7 +746,10 @@ class TriggerManager(commands.Cog):
 
     @trigger_group.command(
         name="list",
-        description="List all triggers in this server."
+        description="List all triggers."
+    )
+    @app_commands.default_permissions(
+        manage_guild=True
     )
     async def trigger_list(
         self,
@@ -642,12 +765,17 @@ class TriggerManager(commands.Cog):
 
             return
 
-        if not self.has_staff_access(
-            interaction
+        if not self.has_active_license(
+            interaction.guild.id
         ):
 
-            await self.deny_access(
-                interaction
+            await interaction.response.send_message(
+                (
+                    "🔒 **Premium feature**\n\n"
+                    "This server does not have "
+                    "an active Misuki license."
+                ),
+                ephemeral=True
             )
 
             return
@@ -659,16 +787,11 @@ class TriggerManager(commands.Cog):
         if not triggers:
 
             await interaction.response.send_message(
-                "📭 This server does not have any triggers.",
+                "📭 This server has no triggers.",
                 ephemeral=True
             )
 
             return
-
-        embed = discord.Embed(
-            title="📋 Server Triggers",
-            color=discord.Color.blurple()
-        )
 
         lines = []
 
@@ -676,9 +799,7 @@ class TriggerManager(commands.Cog):
             trigger_id,
             trigger,
             response,
-            enabled,
-            created_by,
-            created_at
+            enabled
         ) in triggers:
 
             status = (
@@ -687,43 +808,39 @@ class TriggerManager(commands.Cog):
                 else "🔴"
             )
 
-            preview = response.replace(
-                "\n",
-                " "
-            )
-
-            if len(preview) > 100:
-
-                preview = (
-                    preview[:97]
-                    + "..."
-                )
-
             lines.append(
-                (
-                    f"{status} "
-                    f"`{trigger}` → "
-                    f"{preview}"
-                )
+                f"{status} `{trigger}` → {response}"
             )
 
         description = "\n".join(
             lines
         )
 
+        # Discord embed descriptions have a
+        # 4096-character limit.
+
         if len(description) > 4000:
 
             description = (
-                description[:3997]
-                + "..."
+                description[:3990]
+                + "\n..."
             )
 
-        embed.description = description
+        embed = discord.Embed(
+            title="📋 Misuki Triggers",
+            description=description,
+            color=discord.Color.blurple()
+        )
+
+        embed.set_footer(
+            text=f"{len(triggers)} trigger(s)"
+        )
 
         await interaction.response.send_message(
             embed=embed,
             ephemeral=True
         )
+
 
     # =====================================================
     # /TRIGGER ENABLE
@@ -731,7 +848,13 @@ class TriggerManager(commands.Cog):
 
     @trigger_group.command(
         name="enable",
-        description="Enable an automatic trigger."
+        description="Enable a trigger."
+    )
+    @app_commands.describe(
+        trigger="The trigger to enable."
+    )
+    @app_commands.default_permissions(
+        manage_guild=True
     )
     async def trigger_enable(
         self,
@@ -748,35 +871,46 @@ class TriggerManager(commands.Cog):
 
             return
 
-        if not self.has_staff_access(
-            interaction
+        if not self.has_active_license(
+            interaction.guild.id
         ):
 
-            await self.deny_access(
-                interaction
+            await interaction.response.send_message(
+                (
+                    "🔒 **Premium feature**\n\n"
+                    "This server does not have "
+                    "an active Misuki license."
+                ),
+                ephemeral=True
             )
 
             return
 
-        success = self.set_enabled(
+        success = self.enable_trigger(
             interaction.guild.id,
-            trigger,
-            True
+            trigger.strip()
         )
 
         if not success:
 
             await interaction.response.send_message(
-                "❌ No trigger with that name was found.",
+                (
+                    f"❌ Trigger `{trigger}` "
+                    "was not found."
+                ),
                 ephemeral=True
             )
 
             return
 
         await interaction.response.send_message(
-            f"🟢 Trigger `{trigger}` has been enabled.",
+            (
+                f"🟢 Trigger `{trigger}` "
+                "**enabled.**"
+            ),
             ephemeral=True
         )
+
 
     # =====================================================
     # /TRIGGER DISABLE
@@ -784,7 +918,13 @@ class TriggerManager(commands.Cog):
 
     @trigger_group.command(
         name="disable",
-        description="Disable an automatic trigger."
+        description="Disable a trigger."
+    )
+    @app_commands.describe(
+        trigger="The trigger to disable."
+    )
+    @app_commands.default_permissions(
+        manage_guild=True
     )
     async def trigger_disable(
         self,
@@ -801,35 +941,46 @@ class TriggerManager(commands.Cog):
 
             return
 
-        if not self.has_staff_access(
-            interaction
+        if not self.has_active_license(
+            interaction.guild.id
         ):
 
-            await self.deny_access(
-                interaction
+            await interaction.response.send_message(
+                (
+                    "🔒 **Premium feature**\n\n"
+                    "This server does not have "
+                    "an active Misuki license."
+                ),
+                ephemeral=True
             )
 
             return
 
-        success = self.set_enabled(
+        success = self.disable_trigger(
             interaction.guild.id,
-            trigger,
-            False
+            trigger.strip()
         )
 
         if not success:
 
             await interaction.response.send_message(
-                "❌ No trigger with that name was found.",
+                (
+                    f"❌ Trigger `{trigger}` "
+                    "was not found."
+                ),
                 ephemeral=True
             )
 
             return
 
         await interaction.response.send_message(
-            f"🔴 Trigger `{trigger}` has been disabled.",
+            (
+                f"🔴 Trigger `{trigger}` "
+                "**disabled.**"
+            ),
             ephemeral=True
         )
+
 
     # =====================================================
     # MESSAGE LISTENER
@@ -841,122 +992,131 @@ class TriggerManager(commands.Cog):
         message: discord.Message
     ):
 
-        print(
-            "========== TRIGGER MESSAGE =========="
-        )
-
-        print(
-            "CONTENT:",
-            repr(message.content)
-        )
-
-        print(
-            "AUTHOR:",
-            message.author
-        )
-
-        print(
-            "GUILD:",
-            message.guild
-        )
-
-        print(
-            "CHANNEL:",
-            message.channel
-        )
-
-        print(
-            "IS BOT:",
-            message.author.bot
-        )
-
-        print(
-            "====================================="
-        )
-
         # -------------------------------------------------
         # IGNORE BOTS
         # -------------------------------------------------
 
         if message.author.bot:
-
             return
 
         # -------------------------------------------------
-        # IGNORE DMs
+        # IGNORE DMS
         # -------------------------------------------------
 
         if message.guild is None:
-
             return
 
         # -------------------------------------------------
-        # CONTENT
+        # MESSAGE CONTENT
         # -------------------------------------------------
 
-        content = message.content.strip()
+        content = message.content
 
         if not content:
 
+            print(
+                "⚠️ Mensagem sem conteúdo recebida "
+                f"no servidor {message.guild.id}."
+            )
+
             return
+
+        # -------------------------------------------------
+        # DATABASE
+        # -------------------------------------------------
+
+        try:
+
+            with self.get_connection() as connection:
+
+                with connection.cursor() as cursor:
+
+                    cursor.execute(
+                        """
+                        SELECT
+                            trigger,
+                            response
+                        FROM triggers
+                        WHERE guild_id = %s
+                        AND enabled = TRUE
+                        """,
+                        (
+                            message.guild.id,
+                        )
+                    )
+
+                    triggers = cursor.fetchall()
+
+        except Exception as error:
+
+            print(
+                f"❌ Error reading triggers: {error}"
+            )
+
+            return
+
+        # -------------------------------------------------
+        # CHECK LICENSE
+        # -------------------------------------------------
+
+        if not self.has_active_license(
+            message.guild.id
+        ):
+
+            return
+
+        # -------------------------------------------------
+        # CHECK TRIGGERS
+        # -------------------------------------------------
 
         content_lower = content.lower()
 
-        # -------------------------------------------------
-        # GET ACTIVE TRIGGERS
-        # -------------------------------------------------
+        for (
+            trigger,
+            response
+        ) in triggers:
 
-        triggers = self.get_active_triggers(
-            message.guild.id
-        )
+            trigger_lower = (
+                trigger.lower()
+            )
 
-        if not triggers:
+            # -------------------------------------------------
+            # EXACT WORD / PHRASE
+            # -------------------------------------------------
 
-            return
-
-        # -------------------------------------------------
-        # CHECK
-        # -------------------------------------------------
-
-        for trigger, response in triggers:
-
-            if trigger in content_lower:
+            if trigger_lower in content_lower:
 
                 try:
 
                     await message.channel.send(
-                        response,
-                        allowed_mentions=discord.AllowedMentions(
-                            everyone=False,
-                            users=False,
-                            roles=False
-                        )
+                        response
                     )
 
                     print(
-                        (
-                            f"✅ Trigger activated: "
-                            f"{trigger}"
-                        )
+                        "⚡ Trigger activated: "
+                        f"'{trigger}' "
+                        f"in guild "
+                        f"{message.guild.id}"
                     )
 
                 except discord.Forbidden:
 
                     print(
-                        (
-                            "❌ Missing permission "
-                            "to send messages."
-                        )
+                        "❌ No permission to send "
+                        f"messages in channel "
+                        f"{message.channel.id}"
                     )
 
                 except discord.HTTPException as error:
 
                     print(
-                        (
-                            "❌ Trigger response "
-                            f"failed: {error}"
-                        )
+                        f"❌ Discord error sending "
+                        f"trigger response: {error}"
                     )
+
+                # -------------------------------------------------
+                # ONLY FIRST MATCH
+                # -------------------------------------------------
 
                 break
 
@@ -1004,7 +1164,6 @@ async def setup(
             for subcommand in command.commands:
 
                 print(
-                    f"   /{command.name} "
+                    f"/{command.name} "
                     f"{subcommand.name}"
                 )
-
