@@ -23,7 +23,10 @@ bot = commands.Bot(
     command_prefix="!",
     intents=intents
 )
-
+print(
+    "Message Content Intent:",
+    bot.intents.message_content
+)
 
 # =========================================================
 # READY
