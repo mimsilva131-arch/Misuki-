@@ -2769,7 +2769,7 @@ def dashboard():
             <div class="container">
 
                 <h1>
-                    🎛️ Dashboard
+                     Dashboard
                 </h1>
 
 
