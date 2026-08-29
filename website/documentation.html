@@ -1,250 +1,199 @@
 <!DOCTYPE html>
 
-<html lang="pt-PT">
+<html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-```
-<title>Misuki — Documentation</title>
+
+<meta charset="UTF-8">
 
 <meta
-    name="description"
-    content="Documentação da Misuki."
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
 >
 
-<link rel="stylesheet" href="../css/style.css">
-<link rel="stylesheet" href="../css/dashboard.css">
-```
+<title>Misuki — Documentation</title>
+
+<link
+    rel="stylesheet"
+    href="/css/style.css"
+>
+
 
 </head>
 
 <body>
 
-```
-<!-- =====================================================
-     NAVBAR
-     ===================================================== -->
 
-<header class="navbar">
+<header class="container">
 
-    <div class="navbar-container">
+    <a
+        class="logo"
+        href="/"
+    >
+        Misuki<span>.</span>
+    </a>
 
-        <a href="index.html" class="logo">
-            Misuki
-        </a>
 
-        <nav class="nav-links">
+    <button
+        class="hamburger"
+        onclick="openMenu()"
+        aria-label="Open menu"
+    >
 
-            <a href="index.html">
-                Home
-            </a>
+        <span></span>
+        <span></span>
+        <span></span>
 
-            <a href="documentation.html" class="active">
-                Documentation
-            </a>
-
-            <a href="reviews.html">
-                Reviews
-            </a>
-
-            <a href="support.html">
-                Support
-            </a>
-        </nav>
-
-    </div>
+    </button>
 
 </header>
 
 
-<!-- =====================================================
-     MAIN
-     ===================================================== -->
-
-<main class="dashboard-page">
-
-    <section class="dashboard-header">
-
-        <div>
-
-            <span class="dashboard-label">
-                MISUKI
-            </span>
-
-            <h1>
-                Documentation
-            </h1>
-
-            <p>
-                Aprende como utilizar e configurar
-                as principais funcionalidades da Misuki.
-            </p>
-
-        </div>
-
-    </section>
+<div
+    class="overlay"
+    id="overlay"
+    onclick="closeMenu()"
+></div>
 
 
-    <!-- =================================================
-         DOCUMENTATION
-         ================================================= -->
+<nav
+    class="menu"
+    id="menu"
+>
 
-    <section class="dashboard-content">
+    <div class="menu-header">
 
-        <div class="dashboard-card">
-
-            <h2>
-                🤖 Misuki Bot
-            </h2>
-
-            <p>
-                A Misuki é um bot para Discord desenvolvido
-                para ajudar na gestão e automatização
-                de servidores.
-            </p>
-
+        <div class="menu-title">
+            Menu
         </div>
 
 
-        <div class="dashboard-card">
+        <button
+            class="menu-close"
+            onclick="closeMenu()"
+        >
+            ×
+        </button>
 
-            <h2>
-                ⚙️ Configuration
-            </h2>
-
-            <p>
-                As configurações do servidor podem ser
-                geridas através dos comandos disponibilizados
-                pela Misuki.
-            </p>
-
-            <p>
-                Os administradores podem configurar diferentes
-                sistemas de acordo com as necessidades
-                do servidor.
-            </p>
-
-        </div>
+    </div>
 
 
-        <div class="dashboard-card">
-
-            <h2>
-                🎫 Tickets
-            </h2>
-
-            <p>
-                O sistema de tickets permite criar canais
-                privados para suporte entre membros e staff.
-            </p>
-
-            <p>
-                Os tickets podem incluir ferramentas como
-                transcripts e encerramento de tickets.
-            </p>
-
-        </div>
+    <div class="menu-section">
+        Navigation
+    </div>
 
 
-        <div class="dashboard-card">
-
-            <h2>
-                ⚡ Triggers
-            </h2>
-
-            <p>
-                Os triggers permitem configurar respostas
-                automáticas quando uma determinada palavra
-                ou expressão é enviada num servidor.
-            </p>
-
-            <p>
-                Os triggers podem ser adicionados,
-                editados, ativados, desativados ou removidos.
-            </p>
-
-        </div>
+    <a href="/">
+        Home
+    </a>
 
 
-        <div class="dashboard-card">
-
-            <h2>
-                🛡️ Moderation
-            </h2>
-
-            <p>
-                As ferramentas de moderação ajudam a equipa
-                de staff a gerir o servidor e a controlar
-                comportamentos inadequados.
-            </p>
-
-        </div>
+    <a href="/dashboard">
+        Dashboard
+    </a>
 
 
-        <div class="dashboard-card">
-
-            <h2>
-                🔐 Verification
-            </h2>
-
-            <p>
-                O sistema de verificação pode ser utilizado
-                para controlar o acesso dos membros e ajudar
-                a proteger o servidor.
-            </p>
-
-        </div>
+    <a href="/reviews">
+        Reviews
+    </a>
 
 
-        <div class="dashboard-card">
-
-            <h2>
-                📊 Statistics
-            </h2>
-
-            <p>
-                A Misuki pode disponibilizar informações
-                estatísticas relacionadas com o servidor
-                e a utilização dos seus sistemas.
-            </p>
-
-        </div>
+    <div class="menu-section">
+        Resources
+    </div>
 
 
-        <div class="dashboard-card">
-
-            <h2>
-                🔑 Licenses
-            </h2>
-
-            <p>
-                Algumas funcionalidades da Misuki dependem
-                de uma licença ativa associada ao servidor.
-            </p>
-
-        </div>
+    <a href="/documentation">
+        Documentation
+    </a>
 
 
-        <div class="dashboard-card">
+    <a href="/support">
+        Support
+    </a>
 
-            <h2>
-                💬 Support
-            </h2>
 
-            <p>
-                Se precisares de ajuda com a configuração
-                ou utilização da Misuki, consulta a página
-                de suporte.
-            </p>
+    <div class="menu-section">
+        Legal
+    </div>
 
-            <a
-                href="support.html"
-                class="dashboard-button"
-            >
-                Contact Support
-            </a>
+
+    <a href="/terms">
+        Terms
+    </a>
+
+
+    <a href="/privacy">
+        Privacy
+    </a>
+
+
+    <a href="/data">
+        Data
+    </a>
+
+
+    <a href="/cookies">
+        Cookies
+    </a>
+
+
+    <div class="menu-section">
+        Account
+    </div>
+
+
+    {% if user %}
+
+        <a href="/dashboard">
+            Dashboard
+        </a>
+
+
+        <a href="/logout">
+            Logout
+        </a>
+
+    {% else %}
+
+        <a
+            href="/login"
+            class="discord-login"
+        >
+            Login with Discord
+        </a>
+
+    {% endif %}
+
+</nav>
+
+
+<main>
+
+    <section class="section">
+
+        <div class="container">
+
+            <div class="card">
+
+                <h1>
+                    Documentation
+                </h1>
+
+
+                <p>
+                    Learn how to configure and use
+                    Misuki in your Discord server.
+                </p>
+
+
+                <p>
+                    More documentation will be
+                    available here soon.
+                </p>
+
+            </div>
 
         </div>
 
@@ -253,42 +202,84 @@
 </main>
 
 
-<!-- =====================================================
-     FOOTER
-     ===================================================== -->
+<footer>
 
-<footer class="footer">
+    <div>
+        © 2026 Misuki. All rights reserved.
+    </div>
 
-    <div class="footer-container">
 
-        <p>
-            © 2026 Misuki. All rights reserved.
-        </p>
+    <div class="footer-links">
 
-        <div class="footer-links">
+        <a href="/terms">
+            Terms
+        </a>
 
-            <a href="privacy.html">
-                Privacy
-            </a>
 
-            <a href="terms.html">
-                Terms
-            </a>
+        <a href="/privacy">
+            Privacy
+        </a>
 
-            <a href="cookies.html">
-                Cookies
-            </a>
 
-            <a href="support.html">
-                Support
-            </a>
+        <a href="/data">
+            Data
+        </a>
 
-        </div>
+
+        <a href="/cookies">
+            Cookies
+        </a>
 
     </div>
 
 </footer>
-```
+
+
+<script>
+
+    function openMenu() {
+
+        document
+            .getElementById("menu")
+            .classList.add("open");
+
+        document
+            .getElementById("overlay")
+            .classList.add("show");
+
+    }
+
+
+    function closeMenu() {
+
+        document
+            .getElementById("menu")
+            .classList.remove("open");
+
+        document
+            .getElementById("overlay")
+            .classList.remove("show");
+
+    }
+
+
+    document.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (
+                event.key === "Escape"
+            ) {
+
+                closeMenu();
+
+            }
+
+        }
+    );
+
+</script>
+
 
 </body>
 

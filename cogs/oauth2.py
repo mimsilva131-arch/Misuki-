@@ -14,7 +14,7 @@ from flask import (
     redirect,
     session,
     request,
-    render_template_string
+    render_template
 )
 
 from dotenv import load_dotenv
@@ -69,8 +69,6 @@ PORT = int(
     )
 )
 
-# In production this should be true.
-# Set COOKIE_SECURE=false for local HTTP development.
 COOKIE_SECURE = (
     os.getenv(
         "COOKIE_SECURE",
@@ -206,16 +204,11 @@ def create_database():
 
         return
 
-
     try:
 
         with database_connection() as connection:
 
             with connection.cursor() as cursor:
-
-                # -------------------------------------------------
-                # LICENSES
-                # -------------------------------------------------
 
                 cursor.execute(
                     """
@@ -235,11 +228,6 @@ def create_database():
                     )
                     """
                 )
-
-
-                # -------------------------------------------------
-                # REVIEWS
-                # -------------------------------------------------
 
                 cursor.execute(
                     """
@@ -263,11 +251,6 @@ def create_database():
                     """
                 )
 
-
-                # -------------------------------------------------
-                # MIGRATION
-                # -------------------------------------------------
-
                 cursor.execute(
                     """
                     ALTER TABLE reviews
@@ -275,14 +258,11 @@ def create_database():
                     """
                 )
 
-
                 connection.commit()
-
 
         print(
             "✅ PostgreSQL database initialized."
         )
-
 
     except Exception as error:
 
@@ -311,7 +291,6 @@ def parse_datetime(value):
 
         return None
 
-
     try:
 
         parsed = datetime.fromisoformat(
@@ -325,14 +304,11 @@ def parse_datetime(value):
 
         return None
 
-
-    # Convert old naive timestamps to UTC.
     if parsed.tzinfo is None:
 
         parsed = parsed.replace(
             tzinfo=timezone.utc
         )
-
 
     return parsed
 
@@ -347,21 +323,17 @@ def safe_next_url(value):
 
         return "/dashboard"
 
-
     value = str(
         value
     )
-
 
     if not value.startswith("/"):
 
         return "/dashboard"
 
-
     if value.startswith("//"):
 
         return "/dashboard"
-
 
     return value
 
@@ -385,11 +357,9 @@ def get_license(guild_id):
 
         return None
 
-
     if not DATABASE_URL:
 
         return None
-
 
     try:
 
@@ -418,11 +388,9 @@ def get_license(guild_id):
 
                 row = cursor.fetchone()
 
-
                 if not row:
 
                     return None
-
 
                 return (
                     row["guild_id"],
@@ -431,7 +399,6 @@ def get_license(guild_id):
                     row["expires_at"],
                     row["created_at"]
                 )
-
 
     except Exception as error:
 
@@ -452,28 +419,23 @@ def license_is_active(guild_id):
         guild_id
     )
 
-
     if not license_data:
 
         return False
-
 
     status = license_data[2]
 
     expires_at = license_data[3]
 
-
     if status != "active":
 
         return False
-
 
     if expires_at:
 
         expiration = parse_datetime(
             expires_at
         )
-
 
         if not expiration:
 
@@ -483,7 +445,6 @@ def license_is_active(guild_id):
             )
 
             return False
-
 
         if utc_now() >= expiration:
 
@@ -506,16 +467,13 @@ def license_is_active(guild_id):
 
                     connection.commit()
 
-
             except Exception as error:
 
                 print(
                     f"❌ License expiration error: {error}"
                 )
 
-
             return False
-
 
     return True
 
@@ -528,25 +486,21 @@ def user_has_license():
 
     guilds = get_user_guilds()
 
-
     for guild in guilds:
 
         guild_id = guild.get(
             "id"
         )
 
-
         if not guild_id:
 
             continue
-
 
         if license_is_active(
             guild_id
         ):
 
             return True
-
 
     return False
 
@@ -559,11 +513,9 @@ def get_active_license_guild_ids():
 
     active_ids = set()
 
-
     if not DATABASE_URL:
 
         return active_ids
-
 
     try:
 
@@ -583,7 +535,6 @@ def get_active_license_guild_ids():
 
                 rows = cursor.fetchall()
 
-
     except Exception as error:
 
         print(
@@ -592,9 +543,7 @@ def get_active_license_guild_ids():
 
         return active_ids
 
-
     now = utc_now()
-
 
     for row in rows:
 
@@ -604,11 +553,9 @@ def get_active_license_guild_ids():
 
         expires_at = row[2]
 
-
         if status != "active":
 
             continue
-
 
         if expires_at:
 
@@ -616,11 +563,9 @@ def get_active_license_guild_ids():
                 expires_at
             )
 
-
             if not expiration:
 
                 continue
-
 
             if now >= expiration:
 
@@ -643,7 +588,6 @@ def get_active_license_guild_ids():
 
                         connection.commit()
 
-
                 except Exception as error:
 
                     print(
@@ -651,14 +595,11 @@ def get_active_license_guild_ids():
                         f"license {guild_id}: {error}"
                     )
 
-
                 continue
-
 
         active_ids.add(
             str(guild_id)
         )
-
 
     return active_ids
 
@@ -672,7 +613,6 @@ def discord_bot_headers():
     if not BOT_TOKEN:
 
         return {}
-
 
     return {
 
@@ -695,11 +635,9 @@ def get_user():
         "access_token"
     )
 
-
     if not access_token:
 
         return None
-
 
     try:
 
@@ -716,7 +654,6 @@ def get_user():
 
         )
 
-
     except requests.RequestException as error:
 
         print(
@@ -725,10 +662,8 @@ def get_user():
 
         return None
 
-
     if response.status_code != 200:
 
-        # Access token is no longer valid.
         if response.status_code in (
             401,
             403
@@ -736,9 +671,7 @@ def get_user():
 
             session.clear()
 
-
         return None
-
 
     try:
 
@@ -759,11 +692,9 @@ def get_user_guilds():
         "access_token"
     )
 
-
     if not access_token:
 
         return []
-
 
     try:
 
@@ -780,7 +711,6 @@ def get_user_guilds():
 
         )
 
-
     except requests.RequestException as error:
 
         print(
@@ -788,7 +718,6 @@ def get_user_guilds():
         )
 
         return []
-
 
     if response.status_code != 200:
 
@@ -799,7 +728,6 @@ def get_user_guilds():
 
         return []
 
-
     try:
 
         data = response.json()
@@ -808,14 +736,12 @@ def get_user_guilds():
 
         return []
 
-
     if not isinstance(
         data,
         list
     ):
 
         return []
-
 
     return data
 
@@ -834,7 +760,6 @@ def get_bot_guilds():
 
         return []
 
-
     try:
 
         response = requests.get(
@@ -850,7 +775,6 @@ def get_bot_guilds():
 
         )
 
-
     except requests.RequestException as error:
 
         print(
@@ -858,7 +782,6 @@ def get_bot_guilds():
         )
 
         return []
-
 
     if response.status_code != 200:
 
@@ -869,7 +792,6 @@ def get_bot_guilds():
 
         return []
 
-
     try:
 
         data = response.json()
@@ -878,14 +800,12 @@ def get_bot_guilds():
 
         return []
 
-
     if not isinstance(
         data,
         list
     ):
 
         return []
-
 
     return data
 
@@ -917,7 +837,6 @@ def can_manage_guild(guild):
 
         permissions = 0
 
-
     return bool(
 
         permissions & ADMINISTRATOR
@@ -940,7 +859,6 @@ def get_invite_url(guild_id):
         "0"
     )
 
-
     params = {
 
         "client_id":
@@ -956,7 +874,6 @@ def get_invite_url(guild_id):
             str(guild_id)
 
     }
-
 
     return (
         f"{DISCORD_OAUTH_URL}?"
@@ -992,1325 +909,18 @@ def verify_oauth_state(state):
 
     session.modified = True
 
-
     if not state:
 
         return False
-
 
     if not stored_state:
 
         return False
 
-
     return secrets.compare_digest(
         str(stored_state),
         str(state)
     )
-
-
-# =========================================================
-# BASE CSS
-# =========================================================
-
-BASE_STYLE = """
-
-<style>
-
-* {
-    box-sizing: border-box;
-}
-
-body {
-
-    margin: 0;
-
-    background:
-        radial-gradient(
-            circle at top,
-            #20263a 0%,
-            #0b0d13 45%,
-            #07080c 100%
-        );
-
-    color: #ffffff;
-
-    font-family:
-        Inter,
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
-
-    min-height: 100vh;
-}
-
-a {
-    color: inherit;
-    text-decoration: none;
-}
-
-.container {
-
-    width: min(
-        1150px,
-        92%
-    );
-
-    margin: auto;
-}
-
-header {
-
-    height: 76px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    border-bottom:
-        1px solid rgba(
-            255,
-            255,
-            255,
-            .08
-        );
-}
-
-.logo {
-
-    font-size: 25px;
-
-    font-weight: 800;
-
-    letter-spacing: -1px;
-}
-
-.logo span {
-    color: #7289da;
-}
-
-.hamburger {
-
-    width: 45px;
-    height: 40px;
-
-    border:
-        1px solid rgba(
-            255,
-            255,
-            255,
-            .12
-        );
-
-    background:
-        rgba(
-            255,
-            255,
-            255,
-            .04
-        );
-
-    border-radius: 10px;
-
-    cursor: pointer;
-
-    display: flex;
-
-    flex-direction: column;
-
-    align-items: center;
-
-    justify-content: center;
-
-    gap: 5px;
-}
-
-.hamburger span {
-
-    width: 20px;
-    height: 2px;
-
-    background: #ffffff;
-
-    border-radius: 5px;
-}
-
-.menu {
-
-    position: fixed;
-
-    top: 0;
-    right: -360px;
-
-    width: 350px;
-    height: 100vh;
-
-    background: #10131d;
-
-    border-left:
-        1px solid rgba(
-            255,
-            255,
-            255,
-            .08
-        );
-
-    z-index: 1000;
-
-    transition:
-        right .25s ease;
-
-    padding: 25px;
-
-    box-shadow:
-        -15px 0 40px
-        rgba(
-            0,
-            0,
-            0,
-            .4
-        );
-
-    overflow-y: auto;
-}
-
-.menu.open {
-    right: 0;
-}
-
-.menu-header {
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-
-    margin-bottom: 25px;
-}
-
-.menu-title {
-
-    font-size: 20px;
-
-    font-weight: 700;
-}
-
-.menu-close {
-
-    border: none;
-
-    background: transparent;
-
-    color: #ffffff;
-
-    font-size: 25px;
-
-    cursor: pointer;
-}
-
-.menu a {
-
-    display: block;
-
-    padding: 14px 0;
-
-    border-bottom:
-        1px solid rgba(
-            255,
-            255,
-            255,
-            .06
-        );
-
-    color: #d7d9e0;
-
-    transition: .15s;
-}
-
-.menu a:hover {
-    color: #7289da;
-}
-
-.menu-section {
-
-    margin-top: 25px;
-
-    margin-bottom: 7px;
-
-    color: #73798a;
-
-    font-size: 11px;
-
-    font-weight: 800;
-
-    text-transform: uppercase;
-
-    letter-spacing: 1px;
-}
-
-.discord-login {
-
-    display: flex !important;
-
-    align-items: center;
-
-    gap: 10px;
-
-    margin-top: 15px;
-
-    padding:
-        13px 16px !important;
-
-    background: #5865f2;
-
-    border-radius: 10px;
-
-    color: #ffffff !important;
-
-    font-weight: 700;
-
-    border: none !important;
-}
-
-.discord-login:hover {
-
-    background: #6875ff;
-
-    color: #ffffff !important;
-}
-
-.discord-icon {
-
-    width: 21px;
-    height: 21px;
-
-    display: block;
-
-    flex-shrink: 0;
-}
-
-.overlay {
-
-    display: none;
-
-    position: fixed;
-
-    inset: 0;
-
-    background:
-        rgba(
-            0,
-            0,
-            0,
-            .55
-        );
-
-    z-index: 999;
-}
-
-.overlay.show {
-    display: block;
-}
-
-.hero {
-
-    text-align: center;
-
-    padding:
-        100px 0 70px;
-}
-
-.hero h1 {
-
-    font-size:
-        clamp(
-            42px,
-            7vw,
-            76px
-        );
-
-    margin: 0;
-
-    letter-spacing: -3px;
-}
-
-.hero h1 span {
-    color: #7289da;
-}
-
-.hero p {
-
-    max-width: 650px;
-
-    margin:
-        25px auto;
-
-    color: #aeb3c0;
-
-    font-size: 18px;
-
-    line-height: 1.7;
-}
-
-.dashboard-button {
-
-    display: inline-block;
-
-    margin-top: 20px;
-
-    background: #5865f2;
-
-    padding:
-        15px 28px;
-
-    border-radius: 12px;
-
-    font-weight: 800;
-
-    transition: .2s;
-}
-
-.dashboard-button:hover {
-
-    transform:
-        translateY(-2px);
-
-    background: #6875ff;
-}
-
-.section {
-    padding:
-        55px 0;
-}
-
-.section-title {
-
-    font-size: 30px;
-
-    margin-bottom: 25px;
-}
-
-.server-grid {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(
-            auto-fill,
-            minmax(
-                280px,
-                1fr
-            )
-        );
-
-    gap: 18px;
-}
-
-.card {
-
-    background:
-        rgba(
-            255,
-            255,
-            255,
-            .045
-        );
-
-    border:
-        1px solid rgba(
-            255,
-            255,
-            255,
-            .08
-        );
-
-    border-radius: 16px;
-
-    padding: 20px;
-
-    backdrop-filter:
-        blur(10px);
-}
-
-.server-card {
-
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 15px;
-}
-
-.server-top {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 14px;
-}
-
-.server-icon {
-
-    width: 52px;
-    height: 52px;
-
-    border-radius: 15px;
-
-    object-fit: cover;
-
-    background: #20232e;
-}
-
-.server-icon-placeholder {
-
-    width: 52px;
-    height: 52px;
-
-    border-radius: 15px;
-
-    background: #20232e;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    font-size: 22px;
-
-    font-weight: 800;
-}
-
-.server-name {
-
-    font-size: 17px;
-
-    font-weight: 750;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-
-    white-space: nowrap;
-}
-
-.server-id {
-
-    font-size: 12px;
-
-    color: #858b9a;
-}
-
-.badges {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 8px;
-
-    flex-wrap: wrap;
-}
-
-.badge {
-
-    display: inline-flex;
-
-    align-items: center;
-
-    gap: 6px;
-
-    padding:
-        6px 9px;
-
-    border-radius: 8px;
-
-    font-size: 12px;
-
-    font-weight: 750;
-
-    border:
-        1px solid rgba(
-            255,
-            255,
-            255,
-            .08
-        );
-}
-
-.badge-active {
-
-    background:
-        rgba(
-            87,
-            242,
-            135,
-            .10
-        );
-
-    color: #57f287;
-}
-
-.badge-none {
-
-    background:
-        rgba(
-            255,
-            255,
-            255,
-            .05
-        );
-
-    color: #9da3b2;
-}
-
-.badge-warning {
-
-    background:
-        rgba(
-            255,
-            209,
-            102,
-            .10
-        );
-
-    color: #ffd166;
-}
-
-.badge-expired {
-
-    background:
-        rgba(
-            237,
-            66,
-            69,
-            .10
-        );
-
-    color: #ed4245;
-}
-
-.button {
-
-    display: inline-block;
-
-    text-align: center;
-
-    border-radius: 10px;
-
-    padding:
-        11px 15px;
-
-    font-weight: 700;
-
-    border: none;
-
-    cursor: pointer;
-}
-
-.manage {
-    background: #5865f2;
-}
-
-.manage:hover {
-    background: #6875ff;
-}
-
-.add {
-    background: #3ba55d;
-}
-
-.add:hover {
-    background: #43b968;
-}
-
-.blocked {
-
-    background:
-        rgba(
-            255,
-            255,
-            255,
-            .07
-        );
-
-    color: #888e9d;
-
-    cursor: not-allowed;
-}
-
-.review-grid {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(
-            auto-fill,
-            minmax(
-                280px,
-                1fr
-            )
-        );
-
-    gap: 18px;
-}
-
-.review-card {
-    min-height: 170px;
-}
-
-.review-user {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 12px;
-
-    margin-bottom: 15px;
-}
-
-.review-avatar {
-
-    width: 42px;
-    height: 42px;
-
-    border-radius: 50%;
-
-    object-fit: cover;
-}
-
-.review-text {
-
-    color: #c9ccd5;
-
-    line-height: 1.6;
-
-    white-space: pre-wrap;
-
-    overflow-wrap: anywhere;
-}
-
-.stars {
-
-    color: #ffd166;
-
-    letter-spacing: 2px;
-}
-
-.empty {
-
-    padding: 30px;
-
-    text-align: center;
-
-    border:
-        1px dashed rgba(
-            255,
-            255,
-            255,
-            .1
-        );
-
-    border-radius: 14px;
-
-    color: #858b9a;
-}
-
-footer {
-
-    margin-top: 70px;
-
-    padding: 35px 0;
-
-    border-top:
-        1px solid rgba(
-            255,
-            255,
-            255,
-            .08
-        );
-
-    color: #818795;
-
-    text-align: center;
-}
-
-.footer-links {
-
-    display: flex;
-
-    justify-content: center;
-
-    gap: 20px;
-
-    flex-wrap: wrap;
-
-    margin-top: 12px;
-}
-
-.footer-links a:hover {
-    color: #7289da;
-}
-
-.cookie {
-
-    position: fixed;
-
-    left: 20px;
-    right: 20px;
-
-    bottom: 20px;
-
-    max-width: 900px;
-
-    margin: auto;
-
-    background:
-        rgba(
-            20,
-            23,
-            33,
-            .98
-        );
-
-    border:
-        1px solid rgba(
-            255,
-            255,
-            255,
-            .1
-        );
-
-    border-radius: 18px;
-
-    padding: 22px;
-
-    z-index: 2000;
-
-    box-shadow:
-        0 20px 60px
-        rgba(
-            0,
-            0,
-            0,
-            .45
-        );
-}
-
-.cookie h3 {
-    margin-top: 0;
-}
-
-.cookie p {
-
-    color: #aeb3c0;
-
-    line-height: 1.5;
-}
-
-.cookie-links {
-
-    display: flex;
-
-    gap: 15px;
-
-    flex-wrap: wrap;
-
-    margin:
-        10px 0 18px;
-}
-
-.cookie-links a {
-
-    color: #8f98ff;
-
-    font-size: 13px;
-}
-
-.cookie-buttons {
-
-    display: flex;
-
-    gap: 10px;
-
-    flex-wrap: wrap;
-}
-
-.cookie-buttons button {
-
-    border: none;
-
-    border-radius: 9px;
-
-    padding:
-        11px 16px;
-
-    cursor: pointer;
-
-    font-weight: 700;
-}
-
-.accept {
-
-    background: #5865f2;
-
-    color: #ffffff;
-}
-
-.essential {
-
-    background: #303442;
-
-    color: #ffffff;
-}
-
-.deny {
-
-    background: transparent;
-
-    border:
-        1px solid
-        rgba(
-            255,
-            255,
-            255,
-            .15
-        ) !important;
-
-    color: #bbbbbb;
-}
-
-.form {
-
-    max-width: 600px;
-
-    margin:
-        40px auto;
-}
-
-.form textarea,
-.form select {
-
-    width: 100%;
-
-    background: #141722;
-
-    color: #ffffff;
-
-    border:
-        1px solid rgba(
-            255,
-            255,
-            255,
-            .12
-        );
-
-    border-radius: 10px;
-
-    padding: 13px;
-
-    margin:
-        8px 0 18px;
-}
-
-.form textarea {
-
-    min-height: 130px;
-
-    resize: vertical;
-}
-
-.license-key {
-
-    font-family: monospace;
-
-    word-break: break-all;
-
-    background: #090b10;
-
-    padding: 12px;
-
-    border-radius: 9px;
-}
-
-.status-active {
-    color: #57f287;
-}
-
-.status-expired {
-    color: #ed4245;
-}
-
-.status-revoked {
-    color: #ed4245;
-}
-
-@media (max-width: 600px) {
-
-    .hero {
-        padding:
-            70px 0 50px;
-    }
-
-    .menu {
-        width: 90%;
-    }
-
-}
-
-</style>
-
-"""
-
-
-# =========================================================
-# HEADER
-# =========================================================
-
-HEADER = """
-
-<header class="container">
-
-    <a
-        class="logo"
-        href="/"
-    >
-        Misuki<span>.</span>
-    </a>
-
-    <button
-        class="hamburger"
-        onclick="openMenu()"
-        aria-label="Open menu"
-    >
-        <span></span>
-        <span></span>
-        <span></span>
-    </button>
-
-</header>
-
-<div
-    class="overlay"
-    id="overlay"
-    onclick="closeMenu()"
-></div>
-
-<nav
-    class="menu"
-    id="menu"
->
-
-    <div class="menu-header">
-
-        <div class="menu-title">
-            Menu
-        </div>
-
-        <button
-            class="menu-close"
-            onclick="closeMenu()"
-        >
-            ×
-        </button>
-
-    </div>
-
-    <div class="menu-section">
-        Navigation
-    </div>
-
-    <a href="/">
-        Home
-    </a>
-
-    <a href="/dashboard">
-        Dashboard
-    </a>
-
-    <a href="/reviews">
-        Reviews
-    </a>
-
-    <div class="menu-section">
-        Resources
-    </div>
-
-    <a href="/documentation">
-        Documentation
-    </a>
-
-    <a href="/support">
-        Support
-    </a>
-
-    <div class="menu-section">
-        Legal
-    </div>
-
-    <a href="/terms">
-        Terms
-    </a>
-
-    <a href="/privacy">
-        Privacy
-    </a>
-
-    <a href="/data">
-        Data
-    </a>
-
-    <a href="/cookies">
-        Cookies
-    </a>
-
-    <div class="menu-section">
-        Account
-    </div>
-
-    {% if user %}
-
-        <a href="/dashboard">
-            Dashboard
-        </a>
-
-        <a href="/logout">
-            Logout
-        </a>
-
-    {% else %}
-
-        <a
-            href="/login"
-            class="discord-login"
-        >
-
-            <svg
-                class="discord-icon"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                xmlns="http://www.w3.org/2000/svg"
-            >
-
-                <path d="
-                    M19.54 5.32
-                    A16.7 16.7 0 0 0 15.4 4
-                    l-.5 1.02
-                    a15.1 15.1 0 0 0-5.8 0
-                    L8.6 4
-                    a16.7 16.7 0 0 0-4.14 1.32
-                    C1.84 9.2 1.13 13 1.48 16.74
-                    A16.8 16.8 0 0 0 6.57 19
-                    l1.22-1.65
-                    c-.67-.24-1.3-.55-1.9-.9
-                    l.46-.35
-                    c3.66 1.7 7.64 1.7 11.25 0
-                    l.47.35
-                    c-.6.36-1.23.66-1.9.9
-                    L17.4 19
-                    a16.8 16.8 0 0 0 5.1-2.26
-                    c.4-4.34-.68-8.1-2.96-11.42ZM8.5 14.9
-                    c-1.1 0-2-.99-2-2.2
-                    0-1.22.88-2.2 2-2.2
-                    1.13 0 2.01.99 2 2.2
-                    0 1.21-.88 2.2-2 2.2Zm7 0
-                    c-1.1 0-2-.99-2-2.2
-                    0-1.22.88-2.2 2-2.2
-                    1.13 0 2.01.99 2 2.2
-                    0 1.21-.88 2.2-2 2.2Z
-                "/>
-
-            </svg>
-
-            Login with Discord
-
-        </a>
-
-    {% endif %}
-
-</nav>
-
-"""
-
-
-# =========================================================
-# FOOTER
-# =========================================================
-
-FOOTER = """
-
-<footer>
-
-    <div>
-        © 2026 Misuki. All rights reserved.
-    </div>
-
-    <div class="footer-links">
-
-        <a href="/terms">
-            Terms
-        </a>
-
-        <a href="/privacy">
-            Privacy
-        </a>
-
-        <a href="/data">
-            Data
-        </a>
-
-        <a href="/cookies">
-            Cookies
-        </a>
-
-    </div>
-
-</footer>
-
-"""
-
-
-# =========================================================
-# COOKIE BANNER
-# =========================================================
-
-COOKIE_BANNER = """
-
-<div
-    class="cookie"
-    id="cookieBanner"
-    style="display:none;"
->
-
-    <h3>
-        🍪 We use cookies
-    </h3>
-
-    <p>
-        We use essential cookies to keep your session
-        working and optional cookies to improve your
-        experience. You can choose which cookies to allow.
-    </p>
-
-    <div class="cookie-links">
-
-        <a href="/cookies">
-            Cookie Policy
-        </a>
-
-        <a href="/privacy">
-            Privacy
-        </a>
-
-        <a href="/data">
-            Data
-        </a>
-
-    </div>
-
-    <div class="cookie-buttons">
-
-        <button
-            class="accept"
-            onclick="setCookies('all')"
-        >
-            Accept All
-        </button>
-
-        <button
-            class="essential"
-            onclick="setCookies('essential')"
-        >
-            Accept Essential
-        </button>
-
-        <button
-            class="deny"
-            onclick="setCookies('deny')"
-        >
-            Deny
-        </button>
-
-    </div>
-
-</div>
-
-<script>
-
-function setCookies(value) {
-
-    localStorage.setItem(
-        "misuki_cookie_consent",
-        value
-    );
-
-    document.getElementById(
-        "cookieBanner"
-    ).style.display = "none";
-}
-
-
-if (
-    !localStorage.getItem(
-        "misuki_cookie_consent"
-    )
-) {
-
-    document.getElementById(
-        "cookieBanner"
-    ).style.display = "block";
-}
-
-
-function openMenu() {
-
-    document
-        .getElementById("menu")
-        .classList.add("open");
-
-    document
-        .getElementById("overlay")
-        .classList.add("show");
-}
-
-
-function closeMenu() {
-
-    document
-        .getElementById("menu")
-        .classList.remove("open");
-
-    document
-        .getElementById("overlay")
-        .classList.remove("show");
-}
-
-
-document.addEventListener(
-    "keydown",
-    function(event) {
-
-        if (
-            event.key === "Escape"
-        ) {
-
-            closeMenu();
-
-        }
-
-    }
-);
-
-</script>
-
-"""
 
 
 # =========================================================
@@ -2324,43 +934,11 @@ def error_page(
     user=None
 ):
 
-    return render_page(
-
-        """
-        <section class="section">
-
-            <div class="container">
-
-                <div class="card">
-
-                    <h1>
-                        {{ title }}
-                    </h1>
-
-                    <p>
-                        {{ message }}
-                    </p>
-
-                    <a
-                        href="/"
-                        class="button manage"
-                    >
-                        Return Home
-                    </a>
-
-                </div>
-
-            </div>
-
-        </section>
-        """,
-
+    return render_template(
+        "pages/error.html",
         user=user,
-
         title=title,
-
         message=message
-
     ), status_code
 
 
@@ -2379,7 +957,6 @@ def login():
             500
         )
 
-
     if not CLIENT_SECRET:
 
         return error_page(
@@ -2387,7 +964,6 @@ def login():
             "Discord OAuth2 is not configured correctly.",
             500
         )
-
 
     if not DISCORD_LOGIN_REDIRECT_URI:
 
@@ -2397,22 +973,17 @@ def login():
             500
         )
 
-
     next_url = safe_next_url(
         request.args.get(
             "next"
         )
     )
 
-
     session[
         "next_url"
     ] = next_url
 
-
-    # Create CSRF state.
     state = create_oauth_state()
-
 
     params = {
 
@@ -2433,7 +1004,6 @@ def login():
 
     }
 
-
     discord_url = (
 
         f"{DISCORD_OAUTH_URL}?"
@@ -2444,7 +1014,6 @@ def login():
 
     )
 
-
     print(
         "🔐 Starting Discord LOGIN OAuth2"
     )
@@ -2453,7 +1022,6 @@ def login():
         f"🔗 Login redirect: "
         f"{DISCORD_LOGIN_REDIRECT_URI}"
     )
-
 
     return redirect(
         discord_url
@@ -2471,7 +1039,6 @@ def login_callback():
         "error"
     )
 
-
     if error:
 
         session.pop(
@@ -2485,11 +1052,9 @@ def login_callback():
             400
         )
 
-
     state = request.args.get(
         "state"
     )
-
 
     if not verify_oauth_state(
         state
@@ -2501,11 +1066,9 @@ def login_callback():
             400
         )
 
-
     code = request.args.get(
         "code"
     )
-
 
     if not code:
 
@@ -2515,7 +1078,6 @@ def login_callback():
             400
         )
 
-
     if not CLIENT_ID or not CLIENT_SECRET:
 
         return error_page(
@@ -2524,7 +1086,6 @@ def login_callback():
             500
         )
 
-
     if not DISCORD_LOGIN_REDIRECT_URI:
 
         return error_page(
@@ -2532,7 +1093,6 @@ def login_callback():
             "DISCORD_LOGIN_REDIRECT_URI is missing.",
             500
         )
-
 
     token_data = {
 
@@ -2552,7 +1112,6 @@ def login_callback():
             DISCORD_LOGIN_REDIRECT_URI
 
     }
-
 
     try:
 
@@ -2583,7 +1142,6 @@ def login_callback():
             500
         )
 
-
     if response.status_code != 200:
 
         print(
@@ -2600,7 +1158,6 @@ def login_callback():
             400
         )
 
-
     try:
 
         token_json = response.json()
@@ -2613,11 +1170,9 @@ def login_callback():
             400
         )
 
-
     access_token = token_json.get(
         "access_token"
     )
-
 
     if not access_token:
 
@@ -2626,7 +1181,6 @@ def login_callback():
             "Discord did not return an access token.",
             400
         )
-
 
     # -----------------------------------------------------
     # VERIFY USER
@@ -2659,7 +1213,6 @@ def login_callback():
             500
         )
 
-
     if user_response.status_code != 200:
 
         return error_page(
@@ -2667,7 +1220,6 @@ def login_callback():
             "Failed to verify your Discord account.",
             400
         )
-
 
     try:
 
@@ -2681,13 +1233,11 @@ def login_callback():
             400
         )
 
-
     next_url = safe_next_url(
         session.get(
             "next_url"
         )
     )
-
 
     # -----------------------------------------------------
     # REGENERATE SESSION
@@ -2719,7 +1269,6 @@ def login_callback():
 
     session.modified = True
 
-
     print(
         "=========================================="
     )
@@ -2744,7 +1293,6 @@ def login_callback():
         "=========================================="
     )
 
-
     return redirect(
         next_url
     )
@@ -2761,7 +1309,6 @@ def callback():
         "error"
     )
 
-
     if error:
 
         return error_page(
@@ -2770,11 +1317,9 @@ def callback():
             400
         )
 
-
     code = request.args.get(
         "code"
     )
-
 
     if not code:
 
@@ -2784,7 +1329,6 @@ def callback():
             400
         )
 
-
     if not CLIENT_ID or not CLIENT_SECRET:
 
         return error_page(
@@ -2793,7 +1337,6 @@ def callback():
             500
         )
 
-
     if not DISCORD_REDIRECT_URI:
 
         return error_page(
@@ -2801,7 +1344,6 @@ def callback():
             "DISCORD_REDIRECT_URI is missing.",
             500
         )
-
 
     token_data = {
 
@@ -2821,7 +1363,6 @@ def callback():
             DISCORD_REDIRECT_URI
 
     }
-
 
     try:
 
@@ -2852,7 +1393,6 @@ def callback():
             500
         )
 
-
     if response.status_code != 200:
 
         print(
@@ -2869,41 +1409,9 @@ def callback():
             400
         )
 
-
-    return render_page(
-
-        """
-        <section class="section">
-
-            <div class="container">
-
-                <div class="card">
-
-                    <h1>
-                        ✅ OAuth2 Authorization
-                    </h1>
-
-                    <p>
-                        The OAuth2 authorization was
-                        successfully completed.
-                    </p>
-
-                    <a
-                        href="/"
-                        class="button manage"
-                    >
-                        Return Home
-                    </a>
-
-                </div>
-
-            </div>
-
-        </section>
-        """,
-
+    return render_template(
+        "pages/oauth2_success.html",
         user=get_user()
-
     )
 
 
@@ -2934,122 +1442,10 @@ def index():
         6
     )
 
-
-    return render_page(
-
-        """
-        <section class="hero">
-
-            <div class="container">
-
-                <h1>
-                    Welcome to
-                    <span>Misuki</span>
-                </h1>
-
-                <p>
-                    A powerful Discord experience
-                    built around your community.
-                </p>
-
-                <a
-                    href="/dashboard"
-                    class="dashboard-button"
-                >
-                    🚀 Open Dashboard
-                </a>
-
-            </div>
-
-        </section>
-
-        <section class="section">
-
-            <div class="container">
-
-                <h2 class="section-title">
-                    ⭐ What people think
-                </h2>
-
-                {% if reviews %}
-
-                    <div class="review-grid">
-
-                        {% for review in reviews %}
-
-                            <div class="card review-card">
-
-                                <div class="review-user">
-
-                                    {% if review.avatar %}
-
-                                        <img
-                                            class="review-avatar"
-                                            src="{{ review.avatar }}"
-                                            alt=""
-                                        >
-
-                                    {% else %}
-
-                                        <div
-                                            class="review-avatar"
-                                            style="
-                                                background:#5865f2;
-                                                display:flex;
-                                                align-items:center;
-                                                justify-content:center;
-                                            "
-                                        >
-                                            👤
-                                        </div>
-
-                                    {% endif %}
-
-                                    <div>
-
-                                        <strong>
-                                            {{ review.username }}
-                                        </strong>
-
-                                        <div class="stars">
-
-                                            {% for i in range(review.rating) %}
-                                                ★
-                                            {% endfor %}
-
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
-                                <div class="review-text">
-                                    {{ review.review }}
-                                </div>
-
-                            </div>
-
-                        {% endfor %}
-
-                    </div>
-
-                {% else %}
-
-                    <div class="empty">
-                        No reviews yet.
-                    </div>
-
-                {% endif %}
-
-            </div>
-
-        </section>
-        """,
-
+    return render_template(
+        "pages/home.html",
         user=user,
-
         reviews=reviews
-
     )
 
 
@@ -3062,7 +1458,6 @@ def dashboard():
 
     user = get_user()
 
-
     if not user:
 
         session[
@@ -3073,11 +1468,9 @@ def dashboard():
             "/login"
         )
 
-
     user_guilds = get_user_guilds()
 
     bot_guilds = get_bot_guilds()
-
 
     bot_guild_ids = {
 
@@ -3091,16 +1484,13 @@ def dashboard():
 
     }
 
-
     active_license_ids = (
         get_active_license_guild_ids()
     )
 
-
     authorized = []
 
     available = []
-
 
     for original_guild in user_guilds:
 
@@ -3108,26 +1498,21 @@ def dashboard():
             original_guild
         )
 
-
         guild_id = str(
             guild.get("id")
         )
-
 
         if not guild_id:
 
             continue
 
-
         license_data = get_license(
             guild_id
         )
 
-
         guild[
             "license_data"
         ] = license_data
-
 
         guild[
             "license_active"
@@ -3135,7 +1520,6 @@ def dashboard():
             guild_id
             in active_license_ids
         )
-
 
         if license_data:
 
@@ -3145,11 +1529,9 @@ def dashboard():
 
             status = "none"
 
-
         guild[
             "license_status"
         ] = status
-
 
         if guild_id in bot_guild_ids:
 
@@ -3159,13 +1541,11 @@ def dashboard():
 
             continue
 
-
         guild[
             "can_add"
         ] = can_manage_guild(
             guild
         )
-
 
         guild[
             "invite_url"
@@ -3173,11 +1553,9 @@ def dashboard():
             guild_id
         )
 
-
         available.append(
             guild
         )
-
 
     available.sort(
 
@@ -3189,279 +1567,11 @@ def dashboard():
 
     )
 
-
-    return render_page(
-
-        """
-        <section class="section">
-
-            <div class="container">
-
-                <h1>
-                    Dashboard
-                </h1>
-
-                <p style="color:#aeb3c0;">
-
-                    Logged in as
-
-                    <strong>
-                        {{ user.global_name or user.username }}
-                    </strong>
-
-                </p>
-
-                <h2
-                    class="section-title"
-                    style="margin-top:50px;"
-                >
-                    🔐 Authorized Servers
-                </h2>
-
-                {% if authorized %}
-
-                    <div class="server-grid">
-
-                        {% for guild in authorized %}
-
-                            <div class="card server-card">
-
-                                <div class="server-top">
-
-                                    {% if guild.icon %}
-
-                                        <img
-                                            class="server-icon"
-                                            src="https://cdn.discordapp.com/icons/{{ guild.id }}/{{ guild.icon }}.png?size=128"
-                                            alt=""
-                                        >
-
-                                    {% else %}
-
-                                        <div
-                                            class="server-icon-placeholder"
-                                        >
-                                            {{ guild.name[0] }}
-                                        </div>
-
-                                    {% endif %}
-
-                                    <div style="min-width:0;">
-
-                                        <div class="server-name">
-                                            {{ guild.name }}
-                                        </div>
-
-                                        <div class="server-id">
-                                            {{ guild.id }}
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
-                                <div class="badges">
-
-                                    {% if guild.license_active %}
-
-                                        <span class="badge badge-active">
-                                            License 🟢
-                                        </span>
-
-                                    {% elif guild.license_status == "expired" %}
-
-                                        <span class="badge badge-expired">
-                                            License 🔴
-                                        </span>
-
-                                    {% elif guild.license_status == "revoked" %}
-
-                                        <span class="badge badge-expired">
-                                            License ⛔
-                                        </span>
-
-                                    {% else %}
-
-                                        <span class="badge badge-none">
-                                            License ⚪
-                                        </span>
-
-                                    {% endif %}
-
-                                </div>
-
-                                <a
-                                    class="button manage"
-                                    href="/manage/{{ guild.id }}"
-                                >
-                                    ⚙️ Manage
-                                </a>
-
-                            </div>
-
-                        {% endfor %}
-
-                    </div>
-
-                {% else %}
-
-                    <div class="empty">
-                        🔒 No authorized servers found.
-                    </div>
-
-                {% endif %}
-
-                <h2
-                    class="section-title"
-                    style="margin-top:65px;"
-                >
-                    ➕ Available Servers
-                </h2>
-
-                {% if available %}
-
-                    <div class="server-grid">
-
-                        {% for guild in available %}
-
-                            <div class="card server-card">
-
-                                <div class="server-top">
-
-                                    {% if guild.icon %}
-
-                                        <img
-                                            class="server-icon"
-                                            src="https://cdn.discordapp.com/icons/{{ guild.id }}/{{ guild.icon }}.png?size=128"
-                                            alt=""
-                                        >
-
-                                    {% else %}
-
-                                        <div
-                                            class="server-icon-placeholder"
-                                        >
-                                            {{ guild.name[0] }}
-                                        </div>
-
-                                    {% endif %}
-
-                                    <div style="min-width:0;">
-
-                                        <div class="server-name">
-                                            {{ guild.name }}
-                                        </div>
-
-                                        <div class="server-id">
-                                            {{ guild.id }}
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
-                                <div class="badges">
-
-                                    {% if guild.license_active %}
-
-                                        <span class="badge badge-active">
-                                            License 🟢
-                                        </span>
-
-                                    {% elif guild.license_status == "expired" %}
-
-                                        <span class="badge badge-expired">
-                                            License 🔴
-                                        </span>
-
-                                    {% elif guild.license_status == "revoked" %}
-
-                                        <span class="badge badge-expired">
-                                            License ⛔
-                                        </span>
-
-                                    {% else %}
-
-                                        <span class="badge badge-none">
-                                            License ⚪
-                                        </span>
-
-                                    {% endif %}
-
-                                    {% if guild.can_add %}
-
-                                        <span class="badge badge-warning">
-                                            Add permission ✓
-                                        </span>
-
-                                    {% else %}
-
-                                        <span class="badge badge-warning">
-                                            ⚠️ No authorization
-                                        </span>
-
-                                    {% endif %}
-
-                                </div>
-
-                                {% if guild.can_add %}
-
-                                    <a
-                                        href="{{ guild.invite_url }}"
-                                        class="button add"
-                                    >
-                                        ➕ Add Misuki
-                                    </a>
-
-                                {% else %}
-
-                                    <div class="button blocked">
-                                        ⚠️ Cannot Add
-                                    </div>
-
-                                {% endif %}
-
-                            </div>
-
-                        {% endfor %}
-
-                    </div>
-
-                {% else %}
-
-                    <div class="empty">
-                        No additional servers available.
-                    </div>
-
-                {% endif %}
-
-                <div
-                    style="
-                        margin-top:60px;
-                        text-align:center;
-                    "
-                >
-
-                    <a
-                        href="/reviews"
-                        class="dashboard-button"
-                    >
-                        ⭐ Leave a Review
-                    </a>
-
-                </div>
-
-            </div>
-
-        </section>
-        """,
-
+    return render_template(
+        "pages/dashboard.html",
         user=user,
-
         authorized=authorized,
-
         available=available
-
     )
 
 
@@ -3476,7 +1586,6 @@ def manage(guild_id):
 
     user = get_user()
 
-
     if not user:
 
         session[
@@ -3487,9 +1596,7 @@ def manage(guild_id):
             "/login"
         )
 
-
     user_guilds = get_user_guilds()
-
 
     guild = next(
 
@@ -3507,7 +1614,6 @@ def manage(guild_id):
 
     )
 
-
     if guild is None:
 
         return error_page(
@@ -3517,9 +1623,7 @@ def manage(guild_id):
             user
         )
 
-
     bot_guilds = get_bot_guilds()
-
 
     bot_guild_ids = {
 
@@ -3533,170 +1637,26 @@ def manage(guild_id):
 
     }
 
-
     if str(guild_id) not in bot_guild_ids:
 
         return redirect(
             "/dashboard"
         )
 
-
     license_data = get_license(
         guild_id
     )
-
 
     license_active = license_is_active(
         guild_id
     )
 
-
-    return render_page(
-
-        """
-        <section class="section">
-
-            <div class="container">
-
-                <a href="/dashboard">
-                    ← Back to Dashboard
-                </a>
-
-                <div
-                    class="card"
-                    style="margin-top:25px;"
-                >
-
-                    <div class="server-top">
-
-                        {% if guild.icon %}
-
-                            <img
-                                class="server-icon"
-                                src="https://cdn.discordapp.com/icons/{{ guild.id }}/{{ guild.icon }}.png?size=128"
-                                alt=""
-                            >
-
-                        {% else %}
-
-                            <div
-                                class="server-icon-placeholder"
-                            >
-                                {{ guild.name[0] }}
-                            </div>
-
-                        {% endif %}
-
-                        <div>
-
-                            <h1 style="margin:0;">
-                                {{ guild.name }}
-                            </h1>
-
-                            <div class="server-id">
-                                {{ guild.id }}
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <h2 style="margin-top:35px;">
-                        🔐 License
-                    </h2>
-
-                    {% if license_data %}
-
-                        {% set status = license_data[2] %}
-
-                        <p>
-
-                            Status:
-
-                            {% if license_active %}
-
-                                <span class="status-active">
-                                    🟢 Active
-                                </span>
-
-                            {% elif status == "expired" %}
-
-                                <span class="status-expired">
-                                    🔴 Expired
-                                </span>
-
-                            {% elif status == "revoked" %}
-
-                                <span class="status-revoked">
-                                    ⛔ Revoked
-                                </span>
-
-                            {% else %}
-
-                                <span>
-                                    ⚪ {{ status }}
-                                </span>
-
-                            {% endif %}
-
-                        </p>
-
-                        <p>
-                            <strong>
-                                License Key
-                            </strong>
-                        </p>
-
-                        <div class="license-key">
-                            {{ license_data[1] }}
-                        </div>
-
-                        <p style="margin-top:20px;">
-                            <strong>
-                                Expires
-                            </strong>
-                        </p>
-
-                        {% if license_data[3] %}
-
-                            <p>
-                                {{ license_data[3] }}
-                            </p>
-
-                        {% else %}
-
-                            <p>
-                                Never
-                            </p>
-
-                        {% endif %}
-
-                    {% else %}
-
-                        <div class="empty">
-
-                            🔒 This server does not
-                            have a Misuki license.
-
-                        </div>
-
-                    {% endif %}
-
-                </div>
-
-            </div>
-
-        </section>
-        """,
-
+    return render_template(
+        "pages/manage.html",
         user=user,
-
         guild=guild,
-
         license_data=license_data,
-
         license_active=license_active
-
     )
 
 
@@ -3711,7 +1671,6 @@ def get_random_reviews(
     if not DATABASE_URL:
 
         return []
-
 
     try:
 
@@ -3738,7 +1697,6 @@ def get_random_reviews(
 
                 rows = cursor.fetchall()
 
-
     except Exception as error:
 
         print(
@@ -3747,9 +1705,7 @@ def get_random_reviews(
 
         return []
 
-
     reviews = []
-
 
     for row in rows:
 
@@ -3778,11 +1734,9 @@ def get_random_reviews(
 
         })
 
-
     random.shuffle(
         reviews
     )
-
 
     return reviews[:amount]
 
@@ -3802,203 +1756,15 @@ def reviews():
 
     can_review = False
 
-
     if user:
 
         can_review = user_has_license()
 
-
-    return render_page(
-
-        """
-        <section class="section">
-
-            <div class="container">
-
-                <h1>
-                    ⭐ Misuki Reviews
-                </h1>
-
-                <p style="color:#aeb3c0;">
-                    Reviews from members of
-                    Misuki communities.
-                </p>
-
-                {% if can_review %}
-
-                    <div class="card form">
-
-                        <h2>
-                            ✍️ Write a review
-                        </h2>
-
-                        <form
-                            method="POST"
-                            action="/reviews"
-                        >
-
-                            <label>
-                                Rating
-                            </label>
-
-                            <select
-                                name="rating"
-                                required
-                            >
-
-                                <option value="5">
-                                    5 — ⭐⭐⭐⭐⭐
-                                </option>
-
-                                <option value="4">
-                                    4 — ⭐⭐⭐⭐
-                                </option>
-
-                                <option value="3">
-                                    3 — ⭐⭐⭐
-                                </option>
-
-                                <option value="2">
-                                    2 — ⭐⭐
-                                </option>
-
-                                <option value="1">
-                                    1 — ⭐
-                                </option>
-
-                            </select>
-
-                            <label>
-                                Review
-                            </label>
-
-                            <textarea
-                                name="review"
-                                maxlength="1000"
-                                required
-                                placeholder="Tell us what you think about Misuki..."
-                            ></textarea>
-
-                            <button
-                                class="button manage"
-                                type="submit"
-                            >
-                                ⭐ Submit Review
-                            </button>
-
-                        </form>
-
-                    </div>
-
-                {% elif user %}
-
-                    <div class="empty">
-
-                        🔒 You need an active Misuki
-                        license to write a review.
-
-                    </div>
-
-                {% else %}
-
-                    <div class="empty">
-
-                        🔐 Log in with Discord and have
-                        an active Misuki license to
-                        write a review.
-
-                    </div>
-
-                {% endif %}
-
-                <h2
-                    class="section-title"
-                    style="margin-top:60px;"
-                >
-                    💬 Community Reviews
-                </h2>
-
-                {% if review_list %}
-
-                    <div class="review-grid">
-
-                        {% for review in review_list %}
-
-                            <div class="card review-card">
-
-                                <div class="review-user">
-
-                                    {% if review.avatar %}
-
-                                        <img
-                                            class="review-avatar"
-                                            src="{{ review.avatar }}"
-                                            alt=""
-                                        >
-
-                                    {% else %}
-
-                                        <div
-                                            class="review-avatar"
-                                            style="
-                                                background:#5865f2;
-                                                display:flex;
-                                                align-items:center;
-                                                justify-content:center;
-                                            "
-                                        >
-                                            👤
-                                        </div>
-
-                                    {% endif %}
-
-                                    <div>
-
-                                        <strong>
-                                            {{ review.username }}
-                                        </strong>
-
-                                        <div class="stars">
-
-                                            {% for i in range(review.rating) %}
-                                                ★
-                                            {% endfor %}
-
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
-                                <div class="review-text">
-                                    {{ review.review }}
-                                </div>
-
-                            </div>
-
-                        {% endfor %}
-
-                    </div>
-
-                {% else %}
-
-                    <div class="empty">
-                        No reviews yet.
-                    </div>
-
-                {% endif %}
-
-            </div>
-
-        </section>
-        """,
-
+    return render_template(
+        "pages/reviews.html",
         user=user,
-
         review_list=review_list,
-
         can_review=can_review
-
     )
 
 
@@ -4014,7 +1780,6 @@ def submit_review():
 
     user = get_user()
 
-
     if not user:
 
         session[
@@ -4025,7 +1790,6 @@ def submit_review():
             "/login"
         )
 
-
     if not user_has_license():
 
         return error_page(
@@ -4035,18 +1799,15 @@ def submit_review():
             user
         )
 
-
     review = request.form.get(
         "review",
         ""
     ).strip()
 
-
     rating_raw = request.form.get(
         "rating",
         "5"
     )
-
 
     try:
 
@@ -4061,7 +1822,6 @@ def submit_review():
 
         rating = 5
 
-
     rating = max(
         1,
         min(
@@ -4070,23 +1830,19 @@ def submit_review():
         )
     )
 
-
     if not review:
 
         return redirect(
             "/reviews"
         )
 
-
     review = review[:1000]
-
 
     user_id = str(
         user.get(
             "id"
         )
     )
-
 
     username = (
 
@@ -4106,11 +1862,9 @@ def submit_review():
 
     )
 
-
     avatar_hash = user.get(
         "avatar"
     )
-
 
     if avatar_hash:
 
@@ -4128,7 +1882,6 @@ def submit_review():
 
         avatar = None
 
-
     if not DATABASE_URL:
 
         return error_page(
@@ -4137,7 +1890,6 @@ def submit_review():
             500,
             user
         )
-
 
     try:
 
@@ -4188,7 +1940,6 @@ def submit_review():
 
             connection.commit()
 
-
     except Exception as error:
 
         print(
@@ -4202,7 +1953,6 @@ def submit_review():
             user
         )
 
-
     return redirect(
         "/reviews"
     )
@@ -4215,36 +1965,8 @@ def submit_review():
 @app.route("/documentation")
 def documentation():
 
-    return render_page(
-
-        """
-        <section class="section">
-
-            <div class="container">
-
-                <div class="card">
-
-                    <h1>
-                        Documentation
-                    </h1>
-
-                    <p>
-                        Learn how to configure and use
-                        Misuki in your Discord server.
-                    </p>
-
-                    <p>
-                        More documentation will be
-                        available here soon.
-                    </p>
-
-                </div>
-
-            </div>
-
-        </section>
-        """
-
+    return render_template(
+        "pages/documentation.html"
     )
 
 
@@ -4255,35 +1977,8 @@ def documentation():
 @app.route("/support")
 def support():
 
-    return render_page(
-
-        """
-        <section class="section">
-
-            <div class="container">
-
-                <div class="card">
-
-                    <h1>
-                        Support
-                    </h1>
-
-                    <p>
-                        Need help with Misuki?
-                    </p>
-
-                    <p>
-                        Contact the Misuki support team
-                        through the official support channels.
-                    </p>
-
-                </div>
-
-            </div>
-
-        </section>
-        """
-
+    return render_template(
+        "pages/support.html"
     )
 
 
@@ -4294,38 +1989,8 @@ def support():
 @app.route("/terms")
 def terms():
 
-    return render_page(
-
-        """
-        <section class="section">
-
-            <div class="container">
-
-                <div class="card">
-
-                    <h1>
-                        📄 Terms of Service
-                    </h1>
-
-                    <p>
-                        By using Misuki, you agree to use
-                        the service responsibly and in
-                        accordance with applicable rules
-                        and Discord's policies.
-                    </p>
-
-                    <p>
-                        Misuki may restrict or terminate
-                        access to services when necessary.
-                    </p>
-
-                </div>
-
-            </div>
-
-        </section>
-        """
-
+    return render_template(
+        "pages/terms.html"
     )
 
 
@@ -4336,43 +2001,8 @@ def terms():
 @app.route("/privacy")
 def privacy():
 
-    return render_page(
-
-        """
-        <section class="section">
-
-            <div class="container">
-
-                <div class="card">
-
-                    <h1>
-                        🔐 Privacy Policy
-                    </h1>
-
-                    <p>
-                        Misuki uses Discord OAuth2 to
-                        authenticate users and obtain the
-                        Discord information required for
-                        the dashboard.
-                    </p>
-
-                    <p>
-                        We do not request your Discord
-                        password.
-                    </p>
-
-                    <p>
-                        Information is only used for the
-                        functionality of the Misuki service.
-                    </p>
-
-                </div>
-
-            </div>
-
-        </section>
-        """
-
+    return render_template(
+        "pages/privacy.html"
     )
 
 
@@ -4383,38 +2013,8 @@ def privacy():
 @app.route("/data")
 def data_page():
 
-    return render_page(
-
-        """
-        <section class="section">
-
-            <div class="container">
-
-                <div class="card">
-
-                    <h1>
-                        🗄️ Data
-                    </h1>
-
-                    <p>
-                        Misuki stores information required
-                        for authentication, server management,
-                        licenses and reviews.
-                    </p>
-
-                    <p>
-                        You can contact the Misuki
-                        administrator regarding data
-                        questions or deletion requests.
-                    </p>
-
-                </div>
-
-            </div>
-
-        </section>
-        """
-
+    return render_template(
+        "pages/data.html"
     )
 
 
@@ -4425,110 +2025,8 @@ def data_page():
 @app.route("/cookies")
 def cookies_page():
 
-    return render_page(
-
-        """
-        <section class="section">
-
-            <div class="container">
-
-                <div class="card">
-
-                    <h1>
-                        🍪 Cookies
-                    </h1>
-
-                    <p>
-                        Misuki uses essential cookies to
-                        maintain authentication sessions.
-                    </p>
-
-                    <p>
-                        Cookie preferences are stored
-                        locally in your browser.
-                    </p>
-
-                    <p>
-                        You can change your preference
-                        by clearing the site's local
-                        storage.
-                    </p>
-
-                </div>
-
-            </div>
-
-        </section>
-        """
-
-    )
-
-
-# =========================================================
-# RENDER
-# =========================================================
-
-def render_page(
-    content,
-    **context
-):
-
-    if "user" not in context:
-
-        context[
-            "user"
-        ] = get_user()
-
-
-    html = f"""
-
-<!DOCTYPE html>
-
-<html lang="en">
-
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>
-        Misuki
-    </title>
-
-    {BASE_STYLE}
-
-</head>
-
-<body>
-
-    {render_template_string(
-        HEADER,
-        **context
-    )}
-
-    {render_template_string(
-        content,
-        **context
-    )}
-
-    {FOOTER}
-
-    {COOKIE_BANNER}
-
-</body>
-
-</html>
-
-"""
-
-
-    return render_template_string(
-        html,
-        **context
+    return render_template(
+        "pages/cookies.html"
     )
 
 
@@ -4597,7 +2095,6 @@ if __name__ == "__main__":
     print(
         "=========================================="
     )
-
 
     app.run(
 

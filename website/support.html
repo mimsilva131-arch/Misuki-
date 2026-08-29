@@ -1,256 +1,253 @@
 <!DOCTYPE html>
 
-<html lang="pt-PT">
+<html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-```
-<title>Misuki — Support</title>
+
+<meta charset="UTF-8">
 
 <meta
-    name="description"
-    content="Suporte da Misuki."
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
 >
 
-<link rel="stylesheet" href="../css/style.css">
-```
+<title>Misuki — Support</title>
+
+<link
+    rel="stylesheet"
+    href="/css/style.css"
+>
+
 
 </head>
 
 <body>
 
-```
-<!-- =====================================================
-     NAVBAR
-     ===================================================== -->
 
-<header class="navbar">
+<header class="container">
 
-    <div class="navbar-container">
+    <a
+        class="logo"
+        href="/"
+    >
+        Misuki<span>.</span>
+    </a>
 
-        <a href="index.html" class="logo">
-            Misuki
-        </a>
 
-        <nav class="nav-links">
+    <button
+        class="hamburger"
+        onclick="openMenu()"
+        aria-label="Open menu"
+    >
 
-            <a href="index.html">
-                Home
-            </a>
+        <span></span>
+        <span></span>
+        <span></span>
 
-            <a href="documentation.html">
-                Documentation
-            </a>
-
-            <a href="reviews.html">
-                Reviews
-            </a>
-
-            <a href="support.html" class="active">
-                Support
-            </a>
-
-            <a href="manage.html" class="nav-button">
-                Manage
-            </a>
-
-        </nav>
-
-    </div>
+    </button>
 
 </header>
 
 
-<!-- =====================================================
-     MAIN
-     ===================================================== -->
-
-<main class="support-page">
-
-    <section class="support-header">
-
-        <span class="support-label">
-            MISUKI SUPPORT
-        </span>
-
-        <h1>
-            How can we help?
-        </h1>
-
-        <p>
-            Encontra respostas para as tuas dúvidas
-            ou entra em contacto com a equipa Misuki.
-        </p>
-
-    </section>
+<div
+    class="overlay"
+    id="overlay"
+    onclick="closeMenu()"
+></div>
 
 
-    <!-- =================================================
-         SUPPORT OPTIONS
-         ================================================= -->
+<nav
+    class="menu"
+    id="menu"
+>
 
-    <section class="support-grid">
+    <div class="menu-header">
 
-        <article class="support-card">
-
-            <div class="support-icon">
-                📚
-            </div>
-
-            <h2>
-                Documentation
-            </h2>
-
-            <p>
-                Consulta a documentação para aprender
-                a configurar e utilizar as funcionalidades
-                da Misuki.
-            </p>
-
-            <a
-                href="documentation.html"
-                class="button secondary"
-            >
-                View Documentation
-            </a>
-
-        </article>
-
-
-        <article class="support-card">
-
-            <div class="support-icon">
-                💬
-            </div>
-
-            <h2>
-                Discord Support
-            </h2>
-
-            <p>
-                Precisas de ajuda diretamente com a
-                equipa? Entra no servidor oficial
-                de suporte da Misuki.
-            </p>
-
-            <a
-                href="#"
-                class="button primary"
-            >
-                Join Support Server
-            </a>
-
-        </article>
-
-
-        <article class="support-card">
-
-            <div class="support-icon">
-                🎫
-            </div>
-
-            <h2>
-                Create a Ticket
-            </h2>
-
-            <p>
-                Se a tua questão estiver relacionada
-                com um servidor, podes criar um ticket
-                através da Misuki.
-            </p>
-
-            <a
-                href="documentation.html"
-                class="button secondary"
-            >
-                Learn More
-            </a>
-
-        </article>
-
-    </section>
-
-
-    <!-- =================================================
-         FAQ
-         ================================================= -->
-
-    <section class="faq">
-
-        <div class="section-heading">
-
-            <span>
-                FAQ
-            </span>
-
-            <h2>
-                Frequently Asked Questions
-            </h2>
-
+        <div class="menu-title">
+            Menu
         </div>
 
 
-        <div class="faq-list">
+        <button
+            class="menu-close"
+            onclick="closeMenu()"
+        >
+            ×
+        </button>
 
-            <details class="faq-item">
+    </div>
 
-                <summary>
-                    Como adiciono a Misuki ao meu servidor?
-                </summary>
+
+    <div class="menu-section">
+        Navigation
+    </div>
+
+
+    <a href="/">
+        Home
+    </a>
+
+
+    <a href="/dashboard">
+        Dashboard
+    </a>
+
+
+    <a href="/reviews">
+        Reviews
+    </a>
+
+
+    <div class="menu-section">
+        Resources
+    </div>
+
+
+    <a href="/documentation">
+        Documentation
+    </a>
+
+
+    <a href="/support">
+        Support
+    </a>
+
+
+    <div class="menu-section">
+        Legal
+    </div>
+
+
+    <a href="/terms">
+        Terms
+    </a>
+
+
+    <a href="/privacy">
+        Privacy
+    </a>
+
+
+    <a href="/data">
+        Data
+    </a>
+
+
+    <a href="/cookies">
+        Cookies
+    </a>
+
+
+    <div class="menu-section">
+        Account
+    </div>
+
+
+    {% if user %}
+
+        <a href="/dashboard">
+            Dashboard
+        </a>
+
+
+        <a href="/logout">
+            Logout
+        </a>
+
+    {% else %}
+
+        <a
+            href="/login"
+            class="discord-login"
+        >
+            Login with Discord
+        </a>
+
+    {% endif %}
+
+</nav>
+
+
+<main>
+
+    <section class="section">
+
+        <div class="container">
+
+            <div class="card">
+
+                <h1>
+                    Support
+                </h1>
+
 
                 <p>
-                    Utiliza a área de gestão para iniciar
-                    o processo de autenticação e configuração
-                    do teu servidor.
+                    Need help with Misuki?
+                    We're here to help.
                 </p>
 
-            </details>
+
+                <div class="support-content">
+
+                    <h2>
+                        💬 Discord Support
+                    </h2>
 
 
-            <details class="faq-item">
-
-                <summary>
-                    Porque é que uma funcionalidade não funciona?
-                </summary>
-
-                <p>
-                    Verifica primeiro a configuração do
-                    servidor e se a Misuki possui as
-                    permissões necessárias.
-                </p>
-
-            </details>
+                    <p>
+                        Join the Misuki Discord
+                        server to get help, report
+                        problems and talk with the
+                        community.
+                    </p>
 
 
-            <details class="faq-item">
-
-                <summary>
-                    Como configuro os tickets?
-                </summary>
-
-                <p>
-                    A configuração do sistema de tickets
-                    pode ser feita através das opções
-                    disponibilizadas pela Misuki.
-                </p>
-
-            </details>
+                    <a
+                        href="https://discord.com"
+                        class="button"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Join Discord
+                    </a>
 
 
-            <details class="faq-item">
+                    <h2 style="margin-top:40px;">
+                        📚 Documentation
+                    </h2>
 
-                <summary>
-                    Onde posso obter ajuda?
-                </summary>
 
-                <p>
-                    Consulta a documentação ou utiliza
-                    o servidor oficial de suporte.
-                </p>
+                    <p>
+                        Check the documentation for
+                        information about configuring
+                        and using Misuki.
+                    </p>
 
-            </details>
+
+                    <a
+                        href="/documentation"
+                        class="button"
+                    >
+                        View Documentation
+                    </a>
+
+
+                    <h2 style="margin-top:40px;">
+                        🐛 Report a Problem
+                    </h2>
+
+
+                    <p>
+                        Found a bug or something that
+                        isn't working correctly?
+                        Contact the Misuki support team
+                        through Discord.
+                    </p>
+
+                </div>
+
+            </div>
 
         </div>
 
@@ -259,42 +256,84 @@
 </main>
 
 
-<!-- =====================================================
-     FOOTER
-     ===================================================== -->
+<footer>
 
-<footer class="footer">
+    <div>
+        © 2026 Misuki. All rights reserved.
+    </div>
 
-    <div class="footer-container">
 
-        <p>
-            © 2026 Misuki. All rights reserved.
-        </p>
+    <div class="footer-links">
 
-        <div class="footer-links">
+        <a href="/terms">
+            Terms
+        </a>
 
-            <a href="privacy.html">
-                Privacy
-            </a>
 
-            <a href="terms.html">
-                Terms
-            </a>
+        <a href="/privacy">
+            Privacy
+        </a>
 
-            <a href="cookies.html">
-                Cookies
-            </a>
 
-            <a href="support.html">
-                Support
-            </a>
+        <a href="/data">
+            Data
+        </a>
 
-        </div>
+
+        <a href="/cookies">
+            Cookies
+        </a>
 
     </div>
 
 </footer>
-```
+
+
+<script>
+
+    function openMenu() {
+
+        document
+            .getElementById("menu")
+            .classList.add("open");
+
+        document
+            .getElementById("overlay")
+            .classList.add("show");
+
+    }
+
+
+    function closeMenu() {
+
+        document
+            .getElementById("menu")
+            .classList.remove("open");
+
+        document
+            .getElementById("overlay")
+            .classList.remove("show");
+
+    }
+
+
+    document.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (
+                event.key === "Escape"
+            ) {
+
+                closeMenu();
+
+            }
+
+        }
+    );
+
+</script>
+
 
 </body>
 

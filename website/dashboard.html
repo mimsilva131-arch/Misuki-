@@ -1,311 +1,263 @@
 
-<!DOCTYPE html>
-<html lang="pt-PT">
-<head>
-    <meta charset="UTF-8">
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+<section class="section">
 
-    <title>Dashboard — Misuki</title>
+    <div class="container">
 
-    <link
-        rel="stylesheet"
-        href="../css/dashboard.css"
-    >
+        <h1>
+            Dashboard
+        </h1>
 
-    <link
-        rel="stylesheet"
-        href="../css/style.css"
-    >
-</head>
+        <p style="color:#aeb3c0;">
 
-<body>
+            Logged in as
 
-    <!-- =====================================================
-         NAVBAR
-    ====================================================== -->
+            <strong>
+                {{ user.global_name or user.username }}
+            </strong>
 
-    <header class="navbar">
-
-        <div class="navbar-brand">
-            <span class="brand-icon">🤖</span>
-            <span>Misuki</span>
-        </div>
-
-        <nav class="navbar-links">
-
-            <a href="index.html">
-                Início
-            </a>
-
-            <a href="dashboard.html" class="active">
-                Dashboard
-            </a>
-
-            <a href="documentation.html">
-                Documentação
-            </a>
-
-            <a href="support.html">
-                Suporte
-            </a>
-
-        </nav>
-
-        <div class="navbar-user" id="user-section">
-
-            <span id="username">
-                Utilizador
-            </span>
-
-        </div>
-
-    </header>
-
-
-    <!-- =====================================================
-         MAIN
-    ====================================================== -->
-
-    <main class="dashboard">
-
-        <section class="dashboard-header">
-
-            <div>
-
-                <p class="dashboard-label">
-                    MISUKI BOT
-                </p>
-
-                <h1>
-                    Dashboard
-                </h1>
-
-                <p>
-                    Gere os teus servidores e configurações
-                    do Misuki.
-                </p>
-
-            </div>
-
-        </section>
-
-
-        <!-- =================================================
-             SERVER SELECTOR
-        ================================================== -->
-
-        <section class="dashboard-card">
-
-            <div class="card-header">
-
-                <div>
-
-                    <h2>
-                        🏠 Servidor
-                    </h2>
-
-                    <p>
-                        Seleciona o servidor que queres gerir.
-                    </p>
-
-                </div>
-
-            </div>
-
-            <select id="server-select">
-
-                <option value="">
-                    Selecionar servidor
-                </option>
-
-            </select>
-
-        </section>
-
-
-        <!-- =================================================
-             QUICK ACTIONS
-        ================================================== -->
-
-        <section class="dashboard-grid">
-
-            <article class="dashboard-card">
-
-                <div class="card-icon">
-                    ⚙️
-                </div>
-
-                <h2>
-                    Configuração
-                </h2>
-
-                <p>
-                    Configura os sistemas e funcionalidades
-                    disponíveis no teu servidor.
-                </p>
-
-                <a
-                    href="manage.html"
-                    class="dashboard-button"
-                >
-                    Gerir servidor
-                </a>
-
-            </article>
-
-
-            <article class="dashboard-card">
-
-                <div class="card-icon">
-                    📊
-                </div>
-
-                <h2>
-                    Estatísticas
-                </h2>
-
-                <p>
-                    Consulta informações e estatísticas
-                    do teu servidor.
-                </p>
-
-                <a
-                    href="data.html"
-                    class="dashboard-button"
-                >
-                    Ver dados
-                </a>
-
-            </article>
-
-
-            <article class="dashboard-card">
-
-                <div class="card-icon">
-                    🎫
-                </div>
-
-                <h2>
-                    Tickets
-                </h2>
-
-                <p>
-                    Gere o sistema de suporte através
-                    do painel do servidor.
-                </p>
-
-            </article>
-
-
-            <article class="dashboard-card">
-
-                <div class="card-icon">
-                    ⚡
-                </div>
-
-                <h2>
-                    Triggers
-                </h2>
-
-                <p>
-                    Consulta e gere as respostas automáticas
-                    configuradas no servidor.
-                </p>
-
-            </article>
-
-        </section>
-
-
-        <!-- =================================================
-             STATUS
-        ================================================== -->
-
-        <section class="dashboard-card status-card">
-
-            <div class="card-header">
-
-                <div>
-
-                    <h2>
-                        🟢 Estado do Misuki
-                    </h2>
-
-                    <p>
-                        Estado atual dos serviços.
-                    </p>
-
-                </div>
-
-                <span class="status-online">
-                    Online
-                </span>
-
-            </div>
-
-            <div class="status-grid">
-
-                <div class="status-item">
-
-                    <span>
-                        Bot
-                    </span>
-
-                    <strong>
-                        Online
-                    </strong>
-
-                </div>
-
-                <div class="status-item">
-
-                    <span>
-                        API
-                    </span>
-
-                    <strong>
-                        Online
-                    </strong>
-
-                </div>
-
-                <div class="status-item">
-
-                    <span>
-                        Dashboard
-                    </span>
-
-                    <strong>
-                        Online
-                    </strong>
-
-                </div>
-
-            </div>
-
-        </section>
-
-    </main>
-
-
-    <!-- =====================================================
-         FOOTER
-    ====================================================== -->
-
-    <footer class="footer">
-
-        <p>
-            © 2026 Misuki Bot. Todos os direitos reservados.
         </p>
 
-    </footer>
+        <h2
+            class="section-title"
+            style="margin-top:50px;"
+        >
+            🔐 Authorized Servers
+        </h2>
 
+        {% if authorized %}
 
-    <script src="../js/dashboard.js"></script>
+            <div class="server-grid">
 
-</body>
-</html>
+                {% for guild in authorized %}
+
+                    <div class="card server-card">
+
+                        <div class="server-top">
+
+                            {% if guild.icon %}
+
+                                <img
+                                    class="server-icon"
+                                    src="https://cdn.discordapp.com/icons/{{ guild.id }}/{{ guild.icon }}.png?size=128"
+                                    alt=""
+                                >
+
+                            {% else %}
+
+                                <div
+                                    class="server-icon-placeholder"
+                                >
+                                    {{ guild.name[0] }}
+                                </div>
+
+                            {% endif %}
+
+                            <div style="min-width:0;">
+
+                                <div class="server-name">
+                                    {{ guild.name }}
+                                </div>
+
+                                <div class="server-id">
+                                    {{ guild.id }}
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="badges">
+
+                            {% if guild.license_active %}
+
+                                <span class="badge badge-active">
+                                    License 🟢
+                                </span>
+
+                            {% elif guild.license_status == "expired" %}
+
+                                <span class="badge badge-expired">
+                                    License 🔴
+                                </span>
+
+                            {% elif guild.license_status == "revoked" %}
+
+                                <span class="badge badge-expired">
+                                    License ⛔
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge badge-none">
+                                    License ⚪
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                        <a
+                            class="button manage"
+                            href="/manage/{{ guild.id }}"
+                        >
+                            ⚙️ Manage
+                        </a>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="empty">
+                🔒 No authorized servers found.
+            </div>
+
+        {% endif %}
+
+        <h2
+            class="section-title"
+            style="margin-top:65px;"
+        >
+            ➕ Available Servers
+        </h2>
+
+        {% if available %}
+
+            <div class="server-grid">
+
+                {% for guild in available %}
+
+                    <div class="card server-card">
+
+                        <div class="server-top">
+
+                            {% if guild.icon %}
+
+                                <img
+                                    class="server-icon"
+                                    src="https://cdn.discordapp.com/icons/{{ guild.id }}/{{ guild.icon }}.png?size=128"
+                                    alt=""
+                                >
+
+                            {% else %}
+
+                                <div
+                                    class="server-icon-placeholder"
+                                >
+                                    {{ guild.name[0] }}
+                                </div>
+
+                            {% endif %}
+
+                            <div style="min-width:0;">
+
+                                <div class="server-name">
+                                    {{ guild.name }}
+                                </div>
+
+                                <div class="server-id">
+                                    {{ guild.id }}
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="badges">
+
+                            {% if guild.license_active %}
+
+                                <span class="badge badge-active">
+                                    License 🟢
+                                </span>
+
+                            {% elif guild.license_status == "expired" %}
+
+                                <span class="badge badge-expired">
+                                    License 🔴
+                                </span>
+
+                            {% elif guild.license_status == "revoked" %}
+
+                                <span class="badge badge-expired">
+                                    License ⛔
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge badge-none">
+                                    License ⚪
+                                </span>
+
+                            {% endif %}
+
+                            {% if guild.can_add %}
+
+                                <span class="badge badge-warning">
+                                    Add permission ✓
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge badge-warning">
+                                    ⚠️ No authorization
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                        {% if guild.can_add %}
+
+                            <a
+                                href="{{ guild.invite_url }}"
+                                class="button add"
+                            >
+                                ➕ Add Misuki
+                            </a>
+
+                        {% else %}
+
+                            <div class="button blocked">
+                                ⚠️ Cannot Add
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="empty">
+                No additional servers available.
+            </div>
+
+        {% endif %}
+
+        <div
+            style="
+                margin-top:60px;
+                text-align:center;
+            "
+        >
+
+            <a
+                href="/reviews"
+                class="dashboard-button"
+            >
+                ⭐ Leave a Review
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
 

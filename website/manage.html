@@ -1,297 +1,447 @@
 <!DOCTYPE html>
 
-<html lang="pt-PT">
+<html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-```
-<title>Misuki — Manage</title>
+
+<meta charset="UTF-8">
 
 <meta
-    name="description"
-    content="Manage your Discord server with Misuki."
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
 >
 
-<link rel="stylesheet" href="../css/style.css">
-<link rel="stylesheet" href="../css/dashboard.css">
-```
+<title>Misuki</title>
+
+<link
+    rel="stylesheet"
+    href="/static/css/style.css"
+>
+
 
 </head>
 
 <body>
 
-```
-<!-- =====================================================
-     NAVBAR
-     ===================================================== -->
 
-<header class="navbar">
+<header class="container">
 
-    <div class="navbar-container">
+    <a
+        class="logo"
+        href="/"
+    >
+        Misuki<span>.</span>
+    </a>
 
-        <a href="index.html" class="logo">
-            Misuki
-        </a>
-
-        <nav class="nav-links">
-
-            <a href="index.html">
-                Home
-            </a>
-
-            <a href="documentation.html">
-                Documentation
-            </a>
-
-            <a href="reviews.html">
-                Reviews
-            </a>
-
-            <a href="support.html">
-                Support
-            </a>
-
-            <a
-                href="manage.html"
-                class="nav-button active"
-            >
-                Manage
-            </a>
-
-        </nav>
-
-    </div>
+    <button
+        class="hamburger"
+        onclick="openMenu()"
+        aria-label="Open menu"
+    >
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
 
 </header>
 
+<div
+    class="overlay"
+    id="overlay"
+    onclick="closeMenu()"
+></div>
 
-<!-- =====================================================
-     MAIN
-     ===================================================== -->
+<nav
+    class="menu"
+    id="menu"
+>
 
-<main class="dashboard-page">
+    <div class="menu-header">
 
-    <section class="dashboard-header">
-
-        <div>
-
-            <span class="dashboard-label">
-                MISUKI DASHBOARD
-            </span>
-
-            <h1>
-                Manage your server.
-            </h1>
-
-            <p>
-                Configure and manage your Misuki
-                Discord server from one place.
-            </p>
-
+        <div class="menu-title">
+            Menu
         </div>
 
-    </section>
+        <button
+            class="menu-close"
+            onclick="closeMenu()"
+        >
+            ×
+        </button>
+
+    </div>
+
+    <div class="menu-section">
+        Navigation
+    </div>
+
+    <a href="/">
+        Home
+    </a>
+
+    <a href="/dashboard">
+        Dashboard
+    </a>
+
+    <a href="/reviews">
+        Reviews
+    </a>
+
+    <div class="menu-section">
+        Resources
+    </div>
+
+    <a href="/documentation">
+        Documentation
+    </a>
+
+    <a href="/support">
+        Support
+    </a>
+
+    <div class="menu-section">
+        Legal
+    </div>
+
+    <a href="/terms">
+        Terms
+    </a>
+
+    <a href="/privacy">
+        Privacy
+    </a>
+
+    <a href="/data">
+        Data
+    </a>
+
+    <a href="/cookies">
+        Cookies
+    </a>
+
+    <div class="menu-section">
+        Account
+    </div>
+
+    {% if user %}
+
+        <a href="/dashboard">
+            Dashboard
+        </a>
+
+        <a href="/logout">
+            Logout
+        </a>
+
+    {% else %}
+
+        <a
+            href="/login"
+            class="discord-login"
+        >
+
+            Login with Discord
+
+        </a>
+
+    {% endif %}
+
+</nav>
 
 
-    <!-- =================================================
-         LOGIN / DASHBOARD
-         ================================================= -->
+<section class="section">
 
-    <section class="dashboard-content">
+    <div class="container">
 
-        <div class="dashboard-card dashboard-card-large">
+        <a href="/dashboard">
+            ← Back to Dashboard
+        </a>
 
-            <div class="dashboard-card-icon">
-                🔐
+        <div
+            class="card"
+            style="margin-top:25px;"
+        >
+
+            <div class="server-top">
+
+                {% if guild.icon %}
+
+                    <img
+                        class="server-icon"
+                        src="https://cdn.discordapp.com/icons/{{ guild.id }}/{{ guild.icon }}.png?size=128"
+                        alt=""
+                    >
+
+                {% else %}
+
+                    <div
+                        class="server-icon-placeholder"
+                    >
+                        {{ guild.name[0] }}
+                    </div>
+
+                {% endif %}
+
+                <div>
+
+                    <h1 style="margin:0;">
+                        {{ guild.name }}
+                    </h1>
+
+                    <div class="server-id">
+                        {{ guild.id }}
+                    </div>
+
+                </div>
+
             </div>
 
-            <h2>
-                Discord Login
+            <h2 style="margin-top:35px;">
+                🔐 License
             </h2>
 
-            <p>
-                Sign in with Discord to access your
-                server management dashboard.
-            </p>
+            {% if license_data %}
 
-            <a
-                href="#"
-                class="dashboard-button"
-                id="discord-login"
-            >
-                Continue with Discord
-            </a>
+                {% set status = license_data[2] %}
 
-        </div>
+                <p>
 
+                    Status:
 
-        <div class="dashboard-card">
+                    {% if license_active %}
 
-            <div class="dashboard-card-icon">
-                ⚙️
-            </div>
+                        <span class="status-active">
+                            🟢 Active
+                        </span>
 
-            <h2>
-                Server Configuration
-            </h2>
+                    {% elif status == "expired" %}
 
-            <p>
-                Configure the features and settings
-                available for your Discord server.
-            </p>
+                        <span class="status-expired">
+                            🔴 Expired
+                        </span>
 
-        </div>
+                    {% elif status == "revoked" %}
 
+                        <span class="status-revoked">
+                            ⛔ Revoked
+                        </span>
 
-        <div class="dashboard-card">
+                    {% else %}
 
-            <div class="dashboard-card-icon">
-                🛡️
-            </div>
+                        <span>
+                            ⚪ {{ status }}
+                        </span>
 
-            <h2>
-                Moderation
-            </h2>
+                    {% endif %}
 
-            <p>
-                Manage moderation-related settings
-                and server protection features.
-            </p>
+                </p>
 
-        </div>
+                <p>
+                    <strong>
+                        License Key
+                    </strong>
+                </p>
 
+                <div class="license-key">
+                    {{ license_data[1] }}
+                </div>
 
-        <div class="dashboard-card">
+                <p style="margin-top:20px;">
+                    <strong>
+                        Expires
+                    </strong>
+                </p>
 
-            <div class="dashboard-card-icon">
-                🎫
-            </div>
+                {% if license_data[3] %}
 
-            <h2>
-                Tickets
-            </h2>
+                    <p>
+                        {{ license_data[3] }}
+                    </p>
 
-            <p>
-                Configure ticket categories, staff
-                access and transcript settings.
-            </p>
+                {% else %}
 
-        </div>
+                    <p>
+                        Never
+                    </p>
 
+                {% endif %}
 
-        <div class="dashboard-card">
+            {% else %}
 
-            <div class="dashboard-card-icon">
-                ⚡
-            </div>
+                <div class="empty">
 
-            <h2>
-                Triggers
-            </h2>
+                    🔒 This server does not
+                    have a Misuki license.
 
-            <p>
-                Manage automated triggers and
-                custom server responses.
-            </p>
+                </div>
+
+            {% endif %}
 
         </div>
 
+    </div>
 
-        <div class="dashboard-card">
-
-            <div class="dashboard-card-icon">
-                🔑
-            </div>
-
-            <h2>
-                License
-            </h2>
-
-            <p>
-                View the license status associated
-                with your Discord server.
-            </p>
-
-        </div>
-
-    </section>
+</section>
 
 
-    <!-- =================================================
-         INFORMATION
-         ================================================= -->
+<footer>
 
-    <section class="dashboard-info">
+    <div>
+        © 2026 Misuki. All rights reserved.
+    </div>
 
-        <div class="dashboard-card">
+    <div class="footer-links">
 
-            <h2>
-                ℹ️ About the Dashboard
-            </h2>
+        <a href="/terms">
+            Terms
+        </a>
 
-            <p>
-                The Misuki dashboard is designed to
-                provide a simple interface for managing
-                your Discord server.
-            </p>
+        <a href="/privacy">
+            Privacy
+        </a>
 
-            <p>
-                Additional management features can be
-                accessed after authenticating with Discord.
-            </p>
+        <a href="/data">
+            Data
+        </a>
 
-        </div>
-
-    </section>
-
-</main>
-
-
-<!-- =====================================================
-     FOOTER
-     ===================================================== -->
-
-<footer class="footer">
-
-    <div class="footer-container">
-
-        <p>
-            © 2026 Misuki. All rights reserved.
-        </p>
-
-        <div class="footer-links">
-
-            <a href="privacy.html">
-                Privacy
-            </a>
-
-            <a href="terms.html">
-                Terms
-            </a>
-
-            <a href="cookies.html">
-                Cookies
-            </a>
-
-            <a href="support.html">
-                Support
-            </a>
-
-        </div>
+        <a href="/cookies">
+            Cookies
+        </a>
 
     </div>
 
 </footer>
 
 
-<!-- =====================================================
-     JAVASCRIPT
-     ===================================================== -->
+<div
+    class="cookie"
+    id="cookieBanner"
+    style="display:none;"
+>
 
-<script src="../js/auth.js"></script>
-```
+    <h3>
+        🍪 We use cookies
+    </h3>
+
+    <p>
+        We use essential cookies to keep your session
+        working and optional cookies to improve your
+        experience. You can choose which cookies to allow.
+    </p>
+
+    <div class="cookie-links">
+
+        <a href="/cookies">
+            Cookie Policy
+        </a>
+
+        <a href="/privacy">
+            Privacy
+        </a>
+
+        <a href="/data">
+            Data
+        </a>
+
+    </div>
+
+    <div class="cookie-buttons">
+
+        <button
+            class="accept"
+            onclick="setCookies('all')"
+        >
+            Accept All
+        </button>
+
+        <button
+            class="essential"
+            onclick="setCookies('essential')"
+        >
+            Accept Essential
+        </button>
+
+        <button
+            class="deny"
+            onclick="setCookies('deny')"
+        >
+            Deny
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    function setCookies(value) {
+
+        localStorage.setItem(
+            "misuki_cookie_consent",
+            value
+        );
+
+        document.getElementById(
+            "cookieBanner"
+        ).style.display = "none";
+    }
+
+
+    if (
+        !localStorage.getItem(
+            "misuki_cookie_consent"
+        )
+    ) {
+
+        document.getElementById(
+            "cookieBanner"
+        ).style.display = "block";
+    }
+
+
+    function openMenu() {
+
+        document
+            .getElementById("menu")
+            .classList.add("open");
+
+        document
+            .getElementById("overlay")
+            .classList.add("show");
+    }
+
+
+    function closeMenu() {
+
+        document
+            .getElementById("menu")
+            .classList.remove("open");
+
+        document
+            .getElementById("overlay")
+            .classList.remove("show");
+    }
+
+
+    document.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (
+                event.key === "Escape"
+            ) {
+
+                closeMenu();
+
+            }
+
+        }
+    );
+
+</script>
+
 
 </body>
 

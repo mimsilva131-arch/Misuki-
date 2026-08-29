@@ -1,271 +1,435 @@
 <!DOCTYPE html>
 
-<html lang="pt-PT">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-```
-<title>Misuki — Reviews</title>
 
 <meta
-    name="description"
-    content="Reviews da comunidade Misuki."
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
 >
 
-<link rel="stylesheet" href="../css/style.css">
-<link rel="stylesheet" href="../css/reviews.css">
-```
+<title>Misuki — Reviews</title>
+
+<link
+    rel="stylesheet"
+    href="/css/style.css"
+>
+
+<link
+    rel="stylesheet"
+    href="/css/reviews.css"
+>
+
 
 </head>
 
 <body>
 
-```
-<!-- =====================================================
-     NAVBAR
-     ===================================================== -->
 
-<header class="navbar">
+<header class="container">
 
-    <div class="navbar-container">
+    <a
+        class="logo"
+        href="/"
+    >
+        Misuki<span>.</span>
+    </a>
 
-        <a href="index.html" class="logo">
-            Misuki
-        </a>
-
-        <nav class="nav-links">
-
-            <a href="index.html">
-                Home
-            </a>
-
-            <a href="documentation.html">
-                Documentation
-            </a>
-
-            <a href="reviews.html" class="active">
-                Reviews
-            </a>
-
-            <a href="support.html">
-                Support
-            </a>
-
-            <a href="manage.html" class="nav-button">
-                Manage
-            </a>
-
-        </nav>
-
-    </div>
+    <button
+        class="hamburger"
+        onclick="openMenu()"
+        aria-label="Open menu"
+    >
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
 
 </header>
 
 
-<!-- =====================================================
-     MAIN
-     ===================================================== -->
-
-<main class="reviews-page">
-
-    <section class="reviews-header">
-
-        <span class="reviews-label">
-            MISUKI COMMUNITY
-        </span>
-
-        <h1>
-            Reviews
-        </h1>
-
-        <p>
-            See what members of the Misuki community
-            think about the bot.
-        </p>
-
-    </section>
+<div
+    class="overlay"
+    id="overlay"
+    onclick="closeMenu()"
+></div>
 
 
-    <!-- =================================================
-         REVIEWS
-         ================================================= -->
+<nav
+    class="menu"
+    id="menu"
+>
 
-    <section class="reviews-container">
+    <div class="menu-header">
 
-        <div class="reviews-grid">
-
-            <article class="review-card">
-
-                <div class="review-rating">
-                    ★★★★★
-                </div>
-
-                <p>
-                    "A simple and useful bot for managing
-                    a Discord server."
-                </p>
-
-                <div class="review-author">
-
-                    <div class="review-avatar">
-                        M
-                    </div>
-
-                    <div>
-                        <strong>
-                            Misuki User
-                        </strong>
-
-                        <span>
-                            Discord Community
-                        </span>
-                    </div>
-
-                </div>
-
-            </article>
-
-
-            <article class="review-card">
-
-                <div class="review-rating">
-                    ★★★★★
-                </div>
-
-                <p>
-                    "The ticket and moderation features
-                    make server management much easier."
-                </p>
-
-                <div class="review-author">
-
-                    <div class="review-avatar">
-                        D
-                    </div>
-
-                    <div>
-                        <strong>
-                            Discord Member
-                        </strong>
-
-                        <span>
-                            Community User
-                        </span>
-                    </div>
-
-                </div>
-
-            </article>
-
-
-            <article class="review-card">
-
-                <div class="review-rating">
-                    ★★★★☆
-                </div>
-
-                <p>
-                    "The configuration system gives staff
-                    plenty of control over the server."
-                </p>
-
-                <div class="review-author">
-
-                    <div class="review-avatar">
-                        S
-                    </div>
-
-                    <div>
-                        <strong>
-                            Server Staff
-                        </strong>
-
-                        <span>
-                            Discord Community
-                        </span>
-
-                    </div>
-
-                </div>
-
-            </article>
-
+        <div class="menu-title">
+            Menu
         </div>
 
-    </section>
+        <button
+            class="menu-close"
+            onclick="closeMenu()"
+        >
+            ×
+        </button>
+
+    </div>
 
 
-    <!-- =================================================
-         CTA
-         ================================================= -->
+    <div class="menu-section">
+        Navigation
+    </div>
 
-    <section class="reviews-cta">
+    <a href="/">
+        Home
+    </a>
 
-        <h2>
-            Want to share your experience?
-        </h2>
+    <a href="/dashboard">
+        Dashboard
+    </a>
 
-        <p>
-            Your feedback helps improve Misuki.
-        </p>
+    <a href="/reviews">
+        Reviews
+    </a>
+
+
+    <div class="menu-section">
+        Resources
+    </div>
+
+    <a href="/documentation">
+        Documentation
+    </a>
+
+    <a href="/support">
+        Support
+    </a>
+
+
+    <div class="menu-section">
+        Legal
+    </div>
+
+    <a href="/terms">
+        Terms
+    </a>
+
+    <a href="/privacy">
+        Privacy
+    </a>
+
+    <a href="/data">
+        Data
+    </a>
+
+    <a href="/cookies">
+        Cookies
+    </a>
+
+
+    <div class="menu-section">
+        Account
+    </div>
+
+    {% if user %}
+
+        <a href="/dashboard">
+            Dashboard
+        </a>
+
+        <a href="/logout">
+            Logout
+        </a>
+
+    {% else %}
 
         <a
-            href="support.html"
-            class="button primary"
+            href="/login"
+            class="discord-login"
         >
-            Contact Support
+
+            Login with Discord
+
         </a>
+
+    {% endif %}
+
+</nav>
+
+
+<main>
+
+    <section class="section">
+
+        <div class="container">
+
+            <h1>
+                ⭐ Misuki Reviews
+            </h1>
+
+            <p style="color:#aeb3c0;">
+                Reviews from members of
+                Misuki communities.
+            </p>
+
+
+            {% if can_review %}
+
+                <div class="card form">
+
+                    <h2>
+                        ✍️ Write a review
+                    </h2>
+
+                    <form
+                        method="POST"
+                        action="/reviews"
+                    >
+
+                        <label>
+                            Rating
+                        </label>
+
+                        <select
+                            name="rating"
+                            required
+                        >
+
+                            <option value="5">
+                                5 — ⭐⭐⭐⭐⭐
+                            </option>
+
+                            <option value="4">
+                                4 — ⭐⭐⭐⭐
+                            </option>
+
+                            <option value="3">
+                                3 — ⭐⭐⭐
+                            </option>
+
+                            <option value="2">
+                                2 — ⭐⭐
+                            </option>
+
+                            <option value="1">
+                                1 — ⭐
+                            </option>
+
+                        </select>
+
+
+                        <label>
+                            Review
+                        </label>
+
+                        <textarea
+                            name="review"
+                            maxlength="1000"
+                            required
+                            placeholder="Tell us what you think about Misuki..."
+                        ></textarea>
+
+
+                        <button
+                            class="button manage"
+                            type="submit"
+                        >
+                            ⭐ Submit Review
+                        </button>
+
+                    </form>
+
+                </div>
+
+
+            {% elif user %}
+
+                <div class="empty">
+
+                    🔒 You need an active Misuki
+                    license to write a review.
+
+                </div>
+
+
+            {% else %}
+
+                <div class="empty">
+
+                    🔐 Log in with Discord and have
+                    an active Misuki license to
+                    write a review.
+
+                </div>
+
+            {% endif %}
+
+
+            <h2
+                class="section-title"
+                style="margin-top:60px;"
+            >
+                💬 Community Reviews
+            </h2>
+
+
+            {% if review_list %}
+
+                <div class="review-grid">
+
+                    {% for review in review_list %}
+
+                        <div class="card review-card">
+
+                            <div class="review-user">
+
+                                {% if review.avatar %}
+
+                                    <img
+                                        class="review-avatar"
+                                        src="{{ review.avatar }}"
+                                        alt=""
+                                    >
+
+                                {% else %}
+
+                                    <div
+                                        class="review-avatar"
+                                        style="
+                                            background:#5865f2;
+                                            display:flex;
+                                            align-items:center;
+                                            justify-content:center;
+                                        "
+                                    >
+                                        👤
+                                    </div>
+
+                                {% endif %}
+
+
+                                <div>
+
+                                    <strong>
+                                        {{ review.username }}
+                                    </strong>
+
+                                    <div class="stars">
+
+                                        {% for i in range(review.rating) %}
+                                            ★
+                                        {% endfor %}
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="review-text">
+                                {{ review.review }}
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+            {% else %}
+
+                <div class="empty">
+                    No reviews yet.
+                </div>
+
+            {% endif %}
+
+        </div>
 
     </section>
 
 </main>
 
 
-<!-- =====================================================
-     FOOTER
-     ===================================================== -->
+<footer>
 
-<footer class="footer">
+    <div>
+        © 2026 Misuki. All rights reserved.
+    </div>
 
-    <div class="footer-container">
+    <div class="footer-links">
 
-        <p>
-            © 2026 Misuki. All rights reserved.
-        </p>
+        <a href="/terms">
+            Terms
+        </a>
 
-        <div class="footer-links">
+        <a href="/privacy">
+            Privacy
+        </a>
 
-            <a href="privacy.html">
-                Privacy
-            </a>
+        <a href="/data">
+            Data
+        </a>
 
-            <a href="terms.html">
-                Terms
-            </a>
-
-            <a href="cookies.html">
-                Cookies
-            </a>
-
-            <a href="support.html">
-                Support
-            </a>
-
-        </div>
+        <a href="/cookies">
+            Cookies
+        </a>
 
     </div>
 
 </footer>
 
 
-<!-- =====================================================
-     JAVASCRIPT
-     ===================================================== -->
+<script>
 
-<script src="../js/reviews.js"></script>
-```
+    function openMenu() {
+
+        document
+            .getElementById("menu")
+            .classList.add("open");
+
+        document
+            .getElementById("overlay")
+            .classList.add("show");
+
+    }
+
+
+    function closeMenu() {
+
+        document
+            .getElementById("menu")
+            .classList.remove("open");
+
+        document
+            .getElementById("overlay")
+            .classList.remove("show");
+
+    }
+
+
+    document.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (
+                event.key === "Escape"
+            ) {
+
+                closeMenu();
+
+            }
+
+        }
+    );
+
+</script>
+
 
 </body>
 

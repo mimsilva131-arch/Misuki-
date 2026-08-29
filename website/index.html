@@ -1,327 +1,399 @@
 <!DOCTYPE html>
-
-<html lang="pt-PT">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-```
-<title>Misuki — Discord Bot</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-<meta
-    name="description"
-    content="Misuki — A powerful Discord bot for server management, moderation and automation."
+    <title>Misuki</title>
+
+  <link
+    rel="stylesheet"
+    href="/css/style.css"
 >
-
-<link rel="stylesheet" href="/css/style.css">
-```
-
+    
 </head>
 
 <body>
 
-```
-<!-- =====================================================
-     NAVBAR
-     ===================================================== -->
+    <header class="container">
 
-<header class="navbar">
-
-    <div class="navbar-container">
-
-        <a href="index.html" class="logo">
-            Misuki
+        <a
+            class="logo"
+            href="/"
+        >
+            Misuki<span>.</span>
         </a>
 
-        <nav class="nav-links">
+        <button
+            class="hamburger"
+            onclick="openMenu()"
+            aria-label="Open menu"
+        >
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
 
-            <a href="index.html" class="active">
-                Home
-            </a>
+    </header>
 
-            <a href="documentation.html">
-                Documentation
-            </a>
+    <div
+        class="overlay"
+        id="overlay"
+        onclick="closeMenu()"
+    ></div>
 
-            <a href="reviews.html">
-                Reviews
-            </a>
+    <nav
+        class="menu"
+        id="menu"
+    >
 
-            <a href="support.html">
-                Support
-            </a>
+        <div class="menu-header">
 
-            <a
-                href="manage.html"
-                class="nav-button"
+            <div class="menu-title">
+                Menu
+            </div>
+
+            <button
+                class="menu-close"
+                onclick="closeMenu()"
             >
-                Manage
-            </a>
+                ×
+            </button>
 
-        </nav>
+        </div>
 
-    </div>
+        <div class="menu-section">
+            Navigation
+        </div>
 
-</header>
+        <a href="/">
+            Home
+        </a>
 
+        <a href="/dashboard">
+            Dashboard
+        </a>
 
-<!-- =====================================================
-     HERO
-     ===================================================== -->
+        <a href="/reviews">
+            Reviews
+        </a>
 
-<main>
+        <div class="menu-section">
+            Resources
+        </div>
+
+        <a href="/documentation">
+            Documentation
+        </a>
+
+        <a href="/support">
+            Support
+        </a>
+
+        <div class="menu-section">
+            Legal
+        </div>
+
+        <a href="/terms">
+            Terms
+        </a>
+
+        <a href="/privacy">
+            Privacy
+        </a>
+
+        <a href="/data">
+            Data
+        </a>
+
+        <a href="/cookies">
+            Cookies
+        </a>
+
+        <div class="menu-section">
+            Account
+        </div>
+
+        <a
+            href="/login"
+            class="discord-login"
+        >
+            Login with Discord
+        </a>
+
+    </nav>
+
 
     <section class="hero">
 
-        <div class="hero-content">
-
-            <span class="hero-label">
-                ✦ DISCORD BOT
-            </span>
+        <div class="container">
 
             <h1>
-                Meet <span>Misuki</span>.
+                Welcome to
+                <span>Misuki</span>
             </h1>
 
             <p>
-                A modern Discord bot built to make
-                server management, moderation and
-                automation simple.
-            </p>
-
-            <div class="hero-buttons">
-
-                <a
-                    href="manage.html"
-                    class="button primary"
-                >
-                    Manage Server
-                </a>
-
-                <a
-                    href="documentation.html"
-                    class="button secondary"
-                >
-                    Documentation
-                </a>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- =================================================
-         FEATURES
-         ================================================= -->
-
-    <section class="features">
-
-        <div class="section-heading">
-
-            <span>
-                FEATURES
-            </span>
-
-            <h2>
-                Everything your server needs.
-            </h2>
-
-            <p>
-                Powerful tools designed to keep your
-                Discord server organized and easy to manage.
-            </p>
-
-        </div>
-
-
-        <div class="feature-grid">
-
-            <article class="feature-card">
-
-                <div class="feature-icon">
-                    🛡️
-                </div>
-
-                <h3>
-                    Moderation
-                </h3>
-
-                <p>
-                    Keep your community safe with
-                    powerful moderation tools.
-                </p>
-
-            </article>
-
-
-            <article class="feature-card">
-
-                <div class="feature-icon">
-                    🎫
-                </div>
-
-                <h3>
-                    Tickets
-                </h3>
-
-                <p>
-                    Create private support channels
-                    and manage requests efficiently.
-                </p>
-
-            </article>
-
-
-            <article class="feature-card">
-
-                <div class="feature-icon">
-                    ⚡
-                </div>
-
-                <h3>
-                    Triggers
-                </h3>
-
-                <p>
-                    Automate responses using custom
-                    words and phrases.
-                </p>
-
-            </article>
-
-
-            <article class="feature-card">
-
-                <div class="feature-icon">
-                    🔐
-                </div>
-
-                <h3>
-                    Verification
-                </h3>
-
-                <p>
-                    Protect your server with configurable
-                    member verification systems.
-                </p>
-
-            </article>
-
-
-            <article class="feature-card">
-
-                <div class="feature-icon">
-                    📊
-                </div>
-
-                <h3>
-                    Statistics
-                </h3>
-
-                <p>
-                    Keep track of important server
-                    information and activity.
-                </p>
-
-            </article>
-
-
-            <article class="feature-card">
-
-                <div class="feature-icon">
-                    ⚙️
-                </div>
-
-                <h3>
-                    Configuration
-                </h3>
-
-                <p>
-                    Configure Misuki to match the needs
-                    of your Discord community.
-                </p>
-
-            </article>
-
-        </div>
-
-    </section>
-
-
-    <!-- =================================================
-         CTA
-         ================================================= -->
-
-    <section class="cta">
-
-        <div class="cta-content">
-
-            <span>
-                READY?
-            </span>
-
-            <h2>
-                Take control of your server.
-            </h2>
-
-            <p>
-                Configure Misuki and bring your
-                Discord server to the next level.
+                A powerful Discord experience
+                built around your community.
             </p>
 
             <a
-                href="manage.html"
-                class="button primary"
+                href="/dashboard"
+                class="dashboard-button"
             >
-                Get Started
+                🚀 Open Dashboard
             </a>
 
         </div>
 
     </section>
 
-</main>
+
+    <section class="section">
+
+        <div class="container">
+
+            <h2 class="section-title">
+                ⭐ What people think
+            </h2>
+
+            {% if reviews %}
+
+                <div class="review-grid">
+
+                    {% for review in reviews %}
+
+                        <div class="card review-card">
+
+                            <div class="review-user">
+
+                                {% if review.avatar %}
+
+                                    <img
+                                        class="review-avatar"
+                                        src="{{ review.avatar }}"
+                                        alt=""
+                                    >
+
+                                {% else %}
+
+                                    <div
+                                        class="review-avatar"
+                                        style="
+                                            background:#5865f2;
+                                            display:flex;
+                                            align-items:center;
+                                            justify-content:center;
+                                        "
+                                    >
+                                        👤
+                                    </div>
+
+                                {% endif %}
+
+                                <div>
+
+                                    <strong>
+                                        {{ review.username }}
+                                    </strong>
+
+                                    <div class="stars">
+
+                                        {% for i in range(review.rating) %}
+                                            ★
+                                        {% endfor %}
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="review-text">
+                                {{ review.review }}
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="empty">
+                    No reviews yet.
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </section>
 
 
-<!-- =====================================================
-     FOOTER
-     ===================================================== -->
+    <footer>
 
-<footer class="footer">
-
-    <div class="footer-container">
-
-        <p>
+        <div>
             © 2026 Misuki. All rights reserved.
-        </p>
+        </div>
 
         <div class="footer-links">
 
-            <a href="privacy.html">
-                Privacy
-            </a>
-
-            <a href="terms.html">
+            <a href="/terms">
                 Terms
             </a>
 
-            <a href="cookies.html">
+            <a href="/privacy">
+                Privacy
+            </a>
+
+            <a href="/data">
+                Data
+            </a>
+
+            <a href="/cookies">
                 Cookies
             </a>
 
-            <a href="support.html">
-                Support
+        </div>
+
+    </footer>
+
+
+    <div
+        class="cookie"
+        id="cookieBanner"
+        style="display:none;"
+    >
+
+        <h3>
+            🍪 We use cookies
+        </h3>
+
+        <p>
+            We use essential cookies to keep your session
+            working and optional cookies to improve your
+            experience. You can choose which cookies to allow.
+        </p>
+
+        <div class="cookie-links">
+
+            <a href="/cookies">
+                Cookie Policy
             </a>
+
+            <a href="/privacy">
+                Privacy
+            </a>
+
+            <a href="/data">
+                Data
+            </a>
+
+        </div>
+
+        <div class="cookie-buttons">
+
+            <button
+                class="accept"
+                onclick="setCookies('all')"
+            >
+                Accept All
+            </button>
+
+            <button
+                class="essential"
+                onclick="setCookies('essential')"
+            >
+                Accept Essential
+            </button>
+
+            <button
+                class="deny"
+                onclick="setCookies('deny')"
+            >
+                Deny
+            </button>
 
         </div>
 
     </div>
 
-</footer>
-```
+
+    <script>
+
+        function setCookies(value) {
+
+            localStorage.setItem(
+                "misuki_cookie_consent",
+                value
+            );
+
+            document.getElementById(
+                "cookieBanner"
+            ).style.display = "none";
+        }
+
+
+        if (
+            !localStorage.getItem(
+                "misuki_cookie_consent"
+            )
+        ) {
+
+            document.getElementById(
+                "cookieBanner"
+            ).style.display = "block";
+        }
+
+
+        function openMenu() {
+
+            document
+                .getElementById("menu")
+                .classList.add("open");
+
+            document
+                .getElementById("overlay")
+                .classList.add("show");
+        }
+
+
+        function closeMenu() {
+
+            document
+                .getElementById("menu")
+                .classList.remove("open");
+
+            document
+                .getElementById("overlay")
+                .classList.remove("show");
+        }
+
+
+        document.addEventListener(
+            "keydown",
+            function(event) {
+
+                if (
+                    event.key === "Escape"
+                ) {
+
+                    closeMenu();
+
+                }
+
+            }
+        );
+
+    </script>
 
 </body>
 

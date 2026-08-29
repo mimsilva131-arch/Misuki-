@@ -1,199 +1,306 @@
 <!DOCTYPE html>
 
-<html lang="pt-PT">
+<html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-```
-<title>Misuki — Data</title>
-
-<link rel="stylesheet" href="../css/style.css">
-<link rel="stylesheet" href="../css/dashboard.css">
 
 <meta
-    name="description"
-    content="Informações sobre os dados utilizados pela Misuki."
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
 >
-```
+
+<title>Misuki — Your Data</title>
+
+<link
+    rel="stylesheet"
+    href="/css/style.css"
+>
+
 
 </head>
 
 <body>
 
-```
-<!-- =====================================================
-     NAVBAR
-     ===================================================== -->
 
-<header class="navbar">
+<header class="container">
 
-    <div class="navbar-container">
+    <a
+        class="logo"
+        href="/"
+    >
+        Misuki<span>.</span>
+    </a>
 
-        <a href="index.html" class="logo">
-            Misuki
-        </a>
 
-        <nav class="nav-links">
-
-            <a href="index.html">
-                Home
-            </a>
-
-            <a href="documentation.html">
-                Documentation
-            </a>
-
-            <a href="reviews.html">
-                Reviews
-            </a>
-
-            <a href="support.html">
-                Support
-            </a>
-
-        </nav>
-
-    </div>
+    <button
+        class="hamburger"
+        onclick="openMenu()"
+        aria-label="Open menu"
+    >
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
 
 </header>
 
 
-<!-- =====================================================
-     MAIN
-     ===================================================== -->
+<div
+    class="overlay"
+    id="overlay"
+    onclick="closeMenu()"
+></div>
 
-<main class="dashboard-page">
 
-    <section class="dashboard-header">
+<nav
+    class="menu"
+    id="menu"
+>
 
-        <div>
+    <div class="menu-header">
 
-            <span class="dashboard-label">
-                MISUKI
-            </span>
-
-            <h1>
-                Data
-            </h1>
-
-            <p>
-                Informação sobre os dados utilizados
-                pelos serviços da Misuki.
-            </p>
-
+        <div class="menu-title">
+            Menu
         </div>
 
-    </section>
+        <button
+            class="menu-close"
+            onclick="closeMenu()"
+        >
+            ×
+        </button>
+
+    </div>
 
 
-    <!-- =================================================
-         DATA CONTENT
-         ================================================= -->
+    <div class="menu-section">
+        Navigation
+    </div>
 
-    <section class="dashboard-content">
+    <a href="/">
+        Home
+    </a>
 
-        <div class="dashboard-card">
+    <a href="/dashboard">
+        Dashboard
+    </a>
 
-            <h2>
-                📊 Data & Storage
-            </h2>
-
-            <p>
-                A Misuki utiliza dados necessários para
-                disponibilizar e gerir as funcionalidades
-                do bot e dos serviços associados.
-            </p>
-
-        </div>
+    <a href="/reviews">
+        Reviews
+    </a>
 
 
-        <div class="dashboard-card">
+    <div class="menu-section">
+        Resources
+    </div>
 
-            <h2>
-                🔐 Discord Data
-            </h2>
+    <a href="/documentation">
+        Documentation
+    </a>
 
-            <p>
-                Algumas funcionalidades podem utilizar
-                informações fornecidas pelo Discord,
-                como identificadores de utilizadores,
-                servidores, canais e configurações
-                necessárias ao funcionamento do bot.
-            </p>
-
-        </div>
+    <a href="/support">
+        Support
+    </a>
 
 
-        <div class="dashboard-card">
+    <div class="menu-section">
+        Legal
+    </div>
 
-            <h2>
-                ⚙️ Configuration Data
-            </h2>
+    <a href="/terms">
+        Terms
+    </a>
 
-            <p>
-                As configurações dos servidores podem ser
-                armazenadas para permitir que o sistema
-                mantenha as preferências definidas pelos
-                administradores.
-            </p>
+    <a href="/privacy">
+        Privacy
+    </a>
 
-        </div>
+    <a href="/data">
+        Data
+    </a>
 
-
-        <div class="dashboard-card">
-
-            <h2>
-                🎫 Ticket Data
-            </h2>
-
-            <p>
-                O sistema de tickets pode armazenar
-                informações necessárias para identificar
-                e gerir tickets, incluindo informações
-                relacionadas com o servidor e o respetivo
-                utilizador.
-            </p>
-
-        </div>
+    <a href="/cookies">
+        Cookies
+    </a>
 
 
-        <div class="dashboard-card">
+    <div class="menu-section">
+        Account
+    </div>
 
-            <h2>
-                ⚡ Trigger Data
-            </h2>
+    {% if user %}
 
-            <p>
-                Os triggers configurados pelos
-                administradores podem ser armazenados
-                para que as respostas automáticas
-                continuem disponíveis no servidor.
-            </p>
+        <a href="/dashboard">
+            Dashboard
+        </a>
 
-        </div>
+        <a href="/logout">
+            Logout
+        </a>
+
+    {% else %}
+
+        <a
+            href="/login"
+            class="discord-login"
+        >
+            Login with Discord
+        </a>
+
+    {% endif %}
+
+</nav>
 
 
-        <div class="dashboard-card">
+<main>
 
-            <h2>
-                🗑️ Data Management
-            </h2>
+    <section class="section">
 
-            <p>
-                Os dados são utilizados apenas na medida
-                necessária para disponibilizar as
-                funcionalidades correspondentes.
-            </p>
+        <div class="container">
 
-            <p>
-                Para informações adicionais sobre
-                privacidade e tratamento de dados,
-                consulta a nossa
-                <a href="privacy.html">
-                    Privacy Policy
-                </a>.
-            </p>
+            <div class="card legal-page">
+
+                <h1>
+                    Your Data
+                </h1>
+
+
+                <p class="muted">
+                    Manage your Misuki data
+                </p>
+
+
+                <p>
+                    Misuki stores certain information
+                    required to provide its features.
+                    This page explains the types of
+                    information that may be associated
+                    with your account or Discord server.
+                </p>
+
+
+                <h2>
+                    What Data May Be Stored?
+                </h2>
+
+
+                <ul>
+
+                    <li>
+                        Discord user ID
+                    </li>
+
+                    <li>
+                        Discord server IDs
+                    </li>
+
+                    <li>
+                        Server configuration
+                    </li>
+
+                    <li>
+                        Misuki feature settings
+                    </li>
+
+                    <li>
+                        Information required for
+                        licenses and subscriptions
+                    </li>
+
+                    <li>
+                        Support or review information
+                        that you voluntarily provide
+                    </li>
+
+                </ul>
+
+
+                <h2>
+                    Why Is It Stored?
+                </h2>
+
+
+                <p>
+                    This information allows Misuki to
+                    provide its functionality, remember
+                    server settings, authenticate users
+                    and maintain the service.
+                </p>
+
+
+                <h2>
+                    Requesting Your Data
+                </h2>
+
+
+                <p>
+                    You may contact Misuki support if you
+                    would like to request information about
+                    the data associated with your account.
+                </p>
+
+
+                <a
+                    href="/support"
+                    class="button"
+                >
+                    Contact Support
+                </a>
+
+
+                <h2 style="margin-top:40px;">
+                    Requesting Deletion
+                </h2>
+
+
+                <p>
+                    If you would like your data to be
+                    deleted, contact Misuki support and
+                    provide enough information for us to
+                    identify the relevant account or
+                    server.
+                </p>
+
+
+                <p>
+                    Some information may need to be
+                    retained where required by law or
+                    where necessary for security,
+                    fraud prevention or legitimate
+                    technical purposes.
+                </p>
+
+
+                <h2>
+                    Discord Data
+                </h2>
+
+
+                <p>
+                    Misuki uses Discord authentication
+                    where applicable. Misuki does not
+                    store your Discord password.
+                </p>
+
+
+                <p>
+                    Information received through Discord
+                    is handled according to the Misuki
+                    Privacy Policy and the permissions
+                    requested during authentication.
+                </p>
+
+
+                <a
+                    href="/privacy"
+                    class="button"
+                >
+                    Read Privacy Policy
+                </a>
+
+            </div>
 
         </div>
 
@@ -202,42 +309,82 @@
 </main>
 
 
-<!-- =====================================================
-     FOOTER
-     ===================================================== -->
+<footer>
 
-<footer class="footer">
+    <div>
+        © 2026 Misuki. All rights reserved.
+    </div>
 
-    <div class="footer-container">
 
-        <p>
-            © 2026 Misuki. All rights reserved.
-        </p>
+    <div class="footer-links">
 
-        <div class="footer-links">
+        <a href="/terms">
+            Terms
+        </a>
 
-            <a href="privacy.html">
-                Privacy
-            </a>
+        <a href="/privacy">
+            Privacy
+        </a>
 
-            <a href="terms.html">
-                Terms
-            </a>
+        <a href="/data">
+            Data
+        </a>
 
-            <a href="cookies.html">
-                Cookies
-            </a>
-
-            <a href="support.html">
-                Support
-            </a>
-
-        </div>
+        <a href="/cookies">
+            Cookies
+        </a>
 
     </div>
 
 </footer>
-```
+
+
+<script>
+
+    function openMenu() {
+
+        document
+            .getElementById("menu")
+            .classList.add("open");
+
+        document
+            .getElementById("overlay")
+            .classList.add("show");
+
+    }
+
+
+    function closeMenu() {
+
+        document
+            .getElementById("menu")
+            .classList.remove("open");
+
+        document
+            .getElementById("overlay")
+            .classList.remove("show");
+
+    }
+
+
+    document.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (
+                event.key === "Escape"
+            ) {
+
+                closeMenu();
+
+            }
+
+        }
+    );
+
+</script>
+
 
 </body>
+
 </html>

@@ -1,64 +1,461 @@
-# Terms of Service
+<!DOCTYPE html>
 
-## 1. Acceptance of Terms
+<html lang="en">
 
-By accessing or using the Misuki website or services, you agree to these Terms of Service.
+<head>
 
-If you do not agree with these terms, please do not use the service.
 
-## 2. Misuki Service
+<meta charset="UTF-8">
 
-Misuki is a Discord bot and related web dashboard designed to provide server management, moderation, configuration and other Discord-related features.
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
-Features may change, be updated, or be removed over time.
+<title>Misuki — Terms of Service</title>
 
-## 3. User Responsibilities
+<link
+    rel="stylesheet"
+    href="/css/style.css"
+>
 
-You are responsible for:
 
-* Using Misuki in accordance with Discord's Terms of Service and Community Guidelines.
-* Having the necessary permissions to configure Misuki on a Discord server.
-* Keeping your Discord account and credentials secure.
-* Using the service in a lawful and responsible manner.
+</head>
 
-## 4. Discord
+<body>
 
-Misuki interacts with Discord through Discord's official API.
+<header class="container">
 
-Misuki is not affiliated with, endorsed by, or sponsored by Discord Inc.
+    <a
+        class="logo"
+        href="/"
+    >
+        Misuki<span>.</span>
+    </a>
 
-Your use of Discord remains subject to Discord's own terms and policies.
 
-## 5. OAuth2
+    <button
+        class="hamburger"
+        onclick="openMenu()"
+        aria-label="Open menu"
+    >
 
-When you use Discord OAuth2 to authenticate with the Misuki dashboard, the authentication process is handled through Discord.
+        <span></span>
+        <span></span>
+        <span></span>
 
-Misuki only requests the permissions and information necessary for the functionality provided by the dashboard.
+    </button>
 
-## 6. Server Configuration
+</header>
 
-Server administrators are responsible for the configuration and use of Misuki within their servers.
 
-Misuki is not responsible for configurations made incorrectly by server administrators or users with sufficient permissions.
+<div
+    class="overlay"
+    id="overlay"
+    onclick="closeMenu()"
+></div>
 
-## 7. Availability
 
-We aim to keep Misuki available and functional, but continuous availability is not guaranteed.
+<nav
+    class="menu"
+    id="menu"
+>
 
-The service may occasionally be unavailable because of maintenance, updates, technical problems, or external services.
+    <div class="menu-header">
 
-## 8. Changes to These Terms
+        <div class="menu-title">
+            Menu
+        </div>
 
-These Terms of Service may be updated when necessary.
 
-Continued use of Misuki after changes are published constitutes acceptance of the updated terms.
+        <button
+            class="menu-close"
+            onclick="closeMenu()"
+        >
+            ×
+        </button>
 
-## 9. Contact
+    </div>
 
-If you need assistance or have questions regarding these terms, please use the available Misuki support channels.
 
----
+    <div class="menu-section">
+        Navigation
+    </div>
 
-**Misuki Bot**
 
-© 2026 Misuki. All rights reserved.
+    <a href="/">
+        Home
+    </a>
+
+
+    <a href="/dashboard">
+        Dashboard
+    </a>
+
+
+    <a href="/reviews">
+        Reviews
+    </a>
+
+
+    <div class="menu-section">
+        Resources
+    </div>
+
+
+    <a href="/documentation">
+        Documentation
+    </a>
+
+
+    <a href="/support">
+        Support
+    </a>
+
+
+    <div class="menu-section">
+        Legal
+    </div>
+
+
+    <a href="/terms">
+        Terms
+    </a>
+
+
+    <a href="/privacy">
+        Privacy
+    </a>
+
+
+    <a href="/data">
+        Data
+    </a>
+
+
+    <a href="/cookies">
+        Cookies
+    </a>
+
+
+    <div class="menu-section">
+        Account
+    </div>
+
+
+    {% if user %}
+
+        <a href="/dashboard">
+            Dashboard
+        </a>
+
+
+        <a href="/logout">
+            Logout
+        </a>
+
+    {% else %}
+
+        <a
+            href="/login"
+            class="discord-login"
+        >
+            Login with Discord
+        </a>
+
+    {% endif %}
+
+</nav>
+
+
+<main>
+
+    <section class="section">
+
+        <div class="container">
+
+            <div class="card legal-page">
+
+                <h1>
+                    Terms of Service
+                </h1>
+
+
+                <p class="muted">
+                    Last updated: August 2026
+                </p>
+
+
+                <h2>
+                    1. Acceptance of Terms
+                </h2>
+
+
+                <p>
+                    By using Misuki, you agree to
+                    comply with these Terms of Service.
+                    If you do not agree with these terms,
+                    you should not use the service.
+                </p>
+
+
+                <h2>
+                    2. Use of the Service
+                </h2>
+
+
+                <p>
+                    Misuki provides Discord-related
+                    tools and services designed to help
+                    users manage and interact with their
+                    Discord servers.
+                </p>
+
+
+                <p>
+                    You agree to use Misuki responsibly
+                    and in accordance with applicable
+                    laws and Discord's rules and policies.
+                </p>
+
+
+                <h2>
+                    3. Discord
+                </h2>
+
+
+                <p>
+                    Misuki is an independent service and
+                    is not affiliated with, endorsed by,
+                    or sponsored by Discord Inc.
+                </p>
+
+
+                <p>
+                    Your use of Discord remains subject
+                    to Discord's own Terms of Service
+                    and Community Guidelines.
+                </p>
+
+
+                <h2>
+                    4. Accounts and Authentication
+                </h2>
+
+
+                <p>
+                    Some Misuki features may require
+                    authentication through Discord.
+                    You are responsible for maintaining
+                    the security of your account.
+                </p>
+
+
+                <p>
+                    Misuki does not request or store your
+                    Discord password.
+                </p>
+
+
+                <h2>
+                    5. Server Permissions
+                </h2>
+
+
+                <p>
+                    Misuki may require certain permissions
+                    in a Discord server to provide its
+                    features.
+                </p>
+
+
+                <p>
+                    Server owners and administrators are
+                    responsible for deciding which
+                    permissions are granted to the bot.
+                </p>
+
+
+                <h2>
+                    6. Prohibited Use
+                </h2>
+
+
+                <p>
+                    You must not use Misuki to abuse,
+                    disrupt, exploit, or interfere with
+                    Discord, other users, or the service.
+                </p>
+
+
+                <p>
+                    You must also not attempt to gain
+                    unauthorized access to Misuki systems
+                    or data.
+                </p>
+
+
+                <h2>
+                    7. Availability
+                </h2>
+
+
+                <p>
+                    We aim to keep Misuki available and
+                    functional, but we cannot guarantee
+                    uninterrupted access to the service.
+                </p>
+
+
+                <p>
+                    Features may be changed, suspended,
+                    or discontinued when necessary.
+                </p>
+
+
+                <h2>
+                    8. Third-Party Services
+                </h2>
+
+
+                <p>
+                    Misuki may rely on third-party
+                    services, including Discord and other
+                    infrastructure providers.
+                </p>
+
+
+                <p>
+                    Their own terms and policies may
+                    apply when you use those services.
+                </p>
+
+
+                <h2>
+                    9. Termination
+                </h2>
+
+
+                <p>
+                    Access to Misuki may be restricted or
+                    terminated if these Terms of Service
+                    are violated or if necessary to protect
+                    the service and its users.
+                </p>
+
+
+                <h2>
+                    10. Changes to These Terms
+                </h2>
+
+
+                <p>
+                    These Terms of Service may be updated
+                    from time to time. Continued use of
+                    Misuki after changes are published
+                    constitutes acceptance of the updated
+                    terms.
+                </p>
+
+
+                <h2>
+                    11. Contact
+                </h2>
+
+
+                <p>
+                    If you have questions regarding these
+                    terms, please contact Misuki support.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<footer>
+
+    <div>
+        © 2026 Misuki. All rights reserved.
+    </div>
+
+
+    <div class="footer-links">
+
+        <a href="/terms">
+            Terms
+        </a>
+
+
+        <a href="/privacy">
+            Privacy
+        </a>
+
+
+        <a href="/data">
+            Data
+        </a>
+
+
+        <a href="/cookies">
+            Cookies
+        </a>
+
+    </div>
+
+</footer>
+
+
+<script>
+
+    function openMenu() {
+
+        document
+            .getElementById("menu")
+            .classList.add("open");
+
+        document
+            .getElementById("overlay")
+            .classList.add("show");
+
+    }
+
+
+    function closeMenu() {
+
+        document
+            .getElementById("menu")
+            .classList.remove("open");
+
+        document
+            .getElementById("overlay")
+            .classList.remove("show");
+
+    }
+
+
+    document.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (
+                event.key === "Escape"
+            ) {
+
+                closeMenu();
+
+            }
+
+        }
+    );
+
+</script>
+```
+
+</body>
+
+</html>
