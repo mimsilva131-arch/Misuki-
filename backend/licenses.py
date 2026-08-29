@@ -8,7 +8,7 @@ import sqlite3
 
 
 # =========================================================
-# DATABASE
+# PATHS
 # =========================================================
 
 BASE_DIR = os.path.dirname(
@@ -87,9 +87,7 @@ def init_licenses():
 # GET LICENSE
 # =========================================================
 
-def get_license(
-    guild_id
-):
+def get_license(guild_id):
 
     connection = get_connection()
 
@@ -98,9 +96,7 @@ def get_license(
     cursor.execute(
         """
         SELECT *
-
         FROM licenses
-
         WHERE guild_id = ?
         """,
         (
@@ -119,9 +115,7 @@ def get_license(
 # CHECK LICENSE
 # =========================================================
 
-def has_active_license(
-    guild_id
-):
+def has_active_license(guild_id):
 
     license_data = get_license(
         guild_id
@@ -131,9 +125,61 @@ def has_active_license(
 
         return False
 
-    return bool(
-        license_data["active"]
-    )
+    # -----------------------------------------------------
+    # Get available columns safely
+    # -----------------------------------------------------
+
+    try:
+
+        columns = license_data.keys()
+
+    except AttributeError:
+
+        return False
+
+    # -----------------------------------------------------
+    # Active column exists
+    # -----------------------------------------------------
+
+    if "active" in columns:
+
+        try:
+
+            return bool(
+                license_data["active"]
+            )
+
+        except (
+            KeyError,
+            IndexError
+        ):
+
+            return False
+
+    # -----------------------------------------------------
+    # Compatibility with old databases
+    # -----------------------------------------------------
+
+    if "status" in columns:
+
+        try:
+
+            return str(
+                license_data["status"]
+            ).lower() == "active"
+
+        except (
+            KeyError,
+            IndexError
+        ):
+
+            return False
+
+    # -----------------------------------------------------
+    # No known status column
+    # -----------------------------------------------------
+
+    return False
 
 
 # =========================================================
@@ -149,35 +195,131 @@ def create_license(
 
     cursor = connection.cursor()
 
-    cursor.execute(
-        """
-        INSERT INTO licenses
-        (
-            guild_id,
-            license_key,
-            active
+    try:
+
+        cursor.execute(
+            """
+            INSERT INTO licenses
+            (
+                guild_id,
+                license_key,
+                active
+            )
+
+            VALUES (?, ?, TRUE)
+            """,
+            (
+                str(guild_id),
+                license_key
+            )
         )
 
-        VALUES (?, ?, TRUE)
-        """,
-        (
-            str(guild_id),
-            license_key
-        )
-    )
+        connection.commit()
 
-    connection.commit()
+    finally:
 
-    connection.close()
+        connection.close()
 
 
 # =========================================================
 # DISABLE LICENSE
 # =========================================================
 
-def disable_license(
-    guild_id
-):
+def disable_license(guild_id):
+
+    connection = get_connection()
+
+    cursor = connection.cursor()
+
+    try:
+
+        cursor.execute(
+            """
+            UPDATE licenses
+
+            SET active = FALSE
+
+            WHERE guild_id = ?
+            """,
+            (
+                str(guild_id),
+            )
+        )
+
+        connection.commit()
+
+    finally:
+
+        connection.close()
+
+
+# =========================================================
+# ENABLE LICENSE
+# =========================================================
+
+def enable_license(guild_id):
+
+    connection = get_connection()
+
+    cursor = connection.cursor()
+
+    try:
+
+        cursor.execute(
+            """
+            UPDATE licenses
+
+            SET active = TRUE
+
+            WHERE guild_id = ?
+            """,
+            (
+                str(guild_id),
+            )
+        )
+
+        connection.commit()
+
+    finally:
+
+        connection.close()
+
+
+# =========================================================
+# DELETE LICENSE
+# =========================================================
+
+def delete_license(guild_id):
+
+    connection = get_connection()
+
+    cursor = connection.cursor()
+
+    try:
+
+        cursor.execute(
+            """
+            DELETE FROM licenses
+
+            WHERE guild_id = ?
+            """,
+            (
+                str(guild_id),
+            )
+        )
+
+        connection.commit()
+
+    finally:
+
+        connection.close()
+
+
+# =========================================================
+# GET ALL LICENSES
+# =========================================================
+
+def get_all_licenses():
 
     connection = get_connection()
 
@@ -185,20 +327,17 @@ def disable_license(
 
     cursor.execute(
         """
-        UPDATE licenses
-
-        SET active = FALSE
-
-        WHERE guild_id = ?
-        """,
-        (
-            str(guild_id),
-        )
+        SELECT *
+        FROM licenses
+        ORDER BY id DESC
+        """
     )
 
-    connection.commit()
+    licenses = cursor.fetchall()
 
     connection.close()
+
+    return licenses
 
 
 # =========================================================

@@ -11,14 +11,19 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Misuki</title>
-
+    <title>Misuki
+        
+    </title>
+<link rel="icon" type="image/png" href="/assets/images/favicon.png?v=2">
+<link rel="shortcut icon" type="image/png" href="/assets/images/favicon.png?v=2">
+    <!-- Favicon -->
     <link
         rel="icon"
         type="image/png"
-        href="/assets/images/icon.png"
+        href="/assets/images/favicon.png"
     >
 
+    <!-- Main stylesheet -->
     <link
         rel="stylesheet"
         href="/css/style.css"
@@ -27,6 +32,10 @@
 </head>
 
 <body>
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
 
     <header class="container">
 
@@ -50,12 +59,20 @@
     </header>
 
 
+    <!-- =====================================================
+         OVERLAY
+         ===================================================== -->
+
     <div
         class="overlay"
         id="overlay"
         onclick="closeMenu()"
     ></div>
 
+
+    <!-- =====================================================
+         MENU
+         ===================================================== -->
 
     <nav
         class="menu"
@@ -71,6 +88,7 @@
             <button
                 class="menu-close"
                 onclick="closeMenu()"
+                aria-label="Close menu"
             >
                 ×
             </button>
@@ -143,19 +161,35 @@
     </nav>
 
 
+    <!-- =====================================================
+         HERO
+         ===================================================== -->
+
     <section class="hero">
 
         <div class="container">
+
+            <div class="hero-icon">
+
+                <img
+                    src="/assets/images/icon.png"
+                    alt="Misuki"
+                >
+
+            </div>
+
 
             <h1>
                 Welcome to
                 <span>Misuki</span>
             </h1>
 
+
             <p>
                 A powerful Discord experience
                 built around your community.
             </p>
+
 
             <a
                 href="/dashboard"
@@ -169,6 +203,10 @@
     </section>
 
 
+    <!-- =====================================================
+         REVIEWS
+         ===================================================== -->
+
     <section class="section">
 
         <div class="container">
@@ -176,6 +214,7 @@
             <h2 class="section-title">
                 ⭐ What people think
             </h2>
+
 
             {% if reviews %}
 
@@ -254,11 +293,16 @@
     </section>
 
 
+    <!-- =====================================================
+         FOOTER
+         ===================================================== -->
+
     <footer>
 
         <div>
             © 2026 Misuki. All rights reserved.
         </div>
+
 
         <div class="footer-links">
 
@@ -283,6 +327,10 @@
     </footer>
 
 
+    <!-- =====================================================
+         COOKIE BANNER
+         ===================================================== -->
+
     <div
         class="cookie"
         id="cookieBanner"
@@ -292,6 +340,7 @@
         <h3>
             🍪 We use cookies
         </h3>
+
 
         <p>
             We use essential cookies to keep your session
@@ -344,6 +393,10 @@
 
     </div>
 
+
+    <!-- =====================================================
+         JAVASCRIPT
+         ===================================================== -->
 
     <script>
 

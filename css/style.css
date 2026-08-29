@@ -886,3 +886,38 @@ footer {
     }
 }
 
+/* =========================================================
+   MISUKI HERO ICON
+   ========================================================= */
+
+.hero-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 28px;
+}
+
+.hero-icon img {
+    width: 120px;
+    height: 120px;
+
+    object-fit: cover;
+
+    border-radius: 30px;
+
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.35);
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+.hero-icon img:hover {
+    transform: translateY(-5px) scale(1.04);
+
+    box-shadow:
+        0 25px 60px rgba(0, 0, 0, 0.45);
+}
+
+
