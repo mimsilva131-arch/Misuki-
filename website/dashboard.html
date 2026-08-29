@@ -1,263 +1,531 @@
+<!DOCTYPE html>
 
-<section class="section">
+<html lang="en">
 
-    <div class="container">
+<head>
+    <meta charset="UTF-8">
 
-        <h1>
-            Dashboard
-        </h1>
 
-        <p style="color:#aeb3c0;">
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
-            Logged in as
+<title>Misuki — Dashboard</title>
 
-            <strong>
-                {{ user.global_name or user.username }}
-            </strong>
+<link
+    rel="stylesheet"
+    href="/css/style.css"
+>
 
-        </p>
+<link
+    rel="stylesheet"
+    href="/css/dashboard.css"
+>
 
-        <h2
-            class="section-title"
-            style="margin-top:50px;"
-        >
-            🔐 Authorized Servers
-        </h2>
 
-        {% if authorized %}
+</head>
 
-            <div class="server-grid">
+<body>
 
-                {% for guild in authorized %}
 
-                    <div class="card server-card">
+<!-- =====================================================
+     HEADER
+====================================================== -->
 
-                        <div class="server-top">
+<header class="container">
 
-                            {% if guild.icon %}
+    <a
+        class="logo"
+        href="/"
+    >
+        Misuki<span>.</span>
+    </a>
 
-                                <img
-                                    class="server-icon"
-                                    src="https://cdn.discordapp.com/icons/{{ guild.id }}/{{ guild.icon }}.png?size=128"
-                                    alt=""
-                                >
+    <button
+        class="hamburger"
+        onclick="openMenu()"
+        aria-label="Open menu"
+    >
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
 
-                            {% else %}
+</header>
 
-                                <div
-                                    class="server-icon-placeholder"
-                                >
-                                    {{ guild.name[0] }}
-                                </div>
 
-                            {% endif %}
+<!-- =====================================================
+     OVERLAY
+====================================================== -->
 
-                            <div style="min-width:0;">
+<div
+    class="overlay"
+    id="overlay"
+    onclick="closeMenu()"
+></div>
 
-                                <div class="server-name">
-                                    {{ guild.name }}
-                                </div>
 
-                                <div class="server-id">
-                                    {{ guild.id }}
-                                </div>
+<!-- =====================================================
+     MENU
+====================================================== -->
 
-                            </div>
+<nav
+    class="menu"
+    id="menu"
+>
 
-                        </div>
+    <div class="menu-header">
 
-                        <div class="badges">
-
-                            {% if guild.license_active %}
-
-                                <span class="badge badge-active">
-                                    License 🟢
-                                </span>
-
-                            {% elif guild.license_status == "expired" %}
-
-                                <span class="badge badge-expired">
-                                    License 🔴
-                                </span>
-
-                            {% elif guild.license_status == "revoked" %}
-
-                                <span class="badge badge-expired">
-                                    License ⛔
-                                </span>
-
-                            {% else %}
-
-                                <span class="badge badge-none">
-                                    License ⚪
-                                </span>
-
-                            {% endif %}
-
-                        </div>
-
-                        <a
-                            class="button manage"
-                            href="/manage/{{ guild.id }}"
-                        >
-                            ⚙️ Manage
-                        </a>
-
-                    </div>
-
-                {% endfor %}
-
-            </div>
-
-        {% else %}
-
-            <div class="empty">
-                🔒 No authorized servers found.
-            </div>
-
-        {% endif %}
-
-        <h2
-            class="section-title"
-            style="margin-top:65px;"
-        >
-            ➕ Available Servers
-        </h2>
-
-        {% if available %}
-
-            <div class="server-grid">
-
-                {% for guild in available %}
-
-                    <div class="card server-card">
-
-                        <div class="server-top">
-
-                            {% if guild.icon %}
-
-                                <img
-                                    class="server-icon"
-                                    src="https://cdn.discordapp.com/icons/{{ guild.id }}/{{ guild.icon }}.png?size=128"
-                                    alt=""
-                                >
-
-                            {% else %}
-
-                                <div
-                                    class="server-icon-placeholder"
-                                >
-                                    {{ guild.name[0] }}
-                                </div>
-
-                            {% endif %}
-
-                            <div style="min-width:0;">
-
-                                <div class="server-name">
-                                    {{ guild.name }}
-                                </div>
-
-                                <div class="server-id">
-                                    {{ guild.id }}
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                        <div class="badges">
-
-                            {% if guild.license_active %}
-
-                                <span class="badge badge-active">
-                                    License 🟢
-                                </span>
-
-                            {% elif guild.license_status == "expired" %}
-
-                                <span class="badge badge-expired">
-                                    License 🔴
-                                </span>
-
-                            {% elif guild.license_status == "revoked" %}
-
-                                <span class="badge badge-expired">
-                                    License ⛔
-                                </span>
-
-                            {% else %}
-
-                                <span class="badge badge-none">
-                                    License ⚪
-                                </span>
-
-                            {% endif %}
-
-                            {% if guild.can_add %}
-
-                                <span class="badge badge-warning">
-                                    Add permission ✓
-                                </span>
-
-                            {% else %}
-
-                                <span class="badge badge-warning">
-                                    ⚠️ No authorization
-                                </span>
-
-                            {% endif %}
-
-                        </div>
-
-                        {% if guild.can_add %}
-
-                            <a
-                                href="{{ guild.invite_url }}"
-                                class="button add"
-                            >
-                                ➕ Add Misuki
-                            </a>
-
-                        {% else %}
-
-                            <div class="button blocked">
-                                ⚠️ Cannot Add
-                            </div>
-
-                        {% endif %}
-
-                    </div>
-
-                {% endfor %}
-
-            </div>
-
-        {% else %}
-
-            <div class="empty">
-                No additional servers available.
-            </div>
-
-        {% endif %}
-
-        <div
-            style="
-                margin-top:60px;
-                text-align:center;
-            "
-        >
-
-            <a
-                href="/reviews"
-                class="dashboard-button"
-            >
-                ⭐ Leave a Review
-            </a>
-
+        <div class="menu-title">
+            Menu
         </div>
+
+        <button
+            class="menu-close"
+            onclick="closeMenu()"
+            aria-label="Close menu"
+        >
+            ×
+        </button>
 
     </div>
 
-</section>
 
+    <div class="menu-section">
+        Navigation
+    </div>
+
+    <a href="/">
+        Home
+    </a>
+
+    <a href="/dashboard">
+        Dashboard
+    </a>
+
+    <a href="/reviews">
+        Reviews
+    </a>
+
+
+    <div class="menu-section">
+        Resources
+    </div>
+
+    <a href="/documentation">
+        Documentation
+    </a>
+
+    <a href="/support">
+        Support
+    </a>
+
+
+    <div class="menu-section">
+        Legal
+    </div>
+
+    <a href="/terms">
+        Terms
+    </a>
+
+    <a href="/privacy">
+        Privacy
+    </a>
+
+    <a href="/data">
+        Data
+    </a>
+
+    <a href="/cookies">
+        Cookies
+    </a>
+
+
+    <div class="menu-section">
+        Account
+    </div>
+
+    <a
+        href="/logout"
+        class="discord-login"
+    >
+        🚪 Logout
+    </a>
+
+</nav>
+
+
+<!-- =====================================================
+     DASHBOARD
+====================================================== -->
+
+<main>
+
+    <section class="section">
+
+        <div class="container">
+
+
+            <!-- PAGE HEADER -->
+
+            <div class="dashboard-header">
+
+                <div>
+
+                    <h1>
+                        Dashboard
+                    </h1>
+
+                    <p class="dashboard-user">
+
+                        Logged in as
+
+                        <strong>
+                            {{ user.global_name or user.username }}
+                        </strong>
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 AUTHORIZED SERVERS
+            ================================================== -->
+
+            <h2
+                class="section-title"
+                style="margin-top:50px;"
+            >
+                🔐 Authorized Servers
+            </h2>
+
+
+            {% if authorized %}
+
+                <div class="server-grid">
+
+                    {% for guild in authorized %}
+
+                        <div class="card server-card">
+
+
+                            <!-- SERVER INFO -->
+
+                            <div class="server-top">
+
+                                {% if guild.icon %}
+
+                                    <img
+                                        class="server-icon"
+                                        src="https://cdn.discordapp.com/icons/{{ guild.id }}/{{ guild.icon }}.png?size=128"
+                                        alt=""
+                                    >
+
+                                {% else %}
+
+                                    <div class="server-icon-placeholder">
+
+                                        {{ guild.name[0] }}
+
+                                    </div>
+
+                                {% endif %}
+
+
+                                <div style="min-width:0;">
+
+                                    <div class="server-name">
+                                        {{ guild.name }}
+                                    </div>
+
+                                    <div class="server-id">
+                                        {{ guild.id }}
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- LICENSE -->
+
+                            <div class="badges">
+
+                                {% if guild.license_active %}
+
+                                    <span class="badge badge-active">
+                                        License 🟢
+                                    </span>
+
+                                {% elif guild.license_status == "expired" %}
+
+                                    <span class="badge badge-expired">
+                                        License 🔴
+                                    </span>
+
+                                {% elif guild.license_status == "revoked" %}
+
+                                    <span class="badge badge-expired">
+                                        License ⛔
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge badge-none">
+                                        License ⚪
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <!-- MANAGE -->
+
+                            <a
+                                class="button manage"
+                                href="/manage/{{ guild.id }}"
+                            >
+                                ⚙️ Manage
+                            </a>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="empty">
+
+                    🔒 No authorized servers found.
+
+                </div>
+
+            {% endif %}
+
+
+
+            <!-- =================================================
+                 AVAILABLE SERVERS
+            ================================================== -->
+
+            <h2
+                class="section-title"
+                style="margin-top:65px;"
+            >
+                ➕ Available Servers
+            </h2>
+
+
+            {% if available %}
+
+                <div class="server-grid">
+
+                    {% for guild in available %}
+
+                        <div class="card server-card">
+
+
+                            <!-- SERVER INFO -->
+
+                            <div class="server-top">
+
+                                {% if guild.icon %}
+
+                                    <img
+                                        class="server-icon"
+                                        src="https://cdn.discordapp.com/icons/{{ guild.id }}/{{ guild.icon }}.png?size=128"
+                                        alt=""
+                                    >
+
+                                {% else %}
+
+                                    <div class="server-icon-placeholder">
+
+                                        {{ guild.name[0] }}
+
+                                    </div>
+
+                                {% endif %}
+
+
+                                <div style="min-width:0;">
+
+                                    <div class="server-name">
+                                        {{ guild.name }}
+                                    </div>
+
+                                    <div class="server-id">
+                                        {{ guild.id }}
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- BADGES -->
+
+                            <div class="badges">
+
+
+                                {% if guild.license_active %}
+
+                                    <span class="badge badge-active">
+                                        License 🟢
+                                    </span>
+
+                                {% elif guild.license_status == "expired" %}
+
+                                    <span class="badge badge-expired">
+                                        License 🔴
+                                    </span>
+
+                                {% elif guild.license_status == "revoked" %}
+
+                                    <span class="badge badge-expired">
+                                        License ⛔
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge badge-none">
+                                        License ⚪
+                                    </span>
+
+                                {% endif %}
+
+
+                                {% if guild.can_add %}
+
+                                    <span class="badge badge-warning">
+                                        Add permission ✓
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge badge-warning">
+                                        ⚠️ No authorization
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <!-- ADD BOT -->
+
+                            {% if guild.can_add %}
+
+                                <a
+                                    href="{{ guild.invite_url }}"
+                                    class="button add"
+                                >
+                                    ➕ Add Misuki
+                                </a>
+
+                            {% else %}
+
+                                <div class="button blocked">
+                                    ⚠️ Cannot Add
+                                </div>
+
+                            {% endif %}
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="empty">
+
+                    No additional servers available.
+
+                </div>
+
+            {% endif %}
+
+
+
+            <!-- =================================================
+                 REVIEW BUTTON
+            ================================================== -->
+
+            <div
+                style="
+                    margin-top:60px;
+                    text-align:center;
+                "
+            >
+
+                <a
+                    href="/reviews"
+                    class="dashboard-button"
+                >
+                    ⭐ Leave a Review
+                </a>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<!-- =====================================================
+     FOOTER
+====================================================== -->
+
+<footer>
+
+    <div>
+        © 2026 Misuki. All rights reserved.
+    </div>
+
+    <div class="footer-links">
+
+        <a href="/terms">
+            Terms
+        </a>
+
+        <a href="/privacy">
+            Privacy
+        </a>
+
+        <a href="/data">
+            Data
+        </a>
+
+        <a href="/cookies">
+            Cookies
+        </a>
+
+    </div>
+
+</footer>
+
+
+<!-- =====================================================
+     JAVASCRIPT
+====================================================== -->
+
+<script src="/js/main.js"></script>
+
+<script src="/js/dashboard.js"></script>
+
+
+</body>
+
+</html>
