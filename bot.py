@@ -142,7 +142,7 @@ async def load_extensions():
         "cogs.utility",
         "cogs.licenses",
         "cogs.triggers",
-        "cogs.impersonate.py",
+        "cogs.impersonate",
     ]
 
     for extension in extensions:
