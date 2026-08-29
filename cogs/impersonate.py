@@ -10,11 +10,11 @@ class Impersonate(commands.Cog):
 
     @app_commands.command(
         name="impersonate",
-        description="Cria uma paródia visual do perfil de um utilizador."
+        description="Send a message as another user"
     )
     @app_commands.describe(
-        user="Utilizador que queres representar",
-        message="Mensagem a enviar"
+        user="User you want to impersonate",
+        message="Message to send"
     )
     @app_commands.checks.has_permissions(manage_guild=True)
     async def impersonate(
@@ -29,7 +29,7 @@ class Impersonate(commands.Cog):
             discord.TextChannel
         ):
             await interaction.response.send_message(
-                "❌ Este comando só pode ser usado num canal de texto.",
+                "❌ This command can only be used in a text channel.",
                 ephemeral=True
             )
             return
@@ -41,9 +41,6 @@ class Impersonate(commands.Cog):
         webhook = None
 
         try:
-            # =====================================================
-            # PERFIL
-            # =====================================================
 
             display_name = (
                 user.display_name
@@ -58,126 +55,16 @@ class Impersonate(commands.Cog):
                 ).url
             )
 
-            # =====================================================
-            # EMBED
-            # =====================================================
-
-            embed = discord.Embed(
-                description=message,
-                color=discord.Color.blurple()
-            )
-
-            embed.set_author(
-                name=f"{display_name} [PARÓDIA]",
-                icon_url=avatar_url
-            )
-
-            # =====================================================
-            # AVATAR
-            # =====================================================
-
-            embed.set_thumbnail(
-                url=avatar_url
-            )
-
-            # =====================================================
-            # PERFIL
-            # =====================================================
-
-            embed.add_field(
-                name="👤 Utilizador representado",
-                value=f"{user.mention}",
-                inline=False
-            )
-
-            # =====================================================
-            # USERNAME
-            # =====================================================
-
-            embed.add_field(
-                name="🏷️ Username",
-                value=f"`@{user.name}`",
-                inline=True
-            )
-
-            # =====================================================
-            # ID
-            # =====================================================
-
-            embed.add_field(
-                name="🆔 ID",
-                value=f"`{user.id}`",
-                inline=True
-            )
-
-            # =====================================================
-            # BANNER
-            # =====================================================
-            #
-            # Member normalmente não fornece o banner.
-            # Tentamos obter o User completo através da API
-            # oficial da discord.py.
-            #
-
-            try:
-                full_user = await self.bot.fetch_user(
-                    user.id
-                )
-
-            except discord.HTTPException:
-                full_user = user
-
-            banner_url = None
-
-            if getattr(
-                full_user,
-                "banner",
-                None
-            ):
-
-                try:
-                    banner_url = str(
-                        full_user.banner.replace(
-                            size=1024,
-                            format="png"
-                        ).url
-                    )
-
-                except Exception:
-                    banner_url = None
-
-            if banner_url:
-
-                embed.set_image(
-                    url=banner_url
-                )
-
-            # =====================================================
-            # FOOTER
-            # =====================================================
-
-            embed.set_footer(
-                text="⚠️ PARÓDIA • Misuki"
-            )
-
-            # =====================================================
-            # WEBHOOK
-            # =====================================================
-
             webhook = await interaction.channel.create_webhook(
                 name="Misuki Parody"
             )
 
             await webhook.send(
-                username=f"{display_name} [PARÓDIA]",
+                content=message,
+                username=f"{display_name}",
                 avatar_url=avatar_url,
-                embed=embed,
                 allowed_mentions=discord.AllowedMentions.none()
             )
-
-            # =====================================================
-            # DELETE WEBHOOK
-            # =====================================================
 
             await webhook.delete(
                 reason="Temporary Misuki parody webhook"
@@ -193,14 +80,13 @@ class Impersonate(commands.Cog):
         except discord.Forbidden:
 
             if webhook:
-
                 try:
                     await webhook.delete()
                 except Exception:
                     pass
 
             await interaction.followup.send(
-                "❌ O Misuki não tem permissão para criar ou gerir webhooks neste canal.",
+                "❌ O Misuki não tem permissão para gerir webhooks neste canal.",
                 ephemeral=True
             )
 
@@ -211,7 +97,6 @@ class Impersonate(commands.Cog):
             )
 
             if webhook:
-
                 try:
                     await webhook.delete()
                 except Exception:
@@ -229,7 +114,6 @@ class Impersonate(commands.Cog):
             )
 
             if webhook:
-
                 try:
                     await webhook.delete()
                 except Exception:
@@ -239,10 +123,6 @@ class Impersonate(commands.Cog):
                 "❌ Ocorreu um erro inesperado.",
                 ephemeral=True
             )
-
-    # =========================================================
-    # PERMISSION ERROR
-    # =========================================================
 
     @impersonate.error
     async def impersonate_error(
@@ -256,44 +136,34 @@ class Impersonate(commands.Cog):
             app_commands.errors.MissingPermissions
         ):
 
-            if interaction.response.is_done():
+            message = (
+                "❌ Apenas Staff pode utilizar este comando."
+            )
 
-                await interaction.followup.send(
-                    "❌ Apenas Staff pode utilizar este comando.",
-                    ephemeral=True
-                )
+        else:
 
-            else:
+            print(
+                f"❌ Impersonate command error: {error}"
+            )
 
-                await interaction.response.send_message(
-                    "❌ Apenas Staff pode utilizar este comando.",
-                    ephemeral=True
-                )
-
-            return
-
-        print(
-            f"❌ Impersonate command error: {error}"
-        )
+            message = (
+                "❌ Ocorreu um erro ao executar o comando."
+            )
 
         if interaction.response.is_done():
 
             await interaction.followup.send(
-                "❌ Ocorreu um erro ao executar o comando.",
+                message,
                 ephemeral=True
             )
 
         else:
 
             await interaction.response.send_message(
-                "❌ Ocorreu um erro ao executar o comando.",
+                message,
                 ephemeral=True
             )
 
-
-# =============================================================
-# SETUP
-# =============================================================
 
 async def setup(bot):
 

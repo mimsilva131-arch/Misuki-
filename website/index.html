@@ -1,7 +1,9 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -11,11 +13,17 @@
 
     <title>Misuki</title>
 
-  <link
-    rel="stylesheet"
-    href="/css/style.css"
->
-    
+    <link
+        rel="icon"
+        type="image/png"
+        href="/assets/images/icon.png"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/css/style.css"
+    >
+
 </head>
 
 <body>
@@ -41,11 +49,13 @@
 
     </header>
 
+
     <div
         class="overlay"
         id="overlay"
         onclick="closeMenu()"
     ></div>
+
 
     <nav
         class="menu"
@@ -67,6 +77,7 @@
 
         </div>
 
+
         <div class="menu-section">
             Navigation
         </div>
@@ -83,6 +94,7 @@
             Reviews
         </a>
 
+
         <div class="menu-section">
             Resources
         </div>
@@ -94,6 +106,7 @@
         <a href="/support">
             Support
         </a>
+
 
         <div class="menu-section">
             Legal
@@ -114,6 +127,7 @@
         <a href="/cookies">
             Cookies
         </a>
+
 
         <div class="menu-section">
             Account
@@ -197,6 +211,7 @@
 
                                 {% endif %}
 
+
                                 <div>
 
                                     <strong>
@@ -214,6 +229,7 @@
                                 </div>
 
                             </div>
+
 
                             <div class="review-text">
                                 {{ review.review }}
@@ -283,6 +299,7 @@
             experience. You can choose which cookies to allow.
         </p>
 
+
         <div class="cookie-links">
 
             <a href="/cookies">
@@ -298,6 +315,7 @@
             </a>
 
         </div>
+
 
         <div class="cookie-buttons">
 
@@ -339,6 +357,7 @@
             document.getElementById(
                 "cookieBanner"
             ).style.display = "none";
+
         }
 
 
@@ -351,6 +370,7 @@
             document.getElementById(
                 "cookieBanner"
             ).style.display = "block";
+
         }
 
 
@@ -363,6 +383,7 @@
             document
                 .getElementById("overlay")
                 .classList.add("show");
+
         }
 
 
@@ -375,6 +396,7 @@
             document
                 .getElementById("overlay")
                 .classList.remove("show");
+
         }
 
 
@@ -398,3 +420,4 @@
 </body>
 
 </html>
+
