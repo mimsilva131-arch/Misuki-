@@ -1,4 +1,3 @@
-
 import sqlite3
 from datetime import datetime
 import os
@@ -858,6 +857,10 @@ class Config(commands.Cog):
 
         def format_value(value):
 
+            # ---------------------------------------------
+            # LIST OF ROLES
+            # ---------------------------------------------
+
             if isinstance(value, list):
 
                 if not value:
@@ -893,9 +896,17 @@ class Config(commands.Cog):
                     else "None"
                 )
 
+            # ---------------------------------------------
+            # NONE
+            # ---------------------------------------------
+
             if value is None:
 
                 return "None"
+
+            # ---------------------------------------------
+            # INTEGER
+            # ---------------------------------------------
 
             try:
 
@@ -908,21 +919,9 @@ class Config(commands.Cog):
 
                 return str(value)
 
-            role = guild.get_role(
-                value
-            )
-
-            if role:
-
-                return role.mention
-
-            channel_obj = guild.get_channel(
-                value
-            )
-
-            if channel_obj:
-
-                return channel_obj.mention
+            # ---------------------------------------------
+            # CATEGORY
+            # ---------------------------------------------
 
             category = guild.get_channel(
                 value
@@ -933,7 +932,35 @@ class Config(commands.Cog):
                 discord.CategoryChannel
             ):
 
-                return category.name
+                return f"**{category.name}**"
+
+            # ---------------------------------------------
+            # ROLE
+            # ---------------------------------------------
+
+            role = guild.get_role(
+                value
+            )
+
+            if role:
+
+                return role.mention
+
+            # ---------------------------------------------
+            # CHANNEL
+            # ---------------------------------------------
+
+            channel_obj = guild.get_channel(
+                value
+            )
+
+            if channel_obj:
+
+                return channel_obj.mention
+
+            # ---------------------------------------------
+            # UNKNOWN ID
+            # ---------------------------------------------
 
             return f"`{value}`"
 
@@ -2711,4 +2738,3 @@ async def setup(
     await bot.add_cog(
         Config(bot)
     )
-

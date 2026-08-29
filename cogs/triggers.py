@@ -100,7 +100,7 @@ class TriggerManager(
                             enabled BOOLEAN NOT NULL
                                 DEFAULT TRUE,
 
-                            UNIQUE(
+                            UNIQUE (
                                 guild_id,
                                 trigger
                             )
@@ -184,6 +184,8 @@ class TriggerManager(
                     WHERE guild_id = %s
 
                     AND LOWER(trigger) = LOWER(%s)
+
+                    LIMIT 1
                     """,
                     (
                         guild_id,
@@ -199,9 +201,7 @@ class TriggerManager(
     #
     # IMPORTANT:
     #
-    # This listener receives messages sent by Discord.
-    #
-    # Bots are ignored BEFORE checking triggers.
+    # Bots are ignored before checking triggers.
     #
     # =====================================================
 
@@ -325,14 +325,13 @@ class TriggerManager(
             enabled
         ) in triggers:
 
-
             if not enabled:
 
                 continue
 
 
             trigger_text = (
-                trigger
+                str(trigger)
                 .strip()
                 .lower()
             )
@@ -425,6 +424,19 @@ class TriggerManager(
 
             await interaction.response.send_message(
                 "❌ The trigger cannot be empty.",
+                ephemeral=True
+            )
+
+            return
+
+
+        response = response.strip()
+
+
+        if not response:
+
+            await interaction.response.send_message(
+                "❌ The response cannot be empty.",
                 ephemeral=True
             )
 
@@ -528,6 +540,16 @@ class TriggerManager(
         trigger = trigger.strip()
 
 
+        if not trigger:
+
+            await interaction.response.send_message(
+                "❌ The trigger cannot be empty.",
+                ephemeral=True
+            )
+
+            return
+
+
         try:
 
             with self.get_connection() as connection:
@@ -613,6 +635,27 @@ class TriggerManager(
 
 
         trigger = trigger.strip()
+        response = response.strip()
+
+
+        if not trigger:
+
+            await interaction.response.send_message(
+                "❌ The trigger cannot be empty.",
+                ephemeral=True
+            )
+
+            return
+
+
+        if not response:
+
+            await interaction.response.send_message(
+                "❌ The response cannot be empty.",
+                ephemeral=True
+            )
+
+            return
 
 
         try:
@@ -749,9 +792,23 @@ class TriggerManager(
             )
 
 
+        description = "\n\n".join(
+            lines
+        )
+
+
+        # Discord embeds têm limite de 4096 caracteres
+        if len(description) > 4096:
+
+            description = (
+                description[:4080]
+                + "\n\n..."
+            )
+
+
         embed = discord.Embed(
             title="⚡ Misuki Triggers",
-            description="\n\n".join(lines),
+            description=description,
             color=discord.Color.blurple()
         )
 
@@ -790,6 +847,16 @@ class TriggerManager(
 
 
         trigger = trigger.strip()
+
+
+        if not trigger:
+
+            await interaction.response.send_message(
+                "❌ The trigger cannot be empty.",
+                ephemeral=True
+            )
+
+            return
 
 
         try:
@@ -879,6 +946,16 @@ class TriggerManager(
         trigger = trigger.strip()
 
 
+        if not trigger:
+
+            await interaction.response.send_message(
+                "❌ The trigger cannot be empty.",
+                ephemeral=True
+            )
+
+            return
+
+
         try:
 
             with self.get_connection() as connection:
@@ -961,20 +1038,27 @@ async def setup(
     # DEBUG
     # -----------------------------------------------------
 
-    commands_list = (
-        cog.get_app_commands()
-    )
+    try:
 
-
-    print(
-        f"Comandos do TriggerManager: "
-        f"{len(commands_list)}"
-    )
-
-
-    for command in commands_list:
+        commands_list = (
+            cog.get_app_commands()
+        )
 
         print(
-            f"/trigger {command.name}"
+            f"Comandos do TriggerManager: "
+            f"{len(commands_list)}"
+        )
+
+        for command in commands_list:
+
+            print(
+                f"/trigger {command.name}"
+            )
+
+    except Exception as error:
+
+        print(
+            f"⚠️ Não foi possível listar "
+            f"os comandos do TriggerManager: {error}"
         )
 

@@ -1,0 +1,311 @@
+
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Dashboard — Misuki</title>
+
+    <link
+        rel="stylesheet"
+        href="../css/dashboard.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="../css/style.css"
+    >
+</head>
+
+<body>
+
+    <!-- =====================================================
+         NAVBAR
+    ====================================================== -->
+
+    <header class="navbar">
+
+        <div class="navbar-brand">
+            <span class="brand-icon">🤖</span>
+            <span>Misuki</span>
+        </div>
+
+        <nav class="navbar-links">
+
+            <a href="index.html">
+                Início
+            </a>
+
+            <a href="dashboard.html" class="active">
+                Dashboard
+            </a>
+
+            <a href="documentation.html">
+                Documentação
+            </a>
+
+            <a href="support.html">
+                Suporte
+            </a>
+
+        </nav>
+
+        <div class="navbar-user" id="user-section">
+
+            <span id="username">
+                Utilizador
+            </span>
+
+        </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
+    <main class="dashboard">
+
+        <section class="dashboard-header">
+
+            <div>
+
+                <p class="dashboard-label">
+                    MISUKI BOT
+                </p>
+
+                <h1>
+                    Dashboard
+                </h1>
+
+                <p>
+                    Gere os teus servidores e configurações
+                    do Misuki.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             SERVER SELECTOR
+        ================================================== -->
+
+        <section class="dashboard-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h2>
+                        🏠 Servidor
+                    </h2>
+
+                    <p>
+                        Seleciona o servidor que queres gerir.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <select id="server-select">
+
+                <option value="">
+                    Selecionar servidor
+                </option>
+
+            </select>
+
+        </section>
+
+
+        <!-- =================================================
+             QUICK ACTIONS
+        ================================================== -->
+
+        <section class="dashboard-grid">
+
+            <article class="dashboard-card">
+
+                <div class="card-icon">
+                    ⚙️
+                </div>
+
+                <h2>
+                    Configuração
+                </h2>
+
+                <p>
+                    Configura os sistemas e funcionalidades
+                    disponíveis no teu servidor.
+                </p>
+
+                <a
+                    href="manage.html"
+                    class="dashboard-button"
+                >
+                    Gerir servidor
+                </a>
+
+            </article>
+
+
+            <article class="dashboard-card">
+
+                <div class="card-icon">
+                    📊
+                </div>
+
+                <h2>
+                    Estatísticas
+                </h2>
+
+                <p>
+                    Consulta informações e estatísticas
+                    do teu servidor.
+                </p>
+
+                <a
+                    href="data.html"
+                    class="dashboard-button"
+                >
+                    Ver dados
+                </a>
+
+            </article>
+
+
+            <article class="dashboard-card">
+
+                <div class="card-icon">
+                    🎫
+                </div>
+
+                <h2>
+                    Tickets
+                </h2>
+
+                <p>
+                    Gere o sistema de suporte através
+                    do painel do servidor.
+                </p>
+
+            </article>
+
+
+            <article class="dashboard-card">
+
+                <div class="card-icon">
+                    ⚡
+                </div>
+
+                <h2>
+                    Triggers
+                </h2>
+
+                <p>
+                    Consulta e gere as respostas automáticas
+                    configuradas no servidor.
+                </p>
+
+            </article>
+
+        </section>
+
+
+        <!-- =================================================
+             STATUS
+        ================================================== -->
+
+        <section class="dashboard-card status-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h2>
+                        🟢 Estado do Misuki
+                    </h2>
+
+                    <p>
+                        Estado atual dos serviços.
+                    </p>
+
+                </div>
+
+                <span class="status-online">
+                    Online
+                </span>
+
+            </div>
+
+            <div class="status-grid">
+
+                <div class="status-item">
+
+                    <span>
+                        Bot
+                    </span>
+
+                    <strong>
+                        Online
+                    </strong>
+
+                </div>
+
+                <div class="status-item">
+
+                    <span>
+                        API
+                    </span>
+
+                    <strong>
+                        Online
+                    </strong>
+
+                </div>
+
+                <div class="status-item">
+
+                    <span>
+                        Dashboard
+                    </span>
+
+                    <strong>
+                        Online
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- =====================================================
+         FOOTER
+    ====================================================== -->
+
+    <footer class="footer">
+
+        <p>
+            © 2026 Misuki Bot. Todos os direitos reservados.
+        </p>
+
+    </footer>
+
+
+    <script src="../js/dashboard.js"></script>
+
+</body>
+</html>
+

@@ -1,24 +1,36 @@
+# =========================================================
+# MISUKI MODERATION SYSTEM
+# Discord.py
+# =========================================================
+
+import os
+import sqlite3
+
+from datetime import datetime, timedelta, timezone
 
 import discord
+
 from discord import app_commands
 from discord.ext import commands
-
-import sqlite3
-import os
-from datetime import datetime, timedelta
-
-
-DATABASE = "data/moderation.db"
 
 
 # =========================================================
 # DATABASE
 # =========================================================
 
+DATABASE = "data/moderation.db"
+
+
+# =========================================================
+# DATABASE INITIALIZATION
+# =========================================================
+
 def init_database():
+
     os.makedirs("data", exist_ok=True)
 
     with sqlite3.connect(DATABASE) as db:
+
         db.execute("""
             CREATE TABLE IF NOT EXISTS warnings (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -29,18 +41,23 @@ def init_database():
                 created_at TEXT NOT NULL
             )
         """)
+
         db.commit()
 
 
 # =========================================================
-# LOGS
+# CONFIG
 # =========================================================
 
 def get_config(bot):
+
     return bot.get_cog("Config")
 
 
 async def get_log_channel(bot, guild):
+
+    if guild is None:
+        return None
 
     config = get_config(bot)
 
@@ -48,6 +65,7 @@ async def get_log_channel(bot, guild):
         return None
 
     try:
+
         channel_id = config.get_channel_value(
             guild.id,
             "moderation_log_channel_id"
@@ -56,16 +74,28 @@ async def get_log_channel(bot, guild):
         if not channel_id:
             return None
 
-        channel = guild.get_channel(int(channel_id))
+        channel = guild.get_channel(
+            int(channel_id)
+        )
 
-        if isinstance(channel, discord.TextChannel):
+        if isinstance(
+            channel,
+            discord.TextChannel
+        ):
             return channel
 
     except Exception as error:
-        print(f"[Moderation] Error getting log channel: {error}")
+
+        print(
+            f"[Moderation] Error getting log channel: {error}"
+        )
 
     return None
 
+
+# =========================================================
+# MODERATION LOG
+# =========================================================
 
 async def send_mod_log(
     bot,
@@ -79,7 +109,13 @@ async def send_mod_log(
 
     try:
 
-        channel = await get_log_channel(bot, guild)
+        if guild is None:
+            return
+
+        channel = await get_log_channel(
+            bot,
+            guild
+        )
 
         if channel is None:
             return
@@ -87,18 +123,39 @@ async def send_mod_log(
         embed = discord.Embed(
             title=f"🛡️ {action}",
             color=color,
-            timestamp=datetime.now()
+            timestamp=datetime.now(
+                timezone.utc
+            )
         )
 
-        if hasattr(target, "mention"):
+        # -------------------------------------------------
+        # TARGET
+        # -------------------------------------------------
+
+        if isinstance(
+            target,
+            discord.Member
+        ):
+
             target_text = (
                 f"{target.mention}\n"
                 f"`{target.id}`"
             )
-        else:
+
+        elif isinstance(
+            target,
+            discord.User
+        ):
+
             target_text = (
                 f"**{target}**\n"
                 f"`{target.id}`"
+            )
+
+        else:
+
+            target_text = (
+                f"**{target}**"
             )
 
         embed.add_field(
@@ -107,14 +164,51 @@ async def send_mod_log(
             inline=True
         )
 
-        embed.add_field(
-            name="🛡️ Moderator",
-            value=(
+        # -------------------------------------------------
+        # MODERATOR
+        # -------------------------------------------------
+
+        if isinstance(
+            moderator,
+            discord.Member
+        ):
+
+            moderator_text = (
                 f"{moderator.mention}\n"
                 f"`{moderator.id}`"
-            ),
+            )
+
+        elif isinstance(
+            moderator,
+            discord.User
+        ):
+
+            moderator_text = (
+                f"**{moderator}**\n"
+                f"`{moderator.id}`"
+            )
+
+        else:
+
+            moderator_text = str(
+                moderator
+            )
+
+        embed.add_field(
+            name="🛡️ Moderator",
+            value=moderator_text,
             inline=True
         )
+
+        # -------------------------------------------------
+        # REASON
+        # -------------------------------------------------
+
+        if not reason:
+            reason = "No reason provided."
+
+        if len(reason) > 1024:
+            reason = reason[:1021] + "..."
 
         embed.add_field(
             name="📝 Reason",
@@ -122,18 +216,33 @@ async def send_mod_log(
             inline=False
         )
 
-        if hasattr(target, "display_avatar"):
+        # -------------------------------------------------
+        # AVATAR
+        # -------------------------------------------------
+
+        if hasattr(
+            target,
+            "display_avatar"
+        ):
+
             embed.set_thumbnail(
                 url=target.display_avatar.url
             )
+
+        # -------------------------------------------------
+        # FOOTER
+        # -------------------------------------------------
 
         embed.set_footer(
             text="Misuki • Moderation"
         )
 
-        await channel.send(embed=embed)
+        await channel.send(
+            embed=embed
+        )
 
     except Exception as error:
+
         print(
             f"[Moderation] Error sending log: {error}"
         )
@@ -156,59 +265,108 @@ async def send_dm(
             title=title,
             description=description,
             color=color,
-            timestamp=datetime.now()
+            timestamp=datetime.now(
+                timezone.utc
+            )
         )
 
         embed.set_footer(
             text="Misuki • Moderation"
         )
 
-        await user.send(embed=embed)
+        await user.send(
+            embed=embed
+        )
 
-    except Exception:
+    except (
+        discord.Forbidden,
+        discord.HTTPException
+    ):
+
         pass
 
 
 # =========================================================
-# MODERATION
+# MODERATION COG
 # =========================================================
 
 class Moderation(commands.Cog):
 
     def __init__(self, bot):
+
         self.bot = bot
+
 
     # =====================================================
     # HIERARCHY
     # =====================================================
 
-    def can_moderate(self, moderator, target):
+    def can_moderate(
+        self,
+        moderator,
+        target
+    ):
+
+        if not isinstance(
+            moderator,
+            discord.Member
+        ):
+
+            return False
+
+        if not isinstance(
+            target,
+            discord.Member
+        ):
+
+            return False
+
+        # -------------------------------------------------
+        # SELF
+        # -------------------------------------------------
 
         if target.id == moderator.id:
             return False
 
-        if self.bot.user and target.id == self.bot.user.id:
+        # -------------------------------------------------
+        # BOT
+        # -------------------------------------------------
+
+        if self.bot.user:
+
+            if target.id == self.bot.user.id:
+                return False
+
+        # -------------------------------------------------
+        # SERVER OWNER
+        # -------------------------------------------------
+
+        if target.id == moderator.guild.owner_id:
             return False
 
-        if target == moderator.guild.owner:
+        # -------------------------------------------------
+        # MODERATOR HIERARCHY
+        # -------------------------------------------------
+
+        if target.top_role >= moderator.top_role:
+
             return False
 
-        if (
-            isinstance(target, discord.Member)
-            and target.top_role >= moderator.top_role
-        ):
-            return False
+        # -------------------------------------------------
+        # BOT HIERARCHY
+        # -------------------------------------------------
 
         bot_member = moderator.guild.me
 
-        if (
-            isinstance(target, discord.Member)
-            and bot_member
-            and target.top_role >= bot_member.top_role
-        ):
+        if bot_member is None:
+            return False
+
+        if target.top_role >= bot_member.top_role:
+
             return False
 
         return True
+
 
     # =====================================================
     # WARN
@@ -237,23 +395,29 @@ class Moderation(commands.Cog):
         guild = interaction.guild
 
         if guild is None:
+
             await interaction.followup.send(
                 "❌ This command can only be used in a server."
             )
+
             return
 
         if not self.can_moderate(
             interaction.user,
             member
         ):
+
             await interaction.followup.send(
                 "❌ You cannot moderate this member."
             )
+
             return
 
         try:
 
-            with sqlite3.connect(DATABASE) as db:
+            with sqlite3.connect(
+                DATABASE
+            ) as db:
 
                 cursor = db.cursor()
 
@@ -274,7 +438,9 @@ class Moderation(commands.Cog):
                         member.id,
                         interaction.user.id,
                         reason,
-                        datetime.now().isoformat()
+                        datetime.now(
+                            timezone.utc
+                        ).isoformat()
                     )
                 )
 
@@ -291,7 +457,12 @@ class Moderation(commands.Cog):
             await interaction.followup.send(
                 "❌ An error occurred while saving the warning."
             )
+
             return
+
+        # -------------------------------------------------
+        # DM
+        # -------------------------------------------------
 
         await send_dm(
             member,
@@ -303,6 +474,10 @@ class Moderation(commands.Cog):
             ),
             discord.Color.orange()
         )
+
+        # -------------------------------------------------
+        # LOG
+        # -------------------------------------------------
 
         await send_mod_log(
             self.bot,
@@ -316,6 +491,10 @@ class Moderation(commands.Cog):
             ),
             discord.Color.orange()
         )
+
+        # -------------------------------------------------
+        # RESPONSE
+        # -------------------------------------------------
 
         embed = discord.Embed(
             title="⚠️ Warning Issued",
@@ -341,6 +520,7 @@ class Moderation(commands.Cog):
             embed=embed
         )
 
+
     # =====================================================
     # WARNINGS
     # =====================================================
@@ -365,9 +545,21 @@ class Moderation(commands.Cog):
             ephemeral=True
         )
 
+        guild = interaction.guild
+
+        if guild is None:
+
+            await interaction.followup.send(
+                "❌ This command can only be used in a server."
+            )
+
+            return
+
         try:
 
-            with sqlite3.connect(DATABASE) as db:
+            with sqlite3.connect(
+                DATABASE
+            ) as db:
 
                 cursor = db.cursor()
 
@@ -384,7 +576,7 @@ class Moderation(commands.Cog):
                     ORDER BY id DESC
                     """,
                     (
-                        interaction.guild.id,
+                        guild.id,
                         member.id
                     )
                 )
@@ -400,6 +592,7 @@ class Moderation(commands.Cog):
             await interaction.followup.send(
                 "❌ An error occurred while retrieving the warnings."
             )
+
             return
 
         embed = discord.Embed(
@@ -441,14 +634,21 @@ class Moderation(commands.Cog):
                 date = created_at
 
             text += (
-                f"**#{warning_id}** — {warning_reason}\n"
+                f"**#{warning_id}** — "
+                f"{warning_reason}\n"
                 f"🛡️ <@{moderator_id}> • "
                 f"🕐 {date}\n\n"
             )
 
+        # Discord embed description limit
+        if len(text) > 4096:
+
+            text = text[:4093] + "..."
+
         embed.description = text
 
         if len(rows) > 10:
+
             embed.set_footer(
                 text=(
                     f"Showing 10 of "
@@ -459,6 +659,7 @@ class Moderation(commands.Cog):
         await interaction.followup.send(
             embed=embed
         )
+
 
     # =====================================================
     # UNWARN
@@ -489,23 +690,29 @@ class Moderation(commands.Cog):
         guild = interaction.guild
 
         if guild is None:
+
             await interaction.followup.send(
                 "❌ This command can only be used in a server."
             )
+
             return
 
         if not self.can_moderate(
             interaction.user,
             member
         ):
+
             await interaction.followup.send(
                 "❌ You cannot moderate this member."
             )
+
             return
 
         try:
 
-            with sqlite3.connect(DATABASE) as db:
+            with sqlite3.connect(
+                DATABASE
+            ) as db:
 
                 cursor = db.cursor()
 
@@ -595,6 +802,7 @@ class Moderation(commands.Cog):
             f"removed from {member.mention}."
         )
 
+
     # =====================================================
     # CLEAR WARNINGS
     # =====================================================
@@ -621,9 +829,30 @@ class Moderation(commands.Cog):
 
         guild = interaction.guild
 
+        if guild is None:
+
+            await interaction.followup.send(
+                "❌ This command can only be used in a server."
+            )
+
+            return
+
+        if not self.can_moderate(
+            interaction.user,
+            member
+        ):
+
+            await interaction.followup.send(
+                "❌ You cannot moderate this member."
+            )
+
+            return
+
         try:
 
-            with sqlite3.connect(DATABASE) as db:
+            with sqlite3.connect(
+                DATABASE
+            ) as db:
 
                 cursor = db.cursor()
 
@@ -673,6 +902,7 @@ class Moderation(commands.Cog):
             f"from {member.mention}."
         )
 
+
     # =====================================================
     # CLEAR
     # =====================================================
@@ -697,9 +927,31 @@ class Moderation(commands.Cog):
             ephemeral=True
         )
 
+        guild = interaction.guild
+        channel = interaction.channel
+
+        if guild is None:
+
+            await interaction.followup.send(
+                "❌ This command can only be used in a server."
+            )
+
+            return
+
+        if not isinstance(
+            channel,
+            discord.TextChannel
+        ):
+
+            await interaction.followup.send(
+                "❌ This command cannot be used in this channel."
+            )
+
+            return
+
         try:
 
-            deleted = await interaction.channel.purge(
+            deleted = await channel.purge(
                 limit=amount
             )
 
@@ -713,8 +965,12 @@ class Moderation(commands.Cog):
 
         except discord.HTTPException as error:
 
+            print(
+                f"[Moderation] Clear error: {error}"
+            )
+
             await interaction.followup.send(
-                f"❌ A Discord error occurred: `{error}`"
+                "❌ A Discord error occurred while deleting messages."
             )
 
             return
@@ -725,13 +981,14 @@ class Moderation(commands.Cog):
 
         await send_mod_log(
             self.bot,
-            interaction.guild,
+            guild,
             "Messages Cleared",
             interaction.user,
             interaction.user,
             f"{len(deleted)} messages deleted.",
             discord.Color.blurple()
         )
+
 
     # =====================================================
     # TIMEOUT
@@ -761,17 +1018,28 @@ class Moderation(commands.Cog):
 
         guild = interaction.guild
 
+        if guild is None:
+
+            await interaction.followup.send(
+                "❌ This command can only be used in a server."
+            )
+
+            return
+
         if not self.can_moderate(
             interaction.user,
             member
         ):
+
             await interaction.followup.send(
                 "❌ You cannot moderate this member."
             )
+
             return
 
-        until = discord.utils.utcnow() + timedelta(
-            minutes=duration
+        until = (
+            discord.utils.utcnow()
+            + timedelta(minutes=duration)
         )
 
         try:
@@ -791,8 +1059,12 @@ class Moderation(commands.Cog):
 
         except discord.HTTPException as error:
 
+            print(
+                f"[Moderation] Timeout error: {error}"
+            )
+
             await interaction.followup.send(
-                f"❌ A Discord error occurred: `{error}`"
+                "❌ A Discord error occurred while applying the timeout."
             )
 
             return
@@ -826,6 +1098,7 @@ class Moderation(commands.Cog):
             f"for **{duration} minute(s)**."
         )
 
+
     # =====================================================
     # UNTIMEOUT
     # =====================================================
@@ -852,13 +1125,23 @@ class Moderation(commands.Cog):
 
         guild = interaction.guild
 
+        if guild is None:
+
+            await interaction.followup.send(
+                "❌ This command can only be used in a server."
+            )
+
+            return
+
         if not self.can_moderate(
             interaction.user,
             member
         ):
+
             await interaction.followup.send(
                 "❌ You cannot moderate this member."
             )
+
             return
 
         try:
@@ -872,6 +1155,18 @@ class Moderation(commands.Cog):
 
             await interaction.followup.send(
                 "❌ I do not have permission to remove the timeout."
+            )
+
+            return
+
+        except discord.HTTPException as error:
+
+            print(
+                f"[Moderation] Untimeout error: {error}"
+            )
+
+            await interaction.followup.send(
+                "❌ A Discord error occurred while removing the timeout."
             )
 
             return
@@ -890,6 +1185,7 @@ class Moderation(commands.Cog):
             f"🔊 The timeout has been removed from "
             f"{member.mention}."
         )
+
 
     # =====================================================
     # KICK
@@ -917,14 +1213,28 @@ class Moderation(commands.Cog):
 
         guild = interaction.guild
 
+        if guild is None:
+
+            await interaction.followup.send(
+                "❌ This command can only be used in a server."
+            )
+
+            return
+
         if not self.can_moderate(
             interaction.user,
             member
         ):
+
             await interaction.followup.send(
                 "❌ You cannot moderate this member."
             )
+
             return
+
+        # -------------------------------------------------
+        # DM BEFORE KICK
+        # -------------------------------------------------
 
         await send_dm(
             member,
@@ -950,6 +1260,18 @@ class Moderation(commands.Cog):
 
             return
 
+        except discord.HTTPException as error:
+
+            print(
+                f"[Moderation] Kick error: {error}"
+            )
+
+            await interaction.followup.send(
+                "❌ A Discord error occurred while kicking this member."
+            )
+
+            return
+
         await send_mod_log(
             self.bot,
             guild,
@@ -963,6 +1285,7 @@ class Moderation(commands.Cog):
         await interaction.followup.send(
             f"👢 **{member}** has been kicked from the server."
         )
+
 
     # =====================================================
     # BAN
@@ -990,13 +1313,23 @@ class Moderation(commands.Cog):
 
         guild = interaction.guild
 
+        if guild is None:
+
+            await interaction.followup.send(
+                "❌ This command can only be used in a server."
+            )
+
+            return
+
         if not self.can_moderate(
             interaction.user,
             member
         ):
+
             await interaction.followup.send(
                 "❌ You cannot moderate this member."
             )
+
             return
 
         await send_dm(
@@ -1024,6 +1357,18 @@ class Moderation(commands.Cog):
 
             return
 
+        except discord.HTTPException as error:
+
+            print(
+                f"[Moderation] Ban error: {error}"
+            )
+
+            await interaction.followup.send(
+                "❌ A Discord error occurred while banning this member."
+            )
+
+            return
+
         await send_mod_log(
             self.bot,
             guild,
@@ -1037,6 +1382,7 @@ class Moderation(commands.Cog):
         await interaction.followup.send(
             f"🔨 **{member}** has been banned from the server."
         )
+
 
     # =====================================================
     # UNBAN
@@ -1064,20 +1410,41 @@ class Moderation(commands.Cog):
 
         guild = interaction.guild
 
+        if guild is None:
+
+            await interaction.followup.send(
+                "❌ This command can only be used in a server."
+            )
+
+            return
+
+        try:
+
+            parsed_id = int(
+                user_id
+            )
+
+        except ValueError:
+
+            await interaction.followup.send(
+                "❌ The user ID is invalid."
+            )
+
+            return
+
         try:
 
             user = await self.bot.fetch_user(
-                int(user_id)
+                parsed_id
             )
 
         except (
-            ValueError,
             discord.NotFound,
             discord.HTTPException
         ):
 
             await interaction.followup.send(
-                "❌ The user ID is invalid."
+                "❌ The user could not be found."
             )
 
             return
@@ -1105,6 +1472,18 @@ class Moderation(commands.Cog):
 
             return
 
+        except discord.HTTPException as error:
+
+            print(
+                f"[Moderation] Unban error: {error}"
+            )
+
+            await interaction.followup.send(
+                "❌ A Discord error occurred while unbanning this user."
+            )
+
+            return
+
         await send_mod_log(
             self.bot,
             guild,
@@ -1118,6 +1497,7 @@ class Moderation(commands.Cog):
         await interaction.followup.send(
             f"🔓 **{user}** has been unbanned."
         )
+
 
     # =====================================================
     # SOFTBAN
@@ -1145,14 +1525,30 @@ class Moderation(commands.Cog):
 
         guild = interaction.guild
 
+        if guild is None:
+
+            await interaction.followup.send(
+                "❌ This command can only be used in a server."
+            )
+
+            return
+
         if not self.can_moderate(
             interaction.user,
             member
         ):
+
             await interaction.followup.send(
                 "❌ You cannot moderate this member."
             )
+
             return
+
+        # -------------------------------------------------
+        # SAVE USER BEFORE BAN
+        # -------------------------------------------------
+
+        user = member
 
         try:
 
@@ -1162,7 +1558,7 @@ class Moderation(commands.Cog):
             )
 
             await guild.unban(
-                member,
+                user,
                 reason="Softban"
             )
 
@@ -1174,18 +1570,30 @@ class Moderation(commands.Cog):
 
             return
 
+        except discord.HTTPException as error:
+
+            print(
+                f"[Moderation] Softban error: {error}"
+            )
+
+            await interaction.followup.send(
+                "❌ A Discord error occurred while softbanning this member."
+            )
+
+            return
+
         await send_mod_log(
             self.bot,
             guild,
             "Softban",
-            member,
+            user,
             interaction.user,
             reason,
             discord.Color.orange()
         )
 
         await interaction.followup.send(
-            f"🧹 **{member}** has received a softban."
+            f"🧹 **{user}** has received a softban."
         )
 
 
@@ -1201,5 +1609,10 @@ async def setup(bot):
         Moderation(bot)
     )
 
+    print(
+        "🛡️ Moderation carregado."
+    )
 
-
+    print(
+        "🛡️ Comandos de moderação carregados."
+    )

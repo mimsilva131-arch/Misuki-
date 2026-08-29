@@ -1,6 +1,4 @@
-gunicorn
+Flask
 requests
-flask
-python-dotenv
-asyncpg
 psycopg2-binary
+python-dotenv

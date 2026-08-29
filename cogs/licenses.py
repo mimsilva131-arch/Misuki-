@@ -9,11 +9,9 @@ import secrets
 from datetime import datetime, timedelta, timezone
 
 import asyncpg
-
 import discord
 
 from discord import app_commands
-
 from discord.ext import commands
 
 
@@ -21,16 +19,14 @@ from discord.ext import commands
 # ENVIRONMENT
 # =========================================================
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL"
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+OWNER_ID = int(
+    os.getenv(
+        "OWNER_ID",
+        "1146083816503529545"
+    )
 )
-
-
-# =========================================================
-# OWNER
-# =========================================================
-
-OWNER_ID = 1146083816503529545
 
 
 # =========================================================
@@ -42,9 +38,7 @@ class LicenseManager(commands.Cog):
     def __init__(self, bot):
 
         self.bot = bot
-
         self.pool = None
-
 
     # =====================================================
     # DATABASE
@@ -83,19 +77,29 @@ class LicenseManager(commands.Cog):
                 )
             """)
 
-
     # =====================================================
     # COG LOAD
     # =====================================================
 
     async def cog_load(self):
 
-        await self.create_database()
+        try:
 
-        print(
-            "🗄️ LicenseManager conectado ao Neon."
-        )
+            await self.create_database()
 
+            print(
+                "🗄️ LicenseManager conectado ao Neon."
+            )
+
+        except Exception as error:
+
+            print(
+                "❌ Erro ao conectar o LicenseManager ao Neon:"
+            )
+
+            print(error)
+
+            raise
 
     # =====================================================
     # COG UNLOAD
@@ -103,16 +107,31 @@ class LicenseManager(commands.Cog):
 
     async def cog_unload(self):
 
-        if self.pool:
+        if self.pool is not None:
 
             await self.pool.close()
 
+            self.pool = None
+
+    # =====================================================
+    # DATABASE CHECK
+    # =====================================================
+
+    def database_ready(self):
+
+        return self.pool is not None
 
     # =====================================================
     # GENERATE KEY
     # =====================================================
 
     async def generate_license_key(self):
+
+        if not self.database_ready():
+
+            raise RuntimeError(
+                "License database não está disponível."
+            )
 
         while True:
 
@@ -148,7 +167,6 @@ class LicenseManager(commands.Cog):
 
                 return key
 
-
     # =====================================================
     # GET LICENSE
     # =====================================================
@@ -157,6 +175,10 @@ class LicenseManager(commands.Cog):
         self,
         guild_id
     ):
+
+        if not self.database_ready():
+
+            return None
 
         async with self.pool.acquire() as connection:
 
@@ -173,7 +195,6 @@ class LicenseManager(commands.Cog):
                 """,
                 guild_id
             )
-
 
     # =====================================================
     # ACTIVE LICENSE
@@ -218,6 +239,18 @@ class LicenseManager(commands.Cog):
 
         return True
 
+    # =====================================================
+    # REQUIRE LICENSE
+    # =====================================================
+
+    async def require_license(
+        self,
+        guild_id
+    ):
+
+        return await self.has_active_license(
+            guild_id
+        )
 
     # =====================================================
     # EXPIRE
@@ -227,6 +260,10 @@ class LicenseManager(commands.Cog):
         self,
         guild_id
     ):
+
+        if not self.database_ready():
+
+            return
 
         async with self.pool.acquire() as connection:
 
@@ -238,7 +275,6 @@ class LicenseManager(commands.Cog):
                 """,
                 guild_id
             )
-
 
     # =====================================================
     # CREATE
@@ -294,7 +330,6 @@ class LicenseManager(commands.Cog):
 
         return license_key
 
-
     # =====================================================
     # REVOKE
     # =====================================================
@@ -324,7 +359,6 @@ class LicenseManager(commands.Cog):
             )
 
         return True
-
 
     # =====================================================
     # EXTEND
@@ -387,7 +421,6 @@ class LicenseManager(commands.Cog):
 
         return True
 
-
     # =====================================================
     # DELETE
     # =====================================================
@@ -417,7 +450,6 @@ class LicenseManager(commands.Cog):
 
         return True
 
-
     # =====================================================
     # OWNER
     # =====================================================
@@ -432,6 +464,19 @@ class LicenseManager(commands.Cog):
             == OWNER_ID
         )
 
+    # =====================================================
+    # ADMINISTRATOR
+    # =====================================================
+
+    def is_administrator(
+        self,
+        interaction
+    ):
+
+        return (
+            interaction.guild is not None
+            and interaction.user.guild_permissions.administrator
+        )
 
     # =====================================================
     # LICENSE EMBED
@@ -463,6 +508,10 @@ class LicenseManager(commands.Cog):
                 inline=False
             )
 
+            embed.set_footer(
+                text="Misuki • License System"
+            )
+
             return embed
 
         status = license_data["status"]
@@ -472,7 +521,6 @@ class LicenseManager(commands.Cog):
         created_at = license_data["created_at"]
 
         license_key = license_data["license_key"]
-
 
         # -------------------------------------------------
         # CHECK EXPIRATION
@@ -494,7 +542,6 @@ class LicenseManager(commands.Cog):
                 )
 
                 status = "expired"
-
 
         # -------------------------------------------------
         # STATUS
@@ -526,7 +573,6 @@ class LicenseManager(commands.Cog):
 
             color = discord.Color.orange()
 
-
         # -------------------------------------------------
         # EXPIRATION
         # -------------------------------------------------
@@ -540,7 +586,6 @@ class LicenseManager(commands.Cog):
         else:
 
             expiration_text = "Never"
-
 
         # -------------------------------------------------
         # EMBED
@@ -589,7 +634,6 @@ class LicenseManager(commands.Cog):
 
         return embed
 
-
     # =====================================================
     # /LICENSE
     # =====================================================
@@ -615,6 +659,17 @@ class LicenseManager(commands.Cog):
 
             return
 
+        if not self.is_administrator(
+            interaction
+        ):
+
+            await interaction.response.send_message(
+                "❌ You must be an administrator to use this command.",
+                ephemeral=True
+            )
+
+            return
+
         embed = await self.build_license_embed(
             interaction.guild.id
         )
@@ -623,7 +678,6 @@ class LicenseManager(commands.Cog):
             embed=embed,
             ephemeral=True
         )
-
 
     # =====================================================
     # /CREATELICENSE
@@ -746,7 +800,6 @@ class LicenseManager(commands.Cog):
             ephemeral=True
         )
 
-
     # =====================================================
     # /REVOKELICENSE
     # =====================================================
@@ -811,7 +864,6 @@ class LicenseManager(commands.Cog):
             ),
             ephemeral=True
         )
-
 
     # =====================================================
     # /EXTENDLICENSE
@@ -890,7 +942,6 @@ class LicenseManager(commands.Cog):
             ),
             ephemeral=True
         )
-
 
     # =====================================================
     # /DELETELICENSE
