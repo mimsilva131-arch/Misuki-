@@ -1442,8 +1442,10 @@ def index():
         6
     )
 
-    return render_template(
-        "pages/home.html",
+ return render_template(
+    "index.html",
+
+
         user=user,
         reviews=reviews
     )
