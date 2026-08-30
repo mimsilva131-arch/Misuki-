@@ -43,35 +43,53 @@ CLIENT_SECRET = os.getenv(
 )
 
 
-# OAuth2 used for bot authorization
+# =========================================================
+# OAUTH2 REDIRECTS
+# =========================================================
+
+# Used for the normal OAuth2 callback / bot authorization
 DISCORD_REDIRECT_URI = os.getenv(
     "DISCORD_REDIRECT_URI"
 )
 
 
-# OAuth2 used ONLY for Discord login
+# Used ONLY for Discord LOGIN
 DISCORD_LOGIN_REDIRECT_URI = os.getenv(
     "DISCORD_LOGIN_REDIRECT_URI"
 )
 
 
-# Bot token
-BOT_TOKEN = os.getenv(
-    "DISCORD_BOT_TOKEN"
-) or os.getenv(
-    "DISCORD_TOKEN"
+# =========================================================
+# BOT TOKEN
+# =========================================================
+
+BOT_TOKEN = (
+    os.getenv("DISCORD_BOT_TOKEN")
+    or os.getenv("DISCORD_TOKEN")
 )
 
+
+# =========================================================
+# DATABASE
+# =========================================================
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL"
 )
 
 
+# =========================================================
+# FLASK SECRET
+# =========================================================
+
 SECRET_KEY = os.getenv(
     "FLASK_SECRET_KEY"
 )
 
+
+# =========================================================
+# PORT
+# =========================================================
 
 PORT = int(
     os.getenv(
@@ -80,6 +98,10 @@ PORT = int(
     )
 )
 
+
+# =========================================================
+# COOKIE CONFIGURATION
+# =========================================================
 
 COOKIE_SECURE = (
     os.getenv(
@@ -213,11 +235,39 @@ app.config[
 
 
 # =========================================================
-# STATIC CSS
+# STATIC FILES
+#
+# IMPORTANT:
+# Flask was created with static_folder=None.
+# Therefore we manually provide ALL static endpoints.
+#
+# This also creates an endpoint called "static", so:
+#
+# url_for("static", filename="assets/images/favicon.png")
+#
+# works correctly.
 # =========================================================
 
-@app.route("/css/<path:filename>")
-def css(filename):
+@app.route(
+    "/static/<path:filename>",
+    endpoint="static"
+)
+def static_files(filename):
+
+    return send_from_directory(
+        BASE_DIR,
+        filename
+    )
+
+
+# =========================================================
+# CSS
+# =========================================================
+
+@app.route(
+    "/css/<path:filename>"
+)
+def css_files(filename):
 
     return send_from_directory(
         CSS_DIR,
@@ -226,11 +276,13 @@ def css(filename):
 
 
 # =========================================================
-# STATIC JAVASCRIPT
+# JAVASCRIPT
 # =========================================================
 
-@app.route("/js/<path:filename>")
-def js(filename):
+@app.route(
+    "/js/<path:filename>"
+)
+def js_files(filename):
 
     return send_from_directory(
         JS_DIR,
@@ -242,33 +294,13 @@ def js(filename):
 # ASSETS
 # =========================================================
 
-@app.route("/assets/<path:filename>")
+@app.route(
+    "/assets/<path:filename>"
+)
 def assets(filename):
 
     return send_from_directory(
         ASSETS_DIR,
-        filename
-    )
-
-
-# =========================================================
-# BACKWARD COMPATIBILITY
-# =========================================================
-
-@app.route("/static/css/<path:filename>")
-def static_css(filename):
-
-    return send_from_directory(
-        CSS_DIR,
-        filename
-    )
-
-
-@app.route("/static/js/<path:filename>")
-def static_js(filename):
-
-    return send_from_directory(
-        JS_DIR,
         filename
     )
 
@@ -293,7 +325,7 @@ DISCORD_TOKEN_URL = (
 
 
 # =========================================================
-# DATABASE
+# DATABASE CONNECTION
 # =========================================================
 
 def database_connection():
@@ -725,7 +757,7 @@ def get_active_license_guild_ids():
 
 
 # =========================================================
-# DISCORD HEADERS
+# DISCORD BOT HEADERS
 # =========================================================
 
 def discord_bot_headers():
@@ -1063,7 +1095,7 @@ def error_page(
 
 
 # =========================================================
-# LOGIN
+# DISCORD LOGIN
 # =========================================================
 
 @app.route("/login")
@@ -1302,9 +1334,9 @@ def login_callback():
             400
         )
 
-    # -----------------------------------------------------
+    # =====================================================
     # VERIFY USER
-    # -----------------------------------------------------
+    # =====================================================
 
     try:
 
@@ -1359,9 +1391,9 @@ def login_callback():
         )
     )
 
-    # -----------------------------------------------------
+    # =====================================================
     # REGENERATE SESSION
-    # -----------------------------------------------------
+    # =====================================================
 
     session.clear()
 
@@ -1420,6 +1452,8 @@ def login_callback():
 
 # =========================================================
 # NORMAL OAUTH2 CALLBACK
+#
+# This is kept separate from Discord LOGIN.
 # =========================================================
 
 @app.route("/callback")
@@ -1676,6 +1710,10 @@ def dashboard():
         available.append(
             guild
         )
+
+    # =====================================================
+    # SORT SERVERS
+    # =====================================================
 
     authorized.sort(
         key=lambda guild:
