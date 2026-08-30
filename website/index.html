@@ -1,654 +1,634 @@
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
 
-    <meta charset="UTF-8">
+```
+<meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
-    <title>Misuki</title>
+<title>Misuki</title>
 
+<!-- Favicon -->
+<link
+    rel="icon"
+    type="image/png"
+    href="/assets/images/favicon.png?v=3"
+>
 
-    <!-- =====================================================
-         FAVICON
-    ====================================================== -->
+<link
+    rel="shortcut icon"
+    type="image/png"
+    href="/assets/images/favicon.png?v=3"
+>
 
-    <link
-        rel="icon"
-        type="image/png"
-        href="/assets/images/favicon.png?v=3"
-    >
-
-    <link
-        rel="shortcut icon"
-        type="image/png"
-        href="/assets/images/favicon.png?v=3"
-    >
-
-
-    <!-- =====================================================
-         MAIN CSS
-    ====================================================== -->
-
-    <link
-        rel="stylesheet"
-        href="/css/style.css?v=3"
-    >
+<!-- Main stylesheet -->
+<link
+    rel="stylesheet"
+    href="/css/style.css?v=3"
+>
+```
 
 </head>
 
-
 <body>
 
+<!-- =====================================================
+     HEADER
+===================================================== -->
 
-    <!-- =====================================================
-         HEADER
-    ====================================================== -->
+<header class="container">
 
-    <header class="container">
-
-        <a
-            class="logo"
-            href="/"
-        >
-            Misuki<span>.</span>
-        </a>
-
-
-        <button
-            class="hamburger"
-            onclick="openMenu()"
-            aria-label="Open menu"
-        >
-
-            <span></span>
-            <span></span>
-            <span></span>
-
-        </button>
-
-    </header>
+```
+<a
+    class="logo"
+    href="/"
+>
+    Misuki<span>.</span>
+</a>
 
 
+<button
+    class="hamburger"
+    onclick="openMenu()"
+    aria-label="Open menu"
+>
 
-    <!-- =====================================================
-         OVERLAY
-    ====================================================== -->
+    <span></span>
+    <span></span>
+    <span></span>
 
-    <div
-        class="overlay"
-        id="overlay"
+</button>
+```
+
+</header>
+
+<!-- =====================================================
+     OVERLAY
+===================================================== -->
+
+<div
+    class="overlay"
+    id="overlay"
+    onclick="closeMenu()"
+></div>
+
+<!-- =====================================================
+     MENU
+===================================================== -->
+
+<nav
+    class="menu"
+    id="menu"
+>
+
+```
+<div class="menu-header">
+
+    <div class="menu-title">
+        Menu
+    </div>
+
+
+    <button
+        class="menu-close"
         onclick="closeMenu()"
-    ></div>
-
-
-
-    <!-- =====================================================
-         MENU
-    ====================================================== -->
-
-    <nav
-        class="menu"
-        id="menu"
+        aria-label="Close menu"
     >
+        ×
+    </button>
 
-        <div class="menu-header">
-
-            <div class="menu-title">
-                Menu
-            </div>
+</div>
 
 
-            <button
-                class="menu-close"
-                onclick="closeMenu()"
-                aria-label="Close menu"
-            >
-                ×
-            </button>
-
-        </div>
+<div class="menu-section">
+    Navigation
+</div>
 
 
-
-        <div class="menu-section">
-            Navigation
-        </div>
-
-
-        <a href="/">
-            Home
-        </a>
+<a href="/">
+    Home
+</a>
 
 
-        <a href="/dashboard">
-            Dashboard
-        </a>
+<a href="/dashboard">
+    Dashboard
+</a>
 
 
-        <a href="/reviews">
-            Reviews
-        </a>
+<a href="/reviews">
+    Reviews
+</a>
 
 
 
-        <div class="menu-section">
-            Resources
-        </div>
+<div class="menu-section">
+    Resources
+</div>
 
 
-        <a href="/documentation">
-            Documentation
-        </a>
+<a href="/documentation">
+    Documentation
+</a>
 
 
-        <a href="/support">
-            Support
-        </a>
-
-
-
-        <div class="menu-section">
-            Legal
-        </div>
-
-
-        <a href="/terms">
-            Terms
-        </a>
-
-
-        <a href="/privacy">
-            Privacy
-        </a>
-
-
-        <a href="/data">
-            Data
-        </a>
-
-
-        <a href="/cookies">
-            Cookies
-        </a>
+<a href="/support">
+    Support
+</a>
 
 
 
-        <div class="menu-section">
-            Account
-        </div>
+<div class="menu-section">
+    Legal
+</div>
 
 
-        <a
-            href="/login"
-            class="discord-login"
+<a href="/terms">
+    Terms
+</a>
+
+
+<a href="/privacy">
+    Privacy
+</a>
+
+
+<a href="/data">
+    Data
+</a>
+
+
+<a href="/cookies">
+    Cookies
+</a>
+
+
+
+<div class="menu-section">
+    Account
+</div>
+
+
+<a
+    href="/login"
+    class="discord-login"
+>
+    Login with Discord
+</a>
+```
+
+</nav>
+
+<!-- =====================================================
+     HERO
+===================================================== -->
+
+<section class="hero">
+
+```
+<div class="container">
+
+
+    <div class="hero-icon">
+
+        <img
+            src="/assets/images/icon.png?v=3"
+            alt="Misuki"
         >
-            Login with Discord
-        </a>
-
-    </nav>
-
-
-
-    <!-- =====================================================
-         HERO
-    ====================================================== -->
-
-    <section class="hero">
-
-        <div class="container">
-
-
-            <div class="hero-icon">
-
-                <img
-                    src="/assets/images/icon.png?v=3"
-                    alt="Misuki"
-                >
-
-            </div>
-
-
-
-            <h1>
-
-                Welcome to
-                <span>Misuki</span>
-
-            </h1>
-
-
-
-            <p>
-
-                A powerful Discord experience
-                built around your community.
-
-            </p>
-
-
-
-            <a
-                href="/dashboard"
-                class="dashboard-button"
-            >
-                🚀 Open Dashboard
-            </a>
-
-        </div>
-
-    </section>
-
-
-
-    <!-- =====================================================
-         REVIEWS
-    ====================================================== -->
-
-    <section class="section">
-
-        <div class="container">
-
-
-            <h2 class="section-title">
-                ⭐ What people think
-            </h2>
-
-
-
-            {% if reviews %}
-
-                <div class="review-grid">
-
-
-                    {% for review in reviews %}
-
-
-                        <div class="card review-card">
-
-
-                            <div class="review-user">
-
-
-                                {% if review.avatar %}
-
-                                    <img
-                                        class="review-avatar"
-                                        src="{{ review.avatar }}"
-                                        alt=""
-                                    >
-
-                                {% else %}
-
-                                    <div
-                                        class="review-avatar"
-                                        style="
-                                            background:#5865f2;
-                                            display:flex;
-                                            align-items:center;
-                                            justify-content:center;
-                                        "
-                                    >
-                                        👤
-                                    </div>
-
-                                {% endif %}
-
-
-
-                                <div>
-
-                                    <strong>
-                                        {{ review.username }}
-                                    </strong>
-
-
-                                    <div class="stars">
-
-                                        {% for i in range(review.rating) %}
-
-                                            ★
-
-                                        {% endfor %}
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-
-
-                            <div class="review-text">
-
-                                {{ review.review }}
-
-                            </div>
-
-
-                        </div>
-
-
-                    {% endfor %}
-
-
-                </div>
-
-
-            {% else %}
-
-
-                <div class="empty">
-
-                    No reviews yet.
-
-                </div>
-
-
-            {% endif %}
-
-
-        </div>
-
-    </section>
-
-
-
-    <!-- =====================================================
-         FOOTER
-    ====================================================== -->
-
-    <footer>
-
-
-        <div>
-
-            © 2026 Misuki. All rights reserved.
-
-        </div>
-
-
-
-        <div class="footer-links">
-
-
-            <a href="/terms">
-                Terms
-            </a>
-
-
-            <a href="/privacy">
-                Privacy
-            </a>
-
-
-            <a href="/data">
-                Data
-            </a>
-
-
-            <a href="/cookies">
-                Cookies
-            </a>
-
-
-        </div>
-
-
-    </footer>
-
-
-
-    <!-- =====================================================
-         COOKIE BANNER
-    ====================================================== -->
-
-    <div
-        class="cookie"
-        id="cookieBanner"
-        style="display:none;"
-    >
-
-
-        <div class="cookie-content">
-
-
-            <div class="cookie-icon">
-                🍪
-            </div>
-
-
-            <div class="cookie-text">
-
-
-                <h3>
-                    We use cookies
-                </h3>
-
-
-                <p>
-
-                    We use essential cookies to keep
-                    your session working and optional
-                    cookies to improve your experience.
-
-                </p>
-
-
-                <div class="cookie-links">
-
-
-                    <a href="/cookies">
-                        Cookie Policy
-                    </a>
-
-
-                    <a href="/privacy">
-                        Privacy
-                    </a>
-
-
-                    <a href="/terms">
-                        Terms / TOS
-                    </a>
-
-
-                    <a href="/data">
-                        Data
-                    </a>
-
-
-                </div>
-
-
-            </div>
-
-
-        </div>
-
-
-
-        <div class="cookie-buttons">
-
-
-            <button
-                class="accept"
-                onclick="setCookies('all')"
-            >
-                Accept All
-            </button>
-
-
-            <button
-                class="essential"
-                onclick="setCookies('essential')"
-            >
-                Essential Only
-            </button>
-
-
-            <button
-                class="deny"
-                onclick="setCookies('deny')"
-            >
-                Deny
-            </button>
-
-
-        </div>
-
 
     </div>
 
 
+    <h1>
 
-    <!-- =====================================================
-         JAVASCRIPT
-    ====================================================== -->
+        Welcome to
+        <span>Misuki</span>
 
-    <script src="/js/main.js?v=3"></script>
-
-
-    <script>
+    </h1>
 
 
-        /* =====================================================
-           COOKIE CONSENT
-        ===================================================== */
+    <p>
+
+        A powerful Discord experience
+        built around your community.
+
+    </p>
 
 
-        function setCookies(value) {
+    <a
+        href="/dashboard"
+        class="dashboard-button"
+    >
+        🚀 Open Dashboard
+    </a>
+
+</div>
+```
+
+</section>
+
+<!-- =====================================================
+     REVIEWS
+===================================================== -->
+
+<section class="section">
+
+```
+<div class="container">
 
 
-            localStorage.setItem(
-                "misuki_cookie_consent",
-                value
+    <h2 class="section-title">
+        ⭐ What people think
+    </h2>
+
+
+    {% if reviews %}
+
+        <div class="review-grid">
+
+
+            {% for review in reviews %}
+
+                <div class="card review-card">
+
+
+                    <div class="review-user">
+
+
+                        {% if review.avatar %}
+
+                            <img
+                                class="review-avatar"
+                                src="{{ review.avatar }}"
+                                alt=""
+                            >
+
+                        {% else %}
+
+                            <div
+                                class="review-avatar"
+                                style="
+                                    background:#5865f2;
+                                    display:flex;
+                                    align-items:center;
+                                    justify-content:center;
+                                "
+                            >
+                                👤
+                            </div>
+
+                        {% endif %}
+
+
+                        <div>
+
+                            <strong>
+                                {{ review.username }}
+                            </strong>
+
+
+                            <div class="stars">
+
+                                {% for i in range(review.rating) %}
+
+                                    ★
+
+                                {% endfor %}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="review-text">
+
+                        {{ review.review }}
+
+                    </div>
+
+
+                </div>
+
+            {% endfor %}
+
+
+        </div>
+
+
+    {% else %}
+
+        <div class="empty">
+
+            No reviews yet.
+
+        </div>
+
+    {% endif %}
+
+
+</div>
+```
+
+</section>
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<footer>
+
+```
+<div>
+
+    © 2026 Misuki. All rights reserved.
+
+</div>
+
+
+<div class="footer-links">
+
+
+    <a href="/terms">
+        Terms
+    </a>
+
+
+    <a href="/privacy">
+        Privacy
+    </a>
+
+
+    <a href="/data">
+        Data
+    </a>
+
+
+    <a href="/cookies">
+        Cookies
+    </a>
+
+
+</div>
+```
+
+</footer>
+
+<!-- =====================================================
+     COOKIE BANNER
+===================================================== -->
+
+<div
+    class="cookie"
+    id="cookieBanner"
+>
+
+```
+<h3>
+    🍪 We use cookies
+</h3>
+
+
+<p>
+
+    We use essential cookies to keep your session
+    working and optional cookies to improve your
+    experience.
+
+</p>
+
+
+<div class="cookie-links">
+
+    <a href="/cookies">
+        Cookie Policy
+    </a>
+
+
+    <a href="/privacy">
+        Privacy
+    </a>
+
+
+    <a href="/terms">
+        Terms
+    </a>
+
+
+    <a href="/data">
+        Data
+    </a>
+
+</div>
+
+
+<div class="cookie-buttons">
+
+
+    <button
+        class="accept"
+        onclick="setCookies('all')"
+    >
+        Accept All
+    </button>
+
+
+    <button
+        class="essential"
+        onclick="setCookies('essential')"
+    >
+        Accept Essential
+    </button>
+
+
+    <button
+        class="deny"
+        onclick="setCookies('deny')"
+    >
+        Deny
+    </button>
+
+
+</div>
+```
+
+</div>
+
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+
+<script>
+
+
+/* =====================================================
+   COOKIE CONSENT
+===================================================== */
+
+function setCookies(value) {
+
+    localStorage.setItem(
+        "misuki_cookie_consent",
+        value
+    );
+
+
+    const banner =
+        document.getElementById(
+            "cookieBanner"
+        );
+
+
+    if (banner) {
+
+        banner.style.display = "none";
+
+    }
+
+}
+
+
+/* =====================================================
+   CHECK COOKIE CONSENT
+===================================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        const banner =
+            document.getElementById(
+                "cookieBanner"
             );
 
 
-            const banner =
-                document.getElementById(
-                    "cookieBanner"
-                );
+        if (!banner) {
 
-
-            if (banner) {
-
-                banner.style.display = "none";
-
-            }
-
+            return;
 
         }
 
 
-
-        /* =====================================================
-           SHOW COOKIE BANNER
-        ====================================================== */
-
-
-        document.addEventListener(
-            "DOMContentLoaded",
-            function () {
+        const consent =
+            localStorage.getItem(
+                "misuki_cookie_consent"
+            );
 
 
-                const consent =
-                    localStorage.getItem(
-                        "misuki_cookie_consent"
-                    );
+        if (consent) {
+
+            banner.style.display = "none";
+
+        } else {
+
+            banner.style.display = "block";
+
+        }
+
+    }
+);
 
 
-                const banner =
-                    document.getElementById(
-                        "cookieBanner"
-                    );
 
+/* =====================================================
+   MENU
+===================================================== */
 
-                if (
-                    banner &&
-                    !consent
-                ) {
+function openMenu() {
 
-                    banner.style.display =
-                        "block";
-
-                }
-
-
-            }
+    const menu =
+        document.getElementById(
+            "menu"
         );
 
 
-
-        /* =====================================================
-           MENU
-        ====================================================== */
-
-
-        function openMenu() {
-
-
-            document
-                .getElementById("menu")
-                .classList.add("open");
-
-
-            document
-                .getElementById("overlay")
-                .classList.add("show");
-
-
-        }
-
-
-
-        function closeMenu() {
-
-
-            document
-                .getElementById("menu")
-                .classList.remove("open");
-
-
-            document
-                .getElementById("overlay")
-                .classList.remove("show");
-
-
-        }
-
-
-
-        /* =====================================================
-           ESC KEY
-        ====================================================== */
-
-
-        document.addEventListener(
-            "keydown",
-            function(event) {
-
-
-                if (
-                    event.key === "Escape"
-                ) {
-
-                    closeMenu();
-
-                }
-
-
-            }
+    const overlay =
+        document.getElementById(
+            "overlay"
         );
 
 
-    </script>
+    if (menu) {
 
+        menu.classList.add(
+            "open"
+        );
+
+    }
+
+
+    if (overlay) {
+
+        overlay.classList.add(
+            "show"
+        );
+
+    }
+
+}
+
+
+function closeMenu() {
+
+    const menu =
+        document.getElementById(
+            "menu"
+        );
+
+
+    const overlay =
+        document.getElementById(
+            "overlay"
+        );
+
+
+    if (menu) {
+
+        menu.classList.remove(
+            "open"
+        );
+
+    }
+
+
+    if (overlay) {
+
+        overlay.classList.remove(
+            "show"
+        );
+
+    }
+
+}
+
+
+
+/* =====================================================
+   ESC KEY
+===================================================== */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.key === "Escape"
+        ) {
+
+            closeMenu();
+
+        }
+
+    }
+);
+
+</script>
 
 </body>
 
