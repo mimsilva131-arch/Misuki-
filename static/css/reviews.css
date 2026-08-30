@@ -1,0 +1,65 @@
+/* =========================================================
+   MISUKI - REVIEWS
+   ========================================================= */
+
+.reviews-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.reviews-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.reviews-header h1 {
+    margin-bottom: 10px;
+}
+
+.reviews-header p {
+    opacity: 0.8;
+}
+
+.reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.review-card {
+    padding: 24px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.review-author {
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.review-rating {
+    margin-bottom: 12px;
+}
+
+.review-content {
+    line-height: 1.6;
+    opacity: 0.9;
+}
+
+.review-date {
+    margin-top: 15px;
+    font-size: 0.85rem;
+    opacity: 0.6;
+}
+
+@media (max-width: 600px) {
+    .reviews-container {
+        padding: 30px 15px;
+    }
+
+    .reviews-grid {
+        grid-template-columns: 1fr;
+    }
+}

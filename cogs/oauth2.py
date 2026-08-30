@@ -1,4 +1,3 @@
-
 import os
 import random
 import secrets
@@ -216,10 +215,8 @@ app.config[
 # STATIC CSS
 # =========================================================
 
-@app.route(
-    "/static/css/<path:filename>"
-)
-def static_css(filename):
+@app.route("/css/<path:filename>")
+def serve_css(filename):
 
     return send_from_directory(
         CSS_DIR,
@@ -231,10 +228,8 @@ def static_css(filename):
 # STATIC JAVASCRIPT
 # =========================================================
 
-@app.route(
-    "/static/js/<path:filename>"
-)
-def static_js(filename):
+@app.route("/js/<path:filename>")
+def serve_js(filename):
 
     return send_from_directory(
         JS_DIR,
@@ -246,9 +241,7 @@ def static_js(filename):
 # ASSETS
 # =========================================================
 
-@app.route(
-    "/assets/<path:filename>"
-)
+@app.route("/assets/<path:filename>")
 def assets(filename):
 
     return send_from_directory(
@@ -1661,8 +1654,6 @@ def dashboard():
             guild
         )
 
-    # Servers where Misuki is already installed first.
-    # Servers that can be added are shown after them.
     authorized.sort(
         key=lambda guild:
             guild.get(
@@ -2224,4 +2215,3 @@ if __name__ == "__main__":
         debug=False
 
     )
-
