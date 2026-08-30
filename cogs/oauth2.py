@@ -1444,10 +1444,8 @@ def index():
 
  return render_template(
     "index.html",
-
-
-        user=user,
-        reviews=reviews
+    user=user,
+    reviews=reviews
     )
 
 
