@@ -1,4 +1,3 @@
-
 import os
 import random
 import secrets
@@ -42,12 +41,10 @@ CLIENT_SECRET = os.getenv(
     "DISCORD_CLIENT_SECRET"
 )
 
-# OAuth2 used for bot authorization
 DISCORD_REDIRECT_URI = os.getenv(
     "DISCORD_REDIRECT_URI"
 )
 
-# OAuth2 used ONLY for Discord login
 DISCORD_LOGIN_REDIRECT_URI = os.getenv(
     "DISCORD_LOGIN_REDIRECT_URI"
 )
@@ -86,7 +83,9 @@ COOKIE_SECURE = (
 
 if not SECRET_KEY:
 
-    SECRET_KEY = secrets.token_hex(32)
+    SECRET_KEY = secrets.token_hex(
+        32
+    )
 
     print(
         "⚠️ FLASK_SECRET_KEY is missing."
@@ -141,13 +140,9 @@ JS_DIR = os.path.join(
     "js"
 )
 
-ASSETS_DIR = os.path.join(
-    BASE_DIR,
-    "assets"
-)
-
 IMAGES_DIR = os.path.join(
-    ASSETS_DIR,
+    BASE_DIR,
+    "assets",
     "images"
 )
 
@@ -175,8 +170,10 @@ app.wsgi_app = ProxyFix(
 # STATIC FILES
 # =========================================================
 
-@app.route("/static/css/<path:filename>")
-def static_css(filename):
+@app.route(
+    "/css/<path:filename>"
+)
+def serve_css(filename):
 
     return send_from_directory(
         CSS_DIR,
@@ -184,8 +181,10 @@ def static_css(filename):
     )
 
 
-@app.route("/static/js/<path:filename>")
-def static_js(filename):
+@app.route(
+    "/js/<path:filename>"
+)
+def serve_js(filename):
 
     return send_from_directory(
         JS_DIR,
@@ -193,8 +192,10 @@ def static_js(filename):
     )
 
 
-@app.route("/static/images/<path:filename>")
-def static_images(filename):
+@app.route(
+    "/assets/images/<path:filename>"
+)
+def serve_image(filename):
 
     return send_from_directory(
         IMAGES_DIR,
@@ -1007,7 +1008,7 @@ def error_page(
 ):
 
     return render_template(
-        "pages/error.html",
+        "error.html",
         user=user,
         title=title,
         message=message
@@ -1254,6 +1255,10 @@ def login_callback():
             400
         )
 
+    # -----------------------------------------------------
+    # VERIFY USER
+    # -----------------------------------------------------
+
     try:
 
         user_response = requests.get(
@@ -1306,6 +1311,10 @@ def login_callback():
             "next_url"
         )
     )
+
+    # -----------------------------------------------------
+    # REGENERATE SESSION
+    # -----------------------------------------------------
 
     session.clear()
 
@@ -1474,7 +1483,7 @@ def callback():
         )
 
     return render_template(
-        "pages/oauth2_success.html",
+        "index.html",
         user=get_user()
     )
 
@@ -1621,36 +1630,38 @@ def dashboard():
             guild
         )
 
-    # Servers where the bot is already installed first.
-    # Servers where the user can add the bot come next.
-    # Everything else comes last.
+    # -----------------------------------------------------
+    # SERVERS WHERE MISUKI IS ALREADY INSTALLED FIRST
+    # -----------------------------------------------------
+
+    authorized.sort(
+        key=lambda guild:
+            guild.get(
+                "name",
+                ""
+            ).lower()
+    )
 
     available.sort(
+
         key=lambda guild: (
+
             not guild.get(
                 "can_add",
                 False
             ),
-            str(
-                guild.get(
-                    "name",
-                    ""
-                )
-            ).lower()
-        )
-    )
 
-    authorized.sort(
-        key=lambda guild: str(
             guild.get(
                 "name",
                 ""
-            )
-        ).lower()
+            ).lower()
+
+        )
+
     )
 
     return render_template(
-        "pages/dashboard.html",
+        "dashboard.html",
         user=user,
         authorized=authorized,
         available=available
@@ -1734,7 +1745,7 @@ def manage(guild_id):
     )
 
     return render_template(
-        "pages/manage.html",
+        "manage.html",
         user=user,
         guild=guild,
         license_data=license_data,
@@ -1843,7 +1854,7 @@ def reviews():
         can_review = user_has_license()
 
     return render_template(
-        "pages/reviews.html",
+        "reviews.html",
         user=user,
         review_list=review_list,
         can_review=can_review
@@ -2048,7 +2059,7 @@ def submit_review():
 def documentation():
 
     return render_template(
-        "pages/documentation.html"
+        "documentation.html"
     )
 
 
@@ -2060,7 +2071,7 @@ def documentation():
 def support():
 
     return render_template(
-        "pages/support.html"
+        "support.html"
     )
 
 
@@ -2072,7 +2083,7 @@ def support():
 def terms():
 
     return render_template(
-        "pages/terms.html"
+        "terms.html"
     )
 
 
@@ -2084,7 +2095,7 @@ def terms():
 def privacy():
 
     return render_template(
-        "pages/privacy.html"
+        "privacy.html"
     )
 
 
@@ -2096,7 +2107,7 @@ def privacy():
 def data_page():
 
     return render_template(
-        "pages/data.html"
+        "data.html"
     )
 
 
@@ -2108,7 +2119,7 @@ def data_page():
 def cookies_page():
 
     return render_template(
-        "pages/cookies.html"
+        "cookies.html"
     )
 
 
@@ -2175,21 +2186,6 @@ if __name__ == "__main__":
     )
 
     print(
-        f"🎨 CSS directory: "
-        f"{CSS_DIR}"
-    )
-
-    print(
-        f"📜 JS directory: "
-        f"{JS_DIR}"
-    )
-
-    print(
-        f"🖼️ Images directory: "
-        f"{IMAGES_DIR}"
-    )
-
-    print(
         "=========================================="
     )
 
@@ -2202,4 +2198,3 @@ if __name__ == "__main__":
         debug=False
 
     )
-
