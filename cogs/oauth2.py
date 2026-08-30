@@ -118,7 +118,21 @@ if not DATABASE_URL:
 # FLASK
 # =========================================================
 
-app = Flask(__name__)
+BASE_DIR = os.path.dirname(
+    os.path.dirname(
+        os.path.abspath(__file__)
+    )
+)
+
+WEBSITE_DIR = os.path.join(
+    BASE_DIR,
+    "website"
+)
+
+app = Flask(
+    __name__,
+    template_folder=WEBSITE_DIR
+)
 
 app.secret_key = SECRET_KEY
 
