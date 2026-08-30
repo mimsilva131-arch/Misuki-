@@ -1,3 +1,4 @@
+
 import os
 import random
 import secrets
@@ -14,7 +15,8 @@ from flask import (
     redirect,
     session,
     request,
-    render_template
+    render_template,
+    send_from_directory
 )
 
 from dotenv import load_dotenv
@@ -40,27 +42,36 @@ CLIENT_SECRET = os.getenv(
     "DISCORD_CLIENT_SECRET"
 )
 
+
 # OAuth2 used for bot authorization
 DISCORD_REDIRECT_URI = os.getenv(
     "DISCORD_REDIRECT_URI"
 )
+
 
 # OAuth2 used ONLY for Discord login
 DISCORD_LOGIN_REDIRECT_URI = os.getenv(
     "DISCORD_LOGIN_REDIRECT_URI"
 )
 
+
+# Bot token
 BOT_TOKEN = os.getenv(
+    "DISCORD_BOT_TOKEN"
+) or os.getenv(
     "DISCORD_TOKEN"
 )
+
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL"
 )
 
+
 SECRET_KEY = os.getenv(
     "FLASK_SECRET_KEY"
 )
+
 
 PORT = int(
     os.getenv(
@@ -68,6 +79,7 @@ PORT = int(
         "5000"
     )
 )
+
 
 COOKIE_SECURE = (
     os.getenv(
@@ -115,7 +127,7 @@ if not DATABASE_URL:
 
 
 # =========================================================
-# FLASK
+# PATHS
 # =========================================================
 
 BASE_DIR = os.path.dirname(
@@ -124,17 +136,44 @@ BASE_DIR = os.path.dirname(
     )
 )
 
+
 WEBSITE_DIR = os.path.join(
     BASE_DIR,
     "website"
 )
 
-app = Flask(
-    __name__,
-    template_folder=WEBSITE_DIR
+
+CSS_DIR = os.path.join(
+    BASE_DIR,
+    "css"
 )
 
+
+JS_DIR = os.path.join(
+    BASE_DIR,
+    "js"
+)
+
+
+ASSETS_DIR = os.path.join(
+    BASE_DIR,
+    "assets"
+)
+
+
+# =========================================================
+# FLASK
+# =========================================================
+
+app = Flask(
+    __name__,
+    template_folder=WEBSITE_DIR,
+    static_folder=None
+)
+
+
 app.secret_key = SECRET_KEY
+
 
 app.wsgi_app = ProxyFix(
     app.wsgi_app,
@@ -152,21 +191,70 @@ app.config[
     "SESSION_COOKIE_HTTPONLY"
 ] = True
 
+
 app.config[
     "SESSION_COOKIE_SAMESITE"
 ] = "Lax"
+
 
 app.config[
     "SESSION_COOKIE_SECURE"
 ] = COOKIE_SECURE
 
+
 app.config[
     "SESSION_REFRESH_EACH_REQUEST"
 ] = True
 
+
 app.config[
     "PERMANENT_SESSION_LIFETIME"
 ] = 86400
+
+
+# =========================================================
+# STATIC CSS
+# =========================================================
+
+@app.route(
+    "/static/css/<path:filename>"
+)
+def static_css(filename):
+
+    return send_from_directory(
+        CSS_DIR,
+        filename
+    )
+
+
+# =========================================================
+# STATIC JAVASCRIPT
+# =========================================================
+
+@app.route(
+    "/static/js/<path:filename>"
+)
+def static_js(filename):
+
+    return send_from_directory(
+        JS_DIR,
+        filename
+    )
+
+
+# =========================================================
+# ASSETS
+# =========================================================
+
+@app.route(
+    "/assets/<path:filename>"
+)
+def assets(filename):
+
+    return send_from_directory(
+        ASSETS_DIR,
+        filename
+    )
 
 
 # =========================================================
@@ -177,9 +265,11 @@ DISCORD_API = (
     "https://discord.com/api/v10"
 )
 
+
 DISCORD_OAUTH_URL = (
     "https://discord.com/oauth2/authorize"
 )
+
 
 DISCORD_TOKEN_URL = (
     f"{DISCORD_API}/oauth2/token"
@@ -769,7 +859,7 @@ def get_bot_guilds():
     if not BOT_TOKEN:
 
         print(
-            "⚠️ DISCORD_TOKEN is missing."
+            "⚠️ Discord bot token is missing."
         )
 
         return []
@@ -949,7 +1039,7 @@ def error_page(
 ):
 
     return render_template(
-        "pages/error.html",
+        "error.html",
         user=user,
         title=title,
         message=message
@@ -1424,7 +1514,7 @@ def callback():
         )
 
     return render_template(
-        "pages/oauth2_success.html",
+        "oauth2_success.html",
         user=get_user()
     )
 
@@ -1571,18 +1661,31 @@ def dashboard():
             guild
         )
 
-    available.sort(
-
+    # Servers where Misuki is already installed first.
+    # Servers that can be added are shown after them.
+    authorized.sort(
         key=lambda guild:
+            guild.get(
+                "name",
+                ""
+            ).lower()
+    )
+
+    available.sort(
+        key=lambda guild: (
             not guild.get(
                 "can_add",
                 False
-            )
-
+            ),
+            guild.get(
+                "name",
+                ""
+            ).lower()
+        )
     )
 
     return render_template(
-        "pages/dashboard.html",
+        "dashboard.html",
         user=user,
         authorized=authorized,
         available=available
@@ -1615,6 +1718,7 @@ def manage(guild_id):
     guild = next(
 
         (
+
             guild
 
             for guild in user_guilds
@@ -1622,6 +1726,7 @@ def manage(guild_id):
             if str(
                 guild.get("id")
             ) == str(guild_id)
+
         ),
 
         None
@@ -1666,7 +1771,7 @@ def manage(guild_id):
     )
 
     return render_template(
-        "pages/manage.html",
+        "manage.html",
         user=user,
         guild=guild,
         license_data=license_data,
@@ -1775,7 +1880,7 @@ def reviews():
         can_review = user_has_license()
 
     return render_template(
-        "pages/reviews.html",
+        "reviews.html",
         user=user,
         review_list=review_list,
         can_review=can_review
@@ -1980,7 +2085,7 @@ def submit_review():
 def documentation():
 
     return render_template(
-        "pages/documentation.html"
+        "documentation.html"
     )
 
 
@@ -1992,7 +2097,7 @@ def documentation():
 def support():
 
     return render_template(
-        "pages/support.html"
+        "support.html"
     )
 
 
@@ -2004,7 +2109,7 @@ def support():
 def terms():
 
     return render_template(
-        "pages/terms.html"
+        "terms.html"
     )
 
 
@@ -2016,7 +2121,7 @@ def terms():
 def privacy():
 
     return render_template(
-        "pages/privacy.html"
+        "privacy.html"
     )
 
 
@@ -2028,7 +2133,7 @@ def privacy():
 def data_page():
 
     return render_template(
-        "pages/data.html"
+        "data.html"
     )
 
 
@@ -2040,7 +2145,7 @@ def data_page():
 def cookies_page():
 
     return render_template(
-        "pages/cookies.html"
+        "cookies.html"
     )
 
 
@@ -2119,3 +2224,4 @@ if __name__ == "__main__":
         debug=False
 
     )
+
