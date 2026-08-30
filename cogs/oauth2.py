@@ -1,3 +1,4 @@
+
 import os
 import random
 import secrets
@@ -216,7 +217,7 @@ app.config[
 # =========================================================
 
 @app.route("/css/<path:filename>")
-def serve_css(filename):
+def css(filename):
 
     return send_from_directory(
         CSS_DIR,
@@ -229,7 +230,7 @@ def serve_css(filename):
 # =========================================================
 
 @app.route("/js/<path:filename>")
-def serve_js(filename):
+def js(filename):
 
     return send_from_directory(
         JS_DIR,
@@ -246,6 +247,28 @@ def assets(filename):
 
     return send_from_directory(
         ASSETS_DIR,
+        filename
+    )
+
+
+# =========================================================
+# BACKWARD COMPATIBILITY
+# =========================================================
+
+@app.route("/static/css/<path:filename>")
+def static_css(filename):
+
+    return send_from_directory(
+        CSS_DIR,
+        filename
+    )
+
+
+@app.route("/static/js/<path:filename>")
+def static_js(filename):
+
+    return send_from_directory(
+        JS_DIR,
         filename
     )
 
@@ -2215,3 +2238,4 @@ if __name__ == "__main__":
         debug=False
 
     )
+
