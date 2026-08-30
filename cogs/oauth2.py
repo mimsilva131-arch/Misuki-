@@ -1442,7 +1442,7 @@ def index():
         6
     )
 
-return render_template(
+    return render_template(
         "index.html",
         user=user,
         reviews=reviews
