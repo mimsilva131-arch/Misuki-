@@ -1,195 +1,746 @@
-
 /* =========================================================
-   MISUKI - DASHBOARD
+   MISUKI — MAIN STYLES
    ========================================================= */
 
-.dashboard {
-    padding: 40px 0 80px;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
+:root {
+    --background: #05070d;
+    --background-light: #0b1020;
 
-/* =========================================================
-   DASHBOARD HEADER
-   ========================================================= */
+    --card: rgba(15, 22, 38, 0.78);
+    --card-hover: rgba(22, 32, 55, 0.88);
 
-.dashboard-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
+    --text: #f5f7ff;
+    --text-muted: #aab4c8;
+    --text-secondary: #8e99ad;
 
-    margin-bottom: 35px;
-}
+    --blue: #5865f2;
+    --blue-light: #91b5ff;
+    --blue-bright: #78a7ff;
 
-.dashboard-header h1 {
-    margin-bottom: 5px;
+    --border: rgba(255, 255, 255, 0.08);
 
-    font-size: 2rem;
-}
+    --radius: 15px;
+    --transition: 0.22s ease;
 
-.dashboard-header p {
-    color: var(--text-secondary);
-}
-
-
-/* =========================================================
-   USER CARD
-   ========================================================= */
-
-.dashboard-user {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-
-    padding: 20px;
-
-    background: var(--card);
-
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-
-    margin-bottom: 25px;
-}
-
-.dashboard-user img {
-    width: 55px;
-    height: 55px;
-
-    border-radius: 50%;
-
-    object-fit: cover;
-}
-
-.dashboard-user-info h3 {
-    margin-bottom: 2px;
-}
-
-.dashboard-user-info span {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
+    --container: 1180px;
 }
 
 
 /* =========================================================
-   DASHBOARD GRID
+   HTML / BODY
    ========================================================= */
 
-.dashboard-grid {
-    display: grid;
+html {
+    scroll-behavior: smooth;
+    background: var(--background);
+}
 
-    grid-template-columns:
-        repeat(
-            auto-fit,
-            minmax(260px, 1fr)
+body {
+    min-height: 100vh;
+
+    background:
+        radial-gradient(
+            ellipse 70% 55% at 50% 32%,
+            rgba(72, 130, 255, 0.20),
+            rgba(40, 75, 145, 0.10) 35%,
+            transparent 72%
+        ),
+        radial-gradient(
+            ellipse 55% 40% at 50% 72%,
+            rgba(70, 115, 230, 0.10),
+            transparent 70%
+        ),
+        linear-gradient(
+            180deg,
+            #080c18 0%,
+            #060a13 48%,
+            #03050a 100%
         );
 
-    gap: 20px;
+    color: var(--text);
+
+    font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+    overflow-x: hidden;
+}
+
+
+/*
+ * Gradiente azul central.
+ * Mantém as bordas bastante mais escuras.
+ */
+
+body::before {
+    content: "";
+
+    position: fixed;
+    inset: 0;
+
+    pointer-events: none;
+
+    z-index: 0;
+
+    background:
+        radial-gradient(
+            ellipse at center,
+            rgba(90, 145, 255, 0.11) 0%,
+            rgba(55, 95, 180, 0.06) 32%,
+            transparent 70%
+        );
+
+    opacity: 1;
+}
+
+
+body::after {
+    content: "";
+
+    position: fixed;
+    inset: 0;
+
+    pointer-events: none;
+
+    z-index: 0;
+
+    background:
+        radial-gradient(
+            ellipse at center,
+            transparent 45%,
+            rgba(0, 0, 0, 0.38) 100%
+        );
+}
+
+
+a {
+    color: inherit;
+}
+
+button {
+    font-family: inherit;
 }
 
 
 /* =========================================================
-   DASHBOARD CARD
+   CONTENT LAYER
    ========================================================= */
 
-.dashboard-card {
-    padding: 25px;
+header,
+main,
+footer {
+    position: relative;
+    z-index: 5;
+}
 
-    background: var(--card);
 
-    border:
-        1px solid var(--border);
+/* =========================================================
+   CONTAINER
+   ========================================================= */
 
-    border-radius: var(--radius);
+.container {
+    width: min(
+        var(--container),
+        calc(100% - 40px)
+    );
+
+    margin: 0 auto;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+header {
+    min-height: 82px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo {
+    color: #ffffff;
+
+    font-size: 25px;
+    font-weight: 800;
+
+    text-decoration: none;
+
+    letter-spacing: -0.5px;
+}
+
+.logo span {
+    color: var(--blue-light);
+}
+
+
+/* =========================================================
+   HAMBURGER
+   ========================================================= */
+
+.hamburger {
+    width: 44px;
+    height: 44px;
+
+    padding: 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 5px;
+
+    border: 0;
+    border-radius: 10px;
+
+    background: rgba(255, 255, 255, 0.045);
+
+    color: white;
+
+    cursor: pointer;
+
+    position: relative;
+    z-index: 10001;
 
     transition:
-        background var(--transition),
-        transform var(--transition);
+        background 0.2s ease,
+        transform 0.2s ease;
 }
 
-.dashboard-card:hover {
-    background: var(--card-hover);
-
-    transform:
-        translateY(-2px);
+.hamburger:hover {
+    background: rgba(255, 255, 255, 0.09);
+    transform: translateY(-1px);
 }
 
-.dashboard-card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+.hamburger span {
+    width: 23px;
+    height: 2px;
 
-    gap: 15px;
+    display: block;
 
-    margin-bottom: 20px;
-}
+    border-radius: 999px;
 
-.dashboard-card-header h2 {
-    font-size: 1.15rem;
-}
+    background: #ffffff;
 
-.dashboard-card-header .icon {
-    font-size: 1.5rem;
+    transition:
+        transform 0.25s ease,
+        opacity 0.25s ease;
 }
 
 
 /* =========================================================
-   SERVER LIST
+   OVERLAY
    ========================================================= */
 
-.server-list {
-    display: flex;
+.overlay {
+    position: fixed;
+    inset: 0;
 
-    flex-direction: column;
+    background: rgba(0, 0, 0, 0.62);
 
-    gap: 10px;
+    opacity: 0;
+    visibility: hidden;
+
+    pointer-events: none;
+
+    transition:
+        opacity 0.3s ease,
+        visibility 0.3s ease;
+
+    z-index: 9998;
 }
 
-.server-item {
+
+/*
+ * O HTML/JS usa .show.
+ * Também aceitamos .active para compatibilidade.
+ */
+
+.overlay.show,
+.overlay.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+
+/* =========================================================
+   MENU
+   ========================================================= */
+
+.menu {
+    position: fixed;
+
+    top: 0;
+    right: 0;
+
+    width: min(360px, 88vw);
+    height: 100vh;
+
+    padding: 28px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #111827 0%,
+            #080b13 100%
+        );
+
+    border-left:
+        1px solid rgba(255, 255, 255, 0.08);
+
+    box-shadow:
+        -25px 0 70px rgba(0, 0, 0, 0.55);
+
+    transform: translateX(100%);
+
+    opacity: 1;
+
+    visibility: hidden;
+    pointer-events: none;
+
+    transition:
+        transform 0.35s cubic-bezier(.22, 1, .36, 1),
+        visibility 0.35s ease;
+
+    overflow-y: auto;
+
+    z-index: 10000;
+}
+
+
+/*
+ * O HTML usa .open.
+ * .active fica como compatibilidade.
+ */
+
+.menu.open,
+.menu.active {
+    transform: translateX(0);
+
+    visibility: visible;
+
+    pointer-events: auto;
+}
+
+
+.menu-header {
     display: flex;
-
     align-items: center;
-
     justify-content: space-between;
 
-    gap: 15px;
+    margin-bottom: 28px;
+}
+
+.menu-title {
+    color: #ffffff;
+
+    font-size: 22px;
+    font-weight: 750;
+}
+
+.menu-close {
+    width: 40px;
+    height: 40px;
+
+    border: 0;
+    border-radius: 10px;
+
+    background: rgba(255, 255, 255, 0.06);
+
+    color: white;
+
+    font-size: 27px;
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.menu-close:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: rotate(90deg);
+}
+
+
+/* =========================================================
+   MENU SECTIONS
+   ========================================================= */
+
+.menu-section {
+    margin-top: 22px;
+    margin-bottom: 7px;
+
+    color: #727d92;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.menu a {
+    display: block;
+
+    margin: 3px 0;
 
     padding: 12px 14px;
 
-    background:
-        var(--background-light);
+    border-radius: 10px;
+
+    color: #dce2ef;
+
+    text-decoration: none;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.menu a:hover {
+    background: rgba(100, 140, 255, 0.10);
+
+    color: #ffffff;
+
+    transform: translateX(4px);
+}
+
+.menu .discord-login {
+    margin-top: 8px;
+
+    background: rgba(88, 101, 242, 0.14);
+
+    color: #aeb8ff;
+}
+
+.menu .discord-login:hover {
+    background: rgba(88, 101, 242, 0.24);
+    color: white;
+}
+
+body.menu-open {
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.hero {
+    position: relative;
+
+    min-height: 620px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+
+    padding: 80px 0;
+}
+
+.hero .container {
+    position: relative;
+    z-index: 5;
+}
+
+.hero-icon {
+    width: 92px;
+    height: 92px;
+
+    margin: 0 auto 28px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 24px;
+
+    background: rgba(255, 255, 255, 0.05);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.10);
+
+    box-shadow:
+        0 0 45px rgba(88, 101, 242, 0.20);
+
+    overflow: hidden;
+}
+
+
+/*
+ * Imagem ocupa realmente o quadro.
+ */
+
+.hero-icon img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    border-radius: inherit;
+
+    display: block;
+}
+
+.hero h1 {
+    font-size: clamp(48px, 8vw, 86px);
+
+    line-height: 1;
+
+    letter-spacing: -4px;
+
+    font-weight: 800;
+
+    margin-bottom: 26px;
+}
+
+.hero h1 span {
+    color: var(--blue-light);
+}
+
+.hero p {
+    max-width: 680px;
+
+    margin: 0 auto 34px;
+
+    color: var(--text-muted);
+
+    font-size: 18px;
+
+    line-height: 1.7;
+}
+
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.button,
+.dashboard-button {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    min-height: 42px;
+
+    padding: 11px 17px;
+
+    border-radius: 10px;
+
+    border: 1px solid transparent;
+
+    background: var(--blue);
+
+    color: white;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 10px 28px rgba(88, 101, 242, 0.22);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.button:hover,
+.dashboard-button:hover {
+    transform: translateY(-2px);
+
+    background: #6975f5;
+
+    box-shadow:
+        0 14px 34px rgba(88, 101, 242, 0.32);
+}
+
+
+/* =========================================================
+   SECTIONS
+   ========================================================= */
+
+.section {
+    position: relative;
+
+    padding: 90px 0;
+}
+
+.section-title {
+    margin-bottom: 34px;
+
+    color: white;
+
+    font-size: 30px;
+    font-weight: 750;
+
+    text-align: left;
+}
+
+
+/* =========================================================
+   SERVER GRID
+   ========================================================= */
+
+.server-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 20px;
+}
+
+
+/* =========================================================
+   CARDS
+   ========================================================= */
+
+.card {
+    padding: 27px;
 
     border:
         1px solid var(--border);
 
-    border-radius: 10px;
+    border-radius: 17px;
+
+    background:
+        rgba(17, 24, 39, 0.72);
+
+    backdrop-filter: blur(10px);
+
+    box-shadow:
+        0 15px 45px rgba(0, 0, 0, 0.16);
 
     transition:
-        background var(--transition);
+        transform 0.25s ease,
+        border-color 0.25s ease,
+        background 0.25s ease;
 }
 
-.server-item:hover {
-    background: var(--card-hover);
+.card:hover {
+    transform: translateY(-4px);
+
+    background:
+        rgba(23, 32, 51, 0.82);
+
+    border-color:
+        rgba(130, 160, 255, 0.16);
 }
 
-.server-info {
+.card h3 {
+    margin-bottom: 11px;
+
+    color: #ffffff;
+
+    font-size: 18px;
+}
+
+.card p {
+    color: var(--text-muted);
+
+    line-height: 1.65;
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   DASHBOARD SERVER CARDS
+   ========================================================= */
+
+.server-card {
+    display: flex;
+    flex-direction: column;
+
+    min-width: 0;
+
+    gap: 18px;
+}
+
+.server-top {
     display: flex;
 
     align-items: center;
 
-    gap: 12px;
+    gap: 13px;
 
     min-width: 0;
 }
 
+
+/*
+ * Corrige a imagem dos servidores.
+ */
+
 .server-icon {
-    width: 40px;
-    height: 40px;
+    width: 52px;
+    height: 52px;
 
-    flex-shrink: 0;
+    flex: 0 0 52px;
 
-    border-radius: 10px;
+    border-radius: 13px;
 
     object-fit: cover;
+
+    display: block;
+
+    background: #151d31;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.08);
+}
+
+.server-icon-placeholder {
+    width: 52px;
+    height: 52px;
+
+    flex: 0 0 52px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 13px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #5865f2,
+            #7289da
+        );
+
+    color: white;
+
+    font-size: 20px;
+    font-weight: 800;
 }
 
 .server-name {
@@ -198,272 +749,518 @@
     white-space: nowrap;
 
     text-overflow: ellipsis;
+
+    color: white;
+
+    font-size: 15px;
+    font-weight: 700;
 }
 
-.server-members {
-    color: var(--text-muted);
+.server-id {
+    margin-top: 3px;
 
-    font-size: 0.8rem;
+    overflow: hidden;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+
+    color: #6f7b91;
+
+    font-size: 11px;
 }
 
 
 /* =========================================================
-   STATUS
+   DASHBOARD BADGES
    ========================================================= */
 
-.status {
+.badges {
+    display: flex;
+
+    align-items: center;
+
+    flex-wrap: wrap;
+
+    gap: 7px;
+}
+
+.badge {
     display: inline-flex;
 
     align-items: center;
 
-    gap: 7px;
+    min-height: 28px;
 
-    font-size: 0.85rem;
+    padding: 5px 9px;
+
+    border-radius: 8px;
+
+    border: 1px solid rgba(255, 255, 255, 0.07);
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
 }
 
-.status::before {
-    content: "";
-
-    width: 8px;
-    height: 8px;
-
-    border-radius: 50%;
-
-    background: currentColor;
+.badge-active {
+    background: rgba(87, 242, 135, 0.10);
+    color: #75f29a;
 }
 
-.status-online {
-    color: #57f287;
+.badge-expired {
+    background: rgba(237, 66, 69, 0.10);
+    color: #ff777a;
 }
 
-.status-offline {
-    color: #ed4245;
+.badge-none {
+    background: rgba(255, 255, 255, 0.05);
+    color: #a3adbf;
 }
 
-.status-warning {
-    color: #faa61a;
+.badge-warning {
+    background: rgba(250, 166, 26, 0.10);
+    color: #ffc15c;
 }
 
 
 /* =========================================================
-   STATISTICS
+   DASHBOARD ACTION BUTTONS
    ========================================================= */
 
-.stats-grid {
+.server-card .button {
+    width: 100%;
+
+    margin-top: auto;
+
+    min-height: 43px;
+}
+
+
+/*
+ * Manage
+ */
+
+.server-card .manage {
+    background:
+        rgba(88, 101, 242, 0.16);
+
+    border-color:
+        rgba(115, 135, 255, 0.18);
+
+    color: #b8c2ff;
+
+    box-shadow: none;
+}
+
+.server-card .manage:hover {
+    background:
+        rgba(88, 101, 242, 0.28);
+
+    border-color:
+        rgba(130, 150, 255, 0.30);
+
+    color: #ffffff;
+
+    box-shadow:
+        0 10px 25px rgba(88, 101, 242, 0.18);
+}
+
+
+/*
+ * Add Misuki
+ */
+
+.server-card .add {
+    background:
+        rgba(87, 242, 135, 0.12);
+
+    border-color:
+        rgba(87, 242, 135, 0.18);
+
+    color: #8af5aa;
+
+    box-shadow: none;
+}
+
+.server-card .add:hover {
+    background:
+        rgba(87, 242, 135, 0.20);
+
+    border-color:
+        rgba(87, 242, 135, 0.30);
+
+    color: #b8ffcb;
+}
+
+
+/*
+ * Botão bloqueado
+ */
+
+.server-card .blocked {
+    background:
+        rgba(255, 255, 255, 0.045);
+
+    border-color:
+        rgba(255, 255, 255, 0.07);
+
+    color: #727c90;
+
+    cursor: not-allowed;
+
+    box-shadow: none;
+
+    transform: none;
+}
+
+.server-card .blocked:hover {
+    background:
+        rgba(255, 255, 255, 0.045);
+
+    transform: none;
+
+    box-shadow: none;
+}
+
+
+/* =========================================================
+   REVIEWS
+   ========================================================= */
+
+.review-grid {
     display: grid;
 
     grid-template-columns:
-        repeat(
-            auto-fit,
-            minmax(160px, 1fr)
-        );
+        repeat(3, minmax(0, 1fr));
 
-    gap: 15px;
+    gap: 20px;
 }
 
-.stat {
-    padding: 20px;
-
-    background:
-        var(--background-light);
-
-    border:
-        1px solid var(--border);
-
-    border-radius: 10px;
+.review-card {
+    min-height: 170px;
 }
 
-.stat-value {
-    margin-bottom: 3px;
-
-    font-size: 1.8rem;
-
-    font-weight: 700;
-}
-
-.stat-label {
-    color: var(--text-secondary);
-
-    font-size: 0.85rem;
-}
-
-
-/* =========================================================
-   ACTIONS
-   ========================================================= */
-
-.dashboard-actions {
-    display: flex;
-
-    flex-wrap: wrap;
-
-    gap: 10px;
-}
-
-
-/* =========================================================
-   FORMS
-   ========================================================= */
-
-.dashboard-form {
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 15px;
-}
-
-.form-group {
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 7px;
-}
-
-.form-group label {
-    font-size: 0.9rem;
-
-    font-weight: 600;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-    width: 100%;
-
-    padding: 11px 13px;
-
-    background:
-        var(--background-light);
-
-    color: var(--text);
-
-    border:
-        1px solid var(--border);
-
-    border-radius: 9px;
-
-    outline: none;
-
-    transition:
-        border-color var(--transition),
-        background var(--transition);
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-    border-color: var(--primary);
-}
-
-.form-group textarea {
-    min-height: 120px;
-
-    resize: vertical;
-}
-
-
-/* =========================================================
-   EMPTY STATE
-   ========================================================= */
-
-.empty-state {
-    padding: 40px 20px;
-
-    text-align: center;
-
-    color: var(--text-secondary);
-}
-
-.empty-state .icon {
-    display: block;
-
-    margin-bottom: 10px;
-
-    font-size: 2.5rem;
-}
-
-
-/* =========================================================
-   LOADING
-   ========================================================= */
-
-.loading {
+.review-user {
     display: flex;
 
     align-items: center;
-    justify-content: center;
 
-    min-height: 150px;
+    gap: 12px;
 
-    color: var(--text-secondary);
+    margin-bottom: 17px;
 }
 
-.loading::after {
-    content: "";
+.review-user strong {
+    color: white;
+}
 
-    width: 18px;
-    height: 18px;
+.review-avatar {
+    width: 42px;
+    height: 42px;
 
-    margin-left: 10px;
-
-    border:
-        2px solid var(--border);
-
-    border-top-color:
-        var(--primary);
+    flex: 0 0 42px;
 
     border-radius: 50%;
 
-    animation:
-        dashboard-spin 0.8s linear infinite;
+    object-fit: cover;
 }
 
-@keyframes dashboard-spin {
+.stars {
+    margin-top: 3px;
 
-    from {
-        transform: rotate(0deg);
-    }
+    color: #ffd76a;
 
-    to {
-        transform: rotate(360deg);
-    }
+    letter-spacing: 1px;
+}
+
+.review-text {
+    color: #c1c8d6;
+
+    line-height: 1.65;
+
+    font-size: 14px;
+}
+
+.empty {
+    padding: 30px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius: 15px;
+
+    color: var(--text-muted);
+
+    text-align: center;
 }
 
 
 /* =========================================================
-   RESPONSIVE
+   LEGAL / COOKIES PAGES
    ========================================================= */
 
-@media (max-width: 700px) {
+.legal-page {
+    max-width: 900px;
 
-    .dashboard {
-        padding-top: 25px;
+    margin: 0 auto;
+}
+
+.legal-page h1 {
+    margin-bottom: 10px;
+
+    font-size: clamp(32px, 5vw, 48px);
+
+    letter-spacing: -1.5px;
+}
+
+.legal-page h2 {
+    margin-top: 34px;
+    margin-bottom: 12px;
+
+    color: #ffffff;
+
+    font-size: 21px;
+}
+
+.legal-page p,
+.legal-page li {
+    color: var(--text-muted);
+
+    font-size: 15px;
+
+    line-height: 1.75;
+}
+
+.legal-page ul {
+    margin:
+        12px 0
+        12px 22px;
+}
+
+.legal-page .muted {
+    color: #778297;
+
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+footer {
+    width: min(
+        var(--container),
+        calc(100% - 40px)
+    );
+
+    margin: 0 auto;
+
+    padding: 35px 0 45px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 30px;
+
+    color: #7f899b;
+
+    font-size: 13px;
+
+    border-top:
+        1px solid rgba(255, 255, 255, 0.06);
+}
+
+.footer-links {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    gap: 22px;
+}
+
+.footer-links a {
+    color: #929bad;
+
+    text-decoration: none;
+
+    transition:
+        color 0.2s ease;
+}
+
+.footer-links a:hover {
+    color: white;
+}
+
+
+/* =========================================================
+   PAGE TRANSITIONS
+   ========================================================= */
+
+#misuki-page-transition {
+    position: fixed;
+
+    inset: 0;
+
+    background: #05070d;
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    z-index: 2147483000;
+
+    transition:
+        opacity 0.35s ease;
+}
+
+html.misuki-page-enter
+#misuki-page-transition {
+    opacity: 1;
+}
+
+html.misuki-page-ready
+#misuki-page-transition {
+    opacity: 0;
+}
+
+
+/* =========================================================
+   MOUSE TRAIL
+   ========================================================= */
+
+/*
+ * IMPORTANTE:
+ * O JS cria pequenos elementos no ponto do rato.
+ * Aqui transformamo-los numa LINHA fina,
+ * não em bolas.
+ */
+
+.misuki-mouse-trail {
+    position: fixed;
+
+    left: 0;
+    top: 0;
+
+    width: 16px;
+    height: 2px;
+
+    margin: 0;
+    padding: 0;
+
+    border-radius: 999px;
+
+    pointer-events: none;
+
+    z-index: 999999;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0),
+            rgba(145, 181, 255, 0.45),
+            rgba(255, 255, 255, 0.95)
+        );
+
+    box-shadow:
+        0 0 4px rgba(145, 181, 255, 0.65),
+        0 0 9px rgba(120, 160, 255, 0.25);
+
+    transform:
+        translate(-50%, -50%);
+
+    will-change:
+        opacity,
+        transform;
+
+    opacity: 0.75;
+}
+
+
+/*
+ * Impede que a animação antiga do CSS
+ * transforme o rasto em bolas.
+ */
+
+.misuki-mouse-trail::before,
+.misuki-mouse-trail::after {
+    display: none;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 800px) {
+
+    .server-grid,
+    .review-grid {
+        grid-template-columns: 1fr;
     }
 
-    .dashboard-header {
+    .hero {
+        min-height: 560px;
+
+        padding: 60px 0;
+    }
+
+    .hero h1 {
+        letter-spacing: -2px;
+    }
+
+    footer {
         flex-direction: column;
 
-        align-items: flex-start;
+        text-align: center;
     }
 
-    .dashboard-user {
-        align-items: flex-start;
-    }
+    .footer-links {
+        justify-content: center;
 
-    .server-item {
-        align-items: flex-start;
-
-        flex-direction: column;
-    }
-
-    .dashboard-actions {
-        width: 100%;
-    }
-
-    .dashboard-actions .btn {
-        width: 100%;
+        flex-wrap: wrap;
     }
 }
 
+
+@media (max-width: 600px) {
+
+    .container {
+        width: min(
+            calc(100% - 30px),
+            var(--container)
+        );
+    }
+
+    .hero p {
+        font-size: 16px;
+    }
+
+    .section {
+        padding: 65px 0;
+    }
+
+    .section-title {
+        font-size: 27px;
+    }
+
+    footer {
+        width: calc(100% - 30px);
+    }
+
+    .menu {
+        padding: 24px 20px;
+    }
+
+    .card {
+        padding: 21px;
+    }
+}

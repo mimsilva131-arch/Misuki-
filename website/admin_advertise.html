@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<link rel="icon" type="image/png" href="/assets/images/favicon.png?v=2">
+<link rel="shortcut icon" type="image/png" href="/assets/images/favicon.png?v=2">
+<link rel="stylesheet" href="/css/stars.css">
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Advertisement Admin — Misuki</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/css/style.css?v=11"
+    >
+
+</head>
+<script src="/js/stars.js" defer></script>
+<body>
+
+<header class="container">
+
+    <a class="logo" href="/">
+        Misuki<span>.</span>
+    </a>
+
+    <a
+        href="/"
+        class="button manage"
+    >
+        Home
+    </a>
+
+</header>
+
+
+<main>
+
+<section class="section">
+
+<div class="container">
+
+    <h1>
+        📢 Advertisement Management
+    </h1>
+
+    {% if advertisements %}
+
+        <div class="server-grid">
+
+        {% for ad in advertisements %}
+
+            <div class="card server-card">
+
+                {% if ad.image_url %}
+
+                    <img
+                        class="server-icon"
+                        src="{{ ad.image_url }}"
+                        alt=""
+                    >
+
+                {% endif %}
+
+
+                <div>
+
+                    <div class="server-name">
+                        {{ ad.title }}
+                    </div>
+
+                    <div class="server-id">
+                        User ID: {{ ad.user_id }}
+                    </div>
+
+                </div>
+
+
+                <p>
+                    {{ ad.description }}
+                </p>
+
+
+                <div class="badges">
+
+                    {% if ad.status == "pending" %}
+
+                        <span class="badge badge-warning">
+                            🟡 Pending
+                        </span>
+
+                    {% elif ad.status == "active" %}
+
+                        <span class="badge badge-active">
+                            🟢 Active
+                        </span>
+
+                    {% elif ad.status == "rejected" %}
+
+                        <span class="badge badge-expired">
+                            🔴 Rejected
+                        </span>
+
+                    {% elif ad.status == "expired" %}
+
+                        <span class="badge badge-none">
+                            ⚪ Expired
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+
+                <div class="badges">
+
+                    <a
+                        href="{{ ad.target_url }}"
+                        target="_blank"
+                        class="button manage"
+                    >
+                        🔗 Open
+                    </a>
+
+
+                    {% if ad.status == "pending" %}
+
+                        <form
+                            method="POST"
+                            action="/admin/advertise/{{ ad.id }}/approve"
+                        >
+
+                            <button
+                                type="submit"
+                                class="button add"
+                            >
+                                ✅ Approve
+                            </button>
+
+                        </form>
+
+
+                        <form
+                            method="POST"
+                            action="/admin/advertise/{{ ad.id }}/reject"
+                        >
+
+                            <button
+                                type="submit"
+                                class="button blocked"
+                            >
+                                ❌ Reject
+                            </button>
+
+                        </form>
+
+                    {% elif ad.status == "active" %}
+
+                        <form
+                            method="POST"
+                            action="/admin/advertise/{{ ad.id }}/disable"
+                        >
+
+                            <button
+                                type="submit"
+                                class="button blocked"
+                            >
+                                ⛔ Disable
+                            </button>
+
+                        </form>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="empty">
+
+            No advertisements yet.
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+</section>
+
+</main>
+
+
+<footer>
+
+    © 2026 Misuki.
+
+</footer>
+
+</body>
+
+</html>

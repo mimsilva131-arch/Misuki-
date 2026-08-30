@@ -1,0 +1,83 @@
+/* =========================================================
+   MISUKI — MOUSE TRAIL
+   HOME ONLY
+   ========================================================= */
+
+.misuki-mouse-trail {
+    position: fixed;
+
+    width: 4px;
+    height: 4px;
+
+    border-radius: 50%;
+
+    background: rgba(255, 255, 255, 0.95);
+
+    pointer-events: none;
+
+    z-index: 2147483647;
+
+    transform: translate(-50%, -50%);
+
+    box-shadow:
+        0 0 5px rgba(255, 255, 255, 0.9),
+        0 0 12px rgba(255, 255, 255, 0.45);
+
+    opacity: 0.9;
+}
+
+
+/* =========================================================
+   PAGE TRANSITION
+   ========================================================= */
+
+#misuki-page-transition {
+    position: fixed;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    background: #0b0b10;
+
+    pointer-events: none;
+
+    z-index: 2147483646;
+
+    opacity: 0;
+
+    transition:
+        opacity 350ms ease;
+}
+
+
+/*
+   Quando a página está a entrar
+*/
+
+html.misuki-page-enter #misuki-page-transition {
+    opacity: 1;
+}
+
+
+/*
+   Quando a página está pronta
+*/
+
+html.misuki-page-ready #misuki-page-transition {
+    opacity: 0;
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    #misuki-page-transition {
+        transition: none;
+    }
+
+}

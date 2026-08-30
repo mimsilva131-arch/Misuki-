@@ -2,8 +2,8 @@ import os
 import random
 import secrets
 
-from datetime import datetime, timezone
-from urllib.parse import urlencode
+from datetime import datetime, timezone, timedelta
+from urllib.parse import urlencode, urlparse
 
 import requests
 import psycopg2
@@ -72,36 +72,28 @@ CLIENT_SECRET = os.getenv(
     "DISCORD_CLIENT_SECRET"
 )
 
-
-# OAuth2 used for bot authorization
+# Mantido para compatibilidade com outras partes do projeto.
+# O LOGIN usa exclusivamente DISCORD_LOGIN_REDIRECT_URI.
 DISCORD_REDIRECT_URI = os.getenv(
     "DISCORD_REDIRECT_URI"
 )
 
-
-# OAuth2 used ONLY for Discord login
 DISCORD_LOGIN_REDIRECT_URI = os.getenv(
     "DISCORD_LOGIN_REDIRECT_URI"
 )
 
-
-# Bot token
-BOT_TOKEN = os.getenv(
-    "DISCORD_BOT_TOKEN"
-) or os.getenv(
-    "DISCORD_TOKEN"
+BOT_TOKEN = (
+    os.getenv("DISCORD_BOT_TOKEN")
+    or os.getenv("DISCORD_TOKEN")
 )
-
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL"
 )
 
-
 SECRET_KEY = os.getenv(
     "FLASK_SECRET_KEY"
 )
-
 
 PORT = int(
     os.getenv(
@@ -110,7 +102,6 @@ PORT = int(
     )
 )
 
-
 COOKIE_SECURE = (
     os.getenv(
         "COOKIE_SECURE",
@@ -118,6 +109,33 @@ COOKIE_SECURE = (
     ).lower()
     == "true"
 )
+
+
+# =========================================================
+# ADMIN CONFIGURATION
+# =========================================================
+
+ADMIN_DISCORD_IDS = {
+    str(user_id).strip()
+    for user_id in os.getenv(
+        "ADMIN_DISCORD_IDS",
+        ""
+    ).split(",")
+    if user_id.strip()
+}
+
+
+def is_admin(user=None):
+
+    if user is None:
+        user = get_user()
+
+    if not user:
+        return False
+
+    return str(
+        user.get("id")
+    ) in ADMIN_DISCORD_IDS
 
 
 # =========================================================
@@ -160,19 +178,6 @@ if not DATABASE_URL:
 # FLASK
 # =========================================================
 
-# IMPORTANT:
-#
-# static_folder points to BASE_DIR so that:
-#
-# url_for("static", filename="assets/images/favicon.png")
-#
-# becomes:
-#
-# /static/assets/images/favicon.png
-#
-# This also fixes old HTML files that still use
-# url_for("static", ...).
-#
 app = Flask(
     __name__,
     template_folder=WEBSITE_DIR,
@@ -180,9 +185,7 @@ app = Flask(
     static_url_path="/static"
 )
 
-
 app.secret_key = SECRET_KEY
-
 
 app.wsgi_app = ProxyFix(
     app.wsgi_app,
@@ -193,41 +196,24 @@ app.wsgi_app = ProxyFix(
 
 
 # =========================================================
-# SESSION CONFIGURATION
+# SESSION
 # =========================================================
 
-app.config[
-    "SESSION_COOKIE_HTTPONLY"
-] = True
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = COOKIE_SECURE
+app.config["SESSION_REFRESH_EACH_REQUEST"] = True
 
-
-app.config[
-    "SESSION_COOKIE_SAMESITE"
-] = "Lax"
-
-
-app.config[
-    "SESSION_COOKIE_SECURE"
-] = COOKIE_SECURE
-
-
-app.config[
-    "SESSION_REFRESH_EACH_REQUEST"
-] = True
-
-
-app.config[
-    "PERMANENT_SESSION_LIFETIME"
-] = 86400
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(
+    days=1
+)
 
 
 # =========================================================
 # STATIC CSS
 # =========================================================
 
-@app.route(
-    "/css/<path:filename>"
-)
+@app.route("/css/<path:filename>")
 def static_css(filename):
 
     return send_from_directory(
@@ -240,9 +226,7 @@ def static_css(filename):
 # STATIC JAVASCRIPT
 # =========================================================
 
-@app.route(
-    "/js/<path:filename>"
-)
+@app.route("/js/<path:filename>")
 def static_js(filename):
 
     return send_from_directory(
@@ -255,9 +239,7 @@ def static_js(filename):
 # ASSETS
 # =========================================================
 
-@app.route(
-    "/assets/<path:filename>"
-)
+@app.route("/assets/<path:filename>")
 def assets(filename):
 
     return send_from_directory(
@@ -274,11 +256,9 @@ DISCORD_API = (
     "https://discord.com/api/v10"
 )
 
-
 DISCORD_OAUTH_URL = (
     "https://discord.com/oauth2/authorize"
 )
-
 
 DISCORD_TOKEN_URL = (
     f"{DISCORD_API}/oauth2/token"
@@ -323,6 +303,10 @@ def create_database():
 
             with connection.cursor() as cursor:
 
+                # -------------------------------------------------
+                # LICENSES
+                # -------------------------------------------------
+
                 cursor.execute(
                     """
                     CREATE TABLE IF NOT EXISTS licenses (
@@ -341,6 +325,10 @@ def create_database():
                     )
                     """
                 )
+
+                # -------------------------------------------------
+                # REVIEWS
+                # -------------------------------------------------
 
                 cursor.execute(
                     """
@@ -371,7 +359,83 @@ def create_database():
                     """
                 )
 
-                connection.commit()
+                # -------------------------------------------------
+                # ADVERTISEMENTS
+                # -------------------------------------------------
+
+                cursor.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS advertisements (
+
+                        id SERIAL PRIMARY KEY,
+
+                        user_id TEXT NOT NULL,
+
+                        username TEXT NOT NULL,
+
+                        title TEXT NOT NULL,
+
+                        description TEXT NOT NULL,
+
+                        image_url TEXT,
+
+                        target_url TEXT NOT NULL,
+
+                        status TEXT NOT NULL
+                            DEFAULT 'pending',
+
+                        rejection_reason TEXT,
+
+                        start_at TEXT,
+
+                        end_at TEXT,
+
+                        created_at TEXT NOT NULL,
+
+                        updated_at TEXT NOT NULL
+
+                    )
+                    """
+                )
+
+                # -------------------------------------------------
+                # ADVERTISEMENT PAYMENTS
+                # -------------------------------------------------
+
+                cursor.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS advertisement_payments (
+
+                        id SERIAL PRIMARY KEY,
+
+                        advertisement_id INTEGER
+                            REFERENCES advertisements(id)
+                            ON DELETE CASCADE,
+
+                        user_id TEXT NOT NULL,
+
+                        provider TEXT NOT NULL
+                            DEFAULT 'paypal',
+
+                        provider_payment_id TEXT,
+
+                        amount NUMERIC(10, 2),
+
+                        currency TEXT
+                            DEFAULT 'EUR',
+
+                        status TEXT NOT NULL
+                            DEFAULT 'not_configured',
+
+                        created_at TEXT NOT NULL,
+
+                        updated_at TEXT NOT NULL
+
+                    )
+                    """
+                )
+
+            connection.commit()
 
         print(
             "✅ PostgreSQL database initialized."
@@ -401,7 +465,6 @@ def utc_now():
 def parse_datetime(value):
 
     if not value:
-
         return None
 
     try:
@@ -430,22 +493,39 @@ def parse_datetime(value):
 # URL VALIDATION
 # =========================================================
 
+def valid_http_url(value):
+
+    if not value:
+        return False
+
+    try:
+
+        parsed = urlparse(
+            str(value).strip()
+        )
+
+    except Exception:
+
+        return False
+
+    return (
+        parsed.scheme.lower()
+        in ("http", "https")
+        and bool(parsed.netloc)
+    )
+
+
 def safe_next_url(value):
 
     if not value:
-
         return "/dashboard"
 
-    value = str(
-        value
-    )
+    value = str(value)
 
     if not value.startswith("/"):
-
         return "/dashboard"
 
     if value.startswith("//"):
-
         return "/dashboard"
 
     return value
@@ -459,9 +539,7 @@ def get_license(guild_id):
 
     try:
 
-        guild_id = int(
-            guild_id
-        )
+        guild_id = int(guild_id)
 
     except (
         TypeError,
@@ -471,7 +549,6 @@ def get_license(guild_id):
         return None
 
     if not DATABASE_URL:
-
         return None
 
     try:
@@ -502,7 +579,6 @@ def get_license(guild_id):
                 row = cursor.fetchone()
 
                 if not row:
-
                     return None
 
                 return (
@@ -533,15 +609,12 @@ def license_is_active(guild_id):
     )
 
     if not license_data:
-
         return False
 
     status = license_data[2]
-
     expires_at = license_data[3]
 
     if status != "active":
-
         return False
 
     if expires_at:
@@ -551,12 +624,6 @@ def license_is_active(guild_id):
         )
 
         if not expiration:
-
-            print(
-                f"⚠️ Invalid expiration for "
-                f"guild {guild_id}: {expires_at}"
-            )
-
             return False
 
         if utc_now() >= expiration:
@@ -592,6 +659,55 @@ def license_is_active(guild_id):
 
 
 # =========================================================
+# USER GUILDS
+# =========================================================
+
+def get_user_guilds():
+
+    access_token = session.get(
+        "access_token"
+    )
+
+    if not access_token:
+        return []
+
+    try:
+
+        response = requests.get(
+            f"{DISCORD_API}/users/@me/guilds",
+            headers={
+                "Authorization":
+                    f"Bearer {access_token}"
+            },
+            timeout=10
+        )
+
+    except requests.RequestException as error:
+
+        print(
+            f"❌ Discord guild request error: {error}"
+        )
+
+        return []
+
+    if response.status_code != 200:
+        return []
+
+    try:
+
+        data = response.json()
+
+    except ValueError:
+
+        return []
+
+    return data if isinstance(
+        data,
+        list
+    ) else []
+
+
+# =========================================================
 # USER HAS ACTIVE LICENSE
 # =========================================================
 
@@ -601,15 +717,9 @@ def user_has_license():
 
     for guild in guilds:
 
-        guild_id = guild.get(
-            "id"
-        )
+        guild_id = guild.get("id")
 
-        if not guild_id:
-
-            continue
-
-        if license_is_active(
+        if guild_id and license_is_active(
             guild_id
         ):
 
@@ -627,7 +737,6 @@ def get_active_license_guild_ids():
     active_ids = set()
 
     if not DATABASE_URL:
-
         return active_ids
 
     try:
@@ -661,13 +770,10 @@ def get_active_license_guild_ids():
     for row in rows:
 
         guild_id = row[0]
-
         status = row[1]
-
         expires_at = row[2]
 
         if status != "active":
-
             continue
 
         if expires_at:
@@ -677,7 +783,6 @@ def get_active_license_guild_ids():
             )
 
             if not expiration:
-
                 continue
 
             if now >= expiration:
@@ -701,12 +806,8 @@ def get_active_license_guild_ids():
 
                         connection.commit()
 
-                except Exception as error:
-
-                    print(
-                        f"❌ Failed to expire "
-                        f"license {guild_id}: {error}"
-                    )
+                except Exception:
+                    pass
 
                 continue
 
@@ -718,23 +819,19 @@ def get_active_license_guild_ids():
 
 
 # =========================================================
-# DISCORD HEADERS
+# DISCORD BOT HEADERS
 # =========================================================
 
 def discord_bot_headers():
 
     if not BOT_TOKEN:
-
         return {}
 
     return {
-
         "Authorization":
             f"Bot {BOT_TOKEN}",
-
         "Content-Type":
             "application/json"
-
     }
 
 
@@ -749,29 +846,20 @@ def get_user():
     )
 
     if not access_token:
-
         return None
 
     try:
 
         response = requests.get(
-
             f"{DISCORD_API}/users/@me",
-
             headers={
                 "Authorization":
                     f"Bearer {access_token}"
             },
-
             timeout=10
-
         )
 
-    except requests.RequestException as error:
-
-        print(
-            f"❌ Discord user request error: {error}"
-        )
+    except requests.RequestException:
 
         return None
 
@@ -796,113 +884,30 @@ def get_user():
 
 
 # =========================================================
-# GET USER GUILDS
-# =========================================================
-
-def get_user_guilds():
-
-    access_token = session.get(
-        "access_token"
-    )
-
-    if not access_token:
-
-        return []
-
-    try:
-
-        response = requests.get(
-
-            f"{DISCORD_API}/users/@me/guilds",
-
-            headers={
-                "Authorization":
-                    f"Bearer {access_token}"
-            },
-
-            timeout=10
-
-        )
-
-    except requests.RequestException as error:
-
-        print(
-            f"❌ Discord guild request error: {error}"
-        )
-
-        return []
-
-    if response.status_code != 200:
-
-        print(
-            "❌ Discord guild request returned "
-            f"{response.status_code}"
-        )
-
-        return []
-
-    try:
-
-        data = response.json()
-
-    except ValueError:
-
-        return []
-
-    if not isinstance(
-        data,
-        list
-    ):
-
-        return []
-
-    return data
-
-
-# =========================================================
 # GET BOT GUILDS
 # =========================================================
 
 def get_bot_guilds():
 
     if not BOT_TOKEN:
-
-        print(
-            "⚠️ Discord bot token is missing."
-        )
-
         return []
 
     try:
 
         response = requests.get(
-
             f"{DISCORD_API}/users/@me/guilds",
-
             headers={
                 "Authorization":
                     f"Bot {BOT_TOKEN}"
             },
-
             timeout=10
-
         )
 
-    except requests.RequestException as error:
-
-        print(
-            f"❌ Bot guild request error: {error}"
-        )
+    except requests.RequestException:
 
         return []
 
     if response.status_code != 200:
-
-        print(
-            f"❌ Bot guild request returned "
-            f"{response.status_code}"
-        )
-
         return []
 
     try:
@@ -913,14 +918,10 @@ def get_bot_guilds():
 
         return []
 
-    if not isinstance(
+    return data if isinstance(
         data,
         list
-    ):
-
-        return []
-
-    return data
+    ) else []
 
 
 # =========================================================
@@ -928,7 +929,6 @@ def get_bot_guilds():
 # =========================================================
 
 ADMINISTRATOR = 1 << 3
-
 MANAGE_GUILD = 1 << 5
 
 
@@ -951,13 +951,9 @@ def can_manage_guild(guild):
         permissions = 0
 
     return bool(
-
         permissions & ADMINISTRATOR
-
         or
-
         permissions & MANAGE_GUILD
-
     )
 
 
@@ -973,7 +969,6 @@ def get_invite_url(guild_id):
     )
 
     params = {
-
         "client_id":
             CLIENT_ID,
 
@@ -985,7 +980,6 @@ def get_invite_url(guild_id):
 
         "guild_id":
             str(guild_id)
-
     }
 
     return (
@@ -1000,13 +994,9 @@ def get_invite_url(guild_id):
 
 def create_oauth_state():
 
-    state = secrets.token_urlsafe(
-        32
-    )
+    state = secrets.token_urlsafe(32)
 
-    session[
-        "oauth_state"
-    ] = state
+    session["oauth_state"] = state
 
     session.modified = True
 
@@ -1022,12 +1012,7 @@ def verify_oauth_state(state):
 
     session.modified = True
 
-    if not state:
-
-        return False
-
-    if not stored_state:
-
+    if not state or not stored_state:
         return False
 
     return secrets.compare_digest(
@@ -1087,19 +1072,14 @@ def login():
         )
 
     next_url = safe_next_url(
-        request.args.get(
-            "next"
-        )
+        request.args.get("next")
     )
 
-    session[
-        "next_url"
-    ] = next_url
+    session["next_url"] = next_url
 
     state = create_oauth_state()
 
     params = {
-
         "client_id":
             CLIENT_ID,
 
@@ -1114,26 +1094,11 @@ def login():
 
         "state":
             state
-
     }
 
     discord_url = (
-
         f"{DISCORD_OAUTH_URL}?"
-
-        + urlencode(
-            params
-        )
-
-    )
-
-    print(
-        "🔐 Starting Discord LOGIN OAuth2"
-    )
-
-    print(
-        f"🔗 Login redirect: "
-        f"{DISCORD_LOGIN_REDIRECT_URI}"
+        + urlencode(params)
     )
 
     return redirect(
@@ -1191,24 +1156,7 @@ def login_callback():
             400
         )
 
-    if not CLIENT_ID or not CLIENT_SECRET:
-
-        return error_page(
-            "❌ Configuration Error",
-            "Discord OAuth2 credentials are missing.",
-            500
-        )
-
-    if not DISCORD_LOGIN_REDIRECT_URI:
-
-        return error_page(
-            "❌ Configuration Error",
-            "DISCORD_LOGIN_REDIRECT_URI is missing.",
-            500
-        )
-
     token_data = {
-
         "client_id":
             CLIENT_ID,
 
@@ -1221,33 +1169,25 @@ def login_callback():
         "code":
             code,
 
+        # IMPORTANT:
+        # Uses DISCORD_LOGIN_REDIRECT_URI.
         "redirect_uri":
             DISCORD_LOGIN_REDIRECT_URI
-
     }
 
     try:
 
         response = requests.post(
-
             DISCORD_TOKEN_URL,
-
             data=token_data,
-
             headers={
                 "Content-Type":
                     "application/x-www-form-urlencoded"
             },
-
             timeout=10
-
         )
 
-    except requests.RequestException as error:
-
-        print(
-            f"❌ Discord token request error: {error}"
-        )
+    except requests.RequestException:
 
         return error_page(
             "❌ OAuth2 Error",
@@ -1258,10 +1198,7 @@ def login_callback():
     if response.status_code != 200:
 
         print(
-            "❌ LOGIN token exchange failed:"
-        )
-
-        print(
+            "❌ Discord token response:",
             response.text
         )
 
@@ -1295,30 +1232,18 @@ def login_callback():
             400
         )
 
-    # -----------------------------------------------------
-    # VERIFY USER
-    # -----------------------------------------------------
-
     try:
 
         user_response = requests.get(
-
             f"{DISCORD_API}/users/@me",
-
             headers={
                 "Authorization":
                     f"Bearer {access_token}"
             },
-
             timeout=10
-
         )
 
-    except requests.RequestException as error:
-
-        print(
-            f"❌ User request error: {error}"
-        )
+    except requests.RequestException:
 
         return error_page(
             "❌ OAuth2 Error",
@@ -1342,189 +1267,30 @@ def login_callback():
 
         return error_page(
             "❌ OAuth2 Error",
-            "Discord returned invalid user information.",
+            "Discord returned invalid user data.",
             400
         )
 
     next_url = safe_next_url(
-        session.get(
-            "next_url"
-        )
+        session.get("next_url")
     )
-
-    # -----------------------------------------------------
-    # REGENERATE SESSION
-    # -----------------------------------------------------
 
     session.clear()
 
-    session[
-        "access_token"
-    ] = access_token
-
-    session[
-        "logged_in"
-    ] = True
-
-    session[
-        "user_id"
-    ] = user.get(
-        "id"
-    )
-
-    session[
-        "username"
-    ] = user.get(
-        "username"
+    session["access_token"] = access_token
+    session["logged_in"] = True
+    session["user_id"] = user.get("id")
+    session["username"] = (
+        user.get("global_name")
+        or
+        user.get("username")
     )
 
     session.permanent = True
-
     session.modified = True
-
-    print(
-        "=========================================="
-    )
-
-    print(
-        "✅ DISCORD LOGIN SUCCESSFUL"
-    )
-
-    print(
-        f"👤 User: {user.get('username')}"
-    )
-
-    print(
-        f"🆔 ID: {user.get('id')}"
-    )
-
-    print(
-        f"➡️ Next: {next_url}"
-    )
-
-    print(
-        "=========================================="
-    )
 
     return redirect(
         next_url
-    )
-
-
-# =========================================================
-# NORMAL OAUTH2 CALLBACK
-# =========================================================
-
-@app.route("/callback")
-def callback():
-
-    error = request.args.get(
-        "error"
-    )
-
-    if error:
-
-        return error_page(
-            "❌ OAuth2 Error",
-            "Discord rejected the authorization.",
-            400
-        )
-
-    code = request.args.get(
-        "code"
-    )
-
-    if not code:
-
-        return error_page(
-            "❌ OAuth2 Error",
-            "No authorization code was received.",
-            400
-        )
-
-    if not CLIENT_ID or not CLIENT_SECRET:
-
-        return error_page(
-            "❌ Configuration Error",
-            "Discord OAuth2 credentials are missing.",
-            500
-        )
-
-    if not DISCORD_REDIRECT_URI:
-
-        return error_page(
-            "❌ Configuration Error",
-            "DISCORD_REDIRECT_URI is missing.",
-            500
-        )
-
-    token_data = {
-
-        "client_id":
-            CLIENT_ID,
-
-        "client_secret":
-            CLIENT_SECRET,
-
-        "grant_type":
-            "authorization_code",
-
-        "code":
-            code,
-
-        "redirect_uri":
-            DISCORD_REDIRECT_URI
-
-    }
-
-    try:
-
-        response = requests.post(
-
-            DISCORD_TOKEN_URL,
-
-            data=token_data,
-
-            headers={
-                "Content-Type":
-                    "application/x-www-form-urlencoded"
-            },
-
-            timeout=10
-
-        )
-
-    except requests.RequestException as error:
-
-        print(
-            f"❌ OAuth2 request failed: {error}"
-        )
-
-        return error_page(
-            "❌ OAuth2 Error",
-            "Could not contact Discord.",
-            500
-        )
-
-    if response.status_code != 200:
-
-        print(
-            "❌ OAuth2 callback failed:"
-        )
-
-        print(
-            response.text
-        )
-
-        return error_page(
-            "❌ OAuth2 Error",
-            "Failed to exchange the authorization code.",
-            400
-        )
-
-    return render_template(
-        "oauth2_success.html",
-        user=get_user()
     )
 
 
@@ -1537,265 +1303,16 @@ def logout():
 
     session.clear()
 
-    return redirect(
-        "/"
-    )
+    return redirect("/")
 
 
 # =========================================================
-# HOME
+# REVIEWS
 # =========================================================
 
-@app.route("/")
-def index():
-
-    user = get_user()
-
-    reviews = get_random_reviews(
-        6
-    )
-
-    return render_template(
-        "index.html",
-        user=user,
-        reviews=reviews
-    )
-
-
-# =========================================================
-# DASHBOARD
-# =========================================================
-
-@app.route("/dashboard")
-def dashboard():
-
-    user = get_user()
-
-    if not user:
-
-        session[
-            "next_url"
-        ] = "/dashboard"
-
-        return redirect(
-            "/login"
-        )
-
-    user_guilds = get_user_guilds()
-
-    bot_guilds = get_bot_guilds()
-
-    bot_guild_ids = {
-
-        str(
-            guild.get("id")
-        )
-
-        for guild in bot_guilds
-
-        if guild.get("id")
-
-    }
-
-    active_license_ids = (
-        get_active_license_guild_ids()
-    )
-
-    authorized = []
-
-    available = []
-
-    for original_guild in user_guilds:
-
-        guild = dict(
-            original_guild
-        )
-
-        guild_id = str(
-            guild.get("id")
-        )
-
-        if not guild_id:
-
-            continue
-
-        license_data = get_license(
-            guild_id
-        )
-
-        guild[
-            "license_data"
-        ] = license_data
-
-        guild[
-            "license_active"
-        ] = (
-            guild_id
-            in active_license_ids
-        )
-
-        if license_data:
-
-            status = license_data[2]
-
-        else:
-
-            status = "none"
-
-        guild[
-            "license_status"
-        ] = status
-
-        if guild_id in bot_guild_ids:
-
-            authorized.append(
-                guild
-            )
-
-            continue
-
-        guild[
-            "can_add"
-        ] = can_manage_guild(
-            guild
-        )
-
-        guild[
-            "invite_url"
-        ] = get_invite_url(
-            guild_id
-        )
-
-        available.append(
-            guild
-        )
-
-    authorized.sort(
-        key=lambda guild:
-            guild.get(
-                "name",
-                ""
-            ).lower()
-    )
-
-    available.sort(
-        key=lambda guild: (
-            not guild.get(
-                "can_add",
-                False
-            ),
-            guild.get(
-                "name",
-                ""
-            ).lower()
-        )
-    )
-
-    return render_template(
-        "dashboard.html",
-        user=user,
-        authorized=authorized,
-        available=available
-    )
-
-
-# =========================================================
-# MANAGE
-# =========================================================
-
-@app.route(
-    "/manage/<guild_id>"
-)
-def manage(guild_id):
-
-    user = get_user()
-
-    if not user:
-
-        session[
-            "next_url"
-        ] = f"/manage/{guild_id}"
-
-        return redirect(
-            "/login"
-        )
-
-    user_guilds = get_user_guilds()
-
-    guild = next(
-
-        (
-
-            guild
-
-            for guild in user_guilds
-
-            if str(
-                guild.get("id")
-            ) == str(guild_id)
-
-        ),
-
-        None
-
-    )
-
-    if guild is None:
-
-        return error_page(
-            "❌ Access denied",
-            "You are not a member of this server.",
-            403,
-            user
-        )
-
-    bot_guilds = get_bot_guilds()
-
-    bot_guild_ids = {
-
-        str(
-            g.get("id")
-        )
-
-        for g in bot_guilds
-
-        if g.get("id")
-
-    }
-
-    if str(guild_id) not in bot_guild_ids:
-
-        return redirect(
-            "/dashboard"
-        )
-
-    license_data = get_license(
-        guild_id
-    )
-
-    license_active = license_is_active(
-        guild_id
-    )
-
-    return render_template(
-        "manage.html",
-        user=user,
-        guild=guild,
-        license_data=license_data,
-        license_active=license_active
-    )
-
-
-# =========================================================
-# REVIEWS DATABASE
-# =========================================================
-
-def get_random_reviews(
-    amount=6
-):
+def get_random_reviews(amount=6):
 
     if not DATABASE_URL:
-
         return []
 
     try:
@@ -1836,7 +1353,6 @@ def get_random_reviews(
     for row in rows:
 
         reviews.append({
-
             "id":
                 row["id"],
 
@@ -1857,7 +1373,6 @@ def get_random_reviews(
 
             "created_at":
                 row["created_at"]
-
         })
 
     random.shuffle(
@@ -1865,6 +1380,357 @@ def get_random_reviews(
     )
 
     return reviews[:amount]
+
+
+# =========================================================
+# ADVERTISEMENTS
+# =========================================================
+
+def get_active_advertisements():
+
+    if not DATABASE_URL:
+        return []
+
+    now = utc_now().isoformat()
+
+    try:
+
+        with database_connection() as connection:
+
+            with connection.cursor(
+                cursor_factory=psycopg2.extras.RealDictCursor
+            ) as cursor:
+
+                cursor.execute(
+                    """
+                    SELECT
+                        id,
+                        user_id,
+                        username,
+                        title,
+                        description,
+                        image_url,
+                        target_url,
+                        status,
+                        start_at,
+                        end_at,
+                        created_at
+                    FROM advertisements
+                    WHERE status = 'active'
+                    AND (
+                        start_at IS NULL
+                        OR start_at <= %s
+                    )
+                    AND (
+                        end_at IS NULL
+                        OR end_at > %s
+                    )
+                    ORDER BY id DESC
+                    """,
+                    (
+                        now,
+                        now
+                    )
+                )
+
+                return cursor.fetchall()
+
+    except Exception as error:
+
+        print(
+            f"❌ Advertisement database error: {error}"
+        )
+
+        return []
+
+
+def expire_advertisements():
+
+    if not DATABASE_URL:
+        return
+
+    now = utc_now().isoformat()
+
+    try:
+
+        with database_connection() as connection:
+
+            with connection.cursor() as cursor:
+
+                cursor.execute(
+                    """
+                    UPDATE advertisements
+                    SET
+                        status = 'expired',
+                        updated_at = %s
+                    WHERE status = 'active'
+                    AND end_at IS NOT NULL
+                    AND end_at <= %s
+                    """,
+                    (
+                        now,
+                        now
+                    )
+                )
+
+            connection.commit()
+
+    except Exception as error:
+
+        print(
+            f"❌ Advertisement expiration error: {error}"
+        )
+
+
+def get_all_advertisements():
+
+    if not DATABASE_URL:
+        return []
+
+    try:
+
+        with database_connection() as connection:
+
+            with connection.cursor(
+                cursor_factory=psycopg2.extras.RealDictCursor
+            ) as cursor:
+
+                cursor.execute(
+                    """
+                    SELECT
+                        id,
+                        user_id,
+                        username,
+                        title,
+                        description,
+                        image_url,
+                        target_url,
+                        status,
+                        rejection_reason,
+                        start_at,
+                        end_at,
+                        created_at,
+                        updated_at
+                    FROM advertisements
+                    ORDER BY id DESC
+                    """
+                )
+
+                return cursor.fetchall()
+
+    except Exception as error:
+
+        print(
+            f"❌ Could not load advertisements: {error}"
+        )
+
+        return []
+
+
+# =========================================================
+# HOME
+# =========================================================
+
+@app.route("/")
+def index():
+
+    user = get_user()
+
+    expire_advertisements()
+
+    reviews = get_random_reviews(6)
+
+    advertisements = (
+        get_active_advertisements()
+    )
+
+    return render_template(
+        "index.html",
+        user=user,
+        reviews=reviews,
+        advertisements=advertisements
+    )
+
+
+# =========================================================
+# DASHBOARD
+# =========================================================
+
+@app.route("/dashboard")
+def dashboard():
+
+    user = get_user()
+
+    if not user:
+
+        session["next_url"] = "/dashboard"
+
+        return redirect("/login")
+
+    user_guilds = get_user_guilds()
+
+    bot_guilds = get_bot_guilds()
+
+    bot_guild_ids = {
+        str(guild.get("id"))
+        for guild in bot_guilds
+        if guild.get("id")
+    }
+
+    active_license_ids = (
+        get_active_license_guild_ids()
+    )
+
+    authorized = []
+    available = []
+
+    for original_guild in user_guilds:
+
+        guild = dict(
+            original_guild
+        )
+
+        guild_id = str(
+            guild.get("id")
+        )
+
+        if not guild_id:
+            continue
+
+        license_data = get_license(
+            guild_id
+        )
+
+        guild["license_data"] = (
+            license_data
+        )
+
+        guild["license_active"] = (
+            guild_id in active_license_ids
+        )
+
+        if license_data:
+            status = license_data[2]
+        else:
+            status = "none"
+
+        guild["license_status"] = status
+
+        if guild_id in bot_guild_ids:
+
+            authorized.append(
+                guild
+            )
+
+            continue
+
+        guild["can_add"] = can_manage_guild(
+            guild
+        )
+
+        guild["invite_url"] = get_invite_url(
+            guild_id
+        )
+
+        available.append(
+            guild
+        )
+
+    authorized.sort(
+        key=lambda guild:
+            guild.get(
+                "name",
+                ""
+            ).lower()
+    )
+
+    available.sort(
+        key=lambda guild: (
+            not guild.get(
+                "can_add",
+                False
+            ),
+            guild.get(
+                "name",
+                ""
+            ).lower()
+        )
+    )
+
+    return render_template(
+        "dashboard.html",
+        user=user,
+        authorized=authorized,
+        available=available
+    )
+
+
+# =========================================================
+# MANAGE
+# =========================================================
+
+@app.route("/manage/<guild_id>")
+def manage(guild_id):
+
+    user = get_user()
+
+    if not user:
+
+        session["next_url"] = (
+            f"/manage/{guild_id}"
+        )
+
+        return redirect("/login")
+
+    user_guilds = get_user_guilds()
+
+    guild = next(
+        (
+            guild
+            for guild in user_guilds
+            if str(
+                guild.get("id")
+            ) == str(guild_id)
+        ),
+        None
+    )
+
+    if guild is None:
+
+        return error_page(
+            "❌ Access denied",
+            "You are not a member of this server.",
+            403,
+            user
+        )
+
+    bot_guilds = get_bot_guilds()
+
+    bot_guild_ids = {
+        str(g.get("id"))
+        for g in bot_guilds
+        if g.get("id")
+    }
+
+    if str(guild_id) not in bot_guild_ids:
+
+        return redirect("/dashboard")
+
+    license_data = get_license(
+        guild_id
+    )
+
+    license_active = license_is_active(
+        guild_id
+    )
+
+    return render_template(
+        "manage.html",
+        user=user,
+        guild=guild,
+        license_data=license_data,
+        license_active=license_active
+    )
 
 
 # =========================================================
@@ -1883,7 +1749,6 @@ def reviews():
     can_review = False
 
     if user:
-
         can_review = user_has_license()
 
     return render_template(
@@ -1908,13 +1773,9 @@ def submit_review():
 
     if not user:
 
-        session[
-            "next_url"
-        ] = "/reviews"
+        session["next_url"] = "/reviews"
 
-        return redirect(
-            "/login"
-        )
+        return redirect("/login")
 
     if not user_has_license():
 
@@ -1965,27 +1826,15 @@ def submit_review():
     review = review[:1000]
 
     user_id = str(
-        user.get(
-            "id"
-        )
+        user.get("id")
     )
 
     username = (
-
-        user.get(
-            "global_name"
-        )
-
+        user.get("global_name")
         or
-
-        user.get(
-            "username"
-        )
-
+        user.get("username")
         or
-
         "Discord User"
-
     )
 
     avatar_hash = user.get(
@@ -1995,27 +1844,14 @@ def submit_review():
     if avatar_hash:
 
         avatar = (
-
             "https://cdn.discordapp.com/"
-
             f"avatars/{user_id}/"
-
             f"{avatar_hash}.png?size=128"
-
         )
 
     else:
 
         avatar = None
-
-    if not DATABASE_URL:
-
-        return error_page(
-            "❌ Review Error",
-            "The database is not configured.",
-            500,
-            user
-        )
 
     try:
 
@@ -2024,7 +1860,6 @@ def submit_review():
             with connection.cursor() as cursor:
 
                 cursor.execute(
-
                     """
                     INSERT INTO reviews
                     (
@@ -2035,7 +1870,6 @@ def submit_review():
                         rating,
                         created_at
                     )
-
                     VALUES (
                         %s,
                         %s,
@@ -2045,23 +1879,14 @@ def submit_review():
                         %s
                     )
                     """,
-
                     (
-
                         user_id,
-
                         username,
-
                         avatar,
-
                         review,
-
                         rating,
-
                         utc_now().isoformat()
-
                     )
-
                 )
 
             connection.commit()
@@ -2081,6 +1906,522 @@ def submit_review():
 
     return redirect(
         "/reviews"
+    )
+
+
+# =========================================================
+# ADVERTISE PAGE
+# =========================================================
+
+@app.route("/advertise")
+def advertise():
+
+    user = get_user()
+
+    if not user:
+
+        session["next_url"] = "/advertise"
+
+        return redirect("/login")
+
+    return render_template(
+        "advertise.html",
+        user=user
+    )
+
+
+# =========================================================
+# CREATE ADVERTISEMENT
+# =========================================================
+
+@app.route(
+    "/advertise",
+    methods=["POST"]
+)
+def create_advertisement():
+
+    user = get_user()
+
+    if not user:
+
+        session["next_url"] = "/advertise"
+
+        return redirect("/login")
+
+    title = request.form.get(
+        "title",
+        ""
+    ).strip()
+
+    description = request.form.get(
+        "description",
+        ""
+    ).strip()
+
+    image_url = request.form.get(
+        "image_url",
+        ""
+    ).strip()
+
+    target_url = request.form.get(
+        "target_url",
+        ""
+    ).strip()
+
+    # -----------------------------------------------------
+    # VALIDATION
+    # -----------------------------------------------------
+
+    if not title:
+
+        return error_page(
+            "❌ Invalid advertisement",
+            "The advertisement needs a title.",
+            400,
+            user
+        )
+
+    if not description:
+
+        return error_page(
+            "❌ Invalid advertisement",
+            "The advertisement needs a description.",
+            400,
+            user
+        )
+
+    if not target_url or not valid_http_url(
+        target_url
+    ):
+
+        return error_page(
+            "❌ Invalid URL",
+            "Please provide a valid HTTP or HTTPS destination URL.",
+            400,
+            user
+        )
+
+    if image_url and not valid_http_url(
+        image_url
+    ):
+
+        return error_page(
+            "❌ Invalid image URL",
+            "The image URL must use HTTP or HTTPS.",
+            400,
+            user
+        )
+
+    title = title[:100]
+    description = description[:500]
+    target_url = target_url[:1000]
+
+    image_url = (
+        image_url[:1000]
+        if image_url
+        else None
+    )
+
+    user_id = str(
+        user.get("id")
+    )
+
+    username = (
+        user.get("global_name")
+        or
+        user.get("username")
+        or
+        "Discord User"
+    )
+
+    now = utc_now().isoformat()
+
+    if not DATABASE_URL:
+
+        return error_page(
+            "❌ Database error",
+            "The database is not configured.",
+            500,
+            user
+        )
+
+    try:
+
+        with database_connection() as connection:
+
+            with connection.cursor() as cursor:
+
+                cursor.execute(
+                    """
+                    INSERT INTO advertisements
+                    (
+                        user_id,
+                        username,
+                        title,
+                        description,
+                        image_url,
+                        target_url,
+                        status,
+                        created_at,
+                        updated_at
+                    )
+                    VALUES (
+                        %s,
+                        %s,
+                        %s,
+                        %s,
+                        %s,
+                        %s,
+                        'pending',
+                        %s,
+                        %s
+                    )
+                    RETURNING id
+                    """,
+                    (
+                        user_id,
+                        username,
+                        title,
+                        description,
+                        image_url,
+                        target_url,
+                        now,
+                        now
+                    )
+                )
+
+                advertisement_id = (
+                    cursor.fetchone()[0]
+                )
+
+                # -------------------------------------------------
+                # PAYMENT RECORD
+                #
+                # Apenas prepara o registo.
+                # Não existe pagamento real nesta versão.
+                # -------------------------------------------------
+
+                cursor.execute(
+                    """
+                    INSERT INTO advertisement_payments
+                    (
+                        advertisement_id,
+                        user_id,
+                        provider,
+                        amount,
+                        currency,
+                        status,
+                        created_at,
+                        updated_at
+                    )
+                    VALUES (
+                        %s,
+                        %s,
+                        'paypal',
+                        NULL,
+                        'EUR',
+                        'not_configured',
+                        %s,
+                        %s
+                    )
+                    """,
+                    (
+                        advertisement_id,
+                        user_id,
+                        now,
+                        now
+                    )
+                )
+
+            connection.commit()
+
+    except Exception as error:
+
+        print(
+            f"❌ Advertisement creation error: {error}"
+        )
+
+        return error_page(
+            "❌ Advertisement Error",
+            "The advertisement could not be created.",
+            500,
+            user
+        )
+
+    return render_template(
+        "advertise_success.html",
+        user=user
+    )
+
+
+# =========================================================
+# ADMIN ADVERTISEMENT PANEL
+# =========================================================
+
+@app.route(
+    "/admin/advertisements"
+)
+def admin_advertisements():
+
+    user = get_user()
+
+    if not user:
+
+        session["next_url"] = (
+            "/admin/advertisements"
+        )
+
+        return redirect("/login")
+
+    if not is_admin(user):
+
+        return error_page(
+            "🚫 Access denied",
+            "You do not have permission to access the advertisement administration panel.",
+            403,
+            user
+        )
+
+    expire_advertisements()
+
+    advertisements = (
+        get_all_advertisements()
+    )
+
+    return render_template(
+        "admin_advertisements.html",
+        user=user,
+        advertisements=advertisements
+    )
+
+
+# =========================================================
+# ADMIN APPROVE ADVERTISEMENT
+# =========================================================
+
+@app.route(
+    "/admin/advertisements/<int:advertisement_id>/approve",
+    methods=["POST"]
+)
+def approve_advertisement(
+    advertisement_id
+):
+
+    user = get_user()
+
+    if not user:
+        return redirect("/login")
+
+    if not is_admin(user):
+
+        return error_page(
+            "🚫 Access denied",
+            "You do not have permission to approve advertisements.",
+            403,
+            user
+        )
+
+    if not DATABASE_URL:
+
+        return error_page(
+            "❌ Database error",
+            "The database is not configured.",
+            500,
+            user
+        )
+
+    now = utc_now().isoformat()
+
+    try:
+
+        with database_connection() as connection:
+
+            with connection.cursor() as cursor:
+
+                cursor.execute(
+                    """
+                    UPDATE advertisements
+                    SET
+                        status = 'active',
+                        rejection_reason = NULL,
+                        start_at = COALESCE(
+                            start_at,
+                            %s
+                        ),
+                        updated_at = %s
+                    WHERE id = %s
+                    """,
+                    (
+                        now,
+                        now,
+                        advertisement_id
+                    )
+                )
+
+            connection.commit()
+
+    except Exception as error:
+
+        print(
+            f"❌ Advertisement approval error: {error}"
+        )
+
+        return error_page(
+            "❌ Advertisement Error",
+            "The advertisement could not be approved.",
+            500,
+            user
+        )
+
+    return redirect(
+        "/admin/advertisements"
+    )
+
+
+# =========================================================
+# ADMIN REJECT ADVERTISEMENT
+# =========================================================
+
+@app.route(
+    "/admin/advertisements/<int:advertisement_id>/reject",
+    methods=["POST"]
+)
+def reject_advertisement(
+    advertisement_id
+):
+
+    user = get_user()
+
+    if not user:
+        return redirect("/login")
+
+    if not is_admin(user):
+
+        return error_page(
+            "🚫 Access denied",
+            "You do not have permission to reject advertisements.",
+            403,
+            user
+        )
+
+    reason = request.form.get(
+        "reason",
+        ""
+    ).strip()
+
+    reason = reason[:500]
+
+    now = utc_now().isoformat()
+
+    try:
+
+        with database_connection() as connection:
+
+            with connection.cursor() as cursor:
+
+                cursor.execute(
+                    """
+                    UPDATE advertisements
+                    SET
+                        status = 'rejected',
+                        rejection_reason = %s,
+                        updated_at = %s
+                    WHERE id = %s
+                    """,
+                    (
+                        reason
+                        or
+                        "Rejected by administrator.",
+                        now,
+                        advertisement_id
+                    )
+                )
+
+            connection.commit()
+
+    except Exception as error:
+
+        print(
+            f"❌ Advertisement rejection error: {error}"
+        )
+
+        return error_page(
+            "❌ Advertisement Error",
+            "The advertisement could not be rejected.",
+            500,
+            user
+        )
+
+    return redirect(
+        "/admin/advertisements"
+    )
+
+
+# =========================================================
+# ADMIN DISABLE ADVERTISEMENT
+# =========================================================
+
+@app.route(
+    "/admin/advertisements/<int:advertisement_id>/disable",
+    methods=["POST"]
+)
+def disable_advertisement(
+    advertisement_id
+):
+
+    user = get_user()
+
+    if not user:
+        return redirect("/login")
+
+    if not is_admin(user):
+
+        return error_page(
+            "🚫 Access denied",
+            "You do not have permission to disable advertisements.",
+            403,
+            user
+        )
+
+    now = utc_now().isoformat()
+
+    try:
+
+        with database_connection() as connection:
+
+            with connection.cursor() as cursor:
+
+                cursor.execute(
+                    """
+                    UPDATE advertisements
+                    SET
+                        status = 'disabled',
+                        updated_at = %s
+                    WHERE id = %s
+                    """,
+                    (
+                        now,
+                        advertisement_id
+                    )
+                )
+
+            connection.commit()
+
+    except Exception as error:
+
+        print(
+            f"❌ Advertisement disable error: {error}"
+        )
+
+        return error_page(
+            "❌ Advertisement Error",
+            "The advertisement could not be disabled.",
+            500,
+            user
+        )
+
+    return redirect(
+        "/admin/advertisements"
     )
 
 
@@ -2157,6 +2498,21 @@ def cookies_page():
 
 
 # =========================================================
+# HEALTH CHECK
+# =========================================================
+
+@app.route("/health")
+def health():
+
+    return {
+        "status": "ok",
+        "database": bool(DATABASE_URL),
+        "discord": bool(CLIENT_ID),
+        "bot": bool(BOT_TOKEN)
+    }, 200
+
+
+# =========================================================
 # START
 # =========================================================
 
@@ -2199,8 +2555,8 @@ if __name__ == "__main__":
     )
 
     print(
-        f"🔗 OAuth2 Redirect: "
-        f"{DISCORD_REDIRECT_URI}"
+        f"👑 Admin IDs configured: "
+        f"{len(ADMIN_DISCORD_IDS)}"
     )
 
     print(
@@ -2223,11 +2579,7 @@ if __name__ == "__main__":
     )
 
     app.run(
-
         host="0.0.0.0",
-
         port=PORT,
-
         debug=False
-
     )
