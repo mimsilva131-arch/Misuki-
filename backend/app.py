@@ -30,6 +30,37 @@ load_dotenv()
 
 
 # =========================================================
+# PATHS
+# =========================================================
+
+BASE_DIR = os.path.dirname(
+    os.path.dirname(
+        os.path.abspath(__file__)
+    )
+)
+
+WEBSITE_DIR = os.path.join(
+    BASE_DIR,
+    "website"
+)
+
+CSS_DIR = os.path.join(
+    BASE_DIR,
+    "css"
+)
+
+JS_DIR = os.path.join(
+    BASE_DIR,
+    "js"
+)
+
+ASSETS_DIR = os.path.join(
+    BASE_DIR,
+    "assets"
+)
+
+
+# =========================================================
 # CONFIGURATION
 # =========================================================
 
@@ -41,25 +72,36 @@ CLIENT_SECRET = os.getenv(
     "DISCORD_CLIENT_SECRET"
 )
 
+
+# OAuth2 used for bot authorization
 DISCORD_REDIRECT_URI = os.getenv(
     "DISCORD_REDIRECT_URI"
 )
 
+
+# OAuth2 used ONLY for Discord login
 DISCORD_LOGIN_REDIRECT_URI = os.getenv(
     "DISCORD_LOGIN_REDIRECT_URI"
 )
 
+
+# Bot token
 BOT_TOKEN = os.getenv(
+    "DISCORD_BOT_TOKEN"
+) or os.getenv(
     "DISCORD_TOKEN"
 )
+
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL"
 )
 
+
 SECRET_KEY = os.getenv(
     "FLASK_SECRET_KEY"
 )
+
 
 PORT = int(
     os.getenv(
@@ -67,6 +109,7 @@ PORT = int(
         "5000"
     )
 )
+
 
 COOKIE_SECURE = (
     os.getenv(
@@ -83,9 +126,7 @@ COOKIE_SECURE = (
 
 if not SECRET_KEY:
 
-    SECRET_KEY = secrets.token_hex(
-        32
-    )
+    SECRET_KEY = secrets.token_hex(32)
 
     print(
         "⚠️ FLASK_SECRET_KEY is missing."
@@ -116,47 +157,32 @@ if not DATABASE_URL:
 
 
 # =========================================================
-# PATHS
-# =========================================================
-
-BASE_DIR = os.path.dirname(
-    os.path.dirname(
-        os.path.abspath(__file__)
-    )
-)
-
-WEBSITE_DIR = os.path.join(
-    BASE_DIR,
-    "website"
-)
-
-CSS_DIR = os.path.join(
-    BASE_DIR,
-    "css"
-)
-
-JS_DIR = os.path.join(
-    BASE_DIR,
-    "js"
-)
-
-IMAGES_DIR = os.path.join(
-    BASE_DIR,
-    "assets",
-    "images"
-)
-
-
-# =========================================================
 # FLASK
 # =========================================================
 
+# IMPORTANT:
+#
+# static_folder points to BASE_DIR so that:
+#
+# url_for("static", filename="assets/images/favicon.png")
+#
+# becomes:
+#
+# /static/assets/images/favicon.png
+#
+# This also fixes old HTML files that still use
+# url_for("static", ...).
+#
 app = Flask(
     __name__,
-    template_folder=WEBSITE_DIR
+    template_folder=WEBSITE_DIR,
+    static_folder=BASE_DIR,
+    static_url_path="/static"
 )
 
+
 app.secret_key = SECRET_KEY
+
 
 app.wsgi_app = ProxyFix(
     app.wsgi_app,
@@ -167,43 +193,6 @@ app.wsgi_app = ProxyFix(
 
 
 # =========================================================
-# STATIC FILES
-# =========================================================
-
-@app.route(
-    "/css/<path:filename>"
-)
-def serve_css(filename):
-
-    return send_from_directory(
-        CSS_DIR,
-        filename
-    )
-
-
-@app.route(
-    "/js/<path:filename>"
-)
-def serve_js(filename):
-
-    return send_from_directory(
-        JS_DIR,
-        filename
-    )
-
-
-@app.route(
-    "/assets/images/<path:filename>"
-)
-def serve_image(filename):
-
-    return send_from_directory(
-        IMAGES_DIR,
-        filename
-    )
-
-
-# =========================================================
 # SESSION CONFIGURATION
 # =========================================================
 
@@ -211,21 +200,70 @@ app.config[
     "SESSION_COOKIE_HTTPONLY"
 ] = True
 
+
 app.config[
     "SESSION_COOKIE_SAMESITE"
 ] = "Lax"
+
 
 app.config[
     "SESSION_COOKIE_SECURE"
 ] = COOKIE_SECURE
 
+
 app.config[
     "SESSION_REFRESH_EACH_REQUEST"
 ] = True
 
+
 app.config[
     "PERMANENT_SESSION_LIFETIME"
 ] = 86400
+
+
+# =========================================================
+# STATIC CSS
+# =========================================================
+
+@app.route(
+    "/css/<path:filename>"
+)
+def static_css(filename):
+
+    return send_from_directory(
+        CSS_DIR,
+        filename
+    )
+
+
+# =========================================================
+# STATIC JAVASCRIPT
+# =========================================================
+
+@app.route(
+    "/js/<path:filename>"
+)
+def static_js(filename):
+
+    return send_from_directory(
+        JS_DIR,
+        filename
+    )
+
+
+# =========================================================
+# ASSETS
+# =========================================================
+
+@app.route(
+    "/assets/<path:filename>"
+)
+def assets(filename):
+
+    return send_from_directory(
+        ASSETS_DIR,
+        filename
+    )
 
 
 # =========================================================
@@ -236,9 +274,11 @@ DISCORD_API = (
     "https://discord.com/api/v10"
 )
 
+
 DISCORD_OAUTH_URL = (
     "https://discord.com/oauth2/authorize"
 )
+
 
 DISCORD_TOKEN_URL = (
     f"{DISCORD_API}/oauth2/token"
@@ -828,7 +868,7 @@ def get_bot_guilds():
     if not BOT_TOKEN:
 
         print(
-            "⚠️ DISCORD_TOKEN is missing."
+            "⚠️ Discord bot token is missing."
         )
 
         return []
@@ -1483,7 +1523,7 @@ def callback():
         )
 
     return render_template(
-        "index.html",
+        "oauth2_success.html",
         user=get_user()
     )
 
@@ -1630,10 +1670,6 @@ def dashboard():
             guild
         )
 
-    # -----------------------------------------------------
-    # SERVERS WHERE MISUKI IS ALREADY INSTALLED FIRST
-    # -----------------------------------------------------
-
     authorized.sort(
         key=lambda guild:
             guild.get(
@@ -1643,21 +1679,16 @@ def dashboard():
     )
 
     available.sort(
-
         key=lambda guild: (
-
             not guild.get(
                 "can_add",
                 False
             ),
-
             guild.get(
                 "name",
                 ""
             ).lower()
-
         )
-
     )
 
     return render_template(
@@ -1694,6 +1725,7 @@ def manage(guild_id):
     guild = next(
 
         (
+
             guild
 
             for guild in user_guilds
@@ -1701,6 +1733,7 @@ def manage(guild_id):
             if str(
                 guild.get("id")
             ) == str(guild_id)
+
         ),
 
         None
