@@ -1072,7 +1072,8 @@ def error_page(
         "error.html",
         user=user,
         title=title,
-        message=message
+        message=message,
+        is_admin=is_admin
     ), status_code
 
 
@@ -1590,7 +1591,8 @@ def index():
         "index.html",
         user=user,
         reviews=reviews,
-        advertisements=advertisements
+        advertisements=advertisements,
+        is_admin=is_admin
     )
 
 
@@ -1714,7 +1716,8 @@ def dashboard():
         "dashboard.html",
         user=user,
         authorized=authorized,
-        available=available
+        available=available,
+        is_admin=is_admin
     )
 
 
@@ -1784,7 +1787,8 @@ def manage(guild_id):
         user=user,
         guild=guild,
         license_data=license_data,
-        license_active=license_active
+        license_active=license_active,
+        is_admin=is_admin
     )
 
 
@@ -1813,7 +1817,8 @@ def reviews():
         "reviews.html",
         user=user,
         review_list=review_list,
-        can_review=can_review
+        can_review=can_review,
+        is_admin=is_admin
     )
 
 
@@ -1988,7 +1993,8 @@ def advertise():
 
     return render_template(
         "advertise.html",
-        user=user
+        user=user,
+        is_admin=is_admin
     )
 
 
@@ -2306,7 +2312,8 @@ def create_advertisement():
 
     return render_template(
         "advertise_success.html",
-        user=user
+        user=user,
+        is_admin=is_admin
     )
 
 
@@ -2347,7 +2354,8 @@ def admin_advertisements():
     return render_template(
         "admin_advertisements.html",
         user=user,
-        advertisements=advertisements
+        advertisements=advertisements,
+        is_admin=is_admin
     )
 
 
@@ -2695,8 +2703,12 @@ def disable_advertisement(
 )
 def documentation():
 
+    user = get_user()
+
     return render_template(
-        "documentation.html"
+        "documentation.html",
+        user=user,
+        is_admin=is_admin
     )
 
 
@@ -2709,8 +2721,12 @@ def documentation():
 )
 def support():
 
+    user = get_user()
+
     return render_template(
-        "support.html"
+        "support.html",
+        user=user,
+        is_admin=is_admin
     )
 
 
@@ -2723,8 +2739,12 @@ def support():
 )
 def terms():
 
+    user = get_user()
+
     return render_template(
-        "terms.html"
+        "terms.html",
+        user=user,
+        is_admin=is_admin
     )
 
 
@@ -2737,8 +2757,12 @@ def terms():
 )
 def privacy():
 
+    user = get_user()
+
     return render_template(
-        "privacy.html"
+        "privacy.html",
+        user=user,
+        is_admin=is_admin
     )
 
 
@@ -2751,8 +2775,12 @@ def privacy():
 )
 def data_page():
 
+    user = get_user()
+
     return render_template(
-        "data.html"
+        "data.html",
+        user=user,
+        is_admin=is_admin
     )
 
 
@@ -2765,8 +2793,12 @@ def data_page():
 )
 def cookies_page():
 
+    user = get_user()
+
     return render_template(
-        "cookies.html"
+        "cookies.html",
+        user=user,
+        is_admin=is_admin
     )
 
 
