@@ -1,4 +1,3 @@
-
 import os
 import random
 import secrets
@@ -998,6 +997,74 @@ def can_manage_guild(guild):
         permissions & MANAGE_GUILD
 
     )
+
+
+# =========================================================
+# ADMIN
+# =========================================================
+
+def is_admin(user):
+    """
+    Checks whether a Discord user is a Misuki administrator.
+
+    Configure ADMIN_USER_IDS in Render as a comma-separated
+    list of Discord user IDs.
+
+    Example:
+
+    ADMIN_USER_IDS=123456789012345678,987654321098765432
+    """
+
+    if not user:
+
+        return False
+
+    user_id = str(
+        user.get(
+            "id",
+            ""
+        )
+    ).strip()
+
+    if not user_id:
+
+        return False
+
+    admin_ids = os.getenv(
+        "ADMIN_USER_IDS",
+        ""
+    )
+
+    if not admin_ids:
+
+        return False
+
+    allowed_ids = {
+
+        item.strip()
+
+        for item in admin_ids.split(",")
+
+        if item.strip()
+
+    }
+
+    return user_id in allowed_ids
+
+
+# =========================================================
+# JINJA TEMPLATE FUNCTIONS
+# =========================================================
+
+@app.context_processor
+def inject_template_functions():
+
+    return {
+
+        "is_admin":
+            is_admin
+
+    }
 
 
 # =========================================================
@@ -2136,8 +2203,11 @@ def submit_review():
 @app.route("/documentation")
 def documentation():
 
+    user = get_user()
+
     return render_template(
-        "documentation.html"
+        "documentation.html",
+        user=user
     )
 
 
@@ -2148,8 +2218,11 @@ def documentation():
 @app.route("/support")
 def support():
 
+    user = get_user()
+
     return render_template(
-        "support.html"
+        "support.html",
+        user=user
     )
 
 
@@ -2160,8 +2233,11 @@ def support():
 @app.route("/terms")
 def terms():
 
+    user = get_user()
+
     return render_template(
-        "terms.html"
+        "terms.html",
+        user=user
     )
 
 
@@ -2172,8 +2248,11 @@ def terms():
 @app.route("/privacy")
 def privacy():
 
+    user = get_user()
+
     return render_template(
-        "privacy.html"
+        "privacy.html",
+        user=user
     )
 
 
@@ -2184,8 +2263,11 @@ def privacy():
 @app.route("/data")
 def data_page():
 
+    user = get_user()
+
     return render_template(
-        "data.html"
+        "data.html",
+        user=user
     )
 
 
@@ -2196,8 +2278,11 @@ def data_page():
 @app.route("/cookies")
 def cookies_page():
 
+    user = get_user()
+
     return render_template(
-        "cookies.html"
+        "cookies.html",
+        user=user
     )
 
 
@@ -2254,6 +2339,11 @@ if __name__ == "__main__":
     )
 
     print(
+        f"🛡️ Admin IDs configured: "
+        f"{bool(os.getenv('ADMIN_USER_IDS'))}"
+    )
+
+    print(
         f"🗝️ Persistent Flask Secret: "
         f"{bool(os.getenv('FLASK_SECRET_KEY'))}"
     )
@@ -2276,4 +2366,3 @@ if __name__ == "__main__":
         debug=False
 
     )
-

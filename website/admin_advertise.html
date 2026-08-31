@@ -1,7 +1,22 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Advertisement Admin — Misuki</title>
+
+
+    <!-- =====================================================
+         FAVICON
+    ====================================================== -->
 
     <link
         rel="icon"
@@ -15,38 +30,45 @@
         href="/assets/images/favicon.png?v=3"
     >
 
-    <link
-        rel="stylesheet"
-        href="/css/stars.css"
-    >
 
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Advertisement Admin — Misuki</title>
+    <!-- =====================================================
+         STYLES
+    ====================================================== -->
 
     <link
         rel="stylesheet"
-        href="/static/css/style.css?v=16"
+        href="/css/stars.css?v=3"
     >
 
     <link
         rel="stylesheet"
-        href="/static/css/cookies.css?v=3"
+        href="/css/style.css?v=16"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/css/cookies.css?v=3"
     >
 
 </head>
 
+
+<body>
+
+
+<!-- =====================================================
+     STARS
+====================================================== -->
+
 <script
-    src="/static/js/stars.js?v=3"
+    src="/js/stars.js?v=3"
     defer
 ></script>
 
-<body>
+
+<!-- =====================================================
+     HEADER
+====================================================== -->
 
 <header class="container">
 
@@ -56,6 +78,7 @@
     >
         Misuki<span>.</span>
     </a>
+
 
     <a
         href="/"
@@ -67,290 +90,458 @@
 </header>
 
 
+<!-- =====================================================
+     MAIN
+====================================================== -->
+
 <main>
 
-<section class="section">
+    <section class="section">
 
-<div class="container">
-
-    <h1>
-        📢 Advertisement Management
-    </h1>
+        <div class="container">
 
 
-    {% if advertisements %}
-
-        <div class="server-grid">
-
-        {% for ad in advertisements %}
-
-            <div class="card server-card">
-
-                {% if ad.image_url %}
-
-                    <img
-                        class="server-icon"
-                        src="{{ ad.image_url }}"
-                        alt="{{ ad.title }}"
-                    >
-
-                {% endif %}
+            <h1>
+                📢 Advertisement Management
+            </h1>
 
 
-                <div>
+            {% if advertisements %}
 
-                    <div class="server-name">
-                        {{ ad.title }}
-                    </div>
 
-                    <div class="server-id">
-                        User ID: {{ ad.user_id }}
-                    </div>
+                <div class="server-grid">
 
-                    <div class="server-id">
-                        Duration: {{ ad.duration_days }} days
-                    </div>
+
+                    {% for ad in advertisements %}
+
+
+                        <div class="card server-card">
+
+
+                            <!-- =================================================
+                                 IMAGE
+                            ================================================== -->
+
+                            {% if ad.image_url %}
+
+                                <img
+                                    class="server-icon"
+                                    src="{{ ad.image_url }}"
+                                    alt="{{ ad.title }}"
+                                >
+
+                            {% endif %}
+
+
+                            <!-- =================================================
+                                 INFORMATION
+                            ================================================== -->
+
+                            <div>
+
+                                <div class="server-name">
+
+                                    {{ ad.title }}
+
+                                </div>
+
+
+                                <div class="server-id">
+
+                                    User ID:
+                                    {{ ad.user_id }}
+
+                                </div>
+
+
+                                <div class="server-id">
+
+                                    Duration:
+                                    {{ ad.duration_days }}
+                                    days
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- =================================================
+                                 DESCRIPTION
+                            ================================================== -->
+
+                            <p>
+
+                                {{ ad.description }}
+
+                            </p>
+
+
+                            <!-- =================================================
+                                 STATUS
+                            ================================================== -->
+
+                            <div class="badges">
+
+
+                                {% if ad.status == "pending" %}
+
+                                    <span class="badge badge-warning">
+
+                                        🟡 Pending
+
+                                    </span>
+
+
+                                {% elif ad.status == "active" %}
+
+                                    <span class="badge badge-active">
+
+                                        🟢 Active
+
+                                    </span>
+
+
+                                {% elif ad.status == "rejected" %}
+
+                                    <span class="badge badge-expired">
+
+                                        🔴 Rejected
+
+                                    </span>
+
+
+                                {% elif ad.status == "expired" %}
+
+                                    <span class="badge badge-none">
+
+                                        ⚪ Expired
+
+                                    </span>
+
+
+                                {% elif ad.status == "disabled" %}
+
+                                    <span class="badge badge-none">
+
+                                        ⚫ Disabled
+
+                                    </span>
+
+
+                                {% endif %}
+
+
+                            </div>
+
+
+                            <!-- =================================================
+                                 START DATE
+                            ================================================== -->
+
+                            {% if ad.start_at %}
+
+                                <p class="server-id">
+
+                                    Start:
+                                    {{ ad.start_at }}
+
+                                </p>
+
+                            {% endif %}
+
+
+                            <!-- =================================================
+                                 END DATE
+                            ================================================== -->
+
+                            {% if ad.end_at %}
+
+                                <p class="server-id">
+
+                                    End:
+                                    {{ ad.end_at }}
+
+                                </p>
+
+                            {% endif %}
+
+
+                            <!-- =================================================
+                                 REJECTION REASON
+                            ================================================== -->
+
+                            {% if ad.rejection_reason %}
+
+                                <p>
+
+                                    <strong>
+                                        Rejection reason:
+                                    </strong>
+
+                                    {{ ad.rejection_reason }}
+
+                                </p>
+
+                            {% endif %}
+
+
+                            <!-- =================================================
+                                 ACTIONS
+                            ================================================== -->
+
+                            <div class="badges">
+
+
+                                <!-- OPEN ADVERTISEMENT -->
+
+                                <a
+                                    href="{{ ad.target_url }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="button manage"
+                                >
+
+                                    🔗 Open
+
+                                </a>
+
+
+                                <!-- =================================================
+                                     PENDING
+                                ================================================== -->
+
+                                {% if ad.status == "pending" %}
+
+
+                                    <!-- APPROVE -->
+
+                                    <form
+                                        method="POST"
+                                        action="/admin/advertisements/{{ ad.id }}/approve"
+                                    >
+
+                                        <button
+                                            type="submit"
+                                            class="button add"
+                                        >
+
+                                            ✅ Approve
+
+                                        </button>
+
+                                    </form>
+
+
+                                    <!-- REJECT -->
+
+                                    <form
+                                        method="POST"
+                                        action="/admin/advertisements/{{ ad.id }}/reject"
+                                    >
+
+                                        <button
+                                            type="submit"
+                                            class="button blocked"
+                                        >
+
+                                            ❌ Reject
+
+                                        </button>
+
+                                    </form>
+
+
+                                <!-- =================================================
+                                     ACTIVE
+                                ================================================== -->
+
+                                {% elif ad.status == "active" %}
+
+
+                                    <!-- DISABLE -->
+
+                                    <form
+                                        method="POST"
+                                        action="/admin/advertisements/{{ ad.id }}/disable"
+                                    >
+
+                                        <button
+                                            type="submit"
+                                            class="button blocked"
+                                        >
+
+                                            ⛔ Disable
+
+                                        </button>
+
+                                    </form>
+
+
+                                {% endif %}
+
+
+                            </div>
+
+
+                        </div>
+
+
+                    {% endfor %}
+
 
                 </div>
 
 
-                <p>
-                    {{ ad.description }}
-                </p>
+            {% else %}
 
 
-                <div class="badges">
+                <!-- =================================================
+                     EMPTY
+                ================================================== -->
 
-                    {% if ad.status == "pending" %}
+                <div class="empty">
 
-                        <span class="badge badge-warning">
-                            🟡 Pending
-                        </span>
-
-                    {% elif ad.status == "active" %}
-
-                        <span class="badge badge-active">
-                            🟢 Active
-                        </span>
-
-                    {% elif ad.status == "rejected" %}
-
-                        <span class="badge badge-expired">
-                            🔴 Rejected
-                        </span>
-
-                    {% elif ad.status == "expired" %}
-
-                        <span class="badge badge-none">
-                            ⚪ Expired
-                        </span>
-
-                    {% elif ad.status == "disabled" %}
-
-                        <span class="badge badge-none">
-                            ⚫ Disabled
-                        </span>
-
-                    {% endif %}
+                    No advertisements yet.
 
                 </div>
 
 
-                {% if ad.start_at %}
+            {% endif %}
 
-                    <p class="server-id">
-
-                        Start:
-                        {{ ad.start_at }}
-
-                    </p>
-
-                {% endif %}
-
-
-                {% if ad.end_at %}
-
-                    <p class="server-id">
-
-                        End:
-                        {{ ad.end_at }}
-
-                    </p>
-
-                {% endif %}
-
-
-                {% if ad.rejection_reason %}
-
-                    <p>
-
-                        <strong>
-                            Rejection reason:
-                        </strong>
-
-                        {{ ad.rejection_reason }}
-
-                    </p>
-
-                {% endif %}
-
-
-                <div class="badges">
-
-                    <a
-                        href="{{ ad.target_url }}"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="button manage"
-                    >
-                        🔗 Open
-                    </a>
-
-
-                    {% if ad.status == "pending" %}
-
-                        <form
-                            method="POST"
-                            action="/admin/advertisements/{{ ad.id }}/approve"
-                        >
-
-                            <button
-                                type="submit"
-                                class="button add"
-                            >
-                                ✅ Approve
-                            </button>
-
-                        </form>
-
-
-                        <form
-                            method="POST"
-                            action="/admin/advertisements/{{ ad.id }}/reject"
-                        >
-
-                            <button
-                                type="submit"
-                                class="button blocked"
-                            >
-                                ❌ Reject
-                            </button>
-
-                        </form>
-
-
-                    {% elif ad.status == "active" %}
-
-                        <form
-                            method="POST"
-                            action="/admin/advertisements/{{ ad.id }}/disable"
-                        >
-
-                            <button
-                                type="submit"
-                                class="button blocked"
-                            >
-                                ⛔ Disable
-                            </button>
-
-                        </form>
-
-                    {% endif %}
-
-                </div>
-
-            </div>
-
-        {% endfor %}
 
         </div>
 
-    {% else %}
-
-        <div class="empty">
-
-            No advertisements yet.
-
-        </div>
-
-    {% endif %}
-
-</div>
-
-</section>
+    </section>
 
 </main>
 
-<div id="misukiCookieBanner">
 
-    <div id="misukiCookieContent">
+<!-- =====================================================
+     COOKIE BANNER
+====================================================== -->
+
+<div
+    id="misukiCookieBanner"
+>
+
+
+    <div
+        id="misukiCookieContent"
+    >
+
 
         <h3>
+
             🍪 We use cookies
+
         </h3>
 
+
         <p>
+
             Misuki uses cookies to improve your
             experience and keep the website working
             correctly.
+
         </p>
 
-        <div id="misukiCookieButtons">
+
+        <div
+            id="misukiCookieButtons"
+        >
+
 
             <button
                 type="button"
                 id="misukiAccept"
             >
+
                 Accept All
+
             </button>
+
 
             <button
                 type="button"
                 id="misukiEssential"
             >
+
                 Essential Only
+
             </button>
+
 
             <button
                 type="button"
                 id="misukiDeny"
             >
+
                 Deny
+
             </button>
 
+
         </div>
 
-        <div id="misukiCookieLegal">
+
+        <div
+            id="misukiCookieLegal"
+        >
+
 
             <a href="/terms">
+
                 Terms
+
             </a>
+
 
             <a href="/privacy">
+
                 Privacy
+
             </a>
+
 
             <a href="/cookies">
+
                 Cookie Policy
+
             </a>
 
+
         </div>
+
 
     </div>
 
+
 </div>
 
+
+<!-- =====================================================
+     COOKIE JAVASCRIPT
+====================================================== -->
+
 <script
-    src="/static/js/cookies.js?v=3"
+    src="/js/cookies.js?v=3"
     defer
 ></script>
 
+
+<!-- =====================================================
+     FOOTER
+====================================================== -->
+
 <footer>
 
-    © 2026 Misuki. All rights reserved.
+    © 2026 Misuki.
+    All rights reserved.
 
 </footer>
+
 
 </body>
 
 </html>
+```
