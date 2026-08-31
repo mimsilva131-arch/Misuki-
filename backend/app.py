@@ -103,13 +103,18 @@ PORT = int(
     )
 )
 
-COOKIE_SECURE = (
-    os.getenv(
-        "COOKIE_SECURE",
-        "true"
-    ).lower()
-    == "true"
-)
+# Determine if cookies should be secure
+# In production (HTTPS), always use secure cookies
+# In development (HTTP), allow insecure cookies
+_env_cookie_secure = os.getenv("COOKIE_SECURE", "").lower()
+
+if _env_cookie_secure in ("true", "false"):
+    COOKIE_SECURE = _env_cookie_secure == "true"
+else:
+    # Auto-detect: if running on onrender (production), use secure
+    DISCORD_LOGIN_REDIRECT_URI_STR = os.getenv("DISCORD_LOGIN_REDIRECT_URI", "")
+    COOKIE_SECURE = DISCORD_LOGIN_REDIRECT_URI_STR.startswith("https://")
+
 
 
 # =========================================================
