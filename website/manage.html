@@ -510,77 +510,51 @@
      COOKIE BANNER
 ====================================================== -->
 
-<div
-    class="cookie"
-    id="cookieBanner"
-    style="display:none;"
->
+<div id="misukiCookieBanner" role="dialog" aria-label="Cookie consent" aria-live="polite">
 
+    <div id="misukiCookieContent">
 
-    <h3>
-        🍪 We use cookies
-    </h3>
+        <h3>
+            🍪 We use cookies
+        </h3>
 
+        <p>
+            Misuki uses cookies to improve your experience and keep the website working correctly.
+        </p>
 
-    <p>
+        <div id="misukiCookieButtons">
 
-        We use essential cookies to keep your session
-        working and optional cookies to improve your
-        experience. You can choose which cookies to allow.
+            <button type="button" id="misukiAccept">
+                Accept All
+            </button>
 
-    </p>
+            <button type="button" id="misukiEssential">
+                Essential Only
+            </button>
 
+            <button type="button" id="misukiDeny">
+                Deny
+            </button>
 
-    <div class="cookie-links">
+        </div>
 
+        <div id="misukiCookieLegal">
 
-        <a href="/cookies">
-            Cookie Policy
-        </a>
+            <a href="/terms">
+                Terms
+            </a>
 
+            <a href="/privacy">
+                Privacy
+            </a>
 
-        <a href="/privacy">
-            Privacy
-        </a>
+            <a href="/cookies">
+                Cookie Policy
+            </a>
 
-
-        <a href="/data">
-            Data
-        </a>
-
-
-    </div>
-
-
-    <div class="cookie-buttons">
-
-
-        <button
-            class="accept"
-            onclick="setCookies('all')"
-        >
-            Accept All
-        </button>
-
-
-        <button
-            class="essential"
-            onclick="setCookies('essential')"
-        >
-            Accept Essential
-        </button>
-
-
-        <button
-            class="deny"
-            onclick="setCookies('deny')"
-        >
-            Deny
-        </button>
-
+        </div>
 
     </div>
-
 
 </div>
 
@@ -589,33 +563,10 @@
      JAVASCRIPT
 ====================================================== -->
 
-<script>
-
-
-/* =====================================================
-   COOKIES
-====================================================== */
-
-function setCookies(value) {
-
-    localStorage.setItem(
-        "misuki_cookie_consent",
-        value
-    );
-
-    const cookieBanner =
-        document.getElementById(
-            "cookieBanner"
-        );
-
-    if (cookieBanner) {
-
-        cookieBanner.style.display =
-            "none";
-
-    }
-
-}
+<script src="/js/stars.js" defer></script>
+<script src="/static/js/mouse-trail.js?v=2" defer></script>
+<script src="/static/js/menu.js?v=1" defer></script>
+<script src="/static/js/cookies.js?v=3" defer></script>
 
 
 /* =====================================================

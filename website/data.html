@@ -1,69 +1,36 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
-<link rel="icon" type="image/png" href="/assets/images/favicon.png?v=2">
-<link rel="shortcut icon" type="image/png" href="/assets/images/favicon.png?v=2">
-<link rel="stylesheet" href="/css/stars.css">
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Misuki — Your Data</title>
 
-
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
-
-<title>Misuki — Your Data
-    
-</title>
-<link rel="icon" type="image/png" href="/assets/images/favicon.png?v=2">
-<link rel="shortcut icon" type="image/png" href="/assets/images/favicon.png?v=2">
-<link
-    rel="stylesheet"
-    href="/css/style.css"
->
-
-
+    <link rel="icon" type="image/png" href="/assets/images/favicon.png?v=2">
+    <link rel="shortcut icon" type="image/png" href="/assets/images/favicon.png?v=2">
+    <link rel="stylesheet" href="/css/stars.css">
+    <link rel="stylesheet" href="/static/css/style.css?v=15">
+    <link rel="stylesheet" href="/static/css/menu.css?v=1">
+    <link rel="stylesheet" href="/static/css/mouse-trail.css?v=2">
+    <link rel="stylesheet" href="/static/css/cookies.css?v=3">
 </head>
-<script src="/js/stars.js" defer></script>
+
 <body>
 
-
 <header class="container">
+    <a class="logo" href="/">Misuki<span>.</span></a>
 
-    <a
-        class="logo"
-        href="/"
-    >
-        Misuki<span>.</span>
-    </a>
-
-
-    <button
-        class="hamburger"
-        onclick="openMenu()"
-        aria-label="Open menu"
-    >
+    <button class="hamburger" id="hamburger" type="button" aria-label="Open menu" aria-controls="menu" aria-expanded="false">
         <span></span>
         <span></span>
         <span></span>
     </button>
-
 </header>
 
-
-<div
-    class="overlay"
-    id="overlay"
-    onclick="closeMenu()"
-></div>
+<div class="overlay" id="overlay"></div>
 
 
-<nav
-    class="menu"
-    id="menu"
->
+<nav class="menu" id="menu" aria-hidden="true">
 
     <div class="menu-header">
 
@@ -73,13 +40,14 @@
 
         <button
             class="menu-close"
-            onclick="closeMenu()"
+            id="menuClose"
+            type="button"
+            aria-label="Close menu"
         >
             ×
         </button>
 
     </div>
-
 
     <div class="menu-section">
         Navigation
@@ -97,7 +65,6 @@
         Reviews
     </a>
 
-
     <div class="menu-section">
         Resources
     </div>
@@ -110,6 +77,15 @@
         Support
     </a>
 
+    <a href="/advertise">
+        Advertisement
+    </a>
+
+    {% if is_admin(user) %}
+        <a href="/admin/advertisements">
+            Advertisement Admin
+        </a>
+    {% endif %}
 
     <div class="menu-section">
         Legal
@@ -130,7 +106,6 @@
     <a href="/cookies">
         Cookies
     </a>
-
 
     <div class="menu-section">
         Account
@@ -161,238 +136,69 @@
 
 
 <main>
-
     <section class="section">
-
         <div class="container">
-
             <div class="card legal-page">
 
-                <h1>
-                    Your Data
-                </h1>
-
-
-                <p class="muted">
-                    Manage your Misuki data
-                </p>
-
+                <h1>Your Data</h1>
+                <p class="muted">Manage your Misuki data</p>
 
                 <p>
-                    Misuki stores certain information
-                    required to provide its features.
-                    This page explains the types of
-                    information that may be associated
-                    with your account or Discord server.
+                    Misuki stores certain information required to provide its features.
+                    This page explains the types of information that may be associated with your account or Discord server.
                 </p>
 
-
-                <h2>
-                    What Data May Be Stored?
-                </h2>
-
-
+                <h2>What Data May Be Stored?</h2>
                 <ul>
-
-                    <li>
-                        Discord user ID
-                    </li>
-
-                    <li>
-                        Discord server IDs
-                    </li>
-
-                    <li>
-                        Server configuration
-                    </li>
-
-                    <li>
-                        Misuki feature settings
-                    </li>
-
-                    <li>
-                        Information required for
-                        licenses and subscriptions
-                    </li>
-
-                    <li>
-                        Support or review information
-                        that you voluntarily provide
-                    </li>
-
+                    <li>Discord user ID</li>
+                    <li>Discord server IDs</li>
+                    <li>Server configuration</li>
+                    <li>Misuki feature settings</li>
+                    <li>Information required for licenses and subscriptions</li>
+                    <li>Support or review information that you voluntarily provide</li>
                 </ul>
 
-
-                <h2>
-                    Why Is It Stored?
-                </h2>
-
-
+                <h2>Why Is It Stored?</h2>
                 <p>
-                    This information allows Misuki to
-                    provide its functionality, remember
-                    server settings, authenticate users
-                    and maintain the service.
+                    This information allows Misuki to provide its functionality, remember server settings,
+                    authenticate users and maintain the service.
                 </p>
 
-
-                <h2>
-                    Requesting Your Data
-                </h2>
-
-
+                <h2>Requesting Your Data</h2>
                 <p>
-                    You may contact Misuki support if you
-                    would like to request information about
-                    the data associated with your account.
+                    You may contact Misuki support if you would like to request information about the data
+                    associated with your account.
                 </p>
 
+                <a href="/support" class="button">Contact Support</a>
 
-                <a
-                    href="/support"
-                    class="button"
-                >
-                    Contact Support
-                </a>
-
-
-                <h2 style="margin-top:40px;">
-                    Requesting Deletion
-                </h2>
-
-
+                <h2 style="margin-top:40px;">Requesting Deletion</h2>
                 <p>
-                    If you would like your data to be
-                    deleted, contact Misuki support and
-                    provide enough information for us to
-                    identify the relevant account or
-                    server.
+                    If you would like your data to be deleted, contact Misuki support and provide enough information
+                    for us to identify the relevant account or server.
+                </p>
+                <p>
+                    Some information may need to be retained where required by law or where necessary for security,
+                    fraud prevention or legitimate technical purposes.
                 </p>
 
-
+                <h2>Discord Data</h2>
                 <p>
-                    Some information may need to be
-                    retained where required by law or
-                    where necessary for security,
-                    fraud prevention or legitimate
-                    technical purposes.
+                    Misuki uses Discord authentication where applicable. Misuki does not store your Discord password.
+                </p>
+                <p>
+                    Information received through Discord is handled according to the Misuki Privacy Policy and the
+                    permissions requested during authentication.
                 </p>
 
-
-                <h2>
-                    Discord Data
-                </h2>
-
-
-                <p>
-                    Misuki uses Discord authentication
-                    where applicable. Misuki does not
-                    store your Discord password.
-                </p>
-
-
-                <p>
-                    Information received through Discord
-                    is handled according to the Misuki
-                    Privacy Policy and the permissions
-                    requested during authentication.
-                </p>
-
-
-                <a
-                    href="/privacy"
-                    class="button"
-                >
-                    Read Privacy Policy
-                </a>
-
+                <a href="/privacy" class="button">Read Privacy Policy</a>
             </div>
-
         </div>
-
     </section>
-
 </main>
 
 
-<footer>
-
-    <div>
-        © 2026 Misuki. All rights reserved.
-    </div>
-
-
-    <div class="footer-links">
-
-        <a href="/terms">
-            Terms
-        </a>
-
-        <a href="/privacy">
-            Privacy
-        </a>
-
-        <a href="/data">
-            Data
-        </a>
-
-        <a href="/cookies">
-            Cookies
-        </a>
-
-    </div>
-
-</footer>
-
-
-<script>
-
-    function openMenu() {
-
-        document
-            .getElementById("menu")
-            .classList.add("open");
-
-        document
-            .getElementById("overlay")
-            .classList.add("show");
-
-    }
-
-
-    function closeMenu() {
-
-        document
-            .getElementById("menu")
-            .classList.remove("open");
-
-        document
-            .getElementById("overlay")
-            .classList.remove("show");
-
-    }
-
-
-    document.addEventListener(
-        "keydown",
-        function(event) {
-
-            if (
-                event.key === "Escape"
-            ) {
-
-                closeMenu();
-
-            }
-
-        }
-    );
-
-</script>
-
-
-
-<div id="misukiCookieBanner">
+<div id="misukiCookieBanner" role="dialog" aria-label="Cookie consent" aria-live="polite">
 
     <div id="misukiCookieContent">
 
@@ -401,31 +207,20 @@
         </h3>
 
         <p>
-            Misuki uses cookies to improve your
-            experience and keep the website working
-            correctly.
+            Misuki uses cookies to improve your experience and keep the website working correctly.
         </p>
 
         <div id="misukiCookieButtons">
 
-            <button
-                type="button"
-                id="misukiAccept"
-            >
+            <button type="button" id="misukiAccept">
                 Accept All
             </button>
 
-            <button
-                type="button"
-                id="misukiEssential"
-            >
+            <button type="button" id="misukiEssential">
                 Essential Only
             </button>
 
-            <button
-                type="button"
-                id="misukiDeny"
-            >
+            <button type="button" id="misukiDeny">
                 Deny
             </button>
 
@@ -451,11 +246,43 @@
 
 </div>
 
-<script
-    src="/static/js/cookies.js?v=3"
-    defer
-></script>
+
+
+<footer>
+
+    <div>
+        © 2026 Misuki. All rights reserved.
+    </div>
+
+    <div class="footer-links">
+
+        <a href="/terms">
+            Terms
+        </a>
+
+        <a href="/privacy">
+            Privacy
+        </a>
+
+        <a href="/data">
+            Data
+        </a>
+
+        <a href="/cookies">
+            Cookies
+        </a>
+
+    </div>
+
+</footer>
+
+
+
+<script src="/js/stars.js" defer></script>
+<script src="/static/js/mouse-trail.js?v=2" defer></script>
+<script src="/static/js/menu.js?v=1" defer></script>
+<script src="/static/js/cookies.js?v=3" defer></script>
+
 
 </body>
-
 </html>

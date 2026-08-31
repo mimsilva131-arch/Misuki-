@@ -1,90 +1,36 @@
-
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
-
-    <link
-        rel="icon"
-        type="image/png"
-        href="/assets/images/favicon.png?v=2"
-    >
-
-    <link
-        rel="shortcut icon"
-        type="image/png"
-        href="/assets/images/favicon.png?v=2"
-    >
-
-    <link
-        rel="stylesheet"
-        href="/css/stars.css"
-    >
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Misuki — Cookies</title>
 
-    <link
-        rel="stylesheet"
-        href="/css/style.css?v=14"
-    >
-
+    <link rel="icon" type="image/png" href="/assets/images/favicon.png?v=2">
+    <link rel="shortcut icon" type="image/png" href="/assets/images/favicon.png?v=2">
+    <link rel="stylesheet" href="/css/stars.css">
+    <link rel="stylesheet" href="/static/css/style.css?v=15">
+    <link rel="stylesheet" href="/static/css/menu.css?v=1">
+    <link rel="stylesheet" href="/static/css/mouse-trail.css?v=2">
+    <link rel="stylesheet" href="/static/css/cookies.css?v=3">
 </head>
-
-<script
-    src="/js/stars.js"
-    defer
-></script>
 
 <body>
 
-
 <header class="container">
+    <a class="logo" href="/">Misuki<span>.</span></a>
 
-    <a
-        class="logo"
-        href="/"
-    >
-        Misuki<span>.</span>
-    </a>
-
-
-    <button
-        class="hamburger"
-        onclick="openMenu()"
-        aria-label="Open menu"
-        type="button"
-    >
-
+    <button class="hamburger" id="hamburger" type="button" aria-label="Open menu" aria-controls="menu" aria-expanded="false">
         <span></span>
         <span></span>
         <span></span>
-
     </button>
-
 </header>
 
+<div class="overlay" id="overlay"></div>
 
 
-<div
-    class="overlay"
-    id="overlay"
-    onclick="closeMenu()"
-></div>
-
-
-
-<nav
-    class="menu"
-    id="menu"
->
+<nav class="menu" id="menu" aria-hidden="true">
 
     <div class="menu-header">
 
@@ -94,7 +40,7 @@
 
         <button
             class="menu-close"
-            onclick="closeMenu()"
+            id="menuClose"
             type="button"
             aria-label="Close menu"
         >
@@ -103,92 +49,73 @@
 
     </div>
 
-
-
     <div class="menu-section">
         Navigation
     </div>
-
 
     <a href="/">
         Home
     </a>
 
-
     <a href="/dashboard">
         Dashboard
     </a>
-
 
     <a href="/reviews">
         Reviews
     </a>
 
-
-
     <div class="menu-section">
         Resources
     </div>
-
 
     <a href="/documentation">
         Documentation
     </a>
 
-
     <a href="/support">
         Support
     </a>
 
-
     <a href="/advertise">
-        📢 Advertisement
+        Advertisement
     </a>
 
     {% if is_admin(user) %}
         <a href="/admin/advertisements">
-            📢 Advertisement Admin
+            Advertisement Admin
         </a>
     {% endif %}
-
 
     <div class="menu-section">
         Legal
     </div>
 
-
     <a href="/terms">
         Terms
     </a>
-
 
     <a href="/privacy">
         Privacy
     </a>
 
-
     <a href="/data">
         Data
     </a>
-
 
     <a href="/cookies">
         Cookies
     </a>
 
-
-
     <div class="menu-section">
         Account
     </div>
-
 
     {% if user %}
 
         <a href="/dashboard">
             Dashboard
         </a>
-
 
         <a href="/logout">
             Logout
@@ -208,316 +135,47 @@
 </nav>
 
 
-
 <main>
-
     <section class="section">
-
         <div class="container">
-
             <div class="card legal-page">
 
-
-                <h1>
-                    Cookie Policy
-                </h1>
-
-
-                <p class="muted">
-                    Last updated: August 2026
-                </p>
-
+                <h1>Cookie Policy</h1>
+                <p class="muted">Last updated: August 2026</p>
 
                 <p>
-                    Misuki may use cookies and similar
-                    technologies to provide and maintain
-                    the website and its features.
+                    Misuki may use cookies and similar technologies to provide and maintain the website and its features.
                 </p>
 
-
-
-                <h2>
-                    1. What Are Cookies?
-                </h2>
-
-
+                <h2>1. What Are Cookies?</h2>
                 <p>
-                    Cookies are small pieces of data
-                    stored by your browser when you visit
-                    a website. They can be used to remember
-                    information between requests and
-                    maintain sessions.
+                    Cookies are small pieces of data stored by your browser when you visit a website. They can be used
+                    to remember information between requests and maintain sessions.
                 </p>
 
-
-
-                <h2>
-                    2. How Misuki Uses Cookies
-                </h2>
-
-
+                <h2>2. How Misuki Uses Cookies</h2>
                 <p>
-                    Misuki may use cookies for purposes
-                    such as:
+                    Misuki may use cookies for purposes such as keeping sessions active, remembering user preferences,
+                    and improving the overall service.
                 </p>
 
-
-                <ul>
-
-                    <li>
-                        Maintaining authentication
-                        sessions.
-                    </li>
-
-                    <li>
-                        Remembering necessary website
-                        preferences.
-                    </li>
-
-                    <li>
-                        Protecting authenticated
-                        sessions.
-                    </li>
-
-                    <li>
-                        Supporting essential website
-                        functionality.
-                    </li>
-
-                </ul>
-
-
-
-                <h2>
-                    3. Essential Cookies
-                </h2>
-
-
+                <h2>3. Your Choices</h2>
                 <p>
-                    Some cookies may be necessary for
-                    the website to function correctly.
-                    These cookies may be used for
-                    authentication, security and session
-                    management.
+                    You can choose to accept all cookies, allow only essential cookies, or deny cookies. Your choice is
+                    stored in your browser and may be reviewed again when you reload the site.
                 </p>
 
-
-
-                <h2>
-                    4. Third-Party Services
-                </h2>
-
-
+                <h2>4. Contact</h2>
                 <p>
-                    Misuki may use third-party services
-                    that can set or access cookies or
-                    similar technologies when their
-                    functionality is used.
+                    If you have questions about this policy, please contact Misuki support.
                 </p>
-
-
-                <p>
-                    These services may have their own
-                    privacy and cookie policies.
-                </p>
-
-
-
-                <h2>
-                    5. Managing Cookies
-                </h2>
-
-
-                <p>
-                    Most modern browsers allow you to
-                    control or delete cookies through
-                    their settings.
-                </p>
-
-
-                <p>
-                    Disabling certain cookies may affect
-                    authentication or other essential
-                    features of the Misuki website.
-                </p>
-
-
-
-                <h2>
-                    6. Changes to This Policy
-                </h2>
-
-
-                <p>
-                    This Cookie Policy may be updated
-                    when necessary. Any changes will be
-                    reflected on this page.
-                </p>
-
-
-
-                <h2>
-                    7. Contact
-                </h2>
-
-
-                <p>
-                    If you have questions about cookies
-                    used by Misuki, please contact
-                    Misuki support.
-                </p>
-
-
-                <a
-                    href="/support"
-                    class="button"
-                >
-                    Contact Support
-                </a>
-
-
-
-                <div
-                    style="
-                        margin-top: 32px;
-                        padding-top: 24px;
-                        border-top: 1px solid var(--border);
-                    "
-                >
-
-                    <p>
-                        For more information about how
-                        Misuki handles personal data,
-                        see the Privacy Policy.
-                    </p>
-
-
-                    <a href="/privacy">
-                        Privacy Policy
-                    </a>
-
-                </div>
-
-
             </div>
-
         </div>
-
     </section>
-
 </main>
 
 
-
-<footer>
-
-    <div>
-        © 2026 Misuki. All rights reserved.
-    </div>
-
-
-    <div class="footer-links">
-
-        <a href="/terms">
-            Terms
-        </a>
-
-
-        <a href="/privacy">
-            Privacy
-        </a>
-
-
-        <a href="/data">
-            Data
-        </a>
-
-
-        <a href="/cookies">
-            Cookies
-        </a>
-
-
-        <a href="/advertise">
-            📢 Advertisement
-        </a>
-
-    </div>
-
-</footer>
-
-
-
-<script>
-
-    function openMenu() {
-
-        const menu =
-            document.getElementById("menu");
-
-        const overlay =
-            document.getElementById("overlay");
-
-
-        if (!menu || !overlay) {
-            return;
-        }
-
-
-        menu.classList.add("open");
-
-        overlay.classList.add("show");
-
-        document.body.style.overflow = "hidden";
-
-    }
-
-
-
-    function closeMenu() {
-
-        const menu =
-            document.getElementById("menu");
-
-        const overlay =
-            document.getElementById("overlay");
-
-
-        if (!menu || !overlay) {
-            return;
-        }
-
-
-        menu.classList.remove("open");
-
-        overlay.classList.remove("show");
-
-        document.body.style.overflow = "";
-
-    }
-
-
-
-    document.addEventListener(
-        "keydown",
-        function(event) {
-
-            if (
-                event.key === "Escape"
-            ) {
-
-                closeMenu();
-
-            }
-
-        }
-    );
-
-</script>
-
-
-
-<div id="misukiCookieBanner">
+<div id="misukiCookieBanner" role="dialog" aria-label="Cookie consent" aria-live="polite">
 
     <div id="misukiCookieContent">
 
@@ -526,31 +184,20 @@
         </h3>
 
         <p>
-            Misuki uses cookies to improve your
-            experience and keep the website working
-            correctly.
+            Misuki uses cookies to improve your experience and keep the website working correctly.
         </p>
 
         <div id="misukiCookieButtons">
 
-            <button
-                type="button"
-                id="misukiAccept"
-            >
+            <button type="button" id="misukiAccept">
                 Accept All
             </button>
 
-            <button
-                type="button"
-                id="misukiEssential"
-            >
+            <button type="button" id="misukiEssential">
                 Essential Only
             </button>
 
-            <button
-                type="button"
-                id="misukiDeny"
-            >
+            <button type="button" id="misukiDeny">
                 Deny
             </button>
 
@@ -576,12 +223,43 @@
 
 </div>
 
-<script
-    src="/static/js/cookies.js?v=3"
-    defer
-></script>
+
+
+<footer>
+
+    <div>
+        © 2026 Misuki. All rights reserved.
+    </div>
+
+    <div class="footer-links">
+
+        <a href="/terms">
+            Terms
+        </a>
+
+        <a href="/privacy">
+            Privacy
+        </a>
+
+        <a href="/data">
+            Data
+        </a>
+
+        <a href="/cookies">
+            Cookies
+        </a>
+
+    </div>
+
+</footer>
+
+
+
+<script src="/js/stars.js" defer></script>
+<script src="/static/js/mouse-trail.js?v=2" defer></script>
+<script src="/static/js/menu.js?v=1" defer></script>
+<script src="/static/js/cookies.js?v=3" defer></script>
+
 
 </body>
-
 </html>
-
