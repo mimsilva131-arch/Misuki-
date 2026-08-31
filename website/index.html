@@ -16,28 +16,33 @@
     <link
         rel="icon"
         type="image/png"
-        href="/assets/images/favicon.png?v=2"
+        href="/assets/images/favicon.png?v=3"
     >
 
     <link
         rel="shortcut icon"
         type="image/png"
-        href="/assets/images/favicon.png?v=2"
+        href="/assets/images/favicon.png?v=3"
     >
 
     <link
         rel="stylesheet"
-        href="/static/css/style.css?v=15"
+        href="/static/css/style.css?v=16"
     >
 
     <link
         rel="stylesheet"
-        href="/static/css/mouse-trail.css?v=2"
+        href="/static/css/mouse-trail.css?v=3"
     >
 
     <link
         rel="stylesheet"
-        href="/static/css/menu.css?v=1"
+        href="/static/css/menu.css?v=2"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/static/css/cookies.css?v=3"
     >
 
 </head>
@@ -165,6 +170,12 @@
         Advertisement
     </a>
 
+    {% if is_admin(user) %}
+        <a href="/admin/advertisements">
+            Advertisement Admin
+        </a>
+    {% endif %}
+
 
     <!-- =================================================
          LEGAL
@@ -245,7 +256,7 @@
             <div class="hero-icon">
 
                 <img
-                    src="/assets/images/icon.png?v=2"
+                    src="/assets/images/icon.png?v=3"
                     alt="Misuki"
                 >
 
@@ -384,12 +395,9 @@
 
             {% if reviews %}
 
-
                 <div class="review-grid">
 
-
                     {% for review in reviews %}
-
 
                         <div class="card review-card">
 
@@ -399,23 +407,19 @@
 
                                 {% if review.avatar %}
 
-
                                     <img
                                         class="review-avatar"
                                         src="{{ review.avatar }}"
                                         alt=""
                                     >
 
-
                                 {% else %}
-
 
                                     <div
                                         class="server-icon-placeholder"
                                     >
                                         {{ review.username[0] }}
                                     </div>
-
 
                                 {% endif %}
 
@@ -452,22 +456,17 @@
 
                         </div>
 
-
                     {% endfor %}
-
 
                 </div>
 
-
             {% else %}
-
 
                 <div class="empty">
 
                     No reviews yet.
 
                 </div>
-
 
             {% endif %}
 
@@ -486,13 +485,14 @@
 
 <div
     id="misukiCookieBanner"
+    role="dialog"
+    aria-label="Cookie consent"
+    aria-live="polite"
 >
-
 
     <div
         id="misukiCookieContent"
     >
-
 
         <h3>
             🍪 We use cookies
@@ -511,7 +511,6 @@
         <div
             id="misukiCookieButtons"
         >
-
 
             <button
                 type="button"
@@ -536,14 +535,12 @@
                 Deny
             </button>
 
-
         </div>
 
 
         <div
             id="misukiCookieLegal"
         >
-
 
             <a href="/terms">
                 Terms
@@ -559,12 +556,9 @@
                 Cookie Policy
             </a>
 
-
         </div>
 
-
     </div>
-
 
 </div>
 
@@ -575,7 +569,6 @@
 
 <footer>
 
-
     <div>
 
         © 2026 Misuki.
@@ -585,7 +578,6 @@
 
 
     <div class="footer-links">
-
 
         <a href="/terms">
             Terms
@@ -606,49 +598,35 @@
             Cookies
         </a>
 
-
     </div>
-
 
 </footer>
 
 
 <!-- =====================================================
-     STARS
+     JAVASCRIPT
 ====================================================== -->
 
 <script
-    src="/js/stars.js"
+    src="/static/js/stars.js?v=3"
     defer
 ></script>
 
 
-<!-- =====================================================
-     MOUSE TRAIL
-====================================================== -->
-
 <script
-    src="/static/js/mouse-trail.js?v=2"
+    src="/static/js/mouse-trail.js?v=3"
     defer
 ></script>
 
 
-<!-- =====================================================
-     MENU JAVASCRIPT
-====================================================== -->
-
 <script
-    src="/static/js/menu.js?v=1"
+    src="/static/js/menu.js?v=2"
     defer
 ></script>
 
 
-<!-- =====================================================
-     COOKIE JAVASCRIPT
-====================================================== -->
-
 <script
-    src="/static/js/cookies.js?v=2"
+    src="/static/js/cookies.js?v=3"
     defer
 ></script>
 

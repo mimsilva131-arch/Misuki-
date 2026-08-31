@@ -212,6 +212,13 @@ app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(
 )
 
 
+@app.context_processor
+def inject_template_helpers():
+    return {
+        "is_admin": is_admin,
+    }
+
+
 # =========================================================
 # STATIC CSS
 # =========================================================

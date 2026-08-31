@@ -55,6 +55,11 @@
         href="/static/css/menu.css?v=1"
     >
 
+    <link
+        rel="stylesheet"
+        href="/static/css/cookies.css?v=3"
+    >
+
 </head>
 
 
@@ -179,6 +184,12 @@
     <a href="/advertise">
         Advertisement
     </a>
+
+    {% if is_admin(user) %}
+        <a href="/admin/advertisements">
+            Advertisement Admin
+        </a>
+    {% endif %}
 
 
     <!-- =================================================
@@ -578,6 +589,71 @@
     defer
 ></script>
 
+
+
+<div id="misukiCookieBanner">
+
+    <div id="misukiCookieContent">
+
+        <h3>
+            🍪 We use cookies
+        </h3>
+
+        <p>
+            Misuki uses cookies to improve your
+            experience and keep the website working
+            correctly.
+        </p>
+
+        <div id="misukiCookieButtons">
+
+            <button
+                type="button"
+                id="misukiAccept"
+            >
+                Accept All
+            </button>
+
+            <button
+                type="button"
+                id="misukiEssential"
+            >
+                Essential Only
+            </button>
+
+            <button
+                type="button"
+                id="misukiDeny"
+            >
+                Deny
+            </button>
+
+        </div>
+
+        <div id="misukiCookieLegal">
+
+            <a href="/terms">
+                Terms
+            </a>
+
+            <a href="/privacy">
+                Privacy
+            </a>
+
+            <a href="/cookies">
+                Cookie Policy
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script
+    src="/static/js/cookies.js?v=3"
+    defer
+></script>
 
 </body>
 
