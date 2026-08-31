@@ -2,9 +2,24 @@
 <html lang="en">
 
 <head>
-<link rel="icon" type="image/png" href="/assets/images/favicon.png?v=2">
-<link rel="shortcut icon" type="image/png" href="/assets/images/favicon.png?v=2">
-<link rel="stylesheet" href="/css/stars.css">
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="/assets/images/favicon.png?v=2"
+    >
+
+    <link
+        rel="shortcut icon"
+        type="image/png"
+        href="/assets/images/favicon.png?v=2"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/css/stars.css"
+    >
+
     <meta charset="UTF-8">
 
     <meta
@@ -20,12 +35,20 @@
     >
 
 </head>
-<script src="/js/stars.js" defer></script>
+
+<script
+    src="/js/stars.js"
+    defer
+></script>
+
 <body>
 
 <header class="container">
 
-    <a class="logo" href="/">
+    <a
+        class="logo"
+        href="/"
+    >
         Misuki<span>.</span>
     </a>
 
@@ -49,6 +72,7 @@
         📢 Advertisement Management
     </h1>
 
+
     {% if advertisements %}
 
         <div class="server-grid">
@@ -62,7 +86,7 @@
                     <img
                         class="server-icon"
                         src="{{ ad.image_url }}"
-                        alt=""
+                        alt="{{ ad.title }}"
                     >
 
                 {% endif %}
@@ -76,6 +100,10 @@
 
                     <div class="server-id">
                         User ID: {{ ad.user_id }}
+                    </div>
+
+                    <div class="server-id">
+                        Duration: {{ ad.duration_days }} days
                     </div>
 
                 </div>
@@ -112,9 +140,54 @@
                             ⚪ Expired
                         </span>
 
+                    {% elif ad.status == "disabled" %}
+
+                        <span class="badge badge-none">
+                            ⚫ Disabled
+                        </span>
+
                     {% endif %}
 
                 </div>
+
+
+                {% if ad.start_at %}
+
+                    <p class="server-id">
+
+                        Start:
+                        {{ ad.start_at }}
+
+                    </p>
+
+                {% endif %}
+
+
+                {% if ad.end_at %}
+
+                    <p class="server-id">
+
+                        End:
+                        {{ ad.end_at }}
+
+                    </p>
+
+                {% endif %}
+
+
+                {% if ad.rejection_reason %}
+
+                    <p>
+
+                        <strong>
+                            Rejection reason:
+                        </strong>
+
+                        {{ ad.rejection_reason }}
+
+                    </p>
+
+                {% endif %}
 
 
                 <div class="badges">
@@ -122,6 +195,7 @@
                     <a
                         href="{{ ad.target_url }}"
                         target="_blank"
+                        rel="noopener noreferrer"
                         class="button manage"
                     >
                         🔗 Open
@@ -132,7 +206,7 @@
 
                         <form
                             method="POST"
-                            action="/admin/advertise/{{ ad.id }}/approve"
+                            action="/admin/advertisements/{{ ad.id }}/approve"
                         >
 
                             <button
@@ -147,7 +221,7 @@
 
                         <form
                             method="POST"
-                            action="/admin/advertise/{{ ad.id }}/reject"
+                            action="/admin/advertisements/{{ ad.id }}/reject"
                         >
 
                             <button
@@ -159,11 +233,12 @@
 
                         </form>
 
+
                     {% elif ad.status == "active" %}
 
                         <form
                             method="POST"
-                            action="/admin/advertise/{{ ad.id }}/disable"
+                            action="/admin/advertisements/{{ ad.id }}/disable"
                         >
 
                             <button
@@ -204,7 +279,7 @@
 
 <footer>
 
-    © 2026 Misuki.
+    © 2026 Misuki. All rights reserved.
 
 </footer>
 

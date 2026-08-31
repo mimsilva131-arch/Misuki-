@@ -1,0 +1,370 @@
+
+/* =========================================================
+   MISUKI — MENU
+   SIDE MENU
+   ========================================================= */
+
+
+/* =========================================================
+   HAMBURGER
+   ========================================================= */
+
+.hamburger {
+
+    width: 44px;
+    height: 44px;
+
+    padding: 0;
+    margin: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    flex-direction: column;
+
+    gap: 5px;
+
+    border: 0;
+
+    border-radius: 10px;
+
+    background:
+        rgba(255, 255, 255, .04);
+
+    color: #ffffff;
+
+    cursor: pointer;
+
+    position: relative;
+
+    z-index: 10002;
+
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+
+    transition:
+        background .2s ease,
+        transform .2s ease;
+}
+
+
+.hamburger:hover {
+
+    background:
+        rgba(255, 255, 255, .09);
+
+    transform:
+        translateY(-1px);
+}
+
+
+/* =========================================================
+   HAMBURGER BARS
+   ========================================================= */
+
+.hamburger span {
+
+    display: block;
+
+    width: 23px;
+    height: 2px;
+
+    flex-shrink: 0;
+
+    border-radius: 999px;
+
+    background: #ffffff;
+}
+
+
+/* =========================================================
+   HAMBURGER — MENU OPEN
+   ========================================================= */
+
+body.menu-open .hamburger {
+
+    display: none !important;
+
+    opacity: 0 !important;
+
+    visibility: hidden !important;
+
+    pointer-events: none !important;
+}
+
+
+/* =========================================================
+   OVERLAY
+   ========================================================= */
+
+.overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    background:
+        rgba(0, 0, 0, .60);
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    pointer-events: none;
+
+    transition:
+        opacity .3s ease,
+        visibility .3s ease;
+
+    z-index: 9998;
+}
+
+
+.overlay.show {
+
+    opacity: 1;
+
+    visibility: visible;
+
+    pointer-events: auto;
+}
+
+
+/* =========================================================
+   SIDE MENU
+   ========================================================= */
+
+.menu {
+
+    position: fixed;
+
+    top: 0;
+    right: 0;
+
+    width:
+        min(
+            360px,
+            88vw
+        );
+
+    height: 100vh;
+
+    padding: 28px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #111522 0%,
+            #090c14 100%
+        );
+
+    border-left:
+        1px solid rgba(255, 255, 255, .08);
+
+    box-shadow:
+        -25px 0 70px rgba(0, 0, 0, .5);
+
+    transform:
+        translateX(100%);
+
+    visibility: hidden;
+
+    pointer-events: none;
+
+    transition:
+        transform .35s cubic-bezier(.22, 1, .36, 1),
+        visibility .35s ease;
+
+    overflow-y: auto;
+
+    z-index: 10000;
+}
+
+
+/* =========================================================
+   MENU OPEN
+   ========================================================= */
+
+.menu.open {
+
+    transform:
+        translateX(0);
+
+    visibility: visible;
+
+    pointer-events: auto;
+}
+
+
+/* =========================================================
+   BODY MENU OPEN
+   ========================================================= */
+
+body.menu-open {
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   MENU HEADER
+   ========================================================= */
+
+.menu-header {
+
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 28px;
+}
+
+
+.menu-title {
+
+    color: #ffffff;
+
+    font-size: 22px;
+
+    font-weight: 750;
+}
+
+
+/* =========================================================
+   MENU CLOSE
+   ========================================================= */
+
+.menu-close {
+
+    width: 40px;
+    height: 40px;
+
+    padding: 0;
+    margin: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border: 0;
+
+    border-radius: 10px;
+
+    background:
+        rgba(255, 255, 255, .06);
+
+    color: #ffffff;
+
+    font-size: 27px;
+
+    line-height: 1;
+
+    cursor: pointer;
+
+    position: relative;
+
+    z-index: 10003;
+
+    transition:
+        background .2s ease,
+        transform .2s ease;
+}
+
+
+.menu-close:hover {
+
+    background:
+        rgba(255, 255, 255, .12);
+
+    transform:
+        rotate(90deg);
+}
+
+
+/* =========================================================
+   MENU SECTIONS
+   ========================================================= */
+
+.menu-section {
+
+    margin-top: 22px;
+
+    margin-bottom: 7px;
+
+    color: #727d92;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1px;
+}
+
+
+/* =========================================================
+   MENU LINKS
+   ========================================================= */
+
+.menu a {
+
+    display: block;
+
+    margin: 3px 0;
+
+    padding: 12px 14px;
+
+    border-radius: 10px;
+
+    color: #dce2ef;
+
+    text-decoration: none;
+
+    transition:
+        background .2s ease,
+        color .2s ease,
+        transform .2s ease;
+}
+
+
+.menu a:hover {
+
+    background:
+        rgba(100, 140, 255, .10);
+
+    color: #ffffff;
+
+    transform:
+        translateX(4px);
+}
+
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
+
+.menu .discord-login {
+
+    margin-top: 8px;
+
+    background:
+        rgba(88, 101, 242, .14);
+
+    color: #aeb8ff;
+}
+
+
+.menu .discord-login:hover {
+
+    background:
+        rgba(88, 101, 242, .24);
+
+    color: #ffffff;
+}
+

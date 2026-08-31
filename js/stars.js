@@ -1,3 +1,4 @@
+
 /* =========================================================
    MISUKI — STAR SYSTEM
    NORMAL STARS + SHOOTING STARS
@@ -9,325 +10,395 @@
 
 
     /* =====================================================
-       STAR CONTAINER
+       INITIALIZATION
        ===================================================== */
 
-    const container =
-        document.getElementById("misuki-stars");
+    function initMisukiStars() {
 
-    if (!container) {
-        console.warn(
-            "MISUKI: #misuki-stars não encontrado."
-        );
+        /*
+         * Procura o container.
+         *
+         * Se não existir, cria automaticamente.
+         * Isto permite colocar o script no <head>
+         * ou antes do </body>.
+         */
 
-        return;
-    }
-
-
-    /* =====================================================
-       NORMAL STARS
-       ===================================================== */
-
-    const STAR_COUNT = 150;
-
-    for (
-        let i = 0;
-        i < STAR_COUNT;
-        i++
-    ) {
-
-        const star =
-            document.createElement("span");
-
-        star.className =
-            "misuki-star";
+        let container =
+            document.getElementById("misuki-stars");
 
 
-        const size =
-            Math.random() * 2.2 + 0.6;
+        if (!container) {
+
+            container =
+                document.createElement("div");
+
+            container.id =
+                "misuki-stars";
+
+            document.body.appendChild(container);
+        }
 
 
-        star.style.width =
-            size + "px";
+        /*
+         * Evita inicializar duas vezes
+         * na mesma página.
+         */
 
-        star.style.height =
-            size + "px";
+        if (container.dataset.misukiInitialized === "true") {
+            return;
+        }
 
-
-        star.style.left =
-            Math.random() * 100 + "%";
-
-        star.style.top =
-            Math.random() * 100 + "%";
-
-
-        star.style.setProperty(
-            "--star-opacity",
-            Math.random() * 0.65 + 0.25
-        );
+        container.dataset.misukiInitialized =
+            "true";
 
 
-        star.style.setProperty(
-            "--blink-duration",
-            Math.random() * 4 + 2 + "s"
-        );
+        /* =================================================
+           NORMAL STARS
+           ================================================= */
+
+        const STAR_COUNT = 150;
 
 
-        star.style.setProperty(
-            "--blink-delay",
-            Math.random() * -6 + "s"
-        );
+        for (
+            let i = 0;
+            i < STAR_COUNT;
+            i++
+        ) {
+
+            const star =
+                document.createElement("span");
 
 
-        container.appendChild(star);
-    }
+            star.className =
+                "misuki-star";
 
 
-    /* =====================================================
-       SHOOTING STAR
-       ===================================================== */
+            /* ---------------------------------------------
+               TAMANHO
+               --------------------------------------------- */
 
-    function createShootingStar() {
-
-        const star =
-            document.createElement("span");
-
-        star.className =
-            "misuki-shooting-star";
+            const size =
+                Math.random() * 2.2 + 0.6;
 
 
-        /* -------------------------------------------------
-           ESCOLHER LADO
-           ------------------------------------------------- */
+            star.style.width =
+                size + "px";
 
-        const fromLeft =
-            Math.random() < 0.5;
-
-
-        /* -------------------------------------------------
-           POSIÇÃO INICIAL
-           ------------------------------------------------- */
-
-        const startX =
-            fromLeft
-                ? -120
-                : window.innerWidth + 120;
+            star.style.height =
+                size + "px";
 
 
-        const startY =
-            Math.random() *
-            window.innerHeight *
-            0.45;
+            /* ---------------------------------------------
+               POSIÇÃO
+               --------------------------------------------- */
+
+            star.style.left =
+                Math.random() * 100 + "%";
+
+            star.style.top =
+                Math.random() * 100 + "%";
 
 
-        /* -------------------------------------------------
-           DISTÂNCIA HORIZONTAL
-           ------------------------------------------------- */
+            /* ---------------------------------------------
+               OPACIDADE
+               --------------------------------------------- */
 
-        const distanceX =
-            fromLeft
-
-                ? window.innerWidth *
-                    (
-                        0.75 +
-                        Math.random() * 0.55
-                    )
-
-                : -window.innerWidth *
-                    (
-                        0.75 +
-                        Math.random() * 0.55
-                    );
-
-
-        /* -------------------------------------------------
-           DISTÂNCIA VERTICAL
-
-           A estrela atravessa o ecrã e continua
-           para fora dele.
-           ------------------------------------------------- */
-
-        const distanceY =
-            window.innerHeight *
-            (
-                1.15 +
-                Math.random() * 0.45
+            star.style.setProperty(
+                "--star-opacity",
+                Math.random() * 0.65 + 0.25
             );
 
 
-        /* -------------------------------------------------
-           ÂNGULO DA TRAJETÓRIA
+            /* ---------------------------------------------
+               CINTILAÇÃO
+               --------------------------------------------- */
 
-           ESTE É O MESMO ÂNGULO DO MOVIMENTO.
-
-           O rasto usa este ângulo para ficar
-           paralelo à trajetória.
-           ------------------------------------------------- */
-
-        const angle =
-            Math.atan2(
-                distanceY,
-                distanceX
-            ) *
-            180 /
-            Math.PI;
+            star.style.setProperty(
+                "--blink-duration",
+                Math.random() * 4 + 2 + "s"
+            );
 
 
-        /* -------------------------------------------------
-           TAMANHO
-           ------------------------------------------------- */
-
-        const size =
-            Math.random() * 2 + 1.5;
+            star.style.setProperty(
+                "--blink-delay",
+                Math.random() * -6 + "s"
+            );
 
 
-        /* -------------------------------------------------
-           RASTO
-           ------------------------------------------------- */
-
-        const trail =
-            Math.random() * 90 + 120;
+            container.appendChild(star);
+        }
 
 
-        /* -------------------------------------------------
-           LARGURA DO RASTO
-           ------------------------------------------------- */
+        /* =================================================
+           SHOOTING STAR
+           ================================================= */
 
-        const trailWidth =
-            Math.random() * 1.2 + 1.5;
+        function createShootingStar() {
 
-
-        /* -------------------------------------------------
-           VELOCIDADE
-           ------------------------------------------------- */
-
-        const duration =
-            Math.random() * 0.8 + 1.6;
+            const star =
+                document.createElement("span");
 
 
-        /* -------------------------------------------------
-           POSIÇÃO
-           ------------------------------------------------- */
-
-        star.style.left =
-            startX + "px";
-
-        star.style.top =
-            startY + "px";
+            star.className =
+                "misuki-shooting-star";
 
 
-        /* -------------------------------------------------
-           MOVIMENTO
-           ------------------------------------------------- */
+            /* ---------------------------------------------
+               ESCOLHER LADO
+               --------------------------------------------- */
 
-        star.style.setProperty(
-            "--distance-x",
-            distanceX + "px"
-        );
-
-        star.style.setProperty(
-            "--distance-y",
-            distanceY + "px"
-        );
+            const fromLeft =
+                Math.random() < 0.5;
 
 
-        /* -------------------------------------------------
-           ÂNGULO
-           ------------------------------------------------- */
+            /* ---------------------------------------------
+               POSIÇÃO INICIAL
+               --------------------------------------------- */
 
-        star.style.setProperty(
-            "--meteor-angle",
-            angle + "deg"
-        );
-
-
-        /* -------------------------------------------------
-           TAMANHO
-           ------------------------------------------------- */
-
-        star.style.setProperty(
-            "--meteor-size",
-            size + "px"
-        );
+            const startX =
+                fromLeft
+                    ? -120
+                    : window.innerWidth + 120;
 
 
-        /* -------------------------------------------------
-           RASTO
-           ------------------------------------------------- */
-
-        star.style.setProperty(
-            "--trail-length",
-            trail + "px"
-        );
+            const startY =
+                Math.random() *
+                window.innerHeight *
+                0.45;
 
 
-        star.style.setProperty(
-            "--trail-width",
-            trailWidth + "px"
-        );
+            /* ---------------------------------------------
+               DISTÂNCIA HORIZONTAL
+               --------------------------------------------- */
+
+            const distanceX =
+                fromLeft
+
+                    ? window.innerWidth *
+                        (
+                            0.75 +
+                            Math.random() * 0.55
+                        )
+
+                    : -window.innerWidth *
+                        (
+                            0.75 +
+                            Math.random() * 0.55
+                        );
 
 
-        /* -------------------------------------------------
-           DURAÇÃO
-           ------------------------------------------------- */
+            /* ---------------------------------------------
+               DISTÂNCIA VERTICAL
 
-        star.style.setProperty(
-            "--shoot-duration",
-            duration + "s"
-        );
+               A estrela continua para fora do ecrã.
+               --------------------------------------------- */
 
-
-        /* -------------------------------------------------
-           ADICIONAR AO FUNDO
-           ------------------------------------------------- */
-
-        container.appendChild(star);
+            const distanceY =
+                window.innerHeight *
+                (
+                    1.15 +
+                    Math.random() * 0.45
+                );
 
 
-        /* -------------------------------------------------
-           REMOVER
-           ------------------------------------------------- */
+            /* ---------------------------------------------
+               ÂNGULO REAL DA TRAJETÓRIA
 
-        setTimeout(
-            function () {
+               NÃO ALTERAR.
 
-                if (star.parentNode) {
-                    star.remove();
-                }
+               Este é o ângulo do movimento.
+               --------------------------------------------- */
 
-            },
-            (duration + 0.3) * 1000
-        );
+            const angle =
+                Math.atan2(
+                    distanceY,
+                    distanceX
+                ) *
+                180 /
+                Math.PI;
+
+
+            /* ---------------------------------------------
+               TAMANHO DA ESTRELA
+               --------------------------------------------- */
+
+            const size =
+                Math.random() * 2 + 1.5;
+
+
+            /* ---------------------------------------------
+               RASTO
+               --------------------------------------------- */
+
+            const trail =
+                Math.random() * 90 + 120;
+
+
+            /* ---------------------------------------------
+               LARGURA DO RASTO
+               --------------------------------------------- */
+
+            const trailWidth =
+                Math.random() * 1.2 + 1.5;
+
+
+            /* ---------------------------------------------
+               VELOCIDADE
+               --------------------------------------------- */
+
+            const duration =
+                Math.random() * 0.8 + 1.6;
+
+
+            /* ---------------------------------------------
+               POSIÇÃO
+               --------------------------------------------- */
+
+            star.style.left =
+                startX + "px";
+
+            star.style.top =
+                startY + "px";
+
+
+            /* ---------------------------------------------
+               MOVIMENTO
+               --------------------------------------------- */
+
+            star.style.setProperty(
+                "--distance-x",
+                distanceX + "px"
+            );
+
+            star.style.setProperty(
+                "--distance-y",
+                distanceY + "px"
+            );
+
+
+            /* ---------------------------------------------
+               ÂNGULO
+               --------------------------------------------- */
+
+            star.style.setProperty(
+                "--meteor-angle",
+                angle + "deg"
+            );
+
+
+            /* ---------------------------------------------
+               TAMANHO
+               --------------------------------------------- */
+
+            star.style.setProperty(
+                "--meteor-size",
+                size + "px"
+            );
+
+
+            /* ---------------------------------------------
+               RASTO
+               --------------------------------------------- */
+
+            star.style.setProperty(
+                "--trail-length",
+                trail + "px"
+            );
+
+            star.style.setProperty(
+                "--trail-width",
+                trailWidth + "px"
+            );
+
+
+            /* ---------------------------------------------
+               DURAÇÃO
+               --------------------------------------------- */
+
+            star.style.setProperty(
+                "--shoot-duration",
+                duration + "s"
+            );
+
+
+            /* ---------------------------------------------
+               ADICIONAR
+               --------------------------------------------- */
+
+            container.appendChild(star);
+
+
+            /* ---------------------------------------------
+               REMOVER DEPOIS DA ANIMAÇÃO
+               --------------------------------------------- */
+
+            setTimeout(
+                function () {
+
+                    if (star.parentNode) {
+                        star.remove();
+                    }
+
+                },
+                (duration + 0.3) * 1000
+            );
+        }
+
+
+        /* =================================================
+           SPAWN
+           ================================================= */
+
+        function scheduleShootingStar() {
+
+            const delay =
+                Math.random() * 7000 + 5000;
+
+
+            setTimeout(
+                function () {
+
+                    createShootingStar();
+
+                    scheduleShootingStar();
+
+                },
+                delay
+            );
+        }
+
+
+        /* =================================================
+           START
+           ================================================= */
+
+        scheduleShootingStar();
     }
 
 
     /* =====================================================
-       SPAWN
+       DOM READY
        ===================================================== */
 
-    function scheduleShootingStar() {
+    /*
+     * Se o script estiver no <head>, o body ainda pode
+     * não existir.
+     *
+     * Neste caso esperamos pelo DOM.
+     */
 
-        const delay =
-            Math.random() * 3000 + 1500;
+    if (document.readyState === "loading") {
 
-
-        setTimeout(
-            function () {
-
-                createShootingStar();
-
-                scheduleShootingStar();
-
-            },
-            delay
+        document.addEventListener(
+            "DOMContentLoaded",
+            initMisukiStars
         );
+
+    } else {
+
+        initMisukiStars();
     }
 
-
-    /* =====================================================
-       START
-       ===================================================== */
-
-    scheduleShootingStar();
 
 })();
+

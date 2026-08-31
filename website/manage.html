@@ -1,32 +1,45 @@
+
 <!DOCTYPE html>
 
 <html lang="en">
 
 <head>
-<link rel="stylesheet" href="/css/stars.css">
 
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
 
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-<title>Misuki
-    
-</title>
-<link rel="icon" type="image/png" href="/assets/images/favicon.png?v=2">
-<link rel="shortcut icon" type="image/png" href="/assets/images/favicon.png?v=2">
-<link
-    rel="stylesheet"
-    href="/static/css/style.css"
->
+    <title>Misuki</title>
 
+    <link
+        rel="icon"
+        type="image/png"
+        href="/assets/images/favicon.png?v=2"
+    >
+
+    <link
+        rel="shortcut icon"
+        type="image/png"
+        href="/assets/images/favicon.png?v=2"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/static/css/style.css?v=15"
+    >
 
 </head>
-<script src="/js/stars.js" defer></script>
+
+
 <body>
 
+
+<!-- =====================================================
+     HEADER
+====================================================== -->
 
 <header class="container">
 
@@ -37,17 +50,33 @@
         Misuki<span>.</span>
     </a>
 
+
+    <!-- =================================================
+         HAMBURGER
+    ================================================== -->
+
     <button
         class="hamburger"
+        id="hamburger"
+        type="button"
         onclick="openMenu()"
         aria-label="Open menu"
+        aria-controls="menu"
+        aria-expanded="false"
     >
+
         <span></span>
         <span></span>
         <span></span>
+
     </button>
 
 </header>
+
+
+<!-- =====================================================
+     OVERLAY
+====================================================== -->
 
 <div
     class="overlay"
@@ -55,10 +84,17 @@
     onclick="closeMenu()"
 ></div>
 
+
+<!-- =====================================================
+     SIDE MENU
+====================================================== -->
+
 <nav
     class="menu"
     id="menu"
+    aria-hidden="true"
 >
+
 
     <div class="menu-header">
 
@@ -66,74 +102,154 @@
             Menu
         </div>
 
+
+        <!-- =================================================
+             CLOSE BUTTON
+        ================================================== -->
+
         <button
             class="menu-close"
+            id="menuClose"
+            type="button"
             onclick="closeMenu()"
+            aria-label="Close menu"
         >
             ×
         </button>
 
     </div>
 
+
+    <!-- =================================================
+         NAVIGATION
+    ================================================== -->
+
     <div class="menu-section">
         Navigation
     </div>
 
-    <a href="/">
+
+    <a
+        href="/"
+        onclick="closeMenu()"
+    >
         Home
     </a>
 
-    <a href="/dashboard">
+
+    <a
+        href="/dashboard"
+        onclick="closeMenu()"
+    >
         Dashboard
     </a>
 
-    <a href="/reviews">
+
+    <a
+        href="/reviews"
+        onclick="closeMenu()"
+    >
         Reviews
     </a>
+
+
+    <!-- =================================================
+         RESOURCES
+    ================================================== -->
 
     <div class="menu-section">
         Resources
     </div>
 
-    <a href="/documentation">
+
+    <a
+        href="/documentation"
+        onclick="closeMenu()"
+    >
         Documentation
     </a>
 
-    <a href="/support">
+
+    <a
+        href="/support"
+        onclick="closeMenu()"
+    >
         Support
     </a>
+
+
+    <a
+        href="/advertise"
+        onclick="closeMenu()"
+    >
+        Advertisement
+    </a>
+
+
+    <!-- =================================================
+         LEGAL
+    ================================================== -->
 
     <div class="menu-section">
         Legal
     </div>
 
-    <a href="/terms">
+
+    <a
+        href="/terms"
+        onclick="closeMenu()"
+    >
         Terms
     </a>
 
-    <a href="/privacy">
+
+    <a
+        href="/privacy"
+        onclick="closeMenu()"
+    >
         Privacy
     </a>
 
-    <a href="/data">
+
+    <a
+        href="/data"
+        onclick="closeMenu()"
+    >
         Data
     </a>
 
-    <a href="/cookies">
+
+    <a
+        href="/cookies"
+        onclick="closeMenu()"
+    >
         Cookies
     </a>
+
+
+    <!-- =================================================
+         ACCOUNT
+    ================================================== -->
 
     <div class="menu-section">
         Account
     </div>
 
+
     {% if user %}
 
-        <a href="/dashboard">
+        <a
+            href="/dashboard"
+            onclick="closeMenu()"
+        >
             Dashboard
         </a>
 
-        <a href="/logout">
+
+        <a
+            href="/logout"
+            onclick="closeMenu()"
+        >
             Logout
         </a>
 
@@ -142,31 +258,45 @@
         <a
             href="/login"
             class="discord-login"
+            onclick="closeMenu()"
         >
-
             Login with Discord
-
         </a>
 
     {% endif %}
 
+
 </nav>
 
+
+<!-- =====================================================
+     SERVER MANAGEMENT
+====================================================== -->
 
 <section class="section">
 
     <div class="container">
 
+
+        <!-- BACK -->
+
         <a href="/dashboard">
             ← Back to Dashboard
         </a>
+
+
+        <!-- SERVER CARD -->
 
         <div
             class="card"
             style="margin-top:25px;"
         >
 
+
+            <!-- SERVER HEADER -->
+
             <div class="server-top">
+
 
                 {% if guild.icon %}
 
@@ -186,11 +316,13 @@
 
                 {% endif %}
 
+
                 <div>
 
                     <h1 style="margin:0;">
                         {{ guild.name }}
                     </h1>
+
 
                     <div class="server-id">
                         {{ guild.id }}
@@ -198,19 +330,28 @@
 
                 </div>
 
+
             </div>
+
+
+            <!-- =================================================
+                 LICENSE
+            ================================================== -->
 
             <h2 style="margin-top:35px;">
                 🔐 License
             </h2>
 
+
             {% if license_data %}
 
                 {% set status = license_data[2] %}
 
+
                 <p>
 
                     Status:
+
 
                     {% if license_active %}
 
@@ -218,17 +359,20 @@
                             🟢 Active
                         </span>
 
+
                     {% elif status == "expired" %}
 
                         <span class="status-expired">
                             🔴 Expired
                         </span>
 
+
                     {% elif status == "revoked" %}
 
                         <span class="status-revoked">
                             ⛔ Revoked
                         </span>
+
 
                     {% else %}
 
@@ -240,21 +384,35 @@
 
                 </p>
 
+
+                <!-- LICENSE KEY -->
+
                 <p>
+
                     <strong>
                         License Key
                     </strong>
+
                 </p>
 
+
                 <div class="license-key">
+
                     {{ license_data[1] }}
+
                 </div>
 
+
+                <!-- EXPIRATION -->
+
                 <p style="margin-top:20px;">
+
                     <strong>
                         Expires
                     </strong>
+
                 </p>
+
 
                 {% if license_data[3] %}
 
@@ -270,7 +428,9 @@
 
                 {% endif %}
 
+
             {% else %}
+
 
                 <div class="empty">
 
@@ -279,43 +439,62 @@
 
                 </div>
 
+
             {% endif %}
 
+
         </div>
+
 
     </div>
 
 </section>
 
 
+<!-- =====================================================
+     FOOTER
+====================================================== -->
+
 <footer>
 
     <div>
+
         © 2026 Misuki. All rights reserved.
+
     </div>
 
+
     <div class="footer-links">
+
 
         <a href="/terms">
             Terms
         </a>
 
+
         <a href="/privacy">
             Privacy
         </a>
+
 
         <a href="/data">
             Data
         </a>
 
+
         <a href="/cookies">
             Cookies
         </a>
+
 
     </div>
 
 </footer>
 
+
+<!-- =====================================================
+     COOKIE BANNER
+====================================================== -->
 
 <div
     class="cookie"
@@ -323,33 +502,44 @@
     style="display:none;"
 >
 
+
     <h3>
         🍪 We use cookies
     </h3>
 
+
     <p>
+
         We use essential cookies to keep your session
         working and optional cookies to improve your
         experience. You can choose which cookies to allow.
+
     </p>
 
+
     <div class="cookie-links">
+
 
         <a href="/cookies">
             Cookie Policy
         </a>
 
+
         <a href="/privacy">
             Privacy
         </a>
+
 
         <a href="/data">
             Data
         </a>
 
+
     </div>
 
+
     <div class="cookie-buttons">
+
 
         <button
             class="accept"
@@ -358,12 +548,14 @@
             Accept All
         </button>
 
+
         <button
             class="essential"
             onclick="setCookies('essential')"
         >
             Accept Essential
         </button>
+
 
         <button
             class="deny"
@@ -372,76 +564,331 @@
             Deny
         </button>
 
+
     </div>
+
 
 </div>
 
 
+<!-- =====================================================
+     JAVASCRIPT
+====================================================== -->
+
 <script>
 
-    function setCookies(value) {
 
-        localStorage.setItem(
-            "misuki_cookie_consent",
-            value
-        );
+/* =====================================================
+   COOKIES
+====================================================== */
 
+function setCookies(value) {
+
+    localStorage.setItem(
+        "misuki_cookie_consent",
+        value
+    );
+
+    const cookieBanner =
         document.getElementById(
             "cookieBanner"
-        ).style.display = "none";
+        );
+
+    if (cookieBanner) {
+
+        cookieBanner.style.display =
+            "none";
+
     }
+
+}
+
+
+/* =====================================================
+   COOKIE INIT
+====================================================== */
+
+if (
+    !localStorage.getItem(
+        "misuki_cookie_consent"
+    )
+) {
+
+    const cookieBanner =
+        document.getElementById(
+            "cookieBanner"
+        );
+
+    if (cookieBanner) {
+
+        cookieBanner.style.display =
+            "block";
+
+    }
+
+}
+
+
+/* =====================================================
+   OPEN MENU
+====================================================== */
+
+function openMenu() {
+
+    const menu =
+        document.getElementById(
+            "menu"
+        );
+
+    const overlay =
+        document.getElementById(
+            "overlay"
+        );
+
+    const hamburger =
+        document.getElementById(
+            "hamburger"
+        );
 
 
     if (
-        !localStorage.getItem(
-            "misuki_cookie_consent"
-        )
+        !menu ||
+        !overlay ||
+        !hamburger
     ) {
 
+        return;
+
+    }
+
+
+    /* =================================================
+       OPEN MENU
+    ================================================== */
+
+    menu.classList.add(
+        "open"
+    );
+
+    menu.classList.add(
+        "active"
+    );
+
+
+    overlay.classList.add(
+        "show"
+    );
+
+    overlay.classList.add(
+        "active"
+    );
+
+
+    /* =================================================
+       HIDE HAMBURGER
+    ================================================== */
+
+    hamburger.classList.add(
+        "hidden"
+    );
+
+
+    /* =================================================
+       BLOCK PAGE SCROLL
+    ================================================== */
+
+    document.body.classList.add(
+        "menu-open"
+    );
+
+
+    /* =================================================
+       ACCESSIBILITY
+    ================================================== */
+
+    hamburger.setAttribute(
+        "aria-expanded",
+        "true"
+    );
+
+    hamburger.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
+    menu.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+
+}
+
+
+/* =====================================================
+   CLOSE MENU
+====================================================== */
+
+function closeMenu() {
+
+    const menu =
         document.getElementById(
-            "cookieBanner"
-        ).style.display = "block";
+            "menu"
+        );
+
+    const overlay =
+        document.getElementById(
+            "overlay"
+        );
+
+    const hamburger =
+        document.getElementById(
+            "hamburger"
+        );
+
+
+    if (
+        !menu ||
+        !overlay ||
+        !hamburger
+    ) {
+
+        return;
+
     }
 
 
-    function openMenu() {
+    /* =================================================
+       CLOSE MENU
+    ================================================== */
 
-        document
-            .getElementById("menu")
-            .classList.add("open");
+    menu.classList.remove(
+        "open"
+    );
 
-        document
-            .getElementById("overlay")
-            .classList.add("show");
-    }
-
-
-    function closeMenu() {
-
-        document
-            .getElementById("menu")
-            .classList.remove("open");
-
-        document
-            .getElementById("overlay")
-            .classList.remove("show");
-    }
+    menu.classList.remove(
+        "active"
+    );
 
 
-    document.addEventListener(
-        "keydown",
-        function(event) {
+    overlay.classList.remove(
+        "show"
+    );
 
-            if (
-                event.key === "Escape"
-            ) {
+    overlay.classList.remove(
+        "active"
+    );
 
-                closeMenu();
 
-            }
+    /* =================================================
+       SHOW HAMBURGER
+    ================================================== */
+
+    hamburger.classList.remove(
+        "hidden"
+    );
+
+
+    /* =================================================
+       UNBLOCK PAGE SCROLL
+    ================================================== */
+
+    document.body.classList.remove(
+        "menu-open"
+    );
+
+
+    /* =================================================
+       ACCESSIBILITY
+    ================================================== */
+
+    hamburger.setAttribute(
+        "aria-expanded",
+        "false"
+    );
+
+    hamburger.removeAttribute(
+        "aria-hidden"
+    );
+
+    menu.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
+}
+
+
+/* =====================================================
+   ESCAPE
+====================================================== */
+
+document.addEventListener(
+    "keydown",
+    function (event) {
+
+        if (
+            event.key === "Escape"
+        ) {
+
+            closeMenu();
 
         }
-    );
+
+    }
+);
+
+
+/* =====================================================
+   INITIAL STATE
+====================================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        const menu =
+            document.getElementById(
+                "menu"
+            );
+
+        const hamburger =
+            document.getElementById(
+                "hamburger"
+            );
+
+
+        if (
+            menu &&
+            hamburger
+        ) {
+
+            menu.classList.remove(
+                "open"
+            );
+
+            menu.classList.remove(
+                "active"
+            );
+
+            hamburger.classList.remove(
+                "hidden"
+            );
+
+            hamburger.setAttribute(
+                "aria-expanded",
+                "false"
+            );
+
+            menu.setAttribute(
+                "aria-hidden",
+                "true"
+            );
+
+        }
+
+    }
+);
+
 
 </script>
 
@@ -449,3 +896,4 @@
 </body>
 
 </html>
+

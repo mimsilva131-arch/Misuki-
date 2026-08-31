@@ -1,32 +1,48 @@
+
 <!DOCTYPE html>
 
 <html lang="en">
 
 <head>
-<link rel="icon" type="image/png" href="/assets/images/favicon.png?v=2">
-<link rel="shortcut icon" type="image/png" href="/assets/images/favicon.png?v=2">
-<link rel="stylesheet" href="/css/stars.css">
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="/assets/images/favicon.png?v=2"
+    >
+
+    <link
+        rel="shortcut icon"
+        type="image/png"
+        href="/assets/images/favicon.png?v=2"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/css/stars.css"
+    >
+
     <meta charset="UTF-8">
 
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
+    <title>Misuki — Cookies</title>
 
-<title>Misuki — Cookies
-    
-</title>
-<link rel="icon" type="image/png" href="/assets/images/favicon.png?v=2">
-<link rel="shortcut icon" type="image/png" href="/assets/images/favicon.png?v=2">
-<link
-    rel="stylesheet"
-    href="/css/style.css"
->
-
+    <link
+        rel="stylesheet"
+        href="/css/style.css?v=14"
+    >
 
 </head>
-<script src="/js/stars.js" defer></script>
+
+<script
+    src="/js/stars.js"
+    defer
+></script>
+
 <body>
 
 
@@ -44,13 +60,17 @@
         class="hamburger"
         onclick="openMenu()"
         aria-label="Open menu"
+        type="button"
     >
+
         <span></span>
         <span></span>
         <span></span>
+
     </button>
 
 </header>
+
 
 
 <div
@@ -58,6 +78,7 @@
     id="overlay"
     onclick="closeMenu()"
 ></div>
+
 
 
 <nav
@@ -74,6 +95,8 @@
         <button
             class="menu-close"
             onclick="closeMenu()"
+            type="button"
+            aria-label="Close menu"
         >
             ×
         </button>
@@ -81,66 +104,86 @@
     </div>
 
 
+
     <div class="menu-section">
         Navigation
     </div>
+
 
     <a href="/">
         Home
     </a>
 
+
     <a href="/dashboard">
         Dashboard
     </a>
+
 
     <a href="/reviews">
         Reviews
     </a>
 
 
+
     <div class="menu-section">
         Resources
     </div>
 
+
     <a href="/documentation">
         Documentation
     </a>
+
 
     <a href="/support">
         Support
     </a>
 
 
+    <a href="/advertise">
+        📢 Advertisement
+    </a>
+
+
+
     <div class="menu-section">
         Legal
     </div>
+
 
     <a href="/terms">
         Terms
     </a>
 
+
     <a href="/privacy">
         Privacy
     </a>
 
+
     <a href="/data">
         Data
     </a>
+
 
     <a href="/cookies">
         Cookies
     </a>
 
 
+
     <div class="menu-section">
         Account
     </div>
+
 
     {% if user %}
 
         <a href="/dashboard">
             Dashboard
         </a>
+
 
         <a href="/logout">
             Logout
@@ -160,6 +203,7 @@
 </nav>
 
 
+
 <main>
 
     <section class="section">
@@ -167,6 +211,7 @@
         <div class="container">
 
             <div class="card legal-page">
+
 
                 <h1>
                     Cookie Policy
@@ -185,6 +230,7 @@
                 </p>
 
 
+
                 <h2>
                     1. What Are Cookies?
                 </h2>
@@ -197,6 +243,7 @@
                     information between requests and
                     maintain sessions.
                 </p>
+
 
 
                 <h2>
@@ -235,6 +282,7 @@
                 </ul>
 
 
+
                 <h2>
                     3. Essential Cookies
                 </h2>
@@ -247,6 +295,7 @@
                     authentication, security and session
                     management.
                 </p>
+
 
 
                 <h2>
@@ -268,6 +317,7 @@
                 </p>
 
 
+
                 <h2>
                     5. Managing Cookies
                 </h2>
@@ -287,6 +337,7 @@
                 </p>
 
 
+
                 <h2>
                     6. Changes to This Policy
                 </h2>
@@ -297,6 +348,7 @@
                     when necessary. Any changes will be
                     reflected on this page.
                 </p>
+
 
 
                 <h2>
@@ -317,6 +369,7 @@
                 >
                     Contact Support
                 </a>
+
 
 
                 <div
@@ -340,6 +393,7 @@
 
                 </div>
 
+
             </div>
 
         </div>
@@ -347,6 +401,7 @@
     </section>
 
 </main>
+
 
 
 <footer>
@@ -362,16 +417,24 @@
             Terms
         </a>
 
+
         <a href="/privacy">
             Privacy
         </a>
+
 
         <a href="/data">
             Data
         </a>
 
+
         <a href="/cookies">
             Cookies
+        </a>
+
+
+        <a href="/advertise">
+            📢 Advertisement
         </a>
 
     </div>
@@ -379,32 +442,55 @@
 </footer>
 
 
+
 <script>
 
     function openMenu() {
 
-        document
-            .getElementById("menu")
-            .classList.add("open");
+        const menu =
+            document.getElementById("menu");
 
-        document
-            .getElementById("overlay")
-            .classList.add("show");
+        const overlay =
+            document.getElementById("overlay");
+
+
+        if (!menu || !overlay) {
+            return;
+        }
+
+
+        menu.classList.add("open");
+
+        overlay.classList.add("show");
+
+        document.body.style.overflow = "hidden";
 
     }
+
 
 
     function closeMenu() {
 
-        document
-            .getElementById("menu")
-            .classList.remove("open");
+        const menu =
+            document.getElementById("menu");
 
-        document
-            .getElementById("overlay")
-            .classList.remove("show");
+        const overlay =
+            document.getElementById("overlay");
+
+
+        if (!menu || !overlay) {
+            return;
+        }
+
+
+        menu.classList.remove("open");
+
+        overlay.classList.remove("show");
+
+        document.body.style.overflow = "";
 
     }
+
 
 
     document.addEventListener(
@@ -428,3 +514,4 @@
 </body>
 
 </html>
+

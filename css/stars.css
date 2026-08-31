@@ -43,73 +43,38 @@
 
     position: absolute;
 
-    left: 50%;
+    right: 50%;
     top: 50%;
 
-    width: 2px;
-    height: var(--trail-length);
-
-    /*
-     * O movimento tem --meteor-angle.
-     *
-     * O rasto fica 180 graus atrás.
-     */
+    width: var(--trail-length);
+    height: var(--trail-width);
 
     transform:
-        translate(-50%, 0)
-        rotate(
-            calc(var(--meteor-angle) + 180deg)
-        );
+        translateY(-50%)
+        rotate(var(--meteor-angle));
 
     transform-origin:
-        50% 0%;
+        right center;
 
     border-radius: 999px;
 
     background:
         linear-gradient(
-            to bottom,
-            rgba(255,255,255,0),
-            rgba(255,255,255,.08) 20%,
-            rgba(255,255,255,.25) 50%,
-            rgba(255,255,255,.65) 80%,
-            rgba(255,255,255,.95) 100%
+            to left,
+            rgba(255,255,255,.55) 0%,
+            rgba(255,255,255,.30) 25%,
+            rgba(255,255,255,.12) 60%,
+            rgba(255,255,255,0) 100%
         );
 
     filter:
         drop-shadow(
-            0 0 6px
-            rgba(142,167,255,.8)
+            0 0 4px
+            rgba(142,167,255,.55)
         );
 
-    /*
-     * MUITO IMPORTANTE:
-     * fica atrás da estrela.
-     */
-
-    z-index: -1;
+    pointer-events: none;
 }
-
-
-.misuki-shooting-star::after {
-    content: "";
-
-    position: absolute;
-
-    inset: -4px;
-
-    border-radius: 50%;
-
-    background: #ffffff;
-
-    filter: blur(3px);
-
-    opacity: .6;
-
-    z-index: -1;
-}
-
-
 /* =========================================================
    MOVIMENTO
    ========================================================= */

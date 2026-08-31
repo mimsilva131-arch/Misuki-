@@ -1,3 +1,4 @@
+
 import os
 import random
 import secrets
@@ -72,7 +73,7 @@ CLIENT_SECRET = os.getenv(
     "DISCORD_CLIENT_SECRET"
 )
 
-# Mantido para compatibilidade com outras partes do projeto.
+# Mantido para compatibilidade com outras partes.
 # O LOGIN usa exclusivamente DISCORD_LOGIN_REDIRECT_URI.
 DISCORD_REDIRECT_URI = os.getenv(
     "DISCORD_REDIRECT_URI"
@@ -186,6 +187,8 @@ app = Flask(
 )
 
 app.secret_key = SECRET_KEY
+
+app.config["PROPAGATE_EXCEPTIONS"] = True
 
 app.wsgi_app = ProxyFix(
     app.wsgi_app,
@@ -386,6 +389,9 @@ def create_database():
 
                         rejection_reason TEXT,
 
+                        duration_days INTEGER NOT NULL
+                            DEFAULT 7,
+
                         start_at TEXT,
 
                         end_at TEXT,
@@ -395,6 +401,18 @@ def create_database():
                         updated_at TEXT NOT NULL
 
                     )
+                    """
+                )
+
+                # -------------------------------------------------
+                # ADVERTISEMENTS MIGRATION
+                # -------------------------------------------------
+
+                cursor.execute(
+                    """
+                    ALTER TABLE advertisements
+                    ADD COLUMN IF NOT EXISTS duration_days
+                    INTEGER NOT NULL DEFAULT 7
                     """
                 )
 
@@ -539,7 +557,9 @@ def get_license(guild_id):
 
     try:
 
-        guild_id = int(guild_id)
+        guild_id = int(
+            guild_id
+        )
 
     except (
         TypeError,
@@ -717,7 +737,9 @@ def user_has_license():
 
     for guild in guilds:
 
-        guild_id = guild.get("id")
+        guild_id = guild.get(
+            "id"
+        )
 
         if guild_id and license_is_active(
             guild_id
@@ -994,7 +1016,9 @@ def get_invite_url(guild_id):
 
 def create_oauth_state():
 
-    state = secrets.token_urlsafe(32)
+    state = secrets.token_urlsafe(
+        32
+    )
 
     session["oauth_state"] = state
 
@@ -1072,7 +1096,9 @@ def login():
         )
 
     next_url = safe_next_url(
-        request.args.get("next")
+        request.args.get(
+            "next"
+        )
     )
 
     session["next_url"] = next_url
@@ -1119,28 +1145,9 @@ def login_callback():
 
     if error:
 
-        session.pop(
-            "oauth_state",
-            None
-        )
-
         return error_page(
             "❌ OAuth2 Error",
-            "Discord cancelled or rejected the login.",
-            400
-        )
-
-    state = request.args.get(
-        "state"
-    )
-
-    if not verify_oauth_state(
-        state
-    ):
-
-        return error_page(
-            "❌ OAuth2 Error",
-            "Invalid or expired OAuth2 state.",
+            f"Discord returned an OAuth error: {error}",
             400
         )
 
@@ -1148,11 +1155,25 @@ def login_callback():
         "code"
     )
 
+    state = request.args.get(
+        "state"
+    )
+
     if not code:
 
         return error_page(
             "❌ OAuth2 Error",
             "No authorization code was received.",
+            400
+        )
+
+    if not verify_oauth_state(
+        state
+    ):
+
+        return error_page(
+            "❌ OAuth2 Error",
+            "Invalid OAuth state. Please try logging in again.",
             400
         )
 
@@ -1169,8 +1190,6 @@ def login_callback():
         "code":
             code,
 
-        # IMPORTANT:
-        # Uses DISCORD_LOGIN_REDIRECT_URI.
         "redirect_uri":
             DISCORD_LOGIN_REDIRECT_URI
     }
@@ -1272,14 +1291,19 @@ def login_callback():
         )
 
     next_url = safe_next_url(
-        session.get("next_url")
+        session.get(
+            "next_url"
+        )
     )
 
     session.clear()
 
     session["access_token"] = access_token
     session["logged_in"] = True
-    session["user_id"] = user.get("id")
+    session["user_id"] = user.get(
+        "id"
+    )
+
     session["username"] = (
         user.get("global_name")
         or
@@ -1391,6 +1415,8 @@ def get_active_advertisements():
     if not DATABASE_URL:
         return []
 
+    expire_advertisements()
+
     now = utc_now().isoformat()
 
     try:
@@ -1412,6 +1438,7 @@ def get_active_advertisements():
                         image_url,
                         target_url,
                         status,
+                        duration_days,
                         start_at,
                         end_at,
                         created_at
@@ -1507,6 +1534,7 @@ def get_all_advertisements():
                         target_url,
                         status,
                         rejection_reason,
+                        duration_days,
                         start_at,
                         end_at,
                         created_at,
@@ -1538,7 +1566,9 @@ def index():
 
     expire_advertisements()
 
-    reviews = get_random_reviews(6)
+    reviews = get_random_reviews(
+        6
+    )
 
     advertisements = (
         get_active_advertisements()
@@ -1563,7 +1593,9 @@ def dashboard():
 
     if not user:
 
-        session["next_url"] = "/dashboard"
+        session["next_url"] = (
+            "/dashboard"
+        )
 
         return redirect("/login")
 
@@ -1610,11 +1642,16 @@ def dashboard():
         )
 
         if license_data:
+
             status = license_data[2]
+
         else:
+
             status = "none"
 
-        guild["license_status"] = status
+        guild["license_status"] = (
+            status
+        )
 
         if guild_id in bot_guild_ids:
 
@@ -1624,12 +1661,16 @@ def dashboard():
 
             continue
 
-        guild["can_add"] = can_manage_guild(
-            guild
+        guild["can_add"] = (
+            can_manage_guild(
+                guild
+            )
         )
 
-        guild["invite_url"] = get_invite_url(
-            guild_id
+        guild["invite_url"] = (
+            get_invite_url(
+                guild_id
+            )
         )
 
         available.append(
@@ -1714,7 +1755,9 @@ def manage(guild_id):
 
     if str(guild_id) not in bot_guild_ids:
 
-        return redirect("/dashboard")
+        return redirect(
+            "/dashboard"
+        )
 
     license_data = get_license(
         guild_id
@@ -1749,7 +1792,10 @@ def reviews():
     can_review = False
 
     if user:
-        can_review = user_has_license()
+
+        can_review = (
+            user_has_license()
+        )
 
     return render_template(
         "reviews.html",
@@ -1773,7 +1819,9 @@ def submit_review():
 
     if not user:
 
-        session["next_url"] = "/reviews"
+        session["next_url"] = (
+            "/reviews"
+        )
 
         return redirect("/login")
 
@@ -1920,7 +1968,9 @@ def advertise():
 
     if not user:
 
-        session["next_url"] = "/advertise"
+        session["next_url"] = (
+            "/advertise"
+        )
 
         return redirect("/login")
 
@@ -1944,7 +1994,9 @@ def create_advertisement():
 
     if not user:
 
-        session["next_url"] = "/advertise"
+        session["next_url"] = (
+            "/advertise"
+        )
 
         return redirect("/login")
 
@@ -1966,6 +2018,11 @@ def create_advertisement():
     target_url = request.form.get(
         "target_url",
         ""
+    ).strip()
+
+    duration_raw = request.form.get(
+        "duration",
+        "7"
     ).strip()
 
     # -----------------------------------------------------
@@ -2012,8 +2069,49 @@ def create_advertisement():
             user
         )
 
+    # -----------------------------------------------------
+    # DURATION
+    # -----------------------------------------------------
+
+    try:
+
+        duration = int(
+            duration_raw
+        )
+
+    except (
+        ValueError,
+        TypeError
+    ):
+
+        return error_page(
+            "❌ Invalid duration",
+            "The advertisement duration is invalid.",
+            400,
+            user
+        )
+
+    if duration not in (
+        7,
+        14,
+        30
+    ):
+
+        return error_page(
+            "❌ Invalid duration",
+            "The advertisement duration must be 7, 14 or 30 days.",
+            400,
+            user
+        )
+
+    # -----------------------------------------------------
+    # LIMITS
+    # -----------------------------------------------------
+
     title = title[:100]
+
     description = description[:500]
+
     target_url = target_url[:1000]
 
     image_url = (
@@ -2021,6 +2119,10 @@ def create_advertisement():
         if image_url
         else None
     )
+
+    # -----------------------------------------------------
+    # USER
+    # -----------------------------------------------------
 
     user_id = str(
         user.get("id")
@@ -2036,6 +2138,10 @@ def create_advertisement():
 
     now = utc_now().isoformat()
 
+    # -----------------------------------------------------
+    # DATABASE CHECK
+    # -----------------------------------------------------
+
     if not DATABASE_URL:
 
         return error_page(
@@ -2044,6 +2150,10 @@ def create_advertisement():
             500,
             user
         )
+
+    # =====================================================
+    # CREATE ADVERTISEMENT
+    # =====================================================
 
     try:
 
@@ -2062,10 +2172,15 @@ def create_advertisement():
                         image_url,
                         target_url,
                         status,
+                        rejection_reason,
+                        duration_days,
+                        start_at,
+                        end_at,
                         created_at,
                         updated_at
                     )
-                    VALUES (
+                    VALUES
+                    (
                         %s,
                         %s,
                         %s,
@@ -2073,6 +2188,10 @@ def create_advertisement():
                         %s,
                         %s,
                         'pending',
+                        NULL,
+                        %s,
+                        NULL,
+                        NULL,
                         %s,
                         %s
                     )
@@ -2085,21 +2204,46 @@ def create_advertisement():
                         description,
                         image_url,
                         target_url,
+                        duration,
                         now,
                         now
                     )
                 )
 
-                advertisement_id = (
-                    cursor.fetchone()[0]
-                )
+                result = cursor.fetchone()
 
-                # -------------------------------------------------
-                # PAYMENT RECORD
-                #
-                # Apenas prepara o registo.
-                # Não existe pagamento real nesta versão.
-                # -------------------------------------------------
+                if not result:
+
+                    raise RuntimeError(
+                        "Advertisement ID was not returned."
+                    )
+
+                advertisement_id = result[0]
+
+            connection.commit()
+
+    except Exception as error:
+
+        print(
+            f"❌ Advertisement creation error: {error}"
+        )
+
+        return error_page(
+            "❌ Advertisement Error",
+            "The advertisement could not be created.",
+            500,
+            user
+        )
+
+    # =====================================================
+    # PAYMENT RECORD
+    # =====================================================
+
+    try:
+
+        with database_connection() as connection:
+
+            with connection.cursor() as cursor:
 
                 cursor.execute(
                     """
@@ -2108,16 +2252,19 @@ def create_advertisement():
                         advertisement_id,
                         user_id,
                         provider,
+                        provider_payment_id,
                         amount,
                         currency,
                         status,
                         created_at,
                         updated_at
                     )
-                    VALUES (
+                    VALUES
+                    (
                         %s,
                         %s,
                         'paypal',
+                        NULL,
                         NULL,
                         'EUR',
                         'not_configured',
@@ -2138,15 +2285,12 @@ def create_advertisement():
     except Exception as error:
 
         print(
-            f"❌ Advertisement creation error: {error}"
+            f"⚠️ Advertisement payment record error: {error}"
         )
 
-        return error_page(
-            "❌ Advertisement Error",
-            "The advertisement could not be created.",
-            500,
-            user
-        )
+    # =====================================================
+    # SUCCESS
+    # =====================================================
 
     return render_template(
         "advertise_success.html",
@@ -2210,7 +2354,10 @@ def approve_advertisement(
     user = get_user()
 
     if not user:
-        return redirect("/login")
+
+        return redirect(
+            "/login"
+        )
 
     if not is_admin(user):
 
@@ -2230,7 +2377,104 @@ def approve_advertisement(
             user
         )
 
-    now = utc_now().isoformat()
+    now = utc_now()
+
+    # -----------------------------------------------------
+    # GET ADVERTISEMENT
+    # -----------------------------------------------------
+
+    try:
+
+        with database_connection() as connection:
+
+            with connection.cursor(
+                cursor_factory=psycopg2.extras.RealDictCursor
+            ) as cursor:
+
+                cursor.execute(
+                    """
+                    SELECT
+                        id,
+                        duration_days
+                    FROM advertisements
+                    WHERE id = %s
+                    LIMIT 1
+                    """,
+                    (
+                        advertisement_id,
+                    )
+                )
+
+                advertisement = (
+                    cursor.fetchone()
+                )
+
+    except Exception as error:
+
+        print(
+            f"❌ Advertisement lookup error: {error}"
+        )
+
+        return error_page(
+            "❌ Advertisement Error",
+            "The advertisement could not be loaded.",
+            500,
+            user
+        )
+
+    if not advertisement:
+
+        return error_page(
+            "❌ Advertisement not found",
+            "This advertisement does not exist.",
+            404,
+            user
+        )
+
+    # -----------------------------------------------------
+    # DURATION
+    # -----------------------------------------------------
+
+    try:
+
+        duration_days = int(
+            advertisement[
+                "duration_days"
+            ]
+        )
+
+    except (
+        ValueError,
+        TypeError
+    ):
+
+        duration_days = 7
+
+    if duration_days not in (
+        7,
+        14,
+        30
+    ):
+
+        duration_days = 7
+
+    # -----------------------------------------------------
+    # CALCULATE END
+    # -----------------------------------------------------
+
+    start_at = now
+
+    end_at = (
+        start_at
+        +
+        timedelta(
+            days=duration_days
+        )
+    )
+
+    # -----------------------------------------------------
+    # ACTIVATE
+    # -----------------------------------------------------
 
     try:
 
@@ -2244,16 +2488,15 @@ def approve_advertisement(
                     SET
                         status = 'active',
                         rejection_reason = NULL,
-                        start_at = COALESCE(
-                            start_at,
-                            %s
-                        ),
+                        start_at = %s,
+                        end_at = %s,
                         updated_at = %s
                     WHERE id = %s
                     """,
                     (
-                        now,
-                        now,
+                        start_at.isoformat(),
+                        end_at.isoformat(),
+                        now.isoformat(),
                         advertisement_id
                     )
                 )
@@ -2293,7 +2536,10 @@ def reject_advertisement(
     user = get_user()
 
     if not user:
-        return redirect("/login")
+
+        return redirect(
+            "/login"
+        )
 
     if not is_admin(user):
 
@@ -2372,7 +2618,10 @@ def disable_advertisement(
     user = get_user()
 
     if not user:
-        return redirect("/login")
+
+        return redirect(
+            "/login"
+        )
 
     if not is_admin(user):
 
@@ -2429,7 +2678,9 @@ def disable_advertisement(
 # DOCUMENTATION
 # =========================================================
 
-@app.route("/documentation")
+@app.route(
+    "/documentation"
+)
 def documentation():
 
     return render_template(
@@ -2441,7 +2692,9 @@ def documentation():
 # SUPPORT
 # =========================================================
 
-@app.route("/support")
+@app.route(
+    "/support"
+)
 def support():
 
     return render_template(
@@ -2453,7 +2706,9 @@ def support():
 # TERMS
 # =========================================================
 
-@app.route("/terms")
+@app.route(
+    "/terms"
+)
 def terms():
 
     return render_template(
@@ -2465,7 +2720,9 @@ def terms():
 # PRIVACY
 # =========================================================
 
-@app.route("/privacy")
+@app.route(
+    "/privacy"
+)
 def privacy():
 
     return render_template(
@@ -2477,7 +2734,9 @@ def privacy():
 # DATA
 # =========================================================
 
-@app.route("/data")
+@app.route(
+    "/data"
+)
 def data_page():
 
     return render_template(
@@ -2489,7 +2748,9 @@ def data_page():
 # COOKIES
 # =========================================================
 
-@app.route("/cookies")
+@app.route(
+    "/cookies"
+)
 def cookies_page():
 
     return render_template(
@@ -2501,14 +2762,22 @@ def cookies_page():
 # HEALTH CHECK
 # =========================================================
 
-@app.route("/health")
+@app.route(
+    "/health"
+)
 def health():
 
     return {
         "status": "ok",
-        "database": bool(DATABASE_URL),
-        "discord": bool(CLIENT_ID),
-        "bot": bool(BOT_TOKEN)
+        "database": bool(
+            DATABASE_URL
+        ),
+        "discord": bool(
+            CLIENT_ID
+        ),
+        "bot": bool(
+            BOT_TOKEN
+        )
     }, 200
 
 
@@ -2583,3 +2852,4 @@ if __name__ == "__main__":
         port=PORT,
         debug=False
     )
+

@@ -1,261 +1,44 @@
 
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
 
-<meta charset="UTF-8">
-
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
-
-<title>Misuki — Discord Bot</title>
-
-<link
-    rel="icon"
-    type="image/png"
-    href="/assets/images/favicon.png?v=2"
->
-
-<link
-    rel="shortcut icon"
-    type="image/png"
-    href="/assets/images/favicon.png?v=2"
->
-
-<!-- =====================================================
-     MAIN CSS
-====================================================== -->
-
-<link
-    rel="stylesheet"
-    href="/static/css/style.css?v=11"
->
-
-<!-- =====================================================
-     MOUSE TRAIL CSS
-====================================================== -->
-
-<link
-    rel="stylesheet"
-    href="/static/css/mouse-trail.css?v=1"
->
-
-
-<!-- =====================================================
-     COOKIE BANNER STYLE
-====================================================== -->
-
-<style>
-
-#misukiCookieBanner {
-
-    position: fixed;
-
-    left: 50%;
-    bottom: 25px;
-
-    transform: translateX(-50%);
-
-    width: min(440px, calc(100% - 40px));
-
-    background: #11131c;
-
-    color: #ffffff;
-
-    border: 1px solid rgba(255, 255, 255, 0.12);
-
-    border-radius: 18px;
-
-    padding: 24px;
-
-    z-index: 2147483647;
-
-    box-shadow:
-        0 20px 60px rgba(0, 0, 0, 0.5);
-
-    text-align: center;
-}
-
-
-#misukiCookieContent h3 {
-
-    margin: 0 0 10px;
-
-    font-size: 20px;
-
-}
-
-
-#misukiCookieContent p {
-
-    margin: 0 0 20px;
-
-    color: #aeb3c0;
-
-    line-height: 1.5;
-
-    font-size: 14px;
-
-}
-
-
-/* =====================================================
-   COOKIE BUTTONS
-====================================================== */
-
-#misukiCookieButtons {
-
-    display: flex;
-
-    justify-content: center;
-
-    align-items: center;
-
-    gap: 10px;
-
-    flex-wrap: wrap;
-
-}
-
-
-#misukiCookieButtons button {
-
-    border: none;
-
-    border-radius: 9px;
-
-    padding: 11px 15px;
-
-    cursor: pointer;
-
-    font-weight: 700;
-
-    font-size: 13px;
-
-}
-
-
-#misukiAccept {
-
-    background: #5865f2;
-
-    color: #ffffff;
-
-}
-
-
-#misukiEssential {
-
-    background: #303442;
-
-    color: #ffffff;
-
-}
-
-
-#misukiDeny {
-
-    background: transparent;
-
-    color: #aaa;
-
-    border:
-        1px solid
-        rgba(255, 255, 255, 0.15) !important;
-
-}
-
-
-#misukiCookieButtons button:hover {
-
-    opacity: 0.85;
-
-}
-
-
-/* =====================================================
-   COOKIE LEGAL LINKS
-====================================================== */
-
-#misukiCookieLegal {
-
-    display: flex;
-
-    justify-content: center;
-
-    align-items: center;
-
-    gap: 18px;
-
-    margin-top: 18px;
-
-    flex-wrap: wrap;
-
-}
-
-
-#misukiCookieLegal a {
-
-    color: #8f98ff;
-
-    font-size: 13px;
-
-    text-decoration: none;
-
-}
-
-
-#misukiCookieLegal a:hover {
-
-    text-decoration: underline;
-
-}
-
-
-/* =====================================================
-   MOBILE
-====================================================== */
-
-@media (max-width: 600px) {
-
-    #misukiCookieBanner {
-
-        bottom: 15px;
-
-        width: calc(100% - 30px);
-
-        padding: 20px;
-
-    }
-
-
-    #misukiCookieButtons {
-
-        flex-direction: column;
-
-    }
-
-
-    #misukiCookieButtons button {
-
-        width: 100%;
-
-    }
-
-
-    #misukiCookieLegal {
-
-        gap: 12px;
-
-    }
-
-}
-
-</style>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Misuki — Discord Bot</title>
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="/assets/images/favicon.png?v=2"
+    >
+
+    <link
+        rel="shortcut icon"
+        type="image/png"
+        href="/assets/images/favicon.png?v=2"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/static/css/style.css?v=15"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/static/css/mouse-trail.css?v=2"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/static/css/menu.css?v=1"
+    >
 
 </head>
 
@@ -269,31 +52,28 @@
 
 <header class="container">
 
-
-<a
-    class="logo"
-    href="/"
->
-
-    Misuki<span>.</span>
-
-</a>
+    <a
+        class="logo"
+        href="/"
+    >
+        Misuki<span>.</span>
+    </a>
 
 
-<button
-    class="hamburger"
-    onclick="openMenu()"
-    aria-label="Open menu"
->
+    <button
+        class="hamburger"
+        id="hamburger"
+        type="button"
+        aria-label="Open menu"
+        aria-controls="menu"
+        aria-expanded="false"
+    >
 
-    <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
 
-    <span></span>
-
-    <span></span>
-
-</button>
-
+    </button>
 
 </header>
 
@@ -305,158 +85,146 @@
 <div
     class="overlay"
     id="overlay"
-    onclick="closeMenu()"
 ></div>
 
 
 <!-- =====================================================
-     MENU
+     SIDE MENU
 ====================================================== -->
 
 <nav
     class="menu"
     id="menu"
+    aria-hidden="true"
 >
 
 
-<div class="menu-header">
+    <div class="menu-header">
+
+        <div class="menu-title">
+            Menu
+        </div>
 
 
-    <div class="menu-title">
-
-        Menu
+        <button
+            class="menu-close"
+            id="menuClose"
+            type="button"
+            aria-label="Close menu"
+        >
+            ×
+        </button>
 
     </div>
 
 
-    <button
-        class="menu-close"
-        onclick="closeMenu()"
-        aria-label="Close menu"
-    >
+    <!-- =================================================
+         NAVIGATION
+    ================================================== -->
 
-        ×
-
-    </button>
+    <div class="menu-section">
+        Navigation
+    </div>
 
 
-</div>
-
-
-<div class="menu-section">
-
-    Navigation
-
-</div>
-
-
-<a href="/">
-
-    Home
-
-</a>
-
-
-<a href="/dashboard">
-
-    Dashboard
-
-</a>
-
-
-<a href="/reviews">
-
-    Reviews
-
-</a>
-
-
-<div class="menu-section">
-
-    Resources
-
-</div>
-
-
-<a href="/documentation">
-
-    Documentation
-
-</a>
-
-
-<a href="/support">
-
-    Support
-
-</a>
-
-
-<div class="menu-section">
-
-    Legal
-
-</div>
-
-
-<a href="/terms">
-
-    Terms
-
-</a>
-
-
-<a href="/privacy">
-
-    Privacy
-
-</a>
-
-
-<a href="/data">
-
-    Data
-
-</a>
-
-
-<a href="/cookies">
-
-    Cookies
-
-</a>
-
-
-<div class="menu-section">
-
-    Account
-
-</div>
-
-
-{% if user %}
-
-    <a
-        href="/logout"
-        class="discord-login"
-    >
-
-        🚪 Logout
-
+    <a href="/">
+        Home
     </a>
 
-{% else %}
 
-    <a
-        href="/login"
-        class="discord-login"
-    >
-
-        🔐 Login with Discord
-
+    <a href="/dashboard">
+        Dashboard
     </a>
 
-{% endif %}
+
+    <a href="/reviews">
+        Reviews
+    </a>
+
+
+    <!-- =================================================
+         RESOURCES
+    ================================================== -->
+
+    <div class="menu-section">
+        Resources
+    </div>
+
+
+    <a href="/documentation">
+        Documentation
+    </a>
+
+
+    <a href="/support">
+        Support
+    </a>
+
+
+    <a href="/advertise">
+        Advertisement
+    </a>
+
+
+    <!-- =================================================
+         LEGAL
+    ================================================== -->
+
+    <div class="menu-section">
+        Legal
+    </div>
+
+
+    <a href="/terms">
+        Terms
+    </a>
+
+
+    <a href="/privacy">
+        Privacy
+    </a>
+
+
+    <a href="/data">
+        Data
+    </a>
+
+
+    <a href="/cookies">
+        Cookies
+    </a>
+
+
+    <!-- =================================================
+         ACCOUNT
+    ================================================== -->
+
+    <div class="menu-section">
+        Account
+    </div>
+
+
+    {% if user %}
+
+        <a href="/dashboard">
+            Dashboard
+        </a>
+
+
+        <a href="/logout">
+            Logout
+        </a>
+
+    {% else %}
+
+        <a
+            href="/login"
+            class="discord-login"
+        >
+            Login with Discord
+        </a>
+
+    {% endif %}
 
 
 </nav>
@@ -469,237 +237,215 @@
 <main>
 
 
-<section class="hero">
+    <section class="hero">
+
+        <div class="container">
 
 
-<div class="container">
+            <div class="hero-icon">
+
+                <img
+                    src="/assets/images/icon.png?v=2"
+                    alt="Misuki"
+                >
+
+            </div>
 
 
-    <div class="hero-icon">
+            <h1>
 
-        <img
-            src="/assets/images/icon.png?v=2"
-            alt="Misuki"
-        >
+                Meet
+                <span>Misuki.</span>
 
-    </div>
-
-
-    <h1>
-
-        Meet
-        <span>Misuki.</span>
-
-    </h1>
-
-
-    <p>
-
-        A powerful Discord bot designed to make
-        your server easier to manage, safer and
-        more enjoyable.
-
-    </p>
-
-
-    {% if user %}
-
-        <a
-            href="/dashboard"
-            class="dashboard-button"
-        >
-
-            🚀 Open Dashboard
-
-        </a>
-
-    {% else %}
-
-        <a
-            href="/login"
-            class="dashboard-button"
-        >
-
-            🔐 Login with Discord
-
-        </a>
-
-    {% endif %}
-
-
-</div>
-
-
-</section>
-
-
-<!-- =====================================================
-     FEATURES
-====================================================== -->
-
-<section class="section">
-
-
-<div class="container">
-
-
-    <h2 class="section-title">
-
-        Why Misuki?
-
-    </h2>
-
-
-    <div class="server-grid">
-
-
-        <div class="card">
-
-
-            <h3>
-
-                Security
-
-            </h3>
+            </h1>
 
 
             <p>
 
-                Keep your Discord server protected
-                with reliable moderation and
-                management tools.
+                A powerful Discord bot designed to make
+                your server easier to manage, safer and
+                more enjoyable.
 
             </p>
 
 
-        </div>
+            {% if user %}
 
+                <a
+                    href="/dashboard"
+                    class="dashboard-button"
+                >
+                    🚀 Open Dashboard
+                </a>
 
-        <div class="card">
+            {% else %}
 
+                <a
+                    href="/login"
+                    class="dashboard-button"
+                >
+                    🔐 Login with Discord
+                </a>
 
-            <h3>
-
-                Performance
-
-            </h3>
-
-
-            <p>
-
-                Fast and responsive commands designed
-                to work smoothly on your server.
-
-            </p>
-
-
-        </div>
-
-
-        <div class="card">
-
-
-            <h3>
-
-                Management
-
-            </h3>
-
-
-            <p>
-
-                Manage your Misuki configuration
-                directly through the dashboard.
-
-            </p>
+            {% endif %}
 
 
         </div>
 
-
-    </div>
-
-
-</div>
+    </section>
 
 
-</section>
+    <!-- =================================================
+         FEATURES
+    ================================================== -->
+
+    <section class="section">
+
+        <div class="container">
 
 
-<!-- =====================================================
-     REVIEWS
-====================================================== -->
-
-<section class="section">
+            <h2 class="section-title">
+                Why Misuki?
+            </h2>
 
 
-<div class="container">
+            <div class="server-grid">
 
 
-    <h2 class="section-title">
+                <div class="card">
 
-        ⭐ What users say
+                    <h3>
+                        Security
+                    </h3>
 
-    </h2>
+                    <p>
 
+                        Keep your Discord server protected
+                        with reliable moderation and
+                        management tools.
 
-    {% if reviews %}
+                    </p>
 
-
-        <div class="review-grid">
-
-
-            {% for review in reviews %}
-
-
-                <div class="card review-card">
+                </div>
 
 
-                    <div class="review-user">
+                <div class="card">
+
+                    <h3>
+                        Performance
+                    </h3>
+
+                    <p>
+
+                        Fast and responsive commands designed
+                        to work smoothly on your server.
+
+                    </p>
+
+                </div>
 
 
-                        {% if review.avatar %}
+                <div class="card">
+
+                    <h3>
+                        Management
+                    </h3>
+
+                    <p>
+
+                        Manage your Misuki configuration
+                        directly through the dashboard.
+
+                    </p>
+
+                </div>
 
 
-                            <img
-                                class="review-avatar"
-                                src="{{ review.avatar }}"
-                                alt=""
-                            >
+            </div>
+
+        </div>
+
+    </section>
 
 
-                        {% else %}
+    <!-- =================================================
+         REVIEWS
+    ================================================== -->
+
+    <section class="section">
+
+        <div class="container">
 
 
-                            <div class="server-icon-placeholder">
+            <h2 class="section-title">
+                ⭐ What users say
+            </h2>
 
-                                {{ review.username[0] }}
+
+            {% if reviews %}
+
+
+                <div class="review-grid">
+
+
+                    {% for review in reviews %}
+
+
+                        <div class="card review-card">
+
+
+                            <div class="review-user">
+
+
+                                {% if review.avatar %}
+
+
+                                    <img
+                                        class="review-avatar"
+                                        src="{{ review.avatar }}"
+                                        alt=""
+                                    >
+
+
+                                {% else %}
+
+
+                                    <div
+                                        class="server-icon-placeholder"
+                                    >
+                                        {{ review.username[0] }}
+                                    </div>
+
+
+                                {% endif %}
+
+
+                                <div>
+
+                                    <strong>
+                                        {{ review.username }}
+                                    </strong>
+
+
+                                    <div class="stars">
+
+                                        {% for i in range(review.rating) %}
+
+                                            ★
+
+                                        {% endfor %}
+
+                                    </div>
+
+                                </div>
+
 
                             </div>
 
 
-                        {% endif %}
+                            <div class="review-text">
 
-
-                        <div>
-
-
-                            <strong>
-
-                                {{ review.username }}
-
-                            </strong>
-
-
-                            <div class="stars">
-
-
-                                {% for i in range(review.rating) %}
-
-                                    ★
-
-                                {% endfor %}
-
+                                {{ review.review }}
 
                             </div>
 
@@ -707,42 +453,28 @@
                         </div>
 
 
-                    </div>
-
-
-                    <div class="review-text">
-
-                        {{ review.review }}
-
-                    </div>
+                    {% endfor %}
 
 
                 </div>
 
 
-            {% endfor %}
+            {% else %}
+
+
+                <div class="empty">
+
+                    No reviews yet.
+
+                </div>
+
+
+            {% endif %}
 
 
         </div>
 
-
-    {% else %}
-
-
-        <div class="empty">
-
-            No reviews yet.
-
-        </div>
-
-
-    {% endif %}
-
-
-</div>
-
-
-</section>
+    </section>
 
 
 </main>
@@ -757,89 +489,81 @@
 >
 
 
-<div id="misukiCookieContent">
+    <div
+        id="misukiCookieContent"
+    >
 
 
-    <h3>
-
-        🍪 We use cookies
-
-    </h3>
+        <h3>
+            🍪 We use cookies
+        </h3>
 
 
-    <p>
+        <p>
 
-        Misuki uses cookies to improve your
-        experience and keep the website working
-        correctly.
+            Misuki uses cookies to improve your
+            experience and keep the website working
+            correctly.
 
-    </p>
-
-
-    <div id="misukiCookieButtons">
+        </p>
 
 
-        <button
-            type="button"
-            id="misukiAccept"
+        <div
+            id="misukiCookieButtons"
         >
 
-            Accept All
 
-        </button>
+            <button
+                type="button"
+                id="misukiAccept"
+            >
+                Accept All
+            </button>
 
 
-        <button
-            type="button"
-            id="misukiEssential"
+            <button
+                type="button"
+                id="misukiEssential"
+            >
+                Essential Only
+            </button>
+
+
+            <button
+                type="button"
+                id="misukiDeny"
+            >
+                Deny
+            </button>
+
+
+        </div>
+
+
+        <div
+            id="misukiCookieLegal"
         >
 
-            Essential Only
 
-        </button>
+            <a href="/terms">
+                Terms
+            </a>
 
 
-        <button
-            type="button"
-            id="misukiDeny"
-        >
+            <a href="/privacy">
+                Privacy
+            </a>
 
-            Deny
 
-        </button>
+            <a href="/cookies">
+                Cookie Policy
+            </a>
+
+
+        </div>
 
 
     </div>
-
-
-    <div id="misukiCookieLegal">
-
-
-        <a href="/terms">
-
-            Terms
-
-        </a>
-
-
-        <a href="/privacy">
-
-            Privacy
-
-        </a>
-
-
-        <a href="/cookies">
-
-            Cookie Policy
-
-        </a>
-
-
-    </div>
-
-
-</div>
 
 
 </div>
@@ -852,190 +576,81 @@
 <footer>
 
 
-<div>
+    <div>
 
-    © 2026 Misuki.
-    All rights reserved.
+        © 2026 Misuki.
+        All rights reserved.
 
-</div>
-
-
-<div class="footer-links">
+    </div>
 
 
-    <a href="/terms">
-
-        Terms
-
-    </a>
+    <div class="footer-links">
 
 
-    <a href="/privacy">
-
-        Privacy
-
-    </a>
+        <a href="/terms">
+            Terms
+        </a>
 
 
-    <a href="/data">
-
-        Data
-
-    </a>
+        <a href="/privacy">
+            Privacy
+        </a>
 
 
-    <a href="/cookies">
-
-        Cookies
-
-    </a>
+        <a href="/data">
+            Data
+        </a>
 
 
-</div>
+        <a href="/cookies">
+            Cookies
+        </a>
+
+
+    </div>
 
 
 </footer>
 
 
 <!-- =====================================================
-     MOUSE TRAIL
+     STARS
 ====================================================== -->
 
-<script src="/static/js/mouse-trail.js?v=1"></script>
+<script
+    src="/js/stars.js"
+    defer
+></script>
 
 
 <!-- =====================================================
-     MAIN JAVASCRIPT
+     MOUSE TRAIL
 ====================================================== -->
 
-<script src="/static/js/main.js?v=11"></script>
+<script
+    src="/static/js/mouse-trail.js?v=2"
+    defer
+></script>
+
+
+<!-- =====================================================
+     MENU JAVASCRIPT
+====================================================== -->
+
+<script
+    src="/static/js/menu.js?v=1"
+    defer
+></script>
 
 
 <!-- =====================================================
      COOKIE JAVASCRIPT
 ====================================================== -->
 
-<script>
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
-
-
-        const banner =
-            document.getElementById(
-                "misukiCookieBanner"
-            );
-
-
-        const accept =
-            document.getElementById(
-                "misukiAccept"
-            );
-
-
-        const essential =
-            document.getElementById(
-                "misukiEssential"
-            );
-
-
-        const deny =
-            document.getElementById(
-                "misukiDeny"
-            );
-
-
-        const cookieName =
-            "misuki_cookie_consent";
-
-
-        function hideBanner() {
-
-            if (banner) {
-
-                banner.style.display =
-                    "none";
-
-            }
-
-        }
-
-
-        function saveConsent(value) {
-
-            localStorage.setItem(
-                cookieName,
-                value
-            );
-
-            hideBanner();
-
-        }
-
-
-        /*
-         * Se já existe uma escolha guardada,
-         * escondemos o banner.
-         */
-
-        if (
-            localStorage.getItem(
-                cookieName
-            )
-        ) {
-
-            hideBanner();
-
-        }
-
-
-        if (accept) {
-
-            accept.addEventListener(
-                "click",
-                function () {
-
-                    saveConsent("all");
-
-                }
-            );
-
-        }
-
-
-        if (essential) {
-
-            essential.addEventListener(
-                "click",
-                function () {
-
-                    saveConsent("essential");
-
-                }
-            );
-
-        }
-
-
-        if (deny) {
-
-            deny.addEventListener(
-                "click",
-                function () {
-
-                    saveConsent("denied");
-
-                }
-            );
-
-        }
-
-
-    }
-);
-
-</script>
+<script
+    src="/static/js/cookies.js?v=2"
+    defer
+></script>
 
 
 </body>
