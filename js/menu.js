@@ -8,186 +8,201 @@
 
     "use strict";
 
+    function initMenu() {
 
-    document.addEventListener(
-        "DOMContentLoaded",
-        function () {
+        const hamburger = document.getElementById("hamburger");
+        const menu = document.getElementById("menu");
+        const overlay = document.getElementById("overlay");
+        const menuClose = document.getElementById("menuClose");
 
-            const hamburger =
-                document.getElementById(
-                    "hamburger"
-                );
-
-
-            const menu =
-                document.getElementById(
-                    "menu"
-                );
+        if (!hamburger || !menu || !overlay || !menuClose) {
+            console.warn("⚠️ Misuki menu elements not found.");
+            return;
+        }
 
 
-            const overlay =
-                document.getElementById(
-                    "overlay"
-                );
+        /* =================================================
+           OPEN MENU
+        ================================================= */
 
+        function openMenu(event) {
 
-            const menuClose =
-                document.getElementById(
-                    "menuClose"
-                );
-
-
-            if (
-                !hamburger ||
-                !menu ||
-                !overlay ||
-                !menuClose
-            ) {
-
-                return;
-
+            if (event) {
+                event.preventDefault();
             }
 
+            menu.classList.add("open");
+            overlay.classList.add("show");
+            document.body.classList.add("menu-open");
 
-            /* =================================================
-               OPEN MENU
-            ================================================== */
+            hamburger.setAttribute(
+                "aria-expanded",
+                "true"
+            );
 
-            function openMenu() {
+            menu.setAttribute(
+                "aria-hidden",
+                "false"
+            );
 
-                menu.classList.add(
-                    "open"
-                );
-
-
-                overlay.classList.add(
-                    "show"
-                );
-
-
-                document.body.classList.add(
-                    "menu-open"
-                );
+        }
 
 
-                hamburger.setAttribute(
-                    "aria-expanded",
-                    "true"
-                );
+        /* =================================================
+           CLOSE MENU
+        ================================================= */
 
+        function closeMenu(event) {
 
-                menu.setAttribute(
-                    "aria-hidden",
-                    "false"
-                );
-
+            if (event) {
+                event.preventDefault();
             }
 
+            menu.classList.remove("open");
+            overlay.classList.remove("show");
+            document.body.classList.remove("menu-open");
 
-            /* =================================================
-               CLOSE MENU
-            ================================================== */
+            hamburger.setAttribute(
+                "aria-expanded",
+                "false"
+            );
 
-            function closeMenu() {
+            menu.setAttribute(
+                "aria-hidden",
+                "true"
+            );
 
-                menu.classList.remove(
-                    "open"
-                );
-
-
-                overlay.classList.remove(
-                    "show"
-                );
-
-
-                document.body.classList.remove(
-                    "menu-open"
-                );
+        }
 
 
-                hamburger.setAttribute(
-                    "aria-expanded",
-                    "false"
-                );
+        /* =================================================
+           TOGGLE MENU
+        ================================================= */
 
+        function toggleMenu(event) {
 
-                menu.setAttribute(
-                    "aria-hidden",
-                    "true"
-                );
-
+            if (event) {
+                event.preventDefault();
             }
 
+            if (menu.classList.contains("open")) {
+                closeMenu();
+            } else {
+                openMenu();
+            }
 
-            /* =================================================
-               HAMBURGER
-            ================================================== */
-
-            hamburger.addEventListener(
-                "click",
-                openMenu
-            );
+        }
 
 
-            /* =================================================
-               X
-            ================================================== */
+        /* =================================================
+           HAMBURGER
+        ================================================= */
 
-            menuClose.addEventListener(
-                "click",
-                closeMenu
-            );
-
-
-            /* =================================================
-               OVERLAY
-            ================================================== */
-
-            overlay.addEventListener(
-                "click",
-                closeMenu
-            );
+        hamburger.addEventListener(
+            "click",
+            toggleMenu
+        );
 
 
-            /* =================================================
-               ESC
-            ================================================== */
+        /* =================================================
+           CLOSE BUTTON
+        ================================================= */
 
-            document.addEventListener(
-                "keydown",
-                function (event) {
+        menuClose.addEventListener(
+            "click",
+            closeMenu
+        );
 
-                    if (
-                        event.key === "Escape"
-                    ) {
+
+        /* =================================================
+           OVERLAY
+        ================================================= */
+
+        overlay.addEventListener(
+            "click",
+            closeMenu
+        );
+
+
+        /* =================================================
+           ESC
+        ================================================= */
+
+        document.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (
+                    event.key === "Escape" &&
+                    menu.classList.contains("open")
+                ) {
+
+                    closeMenu();
+
+                }
+
+            }
+        );
+
+
+        /* =================================================
+           MENU LINKS
+        ================================================= */
+
+        const links = menu.querySelectorAll("a");
+
+        links.forEach(
+            function (link) {
+
+                link.addEventListener(
+                    "click",
+                    function () {
 
                         closeMenu();
 
                     }
-
-                }
-            );
-
-
-            /* =================================================
-               MENU LINKS
-            ================================================== */
-
-            menu
-                .querySelectorAll("a")
-                .forEach(
-                    function (link) {
-
-                        link.addEventListener(
-                            "click",
-                            closeMenu
-                        );
-
-                    }
                 );
 
-        }
-    );
+            }
+        );
+
+
+        /* =================================================
+           INITIAL STATE
+        ================================================= */
+
+        closeMenu();
+
+
+        /* =================================================
+           DEBUG
+        ================================================= */
+
+        console.log(
+            "✅ Misuki menu initialized."
+        );
+
+    }
+
+
+    /* =====================================================
+       INITIALIZE
+    ===================================================== */
+
+    if (
+        document.readyState === "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initMenu
+        );
+
+    } else {
+
+        initMenu();
+
+    }
 
 })();
 

@@ -1,3 +1,4 @@
+
 import os
 import random
 import secrets
@@ -46,7 +47,7 @@ CLIENT_SECRET = os.getenv(
 # OAUTH2 REDIRECTS
 # =========================================================
 
-# Used for the normal OAuth2 callback / bot authorization
+# Used for normal OAuth2 / bot authorization
 DISCORD_REDIRECT_URI = os.getenv(
     "DISCORD_REDIRECT_URI"
 )
@@ -230,21 +231,13 @@ app.config[
 
 app.config[
     "PERMANENT_SESSION_LIFETIME"
-] = 86400
+] = timedelta(
+    days=1
+)
 
 
 # =========================================================
 # STATIC FILES
-#
-# IMPORTANT:
-# Flask was created with static_folder=None.
-# Therefore we manually provide ALL static endpoints.
-#
-# This also creates an endpoint called "static", so:
-#
-# url_for("static", filename="assets/images/favicon.png")
-#
-# works correctly.
 # =========================================================
 
 @app.route(
@@ -1004,16 +997,6 @@ def can_manage_guild(guild):
 # =========================================================
 
 def is_admin(user):
-    """
-    Checks whether a Discord user is a Misuki administrator.
-
-    Configure ADMIN_USER_IDS in Render as a comma-separated
-    list of Discord user IDs.
-
-    Example:
-
-    ADMIN_USER_IDS=123456789012345678,987654321098765432
-    """
 
     if not user:
 
@@ -1117,9 +1100,7 @@ def create_oauth_state():
     session[
         "oauth_state_expires_at"
     ] = (
-        datetime.now(
-            timezone.utc
-        )
+        utc_now()
         + timedelta(minutes=10)
     ).isoformat()
 
@@ -1150,9 +1131,13 @@ def verify_oauth_state(state):
                 expires_at_raw
             )
 
-            if datetime.now(
-                timezone.utc
-            ) >= expires_at:
+            if expires_at.tzinfo is None:
+
+                expires_at = expires_at.replace(
+                    tzinfo=timezone.utc
+                )
+
+            if utc_now() >= expires_at:
 
                 session.pop(
                     "oauth_state",
@@ -1248,6 +1233,51 @@ def error_page(
 @app.route("/login")
 def login():
 
+    # -----------------------------------------------------
+    # If the user already has a valid Discord session,
+    # DO NOT start OAuth2 again.
+    # -----------------------------------------------------
+
+    existing_user = get_user()
+
+    if existing_user:
+
+        next_url = safe_next_url(
+            request.args.get(
+                "next"
+            )
+            or session.get(
+                "next_url"
+            )
+        )
+
+        session[
+            "next_url"
+        ] = next_url
+
+        print(
+            "✅ User is already logged in."
+        )
+
+        print(
+            f"👤 User: "
+            f"{existing_user.get('username')}"
+        )
+
+        print(
+            f"➡️ Redirecting to: "
+            f"{next_url}"
+        )
+
+        return redirect(
+            next_url
+        )
+
+
+    # -----------------------------------------------------
+    # Configuration checks
+    # -----------------------------------------------------
+
     if not CLIENT_ID:
 
         return error_page(
@@ -1272,6 +1302,11 @@ def login():
             500
         )
 
+
+    # -----------------------------------------------------
+    # Destination after login
+    # -----------------------------------------------------
+
     next_url = safe_next_url(
         request.args.get(
             "next"
@@ -1282,7 +1317,17 @@ def login():
         "next_url"
     ] = next_url
 
+
+    # -----------------------------------------------------
+    # Create OAuth state
+    # -----------------------------------------------------
+
     state = create_oauth_state()
+
+
+    # -----------------------------------------------------
+    # Discord OAuth2
+    # -----------------------------------------------------
 
     params = {
 
@@ -1303,6 +1348,7 @@ def login():
 
     }
 
+
     discord_url = (
 
         f"{DISCORD_OAUTH_URL}?"
@@ -1313,6 +1359,7 @@ def login():
 
     )
 
+
     print(
         "🔐 Starting Discord LOGIN OAuth2"
     )
@@ -1321,6 +1368,12 @@ def login():
         f"🔗 Login redirect: "
         f"{DISCORD_LOGIN_REDIRECT_URI}"
     )
+
+    print(
+        f"➡️ Next: "
+        f"{next_url}"
+    )
+
 
     return redirect(
         discord_url
@@ -1345,11 +1398,21 @@ def login_callback():
             None
         )
 
+        session.pop(
+            "oauth_state_expires_at",
+            None
+        )
+
         return error_page(
             "❌ OAuth2 Error",
             "Discord cancelled or rejected the login.",
             400
         )
+
+
+    # -----------------------------------------------------
+    # Verify OAuth state BEFORE exchanging the code
+    # -----------------------------------------------------
 
     state = request.args.get(
         "state"
@@ -1365,6 +1428,7 @@ def login_callback():
             400
         )
 
+
     code = request.args.get(
         "code"
     )
@@ -1377,6 +1441,7 @@ def login_callback():
             400
         )
 
+
     if not CLIENT_ID or not CLIENT_SECRET:
 
         return error_page(
@@ -1385,6 +1450,7 @@ def login_callback():
             500
         )
 
+
     if not DISCORD_LOGIN_REDIRECT_URI:
 
         return error_page(
@@ -1392,6 +1458,11 @@ def login_callback():
             "DISCORD_LOGIN_REDIRECT_URI is missing.",
             500
         )
+
+
+    # -----------------------------------------------------
+    # Token exchange
+    # -----------------------------------------------------
 
     token_data = {
 
@@ -1411,6 +1482,7 @@ def login_callback():
             DISCORD_LOGIN_REDIRECT_URI
 
     }
+
 
     try:
 
@@ -1441,6 +1513,7 @@ def login_callback():
             500
         )
 
+
     if response.status_code != 200:
 
         print(
@@ -1457,6 +1530,7 @@ def login_callback():
             400
         )
 
+
     try:
 
         token_json = response.json()
@@ -1469,9 +1543,11 @@ def login_callback():
             400
         )
 
+
     access_token = token_json.get(
         "access_token"
     )
+
 
     if not access_token:
 
@@ -1481,9 +1557,10 @@ def login_callback():
             400
         )
 
-    # =====================================================
-    # VERIFY USER
-    # =====================================================
+
+    # -----------------------------------------------------
+    # Verify user
+    # -----------------------------------------------------
 
     try:
 
@@ -1512,6 +1589,7 @@ def login_callback():
             500
         )
 
+
     if user_response.status_code != 200:
 
         return error_page(
@@ -1519,6 +1597,7 @@ def login_callback():
             "Failed to verify your Discord account.",
             400
         )
+
 
     try:
 
@@ -1532,25 +1611,38 @@ def login_callback():
             400
         )
 
+
+    # -----------------------------------------------------
+    # Save destination BEFORE regenerating session
+    # -----------------------------------------------------
+
     next_url = safe_next_url(
         session.get(
             "next_url"
         )
     )
 
-    # =====================================================
-    # REGENERATE SESSION
-    # =====================================================
+
+    # -----------------------------------------------------
+    # Regenerate session
+    #
+    # Important:
+    # We intentionally clear the old session after
+    # successful OAuth verification.
+    # -----------------------------------------------------
 
     session.clear()
+
 
     session[
         "access_token"
     ] = access_token
 
+
     session[
         "logged_in"
     ] = True
+
 
     session[
         "user_id"
@@ -1558,15 +1650,25 @@ def login_callback():
         "id"
     )
 
+
     session[
         "username"
     ] = user.get(
         "username"
     )
 
+
+    session[
+        "global_name"
+    ] = user.get(
+        "global_name"
+    )
+
+
     session.permanent = True
 
     session.modified = True
+
 
     print(
         "=========================================="
@@ -1577,20 +1679,24 @@ def login_callback():
     )
 
     print(
-        f"👤 User: {user.get('username')}"
+        f"👤 User: "
+        f"{user.get('username')}"
     )
 
     print(
-        f"🆔 ID: {user.get('id')}"
+        f"🆔 ID: "
+        f"{user.get('id')}"
     )
 
     print(
-        f"➡️ Next: {next_url}"
+        f"➡️ Next: "
+        f"{next_url}"
     )
 
     print(
         "=========================================="
     )
+
 
     return redirect(
         next_url
@@ -1599,8 +1705,6 @@ def login_callback():
 
 # =========================================================
 # NORMAL OAUTH2 CALLBACK
-#
-# This is kept separate from Discord LOGIN.
 # =========================================================
 
 @app.route("/callback")
@@ -1618,6 +1722,7 @@ def callback():
             400
         )
 
+
     code = request.args.get(
         "code"
     )
@@ -1630,6 +1735,7 @@ def callback():
             400
         )
 
+
     if not CLIENT_ID or not CLIENT_SECRET:
 
         return error_page(
@@ -1638,6 +1744,7 @@ def callback():
             500
         )
 
+
     if not DISCORD_REDIRECT_URI:
 
         return error_page(
@@ -1645,6 +1752,7 @@ def callback():
             "DISCORD_REDIRECT_URI is missing.",
             500
         )
+
 
     token_data = {
 
@@ -1664,6 +1772,7 @@ def callback():
             DISCORD_REDIRECT_URI
 
     }
+
 
     try:
 
@@ -1694,6 +1803,7 @@ def callback():
             500
         )
 
+
     if response.status_code != 200:
 
         print(
@@ -1710,6 +1820,7 @@ def callback():
             400
         )
 
+
     return render_template(
         "oauth2_success.html",
         user=get_user()
@@ -1724,6 +1835,10 @@ def callback():
 def logout():
 
     session.clear()
+
+    print(
+        "🚪 User logged out."
+    )
 
     return redirect(
         "/"
@@ -1858,9 +1973,6 @@ def dashboard():
             guild
         )
 
-    # =====================================================
-    # SORT SERVERS
-    # =====================================================
 
     authorized.sort(
         key=lambda guild:
@@ -1869,6 +1981,7 @@ def dashboard():
                 ""
             ).lower()
     )
+
 
     available.sort(
         key=lambda guild: (
@@ -1882,6 +1995,7 @@ def dashboard():
             ).lower()
         )
     )
+
 
     return render_template(
         "dashboard.html",
@@ -1912,7 +2026,9 @@ def manage(guild_id):
             "/login"
         )
 
+
     user_guilds = get_user_guilds()
+
 
     guild = next(
 
@@ -1932,6 +2048,7 @@ def manage(guild_id):
 
     )
 
+
     if guild is None:
 
         return error_page(
@@ -1941,7 +2058,9 @@ def manage(guild_id):
             user
         )
 
+
     bot_guilds = get_bot_guilds()
+
 
     bot_guild_ids = {
 
@@ -1955,19 +2074,23 @@ def manage(guild_id):
 
     }
 
+
     if str(guild_id) not in bot_guild_ids:
 
         return redirect(
             "/dashboard"
         )
 
+
     license_data = get_license(
         guild_id
     )
 
+
     license_active = license_is_active(
         guild_id
     )
+
 
     return render_template(
         "manage.html",
@@ -1989,6 +2112,7 @@ def get_random_reviews(
     if not DATABASE_URL:
 
         return []
+
 
     try:
 
@@ -2015,6 +2139,7 @@ def get_random_reviews(
 
                 rows = cursor.fetchall()
 
+
     except Exception as error:
 
         print(
@@ -2023,7 +2148,9 @@ def get_random_reviews(
 
         return []
 
+
     reviews = []
+
 
     for row in rows:
 
@@ -2052,9 +2179,11 @@ def get_random_reviews(
 
         })
 
+
     random.shuffle(
         reviews
     )
+
 
     return reviews[:amount]
 
@@ -2077,6 +2206,7 @@ def reviews():
     if user:
 
         can_review = user_has_license()
+
 
     return render_template(
         "reviews.html",
@@ -2108,6 +2238,7 @@ def submit_review():
             "/login"
         )
 
+
     if not user_has_license():
 
         return error_page(
@@ -2117,15 +2248,18 @@ def submit_review():
             user
         )
 
+
     review = request.form.get(
         "review",
         ""
     ).strip()
 
+
     rating_raw = request.form.get(
         "rating",
         "5"
     )
+
 
     try:
 
@@ -2140,6 +2274,7 @@ def submit_review():
 
         rating = 5
 
+
     rating = max(
         1,
         min(
@@ -2148,19 +2283,23 @@ def submit_review():
         )
     )
 
+
     if not review:
 
         return redirect(
             "/reviews"
         )
 
+
     review = review[:1000]
+
 
     user_id = str(
         user.get(
             "id"
         )
     )
+
 
     username = (
 
@@ -2180,9 +2319,11 @@ def submit_review():
 
     )
 
+
     avatar_hash = user.get(
         "avatar"
     )
+
 
     if avatar_hash:
 
@@ -2200,6 +2341,7 @@ def submit_review():
 
         avatar = None
 
+
     if not DATABASE_URL:
 
         return error_page(
@@ -2208,6 +2350,7 @@ def submit_review():
             500,
             user
         )
+
 
     try:
 
@@ -2258,6 +2401,7 @@ def submit_review():
 
             connection.commit()
 
+
     except Exception as error:
 
         print(
@@ -2270,6 +2414,7 @@ def submit_review():
             500,
             user
         )
+
 
     return redirect(
         "/reviews"
@@ -2437,6 +2582,7 @@ if __name__ == "__main__":
         "=========================================="
     )
 
+
     app.run(
 
         host="0.0.0.0",
@@ -2446,3 +2592,4 @@ if __name__ == "__main__":
         debug=False
 
     )
+
