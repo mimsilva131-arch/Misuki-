@@ -4,41 +4,31 @@
    SIDE MENU
    ========================================================= */
 
-
 /* =========================================================
    HAMBURGER
    ========================================================= */
 
 .hamburger {
-
     width: 44px;
     height: 44px;
-
     padding: 0;
     margin: 0;
 
     display: flex;
-
     align-items: center;
     justify-content: center;
-
     flex-direction: column;
-
     gap: 5px;
 
     border: 0;
-
     border-radius: 10px;
 
-    background:
-        rgba(255, 255, 255, .04);
-
+    background: rgba(255, 255, 255, .04);
     color: #ffffff;
 
     cursor: pointer;
 
     position: relative;
-
     z-index: 10002;
 
     opacity: 1;
@@ -50,14 +40,9 @@
         transform .2s ease;
 }
 
-
 .hamburger:hover {
-
-    background:
-        rgba(255, 255, 255, .09);
-
-    transform:
-        translateY(-1px);
+    background: rgba(255, 255, 255, .09);
+    transform: translateY(-1px);
 }
 
 
@@ -66,7 +51,6 @@
    ========================================================= */
 
 .hamburger span {
-
     display: block;
 
     width: 23px;
@@ -85,13 +69,9 @@
    ========================================================= */
 
 body.menu-open .hamburger {
-
     display: none !important;
-
     opacity: 0 !important;
-
     visibility: hidden !important;
-
     pointer-events: none !important;
 }
 
@@ -101,18 +81,13 @@ body.menu-open .hamburger {
    ========================================================= */
 
 .overlay {
-
     position: fixed;
-
     inset: 0;
 
-    background:
-        rgba(0, 0, 0, .60);
+    background: rgba(0, 0, 0, .60);
 
     opacity: 0;
-
     visibility: hidden;
-
     pointer-events: none;
 
     transition:
@@ -122,13 +97,9 @@ body.menu-open .hamburger {
     z-index: 9998;
 }
 
-
 .overlay.show {
-
     opacity: 1;
-
     visibility: visible;
-
     pointer-events: auto;
 }
 
@@ -138,18 +109,12 @@ body.menu-open .hamburger {
    ========================================================= */
 
 .menu {
-
     position: fixed;
 
     top: 0;
     right: 0;
 
-    width:
-        min(
-            360px,
-            88vw
-        );
-
+    width: min(360px, 88vw);
     height: 100vh;
 
     padding: 28px;
@@ -167,11 +132,9 @@ body.menu-open .hamburger {
     box-shadow:
         -25px 0 70px rgba(0, 0, 0, .5);
 
-    transform:
-        translateX(100%);
+    transform: translateX(100%);
 
     visibility: hidden;
-
     pointer-events: none;
 
     transition:
@@ -189,12 +152,9 @@ body.menu-open .hamburger {
    ========================================================= */
 
 .menu.open {
-
-    transform:
-        translateX(0);
+    transform: translateX(0);
 
     visibility: visible;
-
     pointer-events: auto;
 }
 
@@ -204,7 +164,6 @@ body.menu-open .hamburger {
    ========================================================= */
 
 body.menu-open {
-
     overflow: hidden;
 }
 
@@ -214,7 +173,6 @@ body.menu-open {
    ========================================================= */
 
 .menu-header {
-
     display: flex;
 
     align-items: center;
@@ -223,13 +181,10 @@ body.menu-open {
     margin-bottom: 28px;
 }
 
-
 .menu-title {
-
     color: #ffffff;
 
     font-size: 22px;
-
     font-weight: 750;
 }
 
@@ -239,7 +194,6 @@ body.menu-open {
    ========================================================= */
 
 .menu-close {
-
     width: 40px;
     height: 40px;
 
@@ -247,27 +201,21 @@ body.menu-open {
     margin: 0;
 
     display: flex;
-
     align-items: center;
     justify-content: center;
 
     border: 0;
-
     border-radius: 10px;
 
-    background:
-        rgba(255, 255, 255, .06);
-
+    background: rgba(255, 255, 255, .06);
     color: #ffffff;
 
     font-size: 27px;
-
     line-height: 1;
 
     cursor: pointer;
 
     position: relative;
-
     z-index: 10003;
 
     transition:
@@ -275,14 +223,10 @@ body.menu-open {
         transform .2s ease;
 }
 
-
 .menu-close:hover {
+    background: rgba(255, 255, 255, .12);
 
-    background:
-        rgba(255, 255, 255, .12);
-
-    transform:
-        rotate(90deg);
+    transform: rotate(90deg);
 }
 
 
@@ -291,19 +235,15 @@ body.menu-open {
    ========================================================= */
 
 .menu-section {
-
     margin-top: 22px;
-
     margin-bottom: 7px;
 
     color: #727d92;
 
     font-size: 11px;
-
     font-weight: 700;
 
     text-transform: uppercase;
-
     letter-spacing: 1px;
 }
 
@@ -313,17 +253,14 @@ body.menu-open {
    ========================================================= */
 
 .menu a {
-
     display: block;
 
     margin: 3px 0;
-
     padding: 12px 14px;
 
     border-radius: 10px;
 
     color: #dce2ef;
-
     text-decoration: none;
 
     transition:
@@ -332,16 +269,12 @@ body.menu-open {
         transform .2s ease;
 }
 
-
 .menu a:hover {
-
-    background:
-        rgba(100, 140, 255, .10);
+    background: rgba(100, 140, 255, .10);
 
     color: #ffffff;
 
-    transform:
-        translateX(4px);
+    transform: translateX(4px);
 }
 
 
@@ -350,20 +283,14 @@ body.menu-open {
    ========================================================= */
 
 .menu .discord-login {
-
     margin-top: 8px;
 
-    background:
-        rgba(88, 101, 242, .14);
-
+    background: rgba(88, 101, 242, .14);
     color: #aeb8ff;
 }
 
-
 .menu .discord-login:hover {
-
-    background:
-        rgba(88, 101, 242, .24);
+    background: rgba(88, 101, 242, .24);
 
     color: #ffffff;
 }

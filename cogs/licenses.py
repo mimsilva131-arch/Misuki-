@@ -724,81 +724,108 @@ class LicenseManager(commands.Cog):
 
             return
 
-        license_key = await self.create_license(
-            guild_id,
-            days
-        )
+        try:
 
-        if license_key is None:
-
-            await interaction.response.send_message(
-                "❌ This server already has a license.",
+            await interaction.response.defer(
                 ephemeral=True
             )
 
-            return
+            license_key = await self.create_license(
+                guild_id,
+                days
+            )
 
-        guild = self.bot.get_guild(
-            guild_id
-        )
+            if license_key is None:
 
-        server_name = (
-            guild.name
-            if guild
-            else "Unknown / Bot not in server"
-        )
+                await interaction.followup.send(
+                    "❌ This server already has a license.",
+                    ephemeral=True
+                )
 
-        license_data = await self.get_license(
-            guild_id
-        )
+                return
 
-        expiration = license_data["expires_at"]
+            guild = self.bot.get_guild(
+                guild_id
+            )
 
-        embed = discord.Embed(
-            title="✅ License Created",
-            color=discord.Color.green()
-        )
+            server_name = (
+                guild.name
+                if guild
+                else "Unknown / Bot not in server"
+            )
 
-        embed.add_field(
-            name="Server",
-            value=server_name,
-            inline=True
-        )
+            license_data = await self.get_license(
+                guild_id
+            )
 
-        embed.add_field(
-            name="Server ID",
-            value=f"`{guild_id}`",
-            inline=True
-        )
+            expiration = license_data["expires_at"]
 
-        embed.add_field(
-            name="Duration",
-            value=f"{days} day(s)",
-            inline=True
-        )
+            embed = discord.Embed(
+                title="✅ License Created",
+                color=discord.Color.green()
+            )
 
-        embed.add_field(
-            name="License Key",
-            value=f"`{license_key}`",
-            inline=False
-        )
+            embed.add_field(
+                name="Server",
+                value=server_name,
+                inline=True
+            )
 
-        embed.add_field(
-            name="Expires",
-            value=(
-                f"<t:{int(expiration.timestamp())}:F>"
-            ),
-            inline=False
-        )
+            embed.add_field(
+                name="Server ID",
+                value=f"`{guild_id}`",
+                inline=True
+            )
 
-        embed.set_footer(
-            text="Misuki • License System"
-        )
+            embed.add_field(
+                name="Duration",
+                value=f"{days} day(s)",
+                inline=True
+            )
 
-        await interaction.response.send_message(
-            embed=embed,
-            ephemeral=True
-        )
+            embed.add_field(
+                name="License Key",
+                value=f"`{license_key}`",
+                inline=False
+            )
+
+            embed.add_field(
+                name="Expires",
+                value=(
+                    f"<t:{int(expiration.timestamp())}:F>"
+                ),
+                inline=False
+            )
+
+            embed.set_footer(
+                text="Misuki • License System"
+            )
+
+            await interaction.followup.send(
+                embed=embed,
+                ephemeral=True
+            )
+
+        except Exception as error:
+
+            print(
+                "❌ Error while creating license:",
+                error
+            )
+
+            if not interaction.response.is_done():
+
+                await interaction.response.send_message(
+                    "❌ Something went wrong while creating the license.",
+                    ephemeral=True
+                )
+
+                return
+
+            await interaction.followup.send(
+                "❌ Something went wrong while creating the license.",
+                ephemeral=True
+            )
 
     # =====================================================
     # /REVOKELICENSE

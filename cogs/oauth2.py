@@ -2,7 +2,7 @@ import os
 import random
 import secrets
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from urllib.parse import urlencode
 
 import requests
@@ -1114,6 +1114,15 @@ def create_oauth_state():
         "oauth_state"
     ] = state
 
+    session[
+        "oauth_state_expires_at"
+    ] = (
+        datetime.now(
+            timezone.utc
+        )
+        + timedelta(minutes=10)
+    ).isoformat()
+
     session.modified = True
 
     return state
@@ -1121,25 +1130,96 @@ def create_oauth_state():
 
 def verify_oauth_state(state):
 
-    stored_state = session.pop(
-        "oauth_state",
-        None
-    )
-
-    session.modified = True
-
     if not state:
 
         return False
+
+    stored_state = session.get(
+        "oauth_state"
+    )
+
+    expires_at_raw = session.get(
+        "oauth_state_expires_at"
+    )
+
+    if expires_at_raw:
+
+        try:
+
+            expires_at = datetime.fromisoformat(
+                expires_at_raw
+            )
+
+            if datetime.now(
+                timezone.utc
+            ) >= expires_at:
+
+                session.pop(
+                    "oauth_state",
+                    None
+                )
+
+                session.pop(
+                    "oauth_state_expires_at",
+                    None
+                )
+
+                session.modified = True
+
+                return False
+
+        except ValueError:
+
+            session.pop(
+                "oauth_state",
+                None
+            )
+
+            session.pop(
+                "oauth_state_expires_at",
+                None
+            )
+
+            session.modified = True
+
+            return False
 
     if not stored_state:
 
         return False
 
-    return secrets.compare_digest(
+    if not secrets.compare_digest(
         str(stored_state),
         str(state)
+    ):
+
+        session.pop(
+            "oauth_state",
+            None
+        )
+
+        session.pop(
+            "oauth_state_expires_at",
+            None
+        )
+
+        session.modified = True
+
+        return False
+
+    session.pop(
+        "oauth_state",
+        None
     )
+
+    session.pop(
+        "oauth_state_expires_at",
+        None
+    )
+
+    session.modified = True
+
+    return True
 
 
 # =========================================================
