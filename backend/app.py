@@ -73,8 +73,9 @@ CLIENT_SECRET = os.getenv(
     "DISCORD_CLIENT_SECRET"
 )
 
-# Mantido para compatibilidade com outras partes.
-# O LOGIN usa exclusivamente DISCORD_LOGIN_REDIRECT_URI.
+# Mantido apenas para compatibilidade.
+# O LOGIN usa exclusivamente:
+# DISCORD_LOGIN_REDIRECT_URI
 DISCORD_REDIRECT_URI = os.getenv(
     "DISCORD_REDIRECT_URI"
 )
@@ -96,25 +97,48 @@ SECRET_KEY = os.getenv(
     "FLASK_SECRET_KEY"
 )
 
-PORT = int(
-    os.getenv(
-        "PORT",
-        "5000"
+try:
+    PORT = int(
+        os.getenv(
+            "PORT",
+            "5000"
+        )
     )
-)
+except (
+    ValueError,
+    TypeError
+):
+    PORT = 5000
 
-# Determine if cookies should be secure
-# In production (HTTPS), always use secure cookies
-# In development (HTTP), allow insecure cookies
-_env_cookie_secure = os.getenv("COOKIE_SECURE", "").lower()
 
-if _env_cookie_secure in ("true", "false"):
-    COOKIE_SECURE = _env_cookie_secure == "true"
+# =========================================================
+# COOKIE CONFIGURATION
+# =========================================================
+
+_env_cookie_secure = os.getenv(
+    "COOKIE_SECURE",
+    ""
+).strip().lower()
+
+if _env_cookie_secure in (
+    "true",
+    "false"
+):
+
+    COOKIE_SECURE = (
+        _env_cookie_secure == "true"
+    )
+
 else:
-    # Auto-detect: if running on onrender (production), use secure
-    DISCORD_LOGIN_REDIRECT_URI_STR = os.getenv("DISCORD_LOGIN_REDIRECT_URI", "")
-    COOKIE_SECURE = DISCORD_LOGIN_REDIRECT_URI_STR.startswith("https://")
 
+    COOKIE_SECURE = (
+        str(
+            DISCORD_LOGIN_REDIRECT_URI
+            or ""
+        )
+        .lower()
+        .startswith("https://")
+    )
 
 
 # =========================================================
@@ -139,8 +163,13 @@ def is_admin(user=None):
     if not user:
         return False
 
+    user_id = user.get("id")
+
+    if not user_id:
+        return False
+
     return str(
-        user.get("id")
+        user_id
     ) in ADMIN_DISCORD_IDS
 
 
@@ -172,11 +201,11 @@ if not SECRET_KEY:
 if not DATABASE_URL:
 
     print(
-        "❌ DATABASE_URL is missing."
+        "⚠️ DATABASE_URL is missing."
     )
 
     print(
-        "❌ PostgreSQL is required for Misuki."
+        "⚠️ PostgreSQL is required for Misuki."
     )
 
 
@@ -195,6 +224,28 @@ app.secret_key = SECRET_KEY
 
 app.config["PROPAGATE_EXCEPTIONS"] = True
 
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+
+app.config["SESSION_COOKIE_SAMESITE"] = (
+    "None"
+    if COOKIE_SECURE
+    else "Lax"
+)
+
+app.config["SESSION_COOKIE_SECURE"] = (
+    COOKIE_SECURE
+)
+
+app.config["SESSION_REFRESH_EACH_REQUEST"] = True
+
+app.config["SESSION_COOKIE_NAME"] = (
+    "misuki_session"
+)
+
+app.config["PERMANENT_SESSION_LIFETIME"] = (
+    timedelta(days=1)
+)
+
 app.wsgi_app = ProxyFix(
     app.wsgi_app,
     x_for=1,
@@ -204,24 +255,14 @@ app.wsgi_app = ProxyFix(
 
 
 # =========================================================
-# SESSION
+# TEMPLATE HELPERS
 # =========================================================
-
-app.config["SESSION_COOKIE_HTTPONLY"] = True
-app.config["SESSION_COOKIE_SAMESITE"] = "None" if COOKIE_SECURE else "Lax"
-app.config["SESSION_COOKIE_SECURE"] = COOKIE_SECURE
-app.config["SESSION_REFRESH_EACH_REQUEST"] = True
-app.config["SESSION_COOKIE_NAME"] = "misuki_session"
-
-app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(
-    days=1
-)
-
 
 @app.context_processor
 def inject_template_helpers():
+
     return {
-        "is_admin": is_admin,
+        "is_admin": is_admin
     }
 
 
@@ -295,7 +336,8 @@ def database_connection():
 
     return psycopg2.connect(
         DATABASE_URL,
-        sslmode="require"
+        sslmode="require",
+        connect_timeout=10
     )
 
 
@@ -417,10 +459,6 @@ def create_database():
                     """
                 )
 
-                # -------------------------------------------------
-                # ADVERTISEMENTS MIGRATION
-                # -------------------------------------------------
-
                 cursor.execute(
                     """
                     ALTER TABLE advertisements
@@ -517,7 +555,9 @@ def parse_datetime(value):
             tzinfo=timezone.utc
         )
 
-    return parsed
+    return parsed.astimezone(
+        timezone.utc
+    )
 
 
 # =========================================================
@@ -541,8 +581,13 @@ def valid_http_url(value):
 
     return (
         parsed.scheme.lower()
-        in ("http", "https")
-        and bool(parsed.netloc)
+        in (
+            "http",
+            "https"
+        )
+        and bool(
+            parsed.netloc
+        )
     )
 
 
@@ -551,7 +596,9 @@ def safe_next_url(value):
     if not value:
         return "/dashboard"
 
-    value = str(value)
+    value = str(
+        value
+    ).strip()
 
     if not value.startswith("/"):
         return "/dashboard"
@@ -647,7 +694,7 @@ def license_is_active(guild_id):
     status = license_data[2]
     expires_at = license_data[3]
 
-    if status != "active":
+    if str(status).lower() != "active":
         return False
 
     if expires_at:
@@ -672,6 +719,7 @@ def license_is_active(guild_id):
                             UPDATE licenses
                             SET status = 'expired'
                             WHERE guild_id = %s
+                            AND status = 'active'
                             """,
                             (
                                 int(guild_id),
@@ -723,6 +771,15 @@ def get_user_guilds():
 
         return []
 
+    if response.status_code in (
+        401,
+        403
+    ):
+
+        session.clear()
+
+        return []
+
     if response.status_code != 200:
         return []
 
@@ -734,10 +791,11 @@ def get_user_guilds():
 
         return []
 
-    return data if isinstance(
-        data,
-        list
-    ) else []
+    return (
+        data
+        if isinstance(data, list)
+        else []
+    )
 
 
 # =========================================================
@@ -754,8 +812,12 @@ def user_has_license():
             "id"
         )
 
-        if guild_id and license_is_active(
+        if (
             guild_id
+            and
+            license_is_active(
+                guild_id
+            )
         ):
 
             return True
@@ -802,13 +864,15 @@ def get_active_license_guild_ids():
 
     now = utc_now()
 
+    expired_ids = []
+
     for row in rows:
 
         guild_id = row[0]
         status = row[1]
         expires_at = row[2]
 
-        if status != "active":
+        if str(status).lower() != "active":
             continue
 
         if expires_at:
@@ -822,33 +886,47 @@ def get_active_license_guild_ids():
 
             if now >= expiration:
 
-                try:
-
-                    with database_connection() as connection:
-
-                        with connection.cursor() as cursor:
-
-                            cursor.execute(
-                                """
-                                UPDATE licenses
-                                SET status = 'expired'
-                                WHERE guild_id = %s
-                                """,
-                                (
-                                    int(guild_id),
-                                )
-                            )
-
-                        connection.commit()
-
-                except Exception:
-                    pass
+                expired_ids.append(
+                    guild_id
+                )
 
                 continue
 
         active_ids.add(
             str(guild_id)
         )
+
+    # -----------------------------------------------------
+    # MARK EXPIRED LICENSES
+    # -----------------------------------------------------
+
+    if expired_ids:
+
+        try:
+
+            with database_connection() as connection:
+
+                with connection.cursor() as cursor:
+
+                    cursor.execute(
+                        """
+                        UPDATE licenses
+                        SET status = 'expired'
+                        WHERE guild_id = ANY(%s)
+                        AND status = 'active'
+                        """,
+                        (
+                            expired_ids,
+                        )
+                    )
+
+                connection.commit()
+
+        except Exception as error:
+
+            print(
+                f"⚠️ Could not mark licenses as expired: {error}"
+            )
 
     return active_ids
 
@@ -894,7 +972,11 @@ def get_user():
             timeout=10
         )
 
-    except requests.RequestException:
+    except requests.RequestException as error:
+
+        print(
+            f"❌ Discord user request error: {error}"
+        )
 
         return None
 
@@ -938,7 +1020,11 @@ def get_bot_guilds():
             timeout=10
         )
 
-    except requests.RequestException:
+    except requests.RequestException as error:
+
+        print(
+            f"❌ Discord bot guild request error: {error}"
+        )
 
         return []
 
@@ -953,10 +1039,11 @@ def get_bot_guilds():
 
         return []
 
-    return data if isinstance(
-        data,
-        list
-    ) else []
+    return (
+        data
+        if isinstance(data, list)
+        else []
+    )
 
 
 # =========================================================
@@ -968,6 +1055,9 @@ MANAGE_GUILD = 1 << 5
 
 
 def can_manage_guild(guild):
+
+    if not guild:
+        return False
 
     try:
 
@@ -998,10 +1088,39 @@ def can_manage_guild(guild):
 
 def get_invite_url(guild_id):
 
+    if not CLIENT_ID:
+        return None
+
+    try:
+
+        guild_id = int(
+            guild_id
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        return None
+
     permissions = os.getenv(
         "DISCORD_BOT_PERMISSIONS",
         "0"
-    )
+    ).strip()
+
+    try:
+
+        int(
+            permissions
+        )
+
+    except (
+        ValueError,
+        TypeError
+    ):
+
+        permissions = "0"
 
     params = {
         "client_id":
@@ -1036,11 +1155,13 @@ def create_oauth_state():
     session["oauth_state"] = state
 
     session["oauth_state_expires_at"] = (
-        datetime.now(
-            timezone.utc
+        (
+            utc_now()
+            +
+            timedelta(minutes=10)
         )
-        + timedelta(minutes=10)
-    ).isoformat()
+        .isoformat()
+    )
 
     session.permanent = True
     session.modified = True
@@ -1051,9 +1172,11 @@ def create_oauth_state():
 def verify_oauth_state(state):
 
     if not state:
+
         print(
             "⚠️ OAuth state verification: No state provided"
         )
+
         return False
 
     stored_state = session.get(
@@ -1064,78 +1187,140 @@ def verify_oauth_state(state):
         "oauth_state_expires_at"
     )
 
-    print(
-        f"📋 OAuth State Check:"
-    )
-    print(
-        f"   Received: {state[:10]}..."
-    )
-    print(
-        f"   Stored: {str(stored_state)[:10] if stored_state else 'None'}..."
-    )
-    print(
-        f"   Expires at: {expires_at_raw}"
-    )
-
-    if expires_at_raw:
-
-        try:
-
-            expires_at = datetime.fromisoformat(
-                expires_at_raw
-            )
-
-            if datetime.now(
-                timezone.utc
-            ) >= expires_at:
-
-                print(
-                    "⚠️ OAuth state expired"
-                )
-
-                session.pop("oauth_state", None)
-                session.pop("oauth_state_expires_at", None)
-                session.modified = True
-                return False
-
-        except ValueError as e:
-
-            print(
-                f"⚠️ OAuth state date parse error: {e}"
-            )
-
-            session.pop("oauth_state", None)
-            session.pop("oauth_state_expires_at", None)
-            session.modified = True
-            return False
-
     if not stored_state:
+
         print(
             "⚠️ OAuth state not in session"
         )
+
         return False
 
-    if not secrets.compare_digest(
-        str(stored_state),
-        str(state)
-    ):
+    if not expires_at_raw:
+
+        print(
+            "⚠️ OAuth state expiration missing"
+        )
+
+        session.pop(
+            "oauth_state",
+            None
+        )
+
+        session.pop(
+            "oauth_state_expires_at",
+            None
+        )
+
+        session.modified = True
+
+        return False
+
+    try:
+
+        expires_at = datetime.fromisoformat(
+            str(expires_at_raw)
+        )
+
+        if expires_at.tzinfo is None:
+
+            expires_at = expires_at.replace(
+                tzinfo=timezone.utc
+            )
+
+        expires_at = expires_at.astimezone(
+            timezone.utc
+        )
+
+    except (
+        ValueError,
+        TypeError
+    ) as error:
+
+        print(
+            f"⚠️ OAuth state date parse error: {error}"
+        )
+
+        session.pop(
+            "oauth_state",
+            None
+        )
+
+        session.pop(
+            "oauth_state_expires_at",
+            None
+        )
+
+        session.modified = True
+
+        return False
+
+    if utc_now() >= expires_at:
+
+        print(
+            "⚠️ OAuth state expired"
+        )
+
+        session.pop(
+            "oauth_state",
+            None
+        )
+
+        session.pop(
+            "oauth_state_expires_at",
+            None
+        )
+
+        session.modified = True
+
+        return False
+
+    try:
+
+        valid = secrets.compare_digest(
+            str(stored_state),
+            str(state)
+        )
+
+    except Exception:
+
+        valid = False
+
+    if not valid:
 
         print(
             "⚠️ OAuth state mismatch"
         )
 
-        session.pop("oauth_state", None)
-        session.pop("oauth_state_expires_at", None)
+        session.pop(
+            "oauth_state",
+            None
+        )
+
+        session.pop(
+            "oauth_state_expires_at",
+            None
+        )
+
         session.modified = True
+
         return False
 
     print(
         "✅ OAuth state verified successfully"
     )
 
-    session.pop("oauth_state", None)
-    session.pop("oauth_state_expires_at", None)
+    session.pop(
+        "oauth_state",
+        None
+    )
+
+    session.pop(
+        "oauth_state_expires_at",
+        None
+    )
+
     session.modified = True
+
     return True
 
 
@@ -1190,6 +1375,16 @@ def login():
             500
         )
 
+    if not valid_http_url(
+        DISCORD_LOGIN_REDIRECT_URI
+    ):
+
+        return error_page(
+            "❌ Configuration Error",
+            "DISCORD_LOGIN_REDIRECT_URI must be a valid HTTP or HTTPS URL.",
+            500
+        )
+
     next_url = safe_next_url(
         request.args.get(
             "next"
@@ -1219,7 +1414,8 @@ def login():
 
     discord_url = (
         f"{DISCORD_OAUTH_URL}?"
-        + urlencode(params)
+        +
+        urlencode(params)
     )
 
     return redirect(
@@ -1239,6 +1435,16 @@ def login_callback():
     )
 
     if error:
+
+        session.pop(
+            "oauth_state",
+            None
+        )
+
+        session.pop(
+            "oauth_state_expires_at",
+            None
+        )
 
         return error_page(
             "❌ OAuth2 Error",
@@ -1272,6 +1478,14 @@ def login_callback():
             400
         )
 
+    if not DISCORD_LOGIN_REDIRECT_URI:
+
+        return error_page(
+            "❌ Configuration Error",
+            "DISCORD_LOGIN_REDIRECT_URI is missing.",
+            500
+        )
+
     token_data = {
         "client_id":
             CLIENT_ID,
@@ -1301,7 +1515,11 @@ def login_callback():
             timeout=10
         )
 
-    except requests.RequestException:
+    except requests.RequestException as error:
+
+        print(
+            f"❌ Discord token request error: {error}"
+        )
 
         return error_page(
             "❌ OAuth2 Error",
@@ -1357,7 +1575,11 @@ def login_callback():
             timeout=10
         )
 
-    except requests.RequestException:
+    except requests.RequestException as error:
+
+        print(
+            f"❌ Discord user request error: {error}"
+        )
 
         return error_page(
             "❌ OAuth2 Error",
@@ -1391,10 +1613,22 @@ def login_callback():
         )
     )
 
+    # -----------------------------------------------------
+    # CLEAR OLD AUTH SESSION
+    # -----------------------------------------------------
+
     session.clear()
 
-    session["access_token"] = access_token
+    # -----------------------------------------------------
+    # CREATE NEW AUTH SESSION
+    # -----------------------------------------------------
+
+    session["access_token"] = (
+        access_token
+    )
+
     session["logged_in"] = True
+
     session["user_id"] = user.get(
         "id"
     )
@@ -1433,6 +1667,27 @@ def get_random_reviews(amount=6):
 
     if not DATABASE_URL:
         return []
+
+    try:
+
+        amount = int(
+            amount
+        )
+
+    except (
+        ValueError,
+        TypeError
+    ):
+
+        amount = 6
+
+    amount = max(
+        1,
+        min(
+            50,
+            amount
+        )
+    )
 
     try:
 
@@ -1693,7 +1948,9 @@ def dashboard():
             "/dashboard"
         )
 
-        return redirect("/login")
+        return redirect(
+            "/login"
+        )
 
     user_guilds = get_user_guilds()
 
@@ -1720,7 +1977,8 @@ def dashboard():
 
         guild_id = str(
             guild.get("id")
-        )
+            or ""
+        ).strip()
 
         if not guild_id:
             continue
@@ -1775,9 +2033,11 @@ def dashboard():
 
     authorized.sort(
         key=lambda guild:
-            guild.get(
-                "name",
-                ""
+            str(
+                guild.get(
+                    "name",
+                    ""
+                )
             ).lower()
     )
 
@@ -1787,9 +2047,11 @@ def dashboard():
                 "can_add",
                 False
             ),
-            guild.get(
-                "name",
-                ""
+            str(
+                guild.get(
+                    "name",
+                    ""
+                )
             ).lower()
         )
     )
@@ -1818,7 +2080,27 @@ def manage(guild_id):
             f"/manage/{guild_id}"
         )
 
-        return redirect("/login")
+        return redirect(
+            "/login"
+        )
+
+    try:
+
+        guild_id_int = int(
+            guild_id
+        )
+
+    except (
+        ValueError,
+        TypeError
+    ):
+
+        return error_page(
+            "❌ Invalid server",
+            "The server ID is invalid.",
+            400,
+            user
+        )
 
     user_guilds = get_user_guilds()
 
@@ -1828,7 +2110,7 @@ def manage(guild_id):
             for guild in user_guilds
             if str(
                 guild.get("id")
-            ) == str(guild_id)
+            ) == str(guild_id_int)
         ),
         None
     )
@@ -1850,18 +2132,18 @@ def manage(guild_id):
         if g.get("id")
     }
 
-    if str(guild_id) not in bot_guild_ids:
+    if str(guild_id_int) not in bot_guild_ids:
 
         return redirect(
             "/dashboard"
         )
 
     license_data = get_license(
-        guild_id
+        guild_id_int
     )
 
     license_active = license_is_active(
-        guild_id
+        guild_id_int
     )
 
     return render_template(
@@ -1922,7 +2204,9 @@ def submit_review():
             "/reviews"
         )
 
-        return redirect("/login")
+        return redirect(
+            "/login"
+        )
 
     if not user_has_license():
 
@@ -1974,7 +2258,17 @@ def submit_review():
 
     user_id = str(
         user.get("id")
+        or ""
     )
+
+    if not user_id:
+
+        return error_page(
+            "❌ Review Error",
+            "Your Discord account could not be identified.",
+            400,
+            user
+        )
 
     username = (
         user.get("global_name")
@@ -2071,7 +2365,9 @@ def advertise():
             "/advertise"
         )
 
-        return redirect("/login")
+        return redirect(
+            "/login"
+        )
 
     return render_template(
         "advertise.html",
@@ -2098,7 +2394,9 @@ def create_advertisement():
             "/advertise"
         )
 
-        return redirect("/login")
+        return redirect(
+            "/login"
+        )
 
     title = request.form.get(
         "title",
@@ -2226,7 +2524,17 @@ def create_advertisement():
 
     user_id = str(
         user.get("id")
+        or ""
     )
+
+    if not user_id:
+
+        return error_page(
+            "❌ Advertisement Error",
+            "Your Discord account could not be identified.",
+            400,
+            user
+        )
 
     username = (
         user.get("global_name")
@@ -2416,7 +2724,9 @@ def admin_advertisements():
             "/admin/advertisements"
         )
 
-        return redirect("/login")
+        return redirect(
+            "/login"
+        )
 
     if not is_admin(user):
 
@@ -2456,6 +2766,10 @@ def approve_advertisement(
     user = get_user()
 
     if not user:
+
+        session["next_url"] = (
+            "/admin/advertisements"
+        )
 
         return redirect(
             "/login"
@@ -2497,7 +2811,8 @@ def approve_advertisement(
                     """
                     SELECT
                         id,
-                        duration_days
+                        duration_days,
+                        status
                     FROM advertisements
                     WHERE id = %s
                     LIMIT 1
@@ -2639,6 +2954,10 @@ def reject_advertisement(
 
     if not user:
 
+        session["next_url"] = (
+            "/admin/advertisements"
+        )
+
         return redirect(
             "/login"
         )
@@ -2720,6 +3039,10 @@ def disable_advertisement(
     user = get_user()
 
     if not user:
+
+        session["next_url"] = (
+            "/admin/advertisements"
+        )
 
         return redirect(
             "/login"
@@ -2903,6 +3226,9 @@ def health():
         ),
         "bot": bool(
             BOT_TOKEN
+        ),
+        "login_redirect": bool(
+            DISCORD_LOGIN_REDIRECT_URI
         )
     }, 200
 
@@ -2955,8 +3281,8 @@ if __name__ == "__main__":
     )
 
     print(
-        f"🔐 Login Redirect: "
-        f"{DISCORD_LOGIN_REDIRECT_URI}"
+        f"🔐 Login Redirect configured: "
+        f"{bool(DISCORD_LOGIN_REDIRECT_URI)}"
     )
 
     print(

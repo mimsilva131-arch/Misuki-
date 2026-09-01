@@ -44,16 +44,9 @@ CLIENT_SECRET = os.getenv(
 
 
 # =========================================================
-# OAUTH2 REDIRECTS
+# DISCORD LOGIN REDIRECT
 # =========================================================
 
-# Used for normal OAuth2 / bot authorization
-DISCORD_REDIRECT_URI = os.getenv(
-    "DISCORD_REDIRECT_URI"
-)
-
-
-# Used ONLY for Discord LOGIN
 DISCORD_LOGIN_REDIRECT_URI = os.getenv(
     "DISCORD_LOGIN_REDIRECT_URI"
 )
@@ -103,19 +96,7 @@ PORT = int(
 # COOKIE CONFIGURATION
 # =========================================================
 
-# Do NOT force cookies to require HTTPS.
-#
-# This allows the Flask session cookie to work when the
-# application is accessed through HTTP as well as HTTPS.
-#
-# This is especially useful when testing locally or when
-# the application is behind a reverse proxy.
-#
-# IMPORTANT:
-# On production, HTTPS should still be used for the website.
-# Render handles HTTPS at the proxy level.
-
-SESSION_SECURE = False
+SESSION_SECURE = True
 
 SESSION_SAMESITE = "Lax"
 
@@ -212,7 +193,10 @@ app = Flask(
 app.secret_key = SECRET_KEY
 
 
-# Render / reverse proxy support
+# =========================================================
+# RENDER / REVERSE PROXY
+# =========================================================
+
 app.wsgi_app = ProxyFix(
     app.wsgi_app,
     x_for=1,
@@ -570,14 +554,78 @@ def get_license(guild_id):
 
 
 # =========================================================
+# GET ALL LICENSES
+# =========================================================
+
+def get_all_licenses():
+
+    licenses = {}
+
+    if not DATABASE_URL:
+
+        return licenses
+
+    try:
+
+        with database_connection() as connection:
+
+            with connection.cursor(
+                cursor_factory=psycopg2.extras.RealDictCursor
+            ) as cursor:
+
+                cursor.execute(
+                    """
+                    SELECT
+                        guild_id,
+                        license_key,
+                        status,
+                        expires_at,
+                        created_at
+                    FROM licenses
+                    """
+                )
+
+                rows = cursor.fetchall()
+
+                for row in rows:
+
+                    guild_id = str(
+                        row["guild_id"]
+                    )
+
+                    licenses[guild_id] = (
+                        row["guild_id"],
+                        row["license_key"],
+                        row["status"],
+                        row["expires_at"],
+                        row["created_at"]
+                    )
+
+    except Exception as error:
+
+        print(
+            f"❌ Could not load licenses: {error}"
+        )
+
+        return {}
+
+    return licenses
+
+
+# =========================================================
 # LICENSE ACTIVE CHECK
 # =========================================================
 
-def license_is_active(guild_id):
+def license_is_active(
+    guild_id,
+    license_data=None
+):
 
-    license_data = get_license(
-        guild_id
-    )
+    if license_data is None:
+
+        license_data = get_license(
+            guild_id
+        )
 
     if not license_data:
 
@@ -646,18 +694,29 @@ def user_has_license():
 
     guilds = get_user_guilds()
 
+    if not guilds:
+
+        return False
+
+    licenses = get_all_licenses()
+
     for guild in guilds:
 
-        guild_id = guild.get(
-            "id"
+        guild_id = str(
+            guild.get("id", "")
         )
 
         if not guild_id:
 
             continue
 
-        if license_is_active(
+        license_data = licenses.get(
             guild_id
+        )
+
+        if license_is_active(
+            guild_id,
+            license_data
         ):
 
             return True
@@ -673,45 +732,17 @@ def get_active_license_guild_ids():
 
     active_ids = set()
 
-    if not DATABASE_URL:
-
-        return active_ids
-
-    try:
-
-        with database_connection() as connection:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    """
-                    SELECT
-                        guild_id,
-                        status,
-                        expires_at
-                    FROM licenses
-                    """
-                )
-
-                rows = cursor.fetchall()
-
-    except Exception as error:
-
-        print(
-            f"❌ Could not load licenses: {error}"
-        )
-
-        return active_ids
+    licenses = get_all_licenses()
 
     now = utc_now()
 
-    for row in rows:
+    expired_ids = []
 
-        guild_id = row[0]
+    for guild_id, license_data in licenses.items():
 
-        status = row[1]
+        status = license_data[2]
 
-        expires_at = row[2]
+        expires_at = license_data[3]
 
         if status != "active":
 
@@ -729,37 +760,45 @@ def get_active_license_guild_ids():
 
             if now >= expiration:
 
-                try:
-
-                    with database_connection() as connection:
-
-                        with connection.cursor() as cursor:
-
-                            cursor.execute(
-                                """
-                                UPDATE licenses
-                                SET status = 'expired'
-                                WHERE guild_id = %s
-                                """,
-                                (
-                                    int(guild_id),
-                                )
-                            )
-
-                        connection.commit()
-
-                except Exception as error:
-
-                    print(
-                        f"❌ Failed to expire "
-                        f"license {guild_id}: {error}"
-                    )
+                expired_ids.append(
+                    guild_id
+                )
 
                 continue
 
         active_ids.add(
             str(guild_id)
         )
+
+    # Expire outdated licenses in one database connection
+    if expired_ids:
+
+        try:
+
+            with database_connection() as connection:
+
+                with connection.cursor() as cursor:
+
+                    for guild_id in expired_ids:
+
+                        cursor.execute(
+                            """
+                            UPDATE licenses
+                            SET status = 'expired'
+                            WHERE guild_id = %s
+                            """,
+                            (
+                                int(guild_id),
+                            )
+                        )
+
+                connection.commit()
+
+        except Exception as error:
+
+            print(
+                f"❌ Failed to expire licenses: {error}"
+            )
 
     return active_ids
 
@@ -1714,123 +1753,6 @@ def login_callback():
 
 
 # =========================================================
-# NORMAL OAUTH2 CALLBACK
-# =========================================================
-
-@app.route("/callback")
-def callback():
-
-    error = request.args.get(
-        "error"
-    )
-
-    if error:
-
-        return error_page(
-            "❌ OAuth2 Error",
-            "Discord rejected the authorization.",
-            400
-        )
-
-    code = request.args.get(
-        "code"
-    )
-
-    if not code:
-
-        return error_page(
-            "❌ OAuth2 Error",
-            "No authorization code was received.",
-            400
-        )
-
-    if not CLIENT_ID or not CLIENT_SECRET:
-
-        return error_page(
-            "❌ Configuration Error",
-            "Discord OAuth2 credentials are missing.",
-            500
-        )
-
-    if not DISCORD_REDIRECT_URI:
-
-        return error_page(
-            "❌ Configuration Error",
-            "DISCORD_REDIRECT_URI is missing.",
-            500
-        )
-
-    token_data = {
-
-        "client_id":
-            CLIENT_ID,
-
-        "client_secret":
-            CLIENT_SECRET,
-
-        "grant_type":
-            "authorization_code",
-
-        "code":
-            code,
-
-        "redirect_uri":
-            DISCORD_REDIRECT_URI
-
-    }
-
-    try:
-
-        response = requests.post(
-
-            DISCORD_TOKEN_URL,
-
-            data=token_data,
-
-            headers={
-                "Content-Type":
-                    "application/x-www-form-urlencoded"
-            },
-
-            timeout=10
-
-        )
-
-    except requests.RequestException as error:
-
-        print(
-            f"❌ OAuth2 request failed: {error}"
-        )
-
-        return error_page(
-            "❌ OAuth2 Error",
-            "Could not contact Discord.",
-            500
-        )
-
-    if response.status_code != 200:
-
-        print(
-            "❌ OAuth2 callback failed:"
-        )
-
-        print(
-            response.text
-        )
-
-        return error_page(
-            "❌ OAuth2 Error",
-            "Failed to exchange the authorization code.",
-            400
-        )
-
-    return render_template(
-        "oauth2_success.html",
-        user=get_user()
-    )
-
-
-# =========================================================
 # LOGOUT
 # =========================================================
 
@@ -1903,9 +1825,82 @@ def dashboard():
 
     }
 
-    active_license_ids = (
-        get_active_license_guild_ids()
-    )
+    # =====================================================
+    # LOAD ALL LICENSES ONCE
+    # =====================================================
+
+    all_licenses = get_all_licenses()
+
+    active_license_ids = set()
+
+    now = utc_now()
+
+    expired_ids = []
+
+    for guild_id, license_data in all_licenses.items():
+
+        status = license_data[2]
+
+        expires_at = license_data[3]
+
+        if status != "active":
+
+            continue
+
+        if expires_at:
+
+            expiration = parse_datetime(
+                expires_at
+            )
+
+            if not expiration:
+
+                continue
+
+            if now >= expiration:
+
+                expired_ids.append(
+                    guild_id
+                )
+
+                continue
+
+        active_license_ids.add(
+            str(guild_id)
+        )
+
+    # =====================================================
+    # EXPIRE OLD LICENSES
+    # =====================================================
+
+    if expired_ids:
+
+        try:
+
+            with database_connection() as connection:
+
+                with connection.cursor() as cursor:
+
+                    for guild_id in expired_ids:
+
+                        cursor.execute(
+                            """
+                            UPDATE licenses
+                            SET status = 'expired'
+                            WHERE guild_id = %s
+                            """,
+                            (
+                                int(guild_id),
+                            )
+                        )
+
+                connection.commit()
+
+        except Exception as error:
+
+            print(
+                f"❌ Failed to expire licenses: {error}"
+            )
 
     authorized = []
 
@@ -1925,7 +1920,11 @@ def dashboard():
 
             continue
 
-        license_data = get_license(
+        # =================================================
+        # USE ALREADY LOADED LICENSE
+        # =================================================
+
+        license_data = all_licenses.get(
             guild_id
         )
 
@@ -1943,6 +1942,12 @@ def dashboard():
         if license_data:
 
             status = license_data[2]
+
+            # If this license expired during this request,
+            # expose the new status.
+            if guild_id in expired_ids:
+
+                status = "expired"
 
         else:
 
@@ -2080,7 +2085,8 @@ def manage(guild_id):
     )
 
     license_active = license_is_active(
-        guild_id
+        guild_id,
+        license_data
     )
 
     return render_template(
@@ -2520,11 +2526,6 @@ if __name__ == "__main__":
     print(
         f"🗄️ PostgreSQL configured: "
         f"{bool(DATABASE_URL)}"
-    )
-
-    print(
-        f"🔗 OAuth2 Redirect: "
-        f"{DISCORD_REDIRECT_URI}"
     )
 
     print(
