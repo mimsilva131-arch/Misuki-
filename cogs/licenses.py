@@ -60,6 +60,10 @@ class LicenseManager(commands.Cog):
 
         async with self.pool.acquire() as connection:
 
+            # -------------------------------------------------
+            # Create table with the correct PostgreSQL types
+            # -------------------------------------------------
+
             await connection.execute("""
                 CREATE TABLE IF NOT EXISTS licenses (
 
@@ -68,7 +72,7 @@ class LicenseManager(commands.Cog):
                     license_key TEXT UNIQUE NOT NULL,
 
                     status TEXT NOT NULL
-                    DEFAULT 'active',
+                        DEFAULT 'active',
 
                     expires_at TIMESTAMPTZ,
 
@@ -76,6 +80,69 @@ class LicenseManager(commands.Cog):
 
                 )
             """)
+
+            # -------------------------------------------------
+            # IMPORTANT:
+            # Older versions of oauth2.py created these
+            # columns as TEXT.
+            #
+            # Convert them to TIMESTAMPTZ if necessary.
+            # -------------------------------------------------
+
+            try:
+
+                await connection.execute("""
+                    ALTER TABLE licenses
+                    ALTER COLUMN expires_at
+                    TYPE TIMESTAMPTZ
+                    USING
+                        CASE
+                            WHEN expires_at IS NULL
+                            THEN NULL
+                            ELSE expires_at::TIMESTAMPTZ
+                        END
+                """)
+
+            except Exception as error:
+
+                # PostgreSQL may report that the column is
+                # already TIMESTAMPTZ. That is harmless.
+                message = str(error).lower()
+
+                if (
+                    "already" not in message
+                    and
+                    "cannot cast" not in message
+                ):
+
+                    print(
+                        "⚠️ Could not migrate expires_at:",
+                        error
+                    )
+
+            try:
+
+                await connection.execute("""
+                    ALTER TABLE licenses
+                    ALTER COLUMN created_at
+                    TYPE TIMESTAMPTZ
+                    USING created_at::TIMESTAMPTZ
+                """)
+
+            except Exception as error:
+
+                message = str(error).lower()
+
+                if (
+                    "already" not in message
+                    and
+                    "cannot cast" not in message
+                ):
+
+                    print(
+                        "⚠️ Could not migrate created_at:",
+                        error
+                    )
 
     # =====================================================
     # COG LOAD
@@ -180,6 +247,17 @@ class LicenseManager(commands.Cog):
 
             return None
 
+        try:
+
+            guild_id = int(guild_id)
+
+        except (
+            TypeError,
+            ValueError
+        ):
+
+            return None
+
         async with self.pool.acquire() as connection:
 
             return await connection.fetchrow(
@@ -229,6 +307,15 @@ class LicenseManager(commands.Cog):
             timezone.utc
         )
 
+        # asyncpg returns TIMESTAMPTZ as datetime.
+        # Make sure it is timezone-aware.
+
+        if expires_at.tzinfo is None:
+
+            expires_at = expires_at.replace(
+                tzinfo=timezone.utc
+            )
+
         if now >= expires_at:
 
             await self.set_expired(
@@ -273,7 +360,7 @@ class LicenseManager(commands.Cog):
                 SET status = 'expired'
                 WHERE guild_id = $1
                 """,
-                guild_id
+                int(guild_id)
             )
 
     # =====================================================
@@ -286,6 +373,50 @@ class LicenseManager(commands.Cog):
         days
     ):
 
+        # -------------------------------------------------
+        # Make absolutely sure guild_id and days are
+        # integers.
+        # -------------------------------------------------
+
+        try:
+
+            guild_id = int(
+                guild_id
+            )
+
+            days = int(
+                days
+            )
+
+        except (
+            TypeError,
+            ValueError
+        ):
+
+            raise ValueError(
+                "guild_id e days têm de ser números inteiros."
+            )
+
+        # -------------------------------------------------
+        # Validate duration
+        # -------------------------------------------------
+
+        if days < 1:
+
+            raise ValueError(
+                "A duração da licença deve ser de pelo menos 1 dia."
+            )
+
+        if days > 3650:
+
+            raise ValueError(
+                "A duração máxima da licença é de 3650 dias."
+            )
+
+        # -------------------------------------------------
+        # Check existing license
+        # -------------------------------------------------
+
         existing = await self.get_license(
             guild_id
         )
@@ -294,16 +425,39 @@ class LicenseManager(commands.Cog):
 
             return None
 
+        # -------------------------------------------------
+        # Current UTC time
+        # -------------------------------------------------
+
         now = datetime.now(
             timezone.utc
         )
 
+        # -------------------------------------------------
+        # Calculate expiration
+        #
+        # Example:
+        # days = 30
+        #
+        # expires_at = now + 30 days
+        # -------------------------------------------------
+
         expires_at = (
             now
-            + timedelta(days=days)
+            + timedelta(
+                days=days
+            )
         )
 
+        # -------------------------------------------------
+        # Generate key
+        # -------------------------------------------------
+
         license_key = await self.generate_license_key()
+
+        # -------------------------------------------------
+        # Insert
+        # -------------------------------------------------
 
         async with self.pool.acquire() as connection:
 
@@ -317,10 +471,15 @@ class LicenseManager(commands.Cog):
                     expires_at,
                     created_at
                 )
-
-                VALUES ($1, $2, $3, $4, $5)
+                VALUES
+                (
+                    $1,
+                    $2,
+                    $3,
+                    $4,
+                    $5
+                )
                 """,
-
                 guild_id,
                 license_key,
                 "active",
@@ -355,7 +514,7 @@ class LicenseManager(commands.Cog):
                 SET status = 'revoked'
                 WHERE guild_id = $1
                 """,
-                guild_id
+                int(guild_id)
             )
 
         return True
@@ -369,6 +528,27 @@ class LicenseManager(commands.Cog):
         guild_id,
         days
     ):
+
+        try:
+
+            guild_id = int(
+                guild_id
+            )
+
+            days = int(
+                days
+            )
+
+        except (
+            TypeError,
+            ValueError
+        ):
+
+            return False
+
+        if days < 1 or days > 3650:
+
+            return False
 
         existing = await self.get_license(
             guild_id
@@ -390,6 +570,12 @@ class LicenseManager(commands.Cog):
 
             return False
 
+        if expires_at.tzinfo is None:
+
+            expires_at = expires_at.replace(
+                tzinfo=timezone.utc
+            )
+
         now = datetime.now(
             timezone.utc
         )
@@ -404,7 +590,9 @@ class LicenseManager(commands.Cog):
 
         new_expiration = (
             expires_at
-            + timedelta(days=days)
+            + timedelta(
+                days=days
+            )
         )
 
         async with self.pool.acquire() as connection:
@@ -445,7 +633,7 @@ class LicenseManager(commands.Cog):
                 DELETE FROM licenses
                 WHERE guild_id = $1
                 """,
-                guild_id
+                int(guild_id)
             )
 
         return True
@@ -475,7 +663,8 @@ class LicenseManager(commands.Cog):
 
         return (
             interaction.guild is not None
-            and interaction.user.guild_permissions.administrator
+            and
+            interaction.user.guild_permissions.administrator
         )
 
     # =====================================================
@@ -530,6 +719,12 @@ class LicenseManager(commands.Cog):
             status == "active"
             and expires_at
         ):
+
+            if expires_at.tzinfo is None:
+
+                expires_at = expires_at.replace(
+                    tzinfo=timezone.utc
+                )
 
             now = datetime.now(
                 timezone.utc
@@ -588,6 +783,26 @@ class LicenseManager(commands.Cog):
             expiration_text = "Never"
 
         # -------------------------------------------------
+        # CREATED
+        # -------------------------------------------------
+
+        if created_at:
+
+            if created_at.tzinfo is None:
+
+                created_at = created_at.replace(
+                    tzinfo=timezone.utc
+                )
+
+            created_text = (
+                f"<t:{int(created_at.timestamp())}:F>"
+            )
+
+        else:
+
+            created_text = "Unknown"
+
+        # -------------------------------------------------
         # EMBED
         # -------------------------------------------------
 
@@ -622,9 +837,7 @@ class LicenseManager(commands.Cog):
 
         embed.add_field(
             name="Created",
-            value=(
-                f"<t:{int(created_at.timestamp())}:F>"
-            ),
+            value=created_text,
             inline=False
         )
 
@@ -709,16 +922,47 @@ class LicenseManager(commands.Cog):
 
             return
 
+        # -------------------------------------------------
+        # Validate server ID
+        # -------------------------------------------------
+
         try:
 
             guild_id = int(
                 server_id
             )
 
-        except ValueError:
+        except (
+            ValueError,
+            TypeError
+        ):
 
             await interaction.response.send_message(
                 "❌ Invalid Server ID.",
+                ephemeral=True
+            )
+
+            return
+
+        # -------------------------------------------------
+        # IMPORTANT:
+        # Discord/app_commands can provide the value as an
+        # integer-like object. Convert it explicitly.
+        # -------------------------------------------------
+
+        try:
+
+            days = int(
+                days
+            )
+
+        except (
+            ValueError,
+            TypeError
+        ):
+
+            await interaction.response.send_message(
+                "❌ Invalid number of days.",
                 ephemeral=True
             )
 
@@ -758,7 +1002,19 @@ class LicenseManager(commands.Cog):
                 guild_id
             )
 
+            if license_data is None:
+
+                raise RuntimeError(
+                    "License was created but could not be retrieved."
+                )
+
             expiration = license_data["expires_at"]
+
+            if expiration.tzinfo is None:
+
+                expiration = expiration.replace(
+                    tzinfo=timezone.utc
+                )
 
             embed = discord.Embed(
                 title="✅ License Created",
@@ -810,22 +1066,22 @@ class LicenseManager(commands.Cog):
 
             print(
                 "❌ Error while creating license:",
-                error
+                repr(error)
             )
 
-            if not interaction.response.is_done():
+            try:
 
-                await interaction.response.send_message(
-                    "❌ Something went wrong while creating the license.",
+                await interaction.followup.send(
+                    (
+                        "❌ Something went wrong while "
+                        "creating the license."
+                    ),
                     ephemeral=True
                 )
 
-                return
+            except Exception:
 
-            await interaction.followup.send(
-                "❌ Something went wrong while creating the license.",
-                ephemeral=True
-            )
+                pass
 
     # =====================================================
     # /REVOKELICENSE
@@ -861,7 +1117,10 @@ class LicenseManager(commands.Cog):
                 server_id
             )
 
-        except ValueError:
+        except (
+            ValueError,
+            TypeError
+        ):
 
             await interaction.response.send_message(
                 "❌ Invalid Server ID.",
@@ -928,10 +1187,17 @@ class LicenseManager(commands.Cog):
                 server_id
             )
 
-        except ValueError:
+            days = int(
+                days
+            )
+
+        except (
+            ValueError,
+            TypeError
+        ):
 
             await interaction.response.send_message(
-                "❌ Invalid Server ID.",
+                "❌ Invalid Server ID or number of days.",
                 ephemeral=True
             )
 
@@ -958,7 +1224,22 @@ class LicenseManager(commands.Cog):
             guild_id
         )
 
+        if license_data is None:
+
+            await interaction.response.send_message(
+                "❌ Could not retrieve the updated license.",
+                ephemeral=True
+            )
+
+            return
+
         expiration = license_data["expires_at"]
+
+        if expiration.tzinfo is None:
+
+            expiration = expiration.replace(
+                tzinfo=timezone.utc
+            )
 
         await interaction.response.send_message(
             (
@@ -1004,7 +1285,10 @@ class LicenseManager(commands.Cog):
                 server_id
             )
 
-        except ValueError:
+        except (
+            ValueError,
+            TypeError
+        ):
 
             await interaction.response.send_message(
                 "❌ Invalid Server ID.",

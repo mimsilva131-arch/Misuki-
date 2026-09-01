@@ -208,9 +208,10 @@ app.wsgi_app = ProxyFix(
 # =========================================================
 
 app.config["SESSION_COOKIE_HTTPONLY"] = True
-app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SAMESITE"] = "None" if COOKIE_SECURE else "Lax"
 app.config["SESSION_COOKIE_SECURE"] = COOKIE_SECURE
 app.config["SESSION_REFRESH_EACH_REQUEST"] = True
+app.config["SESSION_COOKIE_NAME"] = "misuki_session"
 
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(
     days=1
@@ -1041,6 +1042,7 @@ def create_oauth_state():
         + timedelta(minutes=10)
     ).isoformat()
 
+    session.permanent = True
     session.modified = True
 
     return state
@@ -1049,6 +1051,9 @@ def create_oauth_state():
 def verify_oauth_state(state):
 
     if not state:
+        print(
+            "⚠️ OAuth state verification: No state provided"
+        )
         return False
 
     stored_state = session.get(
@@ -1057,6 +1062,19 @@ def verify_oauth_state(state):
 
     expires_at_raw = session.get(
         "oauth_state_expires_at"
+    )
+
+    print(
+        f"📋 OAuth State Check:"
+    )
+    print(
+        f"   Received: {state[:10]}..."
+    )
+    print(
+        f"   Stored: {str(stored_state)[:10] if stored_state else 'None'}..."
+    )
+    print(
+        f"   Expires at: {expires_at_raw}"
     )
 
     if expires_at_raw:
@@ -1071,12 +1089,20 @@ def verify_oauth_state(state):
                 timezone.utc
             ) >= expires_at:
 
+                print(
+                    "⚠️ OAuth state expired"
+                )
+
                 session.pop("oauth_state", None)
                 session.pop("oauth_state_expires_at", None)
                 session.modified = True
                 return False
 
-        except ValueError:
+        except ValueError as e:
+
+            print(
+                f"⚠️ OAuth state date parse error: {e}"
+            )
 
             session.pop("oauth_state", None)
             session.pop("oauth_state_expires_at", None)
@@ -1084,6 +1110,9 @@ def verify_oauth_state(state):
             return False
 
     if not stored_state:
+        print(
+            "⚠️ OAuth state not in session"
+        )
         return False
 
     if not secrets.compare_digest(
@@ -1091,10 +1120,18 @@ def verify_oauth_state(state):
         str(state)
     ):
 
+        print(
+            "⚠️ OAuth state mismatch"
+        )
+
         session.pop("oauth_state", None)
         session.pop("oauth_state_expires_at", None)
         session.modified = True
         return False
+
+    print(
+        "✅ OAuth state verified successfully"
+    )
 
     session.pop("oauth_state", None)
     session.pop("oauth_state_expires_at", None)
