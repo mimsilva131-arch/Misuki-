@@ -1,199 +1,157 @@
-
 /* =========================================================
-   MISUKI — COOKIES.JS
-   COOKIE BANNER
+   MISUKI - COOKIE BANNER
    ========================================================= */
 
 (function () {
 
     "use strict";
 
+    const COOKIE_NAME = "misuki_cookie_consent";
 
-    document.addEventListener(
-        "DOMContentLoaded",
-        function () {
-
-
-            /* =================================================
-               ELEMENTS
-            ================================================= */
-
-            const banner =
-                document.getElementById(
-                    "misukiCookieBanner"
-                );
+    const banner = document.getElementById("misukiCookieBanner");
+    const accept = document.getElementById("misukiAccept");
+    const essential = document.getElementById("misukiEssential");
+    const deny = document.getElementById("misukiDeny");
 
 
-            const accept =
-                document.getElementById(
-                    "misukiAccept"
-                );
+    /* =====================================================
+       CHECK BANNER
+    ===================================================== */
+
+    if (!banner) {
+        return;
+    }
 
 
-            const essential =
-                document.getElementById(
-                    "misukiEssential"
-                );
+    /* =====================================================
+       CHECK CURRENT BROWSER SESSION
+    ===================================================== */
+
+    let savedConsent = null;
+
+    try {
+
+        savedConsent = sessionStorage.getItem(COOKIE_NAME);
+
+    } catch (error) {
+
+        console.warn(
+            "Misuki Cookies: sessionStorage unavailable.",
+            error
+        );
+
+    }
 
 
-            const deny =
-                document.getElementById(
-                    "misukiDeny"
-                );
+    /* =====================================================
+       ALREADY CHOSEN DURING THIS SESSION
+    ===================================================== */
+
+    if (
+        savedConsent === "all" ||
+        savedConsent === "essential" ||
+        savedConsent === "denied"
+    ) {
+
+        banner.style.display = "none";
+
+        return;
+    }
 
 
-            const cookieName =
-                "misuki_cookie_consent";
+    /* =====================================================
+       SHOW BANNER
+    ===================================================== */
+
+    banner.style.display = "block";
 
 
-            /* =================================================
-               SAFETY CHECK
-            ================================================= */
+    /* =====================================================
+       SAVE SESSION CONSENT
+    ===================================================== */
 
-            if (!banner) {
+    function saveConsent(value) {
 
-                return;
+        try {
 
-            }
-
-
-            /* =================================================
-               SHOW BANNER
-            ================================================= */
-
-            function showBanner() {
-
-                banner.classList.add(
-                    "show"
-                );
-
-            }
-
-
-            /* =================================================
-               HIDE BANNER
-            ================================================= */
-
-            function hideBanner() {
-
-                banner.classList.remove(
-                    "show"
-                );
-
-            }
-
-
-            /* =================================================
-               SAVE CONSENT
-            ================================================= */
-
-            function saveConsent(
+            sessionStorage.setItem(
+                COOKIE_NAME,
                 value
-            ) {
+            );
 
-                try {
+        } catch (error) {
 
-                    localStorage.setItem(
-                        cookieName,
-                        value
-                    );
-
-                } catch (error) {
-
-                    console.warn(
-                        "Misuki cookies: unable to save consent.",
-                        error
-                    );
-
-                }
-
-            }
-
-
-            /* =================================================
-               SHOW ON EVERY PAGE LOAD
-            ================================================= */
-
-            /*
-             * O banner aparece SEMPRE.
-             *
-             * A escolha anterior é guardada,
-             * mas não impede o banner de aparecer
-             * novamente quando a página é recarregada.
-             */
-
-            showBanner();
-
-
-            /* =================================================
-               ACCEPT ALL
-            ================================================= */
-
-            if (accept) {
-
-                accept.addEventListener(
-                    "click",
-                    function () {
-
-                        saveConsent(
-                            "all"
-                        );
-
-                        hideBanner();
-
-                    }
-                );
-
-            }
-
-
-            /* =================================================
-               ESSENTIAL ONLY
-            ================================================= */
-
-            if (essential) {
-
-                essential.addEventListener(
-                    "click",
-                    function () {
-
-                        saveConsent(
-                            "essential"
-                        );
-
-                        hideBanner();
-
-                    }
-                );
-
-            }
-
-
-            /* =================================================
-               DENY
-            ================================================= */
-
-            if (deny) {
-
-                deny.addEventListener(
-                    "click",
-                    function () {
-
-                        saveConsent(
-                            "denied"
-                        );
-
-                        hideBanner();
-
-                    }
-                );
-
-            }
-
+            console.warn(
+                "Misuki Cookies: unable to save session consent.",
+                error
+            );
 
         }
-    );
 
+        banner.style.display = "none";
+    }
+
+
+    /* =====================================================
+       ACCEPT ALL
+    ===================================================== */
+
+    if (accept) {
+
+        accept.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                saveConsent("all");
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       ESSENTIAL ONLY
+    ===================================================== */
+
+    if (essential) {
+
+        essential.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                saveConsent("essential");
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       DENY
+    ===================================================== */
+
+    if (deny) {
+
+        deny.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                saveConsent("denied");
+
+            }
+        );
+
+    }
 
 })();
-

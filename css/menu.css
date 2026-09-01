@@ -1,14 +1,16 @@
 
-/* =========================================================
+/* ========================================================
    MISUKI — MENU
    SIDE MENU
    ========================================================= */
+
 
 /* =========================================================
    HAMBURGER
    ========================================================= */
 
 .hamburger {
+
     width: 44px;
     height: 44px;
     padding: 0;
@@ -18,6 +20,7 @@
     align-items: center;
     justify-content: center;
     flex-direction: column;
+
     gap: 5px;
 
     border: 0;
@@ -40,9 +43,12 @@
         transform .2s ease;
 }
 
+
 .hamburger:hover {
+
     background: rgba(255, 255, 255, .09);
     transform: translateY(-1px);
+
 }
 
 
@@ -51,6 +57,7 @@
    ========================================================= */
 
 .hamburger span {
+
     display: block;
 
     width: 23px;
@@ -61,6 +68,7 @@
     border-radius: 999px;
 
     background: #ffffff;
+
 }
 
 
@@ -69,10 +77,13 @@
    ========================================================= */
 
 body.menu-open .hamburger {
+
     display: none !important;
+
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none !important;
+
 }
 
 
@@ -81,7 +92,9 @@ body.menu-open .hamburger {
    ========================================================= */
 
 .overlay {
+
     position: fixed;
+
     inset: 0;
 
     background: rgba(0, 0, 0, .60);
@@ -95,12 +108,17 @@ body.menu-open .hamburger {
         visibility .3s ease;
 
     z-index: 9998;
+
 }
 
-.overlay.show {
+
+.overlay.show,
+.overlay.active {
+
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
+
 }
 
 
@@ -109,6 +127,7 @@ body.menu-open .hamburger {
    ========================================================= */
 
 .menu {
+
     position: fixed;
 
     top: 0;
@@ -134,6 +153,8 @@ body.menu-open .hamburger {
 
     transform: translateX(100%);
 
+    opacity: 1;
+
     visibility: hidden;
     pointer-events: none;
 
@@ -144,6 +165,7 @@ body.menu-open .hamburger {
     overflow-y: auto;
 
     z-index: 10000;
+
 }
 
 
@@ -151,11 +173,16 @@ body.menu-open .hamburger {
    MENU OPEN
    ========================================================= */
 
-.menu.open {
+.menu.open,
+.menu.active {
+
     transform: translateX(0);
+
+    opacity: 1;
 
     visibility: visible;
     pointer-events: auto;
+
 }
 
 
@@ -164,7 +191,9 @@ body.menu-open .hamburger {
    ========================================================= */
 
 body.menu-open {
+
     overflow: hidden;
+
 }
 
 
@@ -173,19 +202,24 @@ body.menu-open {
    ========================================================= */
 
 .menu-header {
+
     display: flex;
 
     align-items: center;
     justify-content: space-between;
 
     margin-bottom: 28px;
+
 }
 
+
 .menu-title {
+
     color: #ffffff;
 
     font-size: 22px;
     font-weight: 750;
+
 }
 
 
@@ -194,6 +228,7 @@ body.menu-open {
    ========================================================= */
 
 .menu-close {
+
     width: 40px;
     height: 40px;
 
@@ -201,6 +236,7 @@ body.menu-open {
     margin: 0;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
@@ -208,6 +244,7 @@ body.menu-open {
     border-radius: 10px;
 
     background: rgba(255, 255, 255, .06);
+
     color: #ffffff;
 
     font-size: 27px;
@@ -221,12 +258,16 @@ body.menu-open {
     transition:
         background .2s ease,
         transform .2s ease;
+
 }
 
+
 .menu-close:hover {
+
     background: rgba(255, 255, 255, .12);
 
     transform: rotate(90deg);
+
 }
 
 
@@ -235,6 +276,7 @@ body.menu-open {
    ========================================================= */
 
 .menu-section {
+
     margin-top: 22px;
     margin-bottom: 7px;
 
@@ -244,7 +286,9 @@ body.menu-open {
     font-weight: 700;
 
     text-transform: uppercase;
+
     letter-spacing: 1px;
+
 }
 
 
@@ -253,28 +297,35 @@ body.menu-open {
    ========================================================= */
 
 .menu a {
+
     display: block;
 
     margin: 3px 0;
+
     padding: 12px 14px;
 
     border-radius: 10px;
 
     color: #dce2ef;
+
     text-decoration: none;
 
     transition:
         background .2s ease,
         color .2s ease,
         transform .2s ease;
+
 }
 
+
 .menu a:hover {
+
     background: rgba(100, 140, 255, .10);
 
     color: #ffffff;
 
     transform: translateX(4px);
+
 }
 
 
@@ -283,15 +334,23 @@ body.menu-open {
    ========================================================= */
 
 .menu .discord-login {
+
     margin-top: 8px;
 
-    background: rgba(88, 101, 242, .14);
+    background:
+        rgba(88, 101, 242, .14);
+
     color: #aeb8ff;
+
 }
 
-.menu .discord-login:hover {
-    background: rgba(88, 101, 242, .24);
 
-    color: #ffffff;
+.menu .discord-login:hover {
+
+    background:
+        rgba(88, 101, 242, .24);
+
+    color: #fffbfb;
+
 }
 

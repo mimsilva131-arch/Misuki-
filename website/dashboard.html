@@ -1,49 +1,56 @@
-<!DOCTYPE html>
 
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
-<link rel="icon" type="image/png" href="/assets/images/favicon.png?v=3">
-<link rel="shortcut icon" type="image/png" href="/assets/images/favicon.png?v=3">
-<link rel="stylesheet" href="/css/stars.css">
 
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
 
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-<title>Misuki — Dashboard</title>
+    <title>Misuki — Dashboard</title>
 
-<link
-    rel="icon"
-    type="image/png"
-    href="/assets/images/favicon.png?v=3"
->
+    <link
+        rel="icon"
+        type="image/png"
+        href="/assets/images/favicon.png?v=3"
+    >
 
-<link
-    rel="shortcut icon"
-    type="image/png"
-    href="/assets/images/favicon.png?v=3"
->
+    <link
+        rel="shortcut icon"
+        type="image/png"
+        href="/assets/images/favicon.png?v=3"
+    >
 
-<link
+    <link
+        rel="stylesheet"
+        href="/css/stars.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/static/css/style.css?v=16"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/static/css/dashboard.css"
+    >
+
+    <script
+        src="/static/js/stars.js?v=3"
+        defer
+    ></script>
+    <link
     rel="stylesheet"
-    href="/static/css/style.css?v=16"
+    href="/static/css/cookies.css?v=3"
 >
-
-<link
-    rel="stylesheet"
-    href="/static/css/dashboard.css"
->
-
 </head>
 
-<script src="/static/js/stars.js?v=3" defer></script>
-
 <body>
-
 
 <!-- =====================================================
      STAR BACKGROUND
@@ -68,14 +75,11 @@
     <button
         class="hamburger"
         id="hamburger"
-        onclick=""
         aria-label="Open menu"
     >
-
         <span></span>
         <span></span>
         <span></span>
-
     </button>
 
 </header>
@@ -88,7 +92,6 @@
 <div
     class="overlay"
     id="overlay"
-   
 ></div>
 
 
@@ -135,6 +138,31 @@
     </a>
 
 
+    <!-- =================================================
+         ADVERTISE
+    ================================================== -->
+
+    <div class="menu-section">
+        Advertise
+    </div>
+
+    <a href="/advertise">
+        Advertise
+    </a>
+
+    {% if is_admin(user) %}
+
+        <a href="/admin/advertise">
+            Admin Advertise
+        </a>
+
+    {% endif %}
+
+
+    <!-- =================================================
+         RESOURCES
+    ================================================== -->
+
     <div class="menu-section">
         Resources
     </div>
@@ -147,6 +175,10 @@
         Support
     </a>
 
+
+    <!-- =================================================
+         LEGAL
+    ================================================== -->
 
     <div class="menu-section">
         Legal
@@ -168,6 +200,10 @@
         Cookies
     </a>
 
+
+    <!-- =================================================
+         ACCOUNT
+    ================================================== -->
 
     <div class="menu-section">
         Account
@@ -194,7 +230,9 @@
         <div class="container">
 
 
-            <!-- PAGE HEADER -->
+            <!-- =================================================
+                 PAGE HEADER
+            ================================================== -->
 
             <div class="dashboard-header">
 
@@ -255,9 +293,7 @@
                                 {% else %}
 
                                     <div class="server-icon-placeholder">
-
                                         {{ guild.name[0] }}
-
                                     </div>
 
                                 {% endif %}
@@ -329,9 +365,7 @@
             {% else %}
 
                 <div class="empty">
-
                     🔒 No authorized servers found.
-
                 </div>
 
             {% endif %}
@@ -373,9 +407,7 @@
                                 {% else %}
 
                                     <div class="server-icon-placeholder">
-
                                         {{ guild.name[0] }}
-
                                     </div>
 
                                 {% endif %}
@@ -472,9 +504,7 @@
             {% else %}
 
                 <div class="empty">
-
                     No additional servers available.
-
                 </div>
 
             {% endif %}
@@ -548,7 +578,20 @@
 
 <script src="/static/js/dashboard.js"></script>
 
+<script
+    src="/static/js/mouse-trail.js?v=3"
+    defer
+></script>
 
+<script
+    src="/static/js/menu.js?v=2"
+    defer
+></script>
+
+
+<!-- =====================================================
+     COOKIE BANNER
+====================================================== -->
 
 <div id="misukiCookieBanner">
 
@@ -609,20 +652,6 @@
 
 </div>
 
-<script
-    src="/static/js/stars.js?v=3"
-    defer
-></script>
-
-<script
-    src="/static/js/mouse-trail.js?v=3"
-    defer
-></script>
-
-<script
-    src="/static/js/menu.js?v=2"
-    defer
-></script>
 
 <script
     src="/static/js/cookies.js?v=3"
@@ -632,3 +661,4 @@
 </body>
 
 </html>
+

@@ -1,57 +1,58 @@
-```html
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
 
-    <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+<meta charset="UTF-8">
 
-    <title>Advertisement Admin — Misuki</title>
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
-
-    <!-- =====================================================
-         FAVICON
-    ====================================================== -->
-
-    <link
-        rel="icon"
-        type="image/png"
-        href="/assets/images/favicon.png?v=3"
-    >
-
-    <link
-        rel="shortcut icon"
-        type="image/png"
-        href="/assets/images/favicon.png?v=3"
-    >
+<title>Advertisement Admin — Misuki</title>
 
 
-    <!-- =====================================================
-         STYLES
-    ====================================================== -->
+<!-- =====================================================
+     FAVICON
+====================================================== -->
 
-    <link
-        rel="stylesheet"
-        href="/css/stars.css?v=3"
-    >
+<link
+    rel="icon"
+    type="image/png"
+    href="/assets/images/favicon.png?v=3"
+>
 
-    <link
-        rel="stylesheet"
-        href="/css/style.css?v=16"
-    >
+<link
+    rel="shortcut icon"
+    type="image/png"
+    href="/assets/images/favicon.png?v=3"
+>
 
-    <link
-        rel="stylesheet"
-        href="/css/cookies.css?v=3"
-    >
+
+<!-- =====================================================
+     STYLES
+====================================================== -->
+
+<link
+    rel="stylesheet"
+    href="/css/stars.css?v=3"
+>
+
+<link
+    rel="stylesheet"
+    href="/css/style.css?v=16"
+>
+
+<link
+    rel="stylesheet"
+    href="/css/cookies.css?v=3"
+>
+
 
 </head>
-
 
 <body>
 
@@ -317,7 +318,7 @@
 
                                     <form
                                         method="POST"
-                                        action="/admin/advertisements/{{ ad.id }}/approve"
+                                        action="/admin/advertise/{{ ad.id }}/approve"
                                     >
 
                                         <button
@@ -336,12 +337,20 @@
 
                                     <form
                                         method="POST"
-                                        action="/admin/advertisements/{{ ad.id }}/reject"
+                                        action="/admin/advertise/{{ ad.id }}/reject"
                                     >
+
+                                        <input
+                                            type="text"
+                                            name="reason"
+                                            placeholder="Reason for rejection (optional)"
+                                            maxlength="500"
+                                            autocomplete="off"
+                                        >
 
                                         <button
                                             type="submit"
-                                            class="button blocked"
+                                            class="button manage"
                                         >
 
                                             ❌ Reject
@@ -362,12 +371,12 @@
 
                                     <form
                                         method="POST"
-                                        action="/admin/advertisements/{{ ad.id }}/disable"
+                                        action="/admin/advertise/{{ ad.id }}/disable"
                                     >
 
                                         <button
                                             type="submit"
-                                            class="button blocked"
+                                            class="button manage"
                                         >
 
                                             ⛔ Disable
@@ -405,7 +414,6 @@
 
                 </div>
 
-
             {% endif %}
 
 
@@ -416,117 +424,13 @@
 </main>
 
 
-<!-- =====================================================
-     COOKIE BANNER
-====================================================== -->
 
-<div
-    id="misukiCookieBanner"
->
-
-
-    <div
-        id="misukiCookieContent"
-    >
-
-
-        <h3>
-
-            🍪 We use cookies
-
-        </h3>
-
-
-        <p>
-
-            Misuki uses cookies to improve your
-            experience and keep the website working
-            correctly.
-
-        </p>
-
-
-        <div
-            id="misukiCookieButtons"
-        >
-
-
-            <button
-                type="button"
-                id="misukiAccept"
-            >
-
-                Accept All
-
-            </button>
-
-
-            <button
-                type="button"
-                id="misukiEssential"
-            >
-
-                Essential Only
-
-            </button>
-
-
-            <button
-                type="button"
-                id="misukiDeny"
-            >
-
-                Deny
-
-            </button>
-
-
-        </div>
-
-
-        <div
-            id="misukiCookieLegal"
-        >
-
-
-            <a href="/terms">
-
-                Terms
-
-            </a>
-
-
-            <a href="/privacy">
-
-                Privacy
-
-            </a>
-
-
-            <a href="/cookies">
-
-                Cookie Policy
-
-            </a>
-
-
-        </div>
-
-
-    </div>
-
-
-</div>
 
 
 <!-- =====================================================
      COOKIE JAVASCRIPT
 ====================================================== -->
 
-<script
-    src="/js/cookies.js?v=3"
-    defer
-></script>
 
 
 <!-- =====================================================
@@ -544,4 +448,3 @@
 </body>
 
 </html>
-```

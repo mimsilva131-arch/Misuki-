@@ -1,0 +1,334 @@
+/* =========================================================
+   MISUKI - COOKIE BANNER
+   ========================================================= */
+
+#misukiCookieBanner {
+    position: fixed;
+
+    left: 50%;
+    bottom: 24px;
+
+    transform: translateX(-50%);
+
+    width: min(520px, calc(100vw - 32px));
+
+    padding: 22px;
+
+    background: rgba(21, 21, 30, 0.96);
+
+    border: 1px solid rgba(255, 255, 255, 0.10);
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.45),
+        0 0 30px rgba(120, 90, 255, 0.08);
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    z-index: 2147483000;
+
+    color: #ffffff;
+
+    pointer-events: auto;
+
+    animation: misukiCookieAppear 0.35s ease;
+
+}
+
+
+/* =========================================================
+   CONTENT
+   ========================================================= */
+
+#misukiCookieContent {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 12px;
+
+    position: relative;
+
+    z-index: 2147483001;
+
+}
+
+
+/* =========================================================
+   TITLE
+   ========================================================= */
+
+#misukiCookieContent h3 {
+
+    margin: 0;
+
+    font-size: 18px;
+
+    font-weight: 700;
+
+    color: #ffffff;
+
+}
+
+
+/* =========================================================
+   DESCRIPTION
+   ========================================================= */
+
+#misukiCookieContent p {
+
+    margin: 0;
+
+    color: rgba(255, 255, 255, 0.68);
+
+    font-size: 14px;
+
+    line-height: 1.55;
+
+}
+
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+#misukiCookieButtons {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+
+    margin-top: 4px;
+
+    position: relative;
+
+    z-index: 2147483002;
+
+}
+
+
+#misukiCookieButtons button {
+
+    border: 0;
+
+    padding: 9px 13px;
+
+    border-radius: 10px;
+
+    background: rgba(255, 255, 255, 0.08);
+
+    color: #ffffff;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        opacity 0.2s ease;
+
+    position: relative;
+
+    z-index: 2147483003;
+
+    pointer-events: auto;
+
+    user-select: none;
+
+}
+
+
+/* =========================================================
+   BUTTON HOVER
+   ========================================================= */
+
+#misukiCookieButtons button:hover {
+
+    background: rgba(255, 255, 255, 0.15);
+
+    transform: translateY(-1px);
+
+}
+
+
+#misukiCookieButtons button:active {
+
+    transform: translateY(0);
+
+}
+
+
+/* =========================================================
+   ACCEPT
+   ========================================================= */
+
+#misukiAccept {
+
+    background: #ffffff !important;
+
+    color: #0b0b10 !important;
+
+}
+
+
+#misukiAccept:hover {
+
+    background: #e9e9e9 !important;
+
+}
+
+
+/* =========================================================
+   ESSENTIAL
+   ========================================================= */
+
+#misukiEssential {
+
+    background: rgba(255, 255, 255, 0.08);
+
+    color: #ffffff;
+
+}
+
+
+/* =========================================================
+   DENY
+   ========================================================= */
+
+#misukiDeny {
+
+    background: rgba(255, 255, 255, 0.08);
+
+    color: #ffffff;
+
+}
+
+
+/* =========================================================
+   LEGAL LINKS
+   ========================================================= */
+
+#misukiCookieLegal {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 14px;
+
+    margin-top: 2px;
+
+    position: relative;
+
+    z-index: 2147483001;
+
+}
+
+
+#misukiCookieLegal a {
+
+    color: rgba(255, 255, 255, 0.48);
+
+    font-size: 12px;
+
+    text-decoration: none;
+
+    transition: color 0.2s ease;
+
+    pointer-events: auto;
+
+}
+
+
+#misukiCookieLegal a:hover {
+
+    color: #ffffff;
+
+}
+
+
+/* =========================================================
+   ANIMATION
+   ========================================================= */
+
+@keyframes misukiCookieAppear {
+
+    from {
+
+        opacity: 0;
+
+        transform:
+            translate(-50%, 15px);
+
+    }
+
+    to {
+
+        opacity: 1;
+
+        transform:
+            translate(-50%, 0);
+
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+    #misukiCookieBanner {
+
+        left: 50%;
+
+        bottom: 12px;
+
+        width: calc(100vw - 24px);
+
+        padding: 18px;
+
+        border-radius: 16px;
+
+        transform: translateX(-50%);
+
+    }
+
+
+    #misukiCookieButtons {
+
+        display: grid;
+
+        grid-template-columns: 1fr;
+
+        gap: 8px;
+
+    }
+
+
+    #misukiCookieButtons button {
+
+        width: 100%;
+
+        min-height: 42px;
+
+    }
+
+
+    #misukiCookieLegal {
+
+        justify-content: center;
+
+    }
+
+}

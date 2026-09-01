@@ -2,13 +2,17 @@
 import os
 import random
 import secrets
+import time
 
+from contextlib import contextmanager
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlencode
 
 import requests
 import psycopg2
 import psycopg2.extras
+from psycopg2.pool import ThreadedConnectionPool
 
 from flask import (
     Flask,
@@ -96,9 +100,15 @@ PORT = int(
 # COOKIE CONFIGURATION
 # =========================================================
 
-SESSION_SECURE = True
-
 SESSION_SAMESITE = "Lax"
+
+SESSION_SECURE = (
+    os.getenv(
+        "SESSION_COOKIE_SECURE",
+        "false"
+    ).lower()
+    == "true"
+)
 
 
 print(
@@ -226,7 +236,7 @@ app.config[
 
 app.config[
     "SESSION_REFRESH_EACH_REQUEST"
-] = True
+] = False
 
 
 app.config[
@@ -234,6 +244,94 @@ app.config[
 ] = timedelta(
     days=1
 )
+
+
+# =========================================================
+# HTTP SESSION
+# =========================================================
+
+discord_http = requests.Session()
+
+
+# =========================================================
+# DATABASE CONNECTION POOL
+# =========================================================
+
+db_pool = None
+
+
+if DATABASE_URL:
+
+    try:
+
+        db_pool = ThreadedConnectionPool(
+            1,
+            10,
+            DATABASE_URL,
+            sslmode="require"
+        )
+
+        print(
+            "✅ PostgreSQL connection pool created."
+        )
+
+    except Exception as error:
+
+        print(
+            f"❌ PostgreSQL pool error: {error}"
+        )
+
+        db_pool = None
+
+
+# =========================================================
+# DATABASE CONNECTION CONTEXT
+# =========================================================
+
+@contextmanager
+def database_connection():
+
+    if not db_pool:
+
+        raise RuntimeError(
+            "PostgreSQL connection pool is not available."
+        )
+
+    connection = None
+
+    try:
+
+        connection = db_pool.getconn()
+
+        yield connection
+
+    except Exception:
+
+        if connection:
+
+            try:
+                connection.rollback()
+            except Exception:
+                pass
+
+        raise
+
+    finally:
+
+        if connection:
+
+            try:
+
+                db_pool.putconn(
+                    connection
+                )
+
+            except Exception as error:
+
+                print(
+                    f"❌ Failed to return "
+                    f"database connection: {error}"
+                )
 
 
 # =========================================================
@@ -317,30 +415,12 @@ DISCORD_TOKEN_URL = (
 
 
 # =========================================================
-# DATABASE CONNECTION
-# =========================================================
-
-def database_connection():
-
-    if not DATABASE_URL:
-
-        raise RuntimeError(
-            "DATABASE_URL is not configured."
-        )
-
-    return psycopg2.connect(
-        DATABASE_URL,
-        sslmode="require"
-    )
-
-
-# =========================================================
 # DATABASE SETUP
 # =========================================================
 
 def create_database():
 
-    if not DATABASE_URL:
+    if not DATABASE_URL or not db_pool:
 
         print(
             "⚠️ Database initialization skipped."
@@ -402,7 +482,7 @@ def create_database():
                     """
                 )
 
-                connection.commit()
+            connection.commit()
 
         print(
             "✅ PostgreSQL database initialized."
@@ -501,7 +581,7 @@ def get_license(guild_id):
 
         return None
 
-    if not DATABASE_URL:
+    if not DATABASE_URL or not db_pool:
 
         return None
 
@@ -559,11 +639,9 @@ def get_license(guild_id):
 
 def get_all_licenses():
 
-    licenses = {}
+    if not DATABASE_URL or not db_pool:
 
-    if not DATABASE_URL:
-
-        return licenses
+        return {}
 
     try:
 
@@ -587,19 +665,78 @@ def get_all_licenses():
 
                 rows = cursor.fetchall()
 
-                for row in rows:
+        licenses = {}
 
-                    guild_id = str(
-                        row["guild_id"]
-                    )
+        now = utc_now()
 
-                    licenses[guild_id] = (
-                        row["guild_id"],
-                        row["license_key"],
-                        row["status"],
-                        row["expires_at"],
-                        row["created_at"]
-                    )
+        for row in rows:
+
+            guild_id = str(
+                row["guild_id"]
+            )
+
+            status = row["status"]
+
+            expires_at = row["expires_at"]
+
+            if (
+                status == "active"
+                and expires_at
+            ):
+
+                expiration = parse_datetime(
+                    expires_at
+                )
+
+                if expiration and now >= expiration:
+
+                    status = "expired"
+
+                    try:
+
+                        with database_connection() as connection:
+
+                            with connection.cursor() as cursor:
+
+                                cursor.execute(
+                                    """
+                                    UPDATE licenses
+                                    SET status = 'expired'
+                                    WHERE guild_id = %s
+                                    """,
+                                    (
+                                        int(guild_id),
+                                    )
+                                )
+
+                            connection.commit()
+
+                    except Exception as error:
+
+                        print(
+                            f"❌ License expiration error: {error}"
+                        )
+
+            licenses[guild_id] = {
+
+                "guild_id":
+                    row["guild_id"],
+
+                "license_key":
+                    row["license_key"],
+
+                "status":
+                    status,
+
+                "expires_at":
+                    expires_at,
+
+                "created_at":
+                    row["created_at"]
+
+            }
+
+        return licenses
 
     except Exception as error:
 
@@ -609,23 +746,16 @@ def get_all_licenses():
 
         return {}
 
-    return licenses
-
 
 # =========================================================
 # LICENSE ACTIVE CHECK
 # =========================================================
 
-def license_is_active(
-    guild_id,
-    license_data=None
-):
+def license_is_active(guild_id):
 
-    if license_data is None:
-
-        license_data = get_license(
-            guild_id
-        )
+    license_data = get_license(
+        guild_id
+    )
 
     if not license_data:
 
@@ -646,11 +776,6 @@ def license_is_active(
         )
 
         if not expiration:
-
-            print(
-                f"⚠️ Invalid expiration for "
-                f"guild {guild_id}: {expires_at}"
-            )
 
             return False
 
@@ -703,50 +828,27 @@ def user_has_license():
     for guild in guilds:
 
         guild_id = str(
-            guild.get("id", "")
+            guild.get(
+                "id",
+                ""
+            )
         )
-
-        if not guild_id:
-
-            continue
 
         license_data = licenses.get(
             guild_id
         )
 
-        if license_is_active(
-            guild_id,
-            license_data
-        ):
-
-            return True
-
-    return False
-
-
-# =========================================================
-# ACTIVE LICENSE IDS
-# =========================================================
-
-def get_active_license_guild_ids():
-
-    active_ids = set()
-
-    licenses = get_all_licenses()
-
-    now = utc_now()
-
-    expired_ids = []
-
-    for guild_id, license_data in licenses.items():
-
-        status = license_data[2]
-
-        expires_at = license_data[3]
-
-        if status != "active":
+        if not license_data:
 
             continue
+
+        if license_data["status"] != "active":
+
+            continue
+
+        expires_at = license_data[
+            "expires_at"
+        ]
 
         if expires_at:
 
@@ -758,47 +860,52 @@ def get_active_license_guild_ids():
 
                 continue
 
-            if now >= expiration:
+            if utc_now() >= expiration:
 
-                expired_ids.append(
-                    guild_id
-                )
+                continue
+
+        return True
+
+    return False
+
+
+# =========================================================
+# ACTIVE LICENSE IDS
+# =========================================================
+
+def get_active_license_guild_ids():
+
+    licenses = get_all_licenses()
+
+    active_ids = set()
+
+    for guild_id, license_data in licenses.items():
+
+        if license_data["status"] != "active":
+
+            continue
+
+        expires_at = license_data[
+            "expires_at"
+        ]
+
+        if expires_at:
+
+            expiration = parse_datetime(
+                expires_at
+            )
+
+            if not expiration:
+
+                continue
+
+            if utc_now() >= expiration:
 
                 continue
 
         active_ids.add(
             str(guild_id)
         )
-
-    # Expire outdated licenses in one database connection
-    if expired_ids:
-
-        try:
-
-            with database_connection() as connection:
-
-                with connection.cursor() as cursor:
-
-                    for guild_id in expired_ids:
-
-                        cursor.execute(
-                            """
-                            UPDATE licenses
-                            SET status = 'expired'
-                            WHERE guild_id = %s
-                            """,
-                            (
-                                int(guild_id),
-                            )
-                        )
-
-                connection.commit()
-
-        except Exception as error:
-
-            print(
-                f"❌ Failed to expire licenses: {error}"
-            )
 
     return active_ids
 
@@ -825,10 +932,67 @@ def discord_bot_headers():
 
 
 # =========================================================
+# GET SESSION USER
+# =========================================================
+
+def get_session_user():
+
+    access_token = session.get(
+        "access_token"
+    )
+
+    if not access_token:
+
+        return None
+
+    user_id = session.get(
+        "user_id"
+    )
+
+    username = session.get(
+        "username"
+    )
+
+    global_name = session.get(
+        "global_name"
+    )
+
+    avatar = session.get(
+        "avatar"
+    )
+
+    if not user_id:
+
+        return None
+
+    return {
+
+        "id":
+            user_id,
+
+        "username":
+            username,
+
+        "global_name":
+            global_name,
+
+        "avatar":
+            avatar
+
+    }
+
+
+# =========================================================
 # GET USER
 # =========================================================
 
 def get_user():
+
+    session_user = get_session_user()
+
+    if session_user:
+
+        return session_user
 
     access_token = session.get(
         "access_token"
@@ -840,7 +1004,7 @@ def get_user():
 
     try:
 
-        response = requests.get(
+        response = discord_http.get(
 
             f"{DISCORD_API}/users/@me",
 
@@ -874,11 +1038,39 @@ def get_user():
 
     try:
 
-        return response.json()
+        user = response.json()
 
     except ValueError:
 
         return None
+
+    session[
+        "user_id"
+    ] = user.get(
+        "id"
+    )
+
+    session[
+        "username"
+    ] = user.get(
+        "username"
+    )
+
+    session[
+        "global_name"
+    ] = user.get(
+        "global_name"
+    )
+
+    session[
+        "avatar"
+    ] = user.get(
+        "avatar"
+    )
+
+    session.modified = True
+
+    return user
 
 
 # =========================================================
@@ -897,7 +1089,7 @@ def get_user_guilds():
 
     try:
 
-        response = requests.get(
+        response = discord_http.get(
 
             f"{DISCORD_API}/users/@me/guilds",
 
@@ -946,10 +1138,28 @@ def get_user_guilds():
 
 
 # =========================================================
+# BOT GUILD CACHE
+# =========================================================
+
+BOT_GUILD_CACHE = {
+
+    "data": [],
+
+    "timestamp": 0
+
+}
+
+
+BOT_GUILD_CACHE_TTL = 30
+
+
+# =========================================================
 # GET BOT GUILDS
 # =========================================================
 
 def get_bot_guilds():
+
+    global BOT_GUILD_CACHE
 
     if not BOT_TOKEN:
 
@@ -959,9 +1169,20 @@ def get_bot_guilds():
 
         return []
 
+    now = time.time()
+
+    if (
+        BOT_GUILD_CACHE["data"]
+        and
+        now - BOT_GUILD_CACHE["timestamp"]
+        < BOT_GUILD_CACHE_TTL
+    ):
+
+        return BOT_GUILD_CACHE["data"]
+
     try:
 
-        response = requests.get(
+        response = discord_http.get(
 
             f"{DISCORD_API}/users/@me/guilds",
 
@@ -980,7 +1201,7 @@ def get_bot_guilds():
             f"❌ Bot guild request error: {error}"
         )
 
-        return []
+        return BOT_GUILD_CACHE["data"]
 
     if response.status_code != 200:
 
@@ -989,7 +1210,7 @@ def get_bot_guilds():
             f"{response.status_code}"
         )
 
-        return []
+        return BOT_GUILD_CACHE["data"]
 
     try:
 
@@ -997,14 +1218,24 @@ def get_bot_guilds():
 
     except ValueError:
 
-        return []
+        return BOT_GUILD_CACHE["data"]
 
     if not isinstance(
         data,
         list
     ):
 
-        return []
+        return BOT_GUILD_CACHE["data"]
+
+    BOT_GUILD_CACHE = {
+
+        "data":
+            data,
+
+        "timestamp":
+            now
+
+    }
 
     return data
 
@@ -1068,12 +1299,12 @@ def is_admin(user):
 
         return False
 
-    admin_ids = os.getenv(
-        "ADMIN_USER_IDS",
+    admin_discord_ids = os.getenv(
+        "ADMIN_DISCORD_IDS",
         ""
     )
 
-    if not admin_ids:
+    if not admin_discord_ids:
 
         return False
 
@@ -1081,7 +1312,7 @@ def is_admin(user):
 
         item.strip()
 
-        for item in admin_ids.split(",")
+        for item in admin_discord_ids.split(",")
 
         if item.strip()
 
@@ -1160,6 +1391,7 @@ def create_oauth_state():
     ).isoformat()
 
     session.permanent = True
+
     session.modified = True
 
     return state
@@ -1362,12 +1594,17 @@ def login():
     if existing_user:
 
         next_url = safe_next_url(
+
             request.args.get(
                 "next"
             )
-            or session.get(
+
+            or
+
+            session.get(
                 "next_url"
             )
+
         )
 
         session[
@@ -1568,7 +1805,7 @@ def login_callback():
 
     try:
 
-        response = requests.post(
+        response = discord_http.post(
 
             DISCORD_TOKEN_URL,
 
@@ -1637,7 +1874,7 @@ def login_callback():
 
     try:
 
-        user_response = requests.get(
+        user_response = discord_http.get(
 
             f"{DISCORD_API}/users/@me",
 
@@ -1714,6 +1951,16 @@ def login_callback():
         "global_name"
     ] = user.get(
         "global_name"
+    )
+
+    # -----------------------------------------------------
+    # AVATAR
+    # -----------------------------------------------------
+
+    session[
+        "avatar"
+    ] = user.get(
+        "avatar"
     )
 
     session.permanent = True
@@ -1797,6 +2044,12 @@ def index():
 @app.route("/dashboard")
 def dashboard():
 
+    start_time = time.perf_counter()
+
+    print(
+        "🟢 DASHBOARD: started"
+    )
+
     user = get_user()
 
     if not user:
@@ -1809,9 +2062,56 @@ def dashboard():
             "/login"
         )
 
-    user_guilds = get_user_guilds()
+    # -----------------------------------------------------
+    # PARALLEL EXTERNAL REQUESTS
+    # -----------------------------------------------------
 
-    bot_guilds = get_bot_guilds()
+    with ThreadPoolExecutor(
+        max_workers=3
+    ) as executor:
+
+        user_guilds_future = executor.submit(
+            get_user_guilds
+        )
+
+        bot_guilds_future = executor.submit(
+            get_bot_guilds
+        )
+
+        licenses_future = executor.submit(
+            get_all_licenses
+        )
+
+        user_guilds = (
+            user_guilds_future.result()
+        )
+
+        bot_guilds = (
+            bot_guilds_future.result()
+        )
+
+        licenses = (
+            licenses_future.result()
+        )
+
+    print(
+        f"🏠 DASHBOARD: "
+        f"{len(user_guilds)} user guilds"
+    )
+
+    print(
+        f"🤖 DASHBOARD: "
+        f"{len(bot_guilds)} bot guilds"
+    )
+
+    print(
+        f"🗄️ DASHBOARD: "
+        f"{len(licenses)} licenses"
+    )
+
+    # -----------------------------------------------------
+    # BOT GUILD IDS
+    # -----------------------------------------------------
 
     bot_guild_ids = {
 
@@ -1825,82 +2125,9 @@ def dashboard():
 
     }
 
-    # =====================================================
-    # LOAD ALL LICENSES ONCE
-    # =====================================================
-
-    all_licenses = get_all_licenses()
-
-    active_license_ids = set()
-
-    now = utc_now()
-
-    expired_ids = []
-
-    for guild_id, license_data in all_licenses.items():
-
-        status = license_data[2]
-
-        expires_at = license_data[3]
-
-        if status != "active":
-
-            continue
-
-        if expires_at:
-
-            expiration = parse_datetime(
-                expires_at
-            )
-
-            if not expiration:
-
-                continue
-
-            if now >= expiration:
-
-                expired_ids.append(
-                    guild_id
-                )
-
-                continue
-
-        active_license_ids.add(
-            str(guild_id)
-        )
-
-    # =====================================================
-    # EXPIRE OLD LICENSES
-    # =====================================================
-
-    if expired_ids:
-
-        try:
-
-            with database_connection() as connection:
-
-                with connection.cursor() as cursor:
-
-                    for guild_id in expired_ids:
-
-                        cursor.execute(
-                            """
-                            UPDATE licenses
-                            SET status = 'expired'
-                            WHERE guild_id = %s
-                            """,
-                            (
-                                int(guild_id),
-                            )
-                        )
-
-                connection.commit()
-
-        except Exception as error:
-
-            print(
-                f"❌ Failed to expire licenses: {error}"
-            )
+    # -----------------------------------------------------
+    # BUILD SERVER LISTS
+    # -----------------------------------------------------
 
     authorized = []
 
@@ -1920,11 +2147,11 @@ def dashboard():
 
             continue
 
-        # =================================================
-        # USE ALREADY LOADED LICENSE
-        # =================================================
+        # -------------------------------------------------
+        # LICENSE
+        # -------------------------------------------------
 
-        license_data = all_licenses.get(
+        license_data = licenses.get(
             guild_id
         )
 
@@ -1932,22 +2159,11 @@ def dashboard():
             "license_data"
         ] = license_data
 
-        guild[
-            "license_active"
-        ] = (
-            guild_id
-            in active_license_ids
-        )
-
         if license_data:
 
-            status = license_data[2]
-
-            # If this license expired during this request,
-            # expose the new status.
-            if guild_id in expired_ids:
-
-                status = "expired"
+            status = license_data[
+                "status"
+            ]
 
         else:
 
@@ -1957,6 +2173,16 @@ def dashboard():
             "license_status"
         ] = status
 
+        guild[
+            "license_active"
+        ] = (
+            status == "active"
+        )
+
+        # -------------------------------------------------
+        # AUTHORIZED
+        # -------------------------------------------------
+
         if guild_id in bot_guild_ids:
 
             authorized.append(
@@ -1964,6 +2190,10 @@ def dashboard():
             )
 
             continue
+
+        # -------------------------------------------------
+        # AVAILABLE
+        # -------------------------------------------------
 
         guild[
             "can_add"
@@ -1981,6 +2211,10 @@ def dashboard():
             guild
         )
 
+    # -----------------------------------------------------
+    # SORT
+    # -----------------------------------------------------
+
     authorized.sort(
         key=lambda guild:
             guild.get(
@@ -1991,15 +2225,28 @@ def dashboard():
 
     available.sort(
         key=lambda guild: (
+
             not guild.get(
                 "can_add",
                 False
             ),
+
             guild.get(
                 "name",
                 ""
             ).lower()
+
         )
+    )
+
+    elapsed = (
+        time.perf_counter()
+        - start_time
+    )
+
+    print(
+        f"⚡ DASHBOARD: completed "
+        f"in {elapsed:.3f}s"
     )
 
     return render_template(
@@ -2085,8 +2332,7 @@ def manage(guild_id):
     )
 
     license_active = license_is_active(
-        guild_id,
-        license_data
+        guild_id
     )
 
     return render_template(
@@ -2106,7 +2352,7 @@ def get_random_reviews(
     amount=6
 ):
 
-    if not DATABASE_URL:
+    if not DATABASE_URL or not db_pool:
 
         return []
 
@@ -2320,7 +2566,7 @@ def submit_review():
 
         avatar = None
 
-    if not DATABASE_URL:
+    if not DATABASE_URL or not db_pool:
 
         return error_page(
             "❌ Review Error",
@@ -2535,7 +2781,7 @@ if __name__ == "__main__":
 
     print(
         f"🛡️ Admin IDs configured: "
-        f"{bool(os.getenv('ADMIN_USER_IDS'))}"
+        f"{bool(os.getenv('ADMIN_DISCORD_IDS'))}"
     )
 
     print(

@@ -1,8 +1,8 @@
-
 import os
 import random
 import secrets
 
+from decimal import Decimal, InvalidOperation
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlencode, urlparse
 
@@ -109,6 +109,63 @@ except (
     TypeError
 ):
     PORT = 5000
+
+
+# =========================================================
+# PAYPAL CONFIGURATION
+# =========================================================
+
+PAYPAL_CLIENT_ID = os.getenv(
+    "PAYPAL_CLIENT_ID"
+)
+
+PAYPAL_CLIENT_SECRET = os.getenv(
+    "PAYPAL_CLIENT_SECRET"
+)
+
+PAYPAL_MODE = os.getenv(
+    "PAYPAL_MODE",
+    "sandbox"
+).strip().lower()
+
+if PAYPAL_MODE not in (
+    "sandbox",
+    "live"
+):
+
+    PAYPAL_MODE = "sandbox"
+
+if PAYPAL_MODE == "live":
+
+    PAYPAL_API_BASE = (
+        "https://api-m.paypal.com"
+    )
+
+else:
+
+    PAYPAL_API_BASE = (
+        "https://api-m.sandbox.paypal.com"
+    )
+
+PAYPAL_CURRENCY = os.getenv(
+    "PAYPAL_CURRENCY",
+    "EUR"
+).strip().upper()
+
+if not PAYPAL_CURRENCY:
+
+    PAYPAL_CURRENCY = "EUR"
+
+
+# =========================================================
+# ADVERTISEMENT PRICES
+# =========================================================
+
+ADVERTISEMENT_PRICES = {
+    7: Decimal("0.99"),
+    14: Decimal("1.50"),
+    30: Decimal("2.50")
+}
 
 
 # =========================================================
@@ -504,6 +561,24 @@ def create_database():
                     """
                 )
 
+                # -------------------------------------------------
+                # PAYPAL MIGRATION
+                # -------------------------------------------------
+
+                cursor.execute(
+                    """
+                    ALTER TABLE advertisement_payments
+                    ADD COLUMN IF NOT EXISTS provider_order_id TEXT
+                    """
+                )
+
+                cursor.execute(
+                    """
+                    ALTER TABLE advertisement_payments
+                    ADD COLUMN IF NOT EXISTS provider_capture_id TEXT
+                    """
+                )
+
             connection.commit()
 
         print(
@@ -607,6 +682,598 @@ def safe_next_url(value):
         return "/dashboard"
 
     return value
+
+
+# =========================================================
+# PAYPAL HELPERS
+# =========================================================
+
+def paypal_is_configured():
+
+    return bool(
+        PAYPAL_CLIENT_ID
+        and PAYPAL_CLIENT_SECRET
+    )
+
+
+def paypal_get_access_token():
+
+    if not paypal_is_configured():
+
+        raise RuntimeError(
+            "PayPal is not configured."
+        )
+
+    try:
+
+        response = requests.post(
+            f"{PAYPAL_API_BASE}/v1/oauth2/token",
+            auth=(
+                PAYPAL_CLIENT_ID,
+                PAYPAL_CLIENT_SECRET
+            ),
+            data={
+                "grant_type":
+                    "client_credentials"
+            },
+            headers={
+                "Accept":
+                    "application/json",
+                "Accept-Language":
+                    "en_US",
+                "Content-Type":
+                    "application/x-www-form-urlencoded"
+            },
+            timeout=15
+        )
+
+    except requests.RequestException as error:
+
+        print(
+            f"❌ PayPal authentication request error: {error}"
+        )
+
+        raise RuntimeError(
+            "Could not contact PayPal."
+        ) from error
+
+    if response.status_code != 200:
+
+        print(
+            "❌ PayPal authentication failed:"
+        )
+
+        print(
+            response.text
+        )
+
+        raise RuntimeError(
+            "PayPal authentication failed."
+        )
+
+    try:
+
+        data = response.json()
+
+    except ValueError as error:
+
+        raise RuntimeError(
+            "PayPal returned invalid authentication data."
+        ) from error
+
+    access_token = data.get(
+        "access_token"
+    )
+
+    if not access_token:
+
+        raise RuntimeError(
+            "PayPal did not return an access token."
+        )
+
+    return access_token
+
+
+def paypal_create_order(
+    advertisement_id,
+    title,
+    duration_days,
+    amount
+):
+
+    if not paypal_is_configured():
+
+        raise RuntimeError(
+            "PayPal is not configured."
+        )
+
+    access_token = paypal_get_access_token()
+
+    amount = Decimal(
+        amount
+    ).quantize(
+        Decimal("0.01")
+    )
+
+    return_url = (
+        f"{request.host_url.rstrip('/')}"
+        "/advertise/paypal/success"
+    )
+
+    cancel_url = (
+        f"{request.host_url.rstrip('/')}"
+        "/advertise/paypal/cancel"
+    )
+
+    payload = {
+        "intent": "CAPTURE",
+
+        "purchase_units": [
+            {
+                "reference_id":
+                    f"misuki-ad-{advertisement_id}",
+
+                "description":
+                    f"Misuki advertisement - {duration_days} days",
+
+                "custom_id":
+                    str(advertisement_id),
+
+                "amount": {
+                    "currency_code":
+                        PAYPAL_CURRENCY,
+
+                    "value":
+                        f"{amount:.2f}"
+                }
+            }
+        ],
+
+        "application_context": {
+            "brand_name":
+                "Misuki",
+
+            "user_action":
+                "PAY_NOW",
+
+            "shipping_preference":
+                "NO_SHIPPING",
+
+            "return_url":
+                return_url,
+
+            "cancel_url":
+                cancel_url
+        }
+    }
+
+    headers = {
+        "Authorization":
+            f"Bearer {access_token}",
+
+        "Content-Type":
+            "application/json",
+
+        "Accept":
+            "application/json",
+
+        "PayPal-Request-Id":
+            secrets.token_urlsafe(24)
+    }
+
+    try:
+
+        response = requests.post(
+            f"{PAYPAL_API_BASE}/v2/checkout/orders",
+            json=payload,
+            headers=headers,
+            timeout=20
+        )
+
+    except requests.RequestException as error:
+
+        print(
+            f"❌ PayPal create order request error: {error}"
+        )
+
+        raise RuntimeError(
+            "Could not create the PayPal payment."
+        ) from error
+
+    if response.status_code not in (
+        200,
+        201
+    ):
+
+        print(
+            "❌ PayPal create order failed:"
+        )
+
+        print(
+            response.text
+        )
+
+        raise RuntimeError(
+            "PayPal could not create the payment."
+        )
+
+    try:
+
+        data = response.json()
+
+    except ValueError as error:
+
+        raise RuntimeError(
+            "PayPal returned invalid order data."
+        ) from error
+
+    order_id = data.get(
+        "id"
+    )
+
+    if not order_id:
+
+        raise RuntimeError(
+            "PayPal did not return an order ID."
+        )
+
+    approval_url = None
+
+    for link in data.get(
+        "links",
+        []
+    ):
+
+        if link.get(
+            "rel"
+        ) in (
+            "approve",
+            "payer-action"
+        ):
+
+            approval_url = link.get(
+                "href"
+            )
+
+            if approval_url:
+                break
+
+    if not approval_url:
+
+        raise RuntimeError(
+            "PayPal did not return an approval URL."
+        )
+
+    return {
+        "id":
+            order_id,
+
+        "approval_url":
+            approval_url,
+
+        "status":
+            data.get(
+                "status"
+            )
+    }
+
+
+def paypal_capture_order(
+    order_id
+):
+
+    if not paypal_is_configured():
+
+        raise RuntimeError(
+            "PayPal is not configured."
+        )
+
+    if not order_id:
+
+        raise RuntimeError(
+            "PayPal order ID is missing."
+        )
+
+    access_token = paypal_get_access_token()
+
+    headers = {
+        "Authorization":
+            f"Bearer {access_token}",
+
+        "Content-Type":
+            "application/json",
+
+        "Accept":
+            "application/json",
+
+        "PayPal-Request-Id":
+            secrets.token_urlsafe(24)
+    }
+
+    try:
+
+        response = requests.post(
+            f"{PAYPAL_API_BASE}/v2/checkout/orders/"
+            f"{order_id}/capture",
+            json={},
+            headers=headers,
+            timeout=20
+        )
+
+    except requests.RequestException as error:
+
+        print(
+            f"❌ PayPal capture request error: {error}"
+        )
+
+        raise RuntimeError(
+            "Could not capture the PayPal payment."
+        ) from error
+
+    # A repeated callback can happen after a successful capture.
+    # In that case PayPal may return a conflict because the order
+    # has already been completed.
+    if response.status_code not in (
+        200,
+        201
+    ):
+
+        print(
+            "❌ PayPal capture failed:"
+        )
+
+        print(
+            response.text
+        )
+
+        raise RuntimeError(
+            "PayPal could not complete the payment."
+        )
+
+    try:
+
+        data = response.json()
+
+    except ValueError as error:
+
+        raise RuntimeError(
+            "PayPal returned invalid capture data."
+        ) from error
+
+    return data
+
+
+def paypal_extract_capture_id(
+    paypal_response
+):
+
+    purchase_units = (
+        paypal_response.get(
+            "purchase_units",
+            []
+        )
+    )
+
+    for purchase_unit in purchase_units:
+
+        payments = (
+            purchase_unit.get(
+                "payments",
+                {}
+            )
+        )
+
+        captures = (
+            payments.get(
+                "captures",
+                []
+            )
+        )
+
+        for capture in captures:
+
+            capture_id = capture.get(
+                "id"
+            )
+
+            if capture_id:
+                return capture_id
+
+    return None
+
+
+def paypal_extract_captured_amount(
+    paypal_response
+):
+
+    purchase_units = (
+        paypal_response.get(
+            "purchase_units",
+            []
+        )
+    )
+
+    for purchase_unit in purchase_units:
+
+        payments = (
+            purchase_unit.get(
+                "payments",
+                {}
+            )
+        )
+
+        captures = (
+            payments.get(
+                "captures",
+                []
+            )
+        )
+
+        for capture in captures:
+
+            amount = capture.get(
+                "amount"
+            )
+
+            if not amount:
+                continue
+
+            value = amount.get(
+                "value"
+            )
+
+            currency = amount.get(
+                "currency_code"
+            )
+
+            if value is None:
+                continue
+
+            try:
+
+                value = Decimal(
+                    str(value)
+                ).quantize(
+                    Decimal("0.01")
+                )
+
+            except (
+                InvalidOperation,
+                ValueError,
+                TypeError
+            ):
+
+                continue
+
+            return value, currency
+
+    return None, None
+
+
+def paypal_payment_status_for_ad(
+    advertisement_id,
+    user_id
+):
+
+    if not DATABASE_URL:
+        return None
+
+    try:
+
+        with database_connection() as connection:
+
+            with connection.cursor(
+                cursor_factory=psycopg2.extras.RealDictCursor
+            ) as cursor:
+
+                cursor.execute(
+                    """
+                    SELECT
+                        id,
+                        advertisement_id,
+                        user_id,
+                        provider,
+                        provider_payment_id,
+                        provider_order_id,
+                        provider_capture_id,
+                        amount,
+                        currency,
+                        status,
+                        created_at,
+                        updated_at
+                    FROM advertisement_payments
+                    WHERE advertisement_id = %s
+                    AND user_id = %s
+                    AND provider = 'paypal'
+                    ORDER BY id DESC
+                    LIMIT 1
+                    """,
+                    (
+                        advertisement_id,
+                        user_id
+                    )
+                )
+
+                return cursor.fetchone()
+
+    except Exception as error:
+
+        print(
+            f"❌ PayPal payment lookup error: {error}"
+        )
+
+        return None
+
+
+def update_payment_record(
+    payment_id,
+    status,
+    provider_order_id=None,
+    provider_capture_id=None,
+    provider_payment_id=None,
+    amount=None,
+    currency=None
+):
+
+    if not DATABASE_URL:
+        return False
+
+    now = utc_now().isoformat()
+
+    try:
+
+        with database_connection() as connection:
+
+            with connection.cursor() as cursor:
+
+                cursor.execute(
+                    """
+                    UPDATE advertisement_payments
+                    SET
+                        provider_payment_id =
+                            COALESCE(%s, provider_payment_id),
+
+                        provider_order_id =
+                            COALESCE(%s, provider_order_id),
+
+                        provider_capture_id =
+                            COALESCE(%s, provider_capture_id),
+
+                        amount =
+                            COALESCE(%s, amount),
+
+                        currency =
+                            COALESCE(%s, currency),
+
+                        status = %s,
+
+                        updated_at = %s
+
+                    WHERE id = %s
+                    """,
+                    (
+                        provider_payment_id,
+                        provider_order_id,
+                        provider_capture_id,
+                        amount,
+                        currency,
+                        status,
+                        now,
+                        payment_id
+                    )
+                )
+
+            connection.commit()
+
+        return True
+
+    except Exception as error:
+
+        print(
+            f"❌ Payment update error: {error}"
+        )
+
+        return False
 
 
 # =========================================================
@@ -1767,8 +2434,6 @@ def get_active_advertisements():
 
     expire_advertisements()
 
-    now = utc_now().isoformat()
-
     try:
 
         with database_connection() as connection:
@@ -1794,23 +2459,11 @@ def get_active_advertisements():
                         created_at
                     FROM advertisements
                     WHERE status = 'active'
-                    AND (
-                        start_at IS NULL
-                        OR start_at <= %s
-                    )
-                    AND (
-                        end_at IS NULL
-                        OR end_at > %s
-                    )
                     ORDER BY id DESC
-                    """,
-                    (
-                        now,
-                        now
-                    )
+                    """
                 )
 
-                return cursor.fetchall()
+                rows = cursor.fetchall()
 
     except Exception as error:
 
@@ -1820,35 +2473,101 @@ def get_active_advertisements():
 
         return []
 
+    now = utc_now()
+
+    active_advertisements = []
+
+    for advertisement in rows:
+
+        start_at = parse_datetime(
+            advertisement.get("start_at")
+        )
+
+        end_at = parse_datetime(
+            advertisement.get("end_at")
+        )
+
+        if start_at is not None:
+
+            if now < start_at:
+                continue
+
+        if end_at is not None:
+
+            if now >= end_at:
+                continue
+
+        active_advertisements.append(
+            advertisement
+        )
+
+    return active_advertisements
+
 
 def expire_advertisements():
 
     if not DATABASE_URL:
         return
 
-    now = utc_now().isoformat()
+    now = utc_now()
 
     try:
 
         with database_connection() as connection:
 
-            with connection.cursor() as cursor:
+            with connection.cursor(
+                cursor_factory=psycopg2.extras.RealDictCursor
+            ) as cursor:
 
                 cursor.execute(
                     """
-                    UPDATE advertisements
-                    SET
-                        status = 'expired',
-                        updated_at = %s
+                    SELECT
+                        id,
+                        end_at
+                    FROM advertisements
                     WHERE status = 'active'
                     AND end_at IS NOT NULL
-                    AND end_at <= %s
-                    """,
-                    (
-                        now,
-                        now
-                    )
+                    """
                 )
+
+                advertisements = (
+                    cursor.fetchall()
+                )
+
+                expired_ids = []
+
+                for advertisement in advertisements:
+
+                    end_at = parse_datetime(
+                        advertisement.get(
+                            "end_at"
+                        )
+                    )
+
+                    if not end_at:
+                        continue
+
+                    if now >= end_at:
+
+                        expired_ids.append(
+                            advertisement["id"]
+                        )
+
+                if expired_ids:
+
+                    cursor.execute(
+                        """
+                        UPDATE advertisements
+                        SET
+                            status = 'expired',
+                            updated_at = %s
+                        WHERE id = ANY(%s)
+                        """,
+                        (
+                            now.isoformat(),
+                            expired_ids
+                        )
+                    )
 
             connection.commit()
 
@@ -2372,7 +3091,13 @@ def advertise():
     return render_template(
         "advertise.html",
         user=user,
-        is_admin=is_admin
+        is_admin=is_admin,
+        advertisement_prices={
+            duration:
+                f"{price:.2f}"
+            for duration, price
+            in ADVERTISEMENT_PRICES.items()
+        }
     )
 
 
@@ -2499,6 +3224,32 @@ def create_advertisement():
             "❌ Invalid duration",
             "The advertisement duration must be 7, 14 or 30 days.",
             400,
+            user
+        )
+
+    amount = ADVERTISEMENT_PRICES.get(
+        duration
+    )
+
+    if amount is None:
+
+        return error_page(
+            "❌ Invalid price",
+            "The selected advertisement price is invalid.",
+            400,
+            user
+        )
+
+    # -----------------------------------------------------
+    # PAYPAL CONFIGURATION
+    # -----------------------------------------------------
+
+    if not paypal_is_configured():
+
+        return error_page(
+            "❌ Payment unavailable",
+            "PayPal is not configured yet. Please try again later.",
+            503,
             user
         )
 
@@ -2644,8 +3395,10 @@ def create_advertisement():
         )
 
     # =====================================================
-    # PAYMENT RECORD
+    # CREATE PAYMENT RECORD
     # =====================================================
+
+    payment_id = None
 
     try:
 
@@ -2661,6 +3414,8 @@ def create_advertisement():
                         user_id,
                         provider,
                         provider_payment_id,
+                        provider_order_id,
+                        provider_capture_id,
                         amount,
                         currency,
                         status,
@@ -2674,18 +3429,37 @@ def create_advertisement():
                         'paypal',
                         NULL,
                         NULL,
-                        'EUR',
-                        'not_configured',
+                        NULL,
+                        %s,
+                        %s,
+                        'pending',
                         %s,
                         %s
                     )
+                    RETURNING id
                     """,
                     (
                         advertisement_id,
                         user_id,
+                        amount,
+                        PAYPAL_CURRENCY,
                         now,
                         now
                     )
+                )
+
+                payment_result = (
+                    cursor.fetchone()
+                )
+
+                if not payment_result:
+
+                    raise RuntimeError(
+                        "Payment ID was not returned."
+                    )
+
+                payment_id = (
+                    payment_result[0]
                 )
 
             connection.commit()
@@ -2693,12 +3467,472 @@ def create_advertisement():
     except Exception as error:
 
         print(
-            f"⚠️ Advertisement payment record error: {error}"
+            f"❌ Advertisement payment record error: {error}"
+        )
+
+        return error_page(
+            "❌ Payment Error",
+            "The payment record could not be created.",
+            500,
+            user
         )
 
     # =====================================================
-    # SUCCESS
+    # CREATE PAYPAL ORDER
     # =====================================================
+
+    try:
+
+        paypal_order = paypal_create_order(
+            advertisement_id,
+            title,
+            duration,
+            amount
+        )
+
+    except Exception as error:
+
+        print(
+            f"❌ PayPal order creation error: {error}"
+        )
+
+        update_payment_record(
+            payment_id,
+            "failed"
+        )
+
+        return error_page(
+            "❌ Payment Error",
+            "The PayPal payment could not be created. Please try again.",
+            502,
+            user
+        )
+
+    # =====================================================
+    # SAVE PAYPAL ORDER
+    # =====================================================
+
+    updated = update_payment_record(
+        payment_id,
+        "pending",
+        provider_order_id=paypal_order["id"],
+        provider_payment_id=paypal_order["id"],
+        amount=amount,
+        currency=PAYPAL_CURRENCY
+    )
+
+    if not updated:
+
+        print(
+            "⚠️ PayPal order was created but payment record "
+            "could not be updated."
+        )
+
+        return error_page(
+            "❌ Payment Error",
+            "The payment could not be prepared safely. Please contact support.",
+            500,
+            user
+        )
+
+    # =====================================================
+    # SAVE PAYMENT CONTEXT
+    # =====================================================
+
+    session["pending_paypal_order_id"] = (
+        paypal_order["id"]
+    )
+
+    session["pending_paypal_advertisement_id"] = (
+        advertisement_id
+    )
+
+    session["pending_paypal_payment_id"] = (
+        payment_id
+    )
+
+    session.permanent = True
+    session.modified = True
+
+    # =====================================================
+    # REDIRECT TO PAYPAL
+    # =====================================================
+
+    return redirect(
+        paypal_order["approval_url"]
+    )
+
+
+# =========================================================
+# PAYPAL SUCCESS
+# =========================================================
+
+@app.route(
+    "/advertise/paypal/success"
+)
+def paypal_success():
+
+    user = get_user()
+
+    if not user:
+
+        return error_page(
+            "❌ Payment Error",
+            "Your login session expired. Please log in again.",
+            401
+        )
+
+    order_id = request.args.get(
+        "token"
+    )
+
+    if not order_id:
+
+        return error_page(
+            "❌ Payment Error",
+            "PayPal did not return an order ID.",
+            400,
+            user
+        )
+
+    session_order_id = session.get(
+        "pending_paypal_order_id"
+    )
+
+    if (
+        session_order_id
+        and
+        str(session_order_id)
+        != str(order_id)
+    ):
+
+        return error_page(
+            "❌ Payment Error",
+            "The PayPal order does not match the current payment.",
+            400,
+            user
+        )
+
+    advertisement_id = session.get(
+        "pending_paypal_advertisement_id"
+    )
+
+    payment_id = session.get(
+        "pending_paypal_payment_id"
+    )
+
+    if not advertisement_id or not payment_id:
+
+        return error_page(
+            "❌ Payment Error",
+            "The payment session could not be verified.",
+            400,
+            user
+        )
+
+    # -----------------------------------------------------
+    # VERIFY PAYMENT RECORD
+    # -----------------------------------------------------
+
+    payment = paypal_payment_status_for_ad(
+        advertisement_id,
+        str(user.get("id"))
+    )
+
+    if not payment:
+
+        return error_page(
+            "❌ Payment Error",
+            "The payment record could not be found.",
+            404,
+            user
+        )
+
+    if int(payment["id"]) != int(
+        payment_id
+    ):
+
+        return error_page(
+            "❌ Payment Error",
+            "The payment session could not be verified.",
+            400,
+            user
+        )
+
+    stored_order_id = (
+        payment.get(
+            "provider_order_id"
+        )
+        or
+        payment.get(
+            "provider_payment_id"
+        )
+    )
+
+    if (
+        not stored_order_id
+        or
+        str(stored_order_id)
+        != str(order_id)
+    ):
+
+        return error_page(
+            "❌ Payment Error",
+            "The PayPal order could not be verified.",
+            400,
+            user
+        )
+
+    # -----------------------------------------------------
+    # ALREADY PAID
+    # -----------------------------------------------------
+
+    if str(
+        payment.get(
+            "status"
+        )
+        or
+        ""
+    ).lower() == "paid":
+
+        session.pop(
+            "pending_paypal_order_id",
+            None
+        )
+
+        session.pop(
+            "pending_paypal_advertisement_id",
+            None
+        )
+
+        session.pop(
+            "pending_paypal_payment_id",
+            None
+        )
+
+        session.modified = True
+
+        return render_template(
+            "advertise_success.html",
+            user=user,
+            is_admin=is_admin
+        )
+
+    # -----------------------------------------------------
+    # CAPTURE
+    # -----------------------------------------------------
+
+    try:
+
+        paypal_response = paypal_capture_order(
+            order_id
+        )
+
+    except Exception as error:
+
+        print(
+            f"❌ PayPal capture error: {error}"
+        )
+
+        return error_page(
+            "❌ Payment Error",
+            "PayPal could not complete the payment. Please try again.",
+            502,
+            user
+        )
+
+    paypal_status = str(
+        paypal_response.get(
+            "status",
+            ""
+        )
+    ).upper()
+
+    if paypal_status != "COMPLETED":
+
+        print(
+            "❌ PayPal payment was not completed:"
+        )
+
+        print(
+            paypal_response
+        )
+
+        update_payment_record(
+            payment_id,
+            "failed"
+        )
+
+        return error_page(
+            "❌ Payment not completed",
+            "PayPal did not mark the payment as completed.",
+            400,
+            user
+        )
+
+    # -----------------------------------------------------
+    # VERIFY CAPTURE AMOUNT
+    # -----------------------------------------------------
+
+    captured_amount, captured_currency = (
+        paypal_extract_captured_amount(
+            paypal_response
+        )
+    )
+
+    stored_amount = payment.get(
+        "amount"
+    )
+
+    try:
+
+        stored_amount_decimal = Decimal(
+            str(stored_amount)
+        ).quantize(
+            Decimal("0.01")
+        )
+
+    except (
+        InvalidOperation,
+        ValueError,
+        TypeError
+    ):
+
+        return error_page(
+            "❌ Payment Error",
+            "The stored payment amount is invalid.",
+            500,
+            user
+        )
+
+    if (
+        captured_amount is None
+        or
+        captured_currency is None
+    ):
+
+        return error_page(
+            "❌ Payment Error",
+            "PayPal did not return a valid captured amount.",
+            400,
+            user
+        )
+
+    if captured_amount != stored_amount_decimal:
+
+        print(
+            "❌ PayPal amount mismatch:"
+        )
+
+        print(
+            f"   Expected: {stored_amount_decimal}"
+        )
+
+        print(
+            f"   Received: {captured_amount}"
+        )
+
+        update_payment_record(
+            payment_id,
+            "amount_mismatch"
+        )
+
+        return error_page(
+            "❌ Payment Error",
+            "The payment amount could not be verified.",
+            400,
+            user
+        )
+
+    if str(
+        captured_currency
+    ).upper() != str(
+        PAYPAL_CURRENCY
+    ).upper():
+
+        print(
+            "❌ PayPal currency mismatch:"
+        )
+
+        print(
+            f"   Expected: {PAYPAL_CURRENCY}"
+        )
+
+        print(
+            f"   Received: {captured_currency}"
+        )
+
+        update_payment_record(
+            payment_id,
+            "currency_mismatch"
+        )
+
+        return error_page(
+            "❌ Payment Error",
+            "The payment currency could not be verified.",
+            400,
+            user
+        )
+
+    # -----------------------------------------------------
+    # CAPTURE ID
+    # -----------------------------------------------------
+
+    capture_id = paypal_extract_capture_id(
+        paypal_response
+    )
+
+    # -----------------------------------------------------
+    # MARK PAID
+    # -----------------------------------------------------
+
+    updated = update_payment_record(
+        payment_id,
+        "paid",
+        provider_order_id=order_id,
+        provider_capture_id=capture_id,
+        provider_payment_id=(
+            capture_id
+            or
+            order_id
+        ),
+        amount=captured_amount,
+        currency=captured_currency
+    )
+
+    if not updated:
+
+        return error_page(
+            "❌ Payment Error",
+            "The payment was completed but could not be saved. Please contact support.",
+            500,
+            user
+        )
+
+    # -----------------------------------------------------
+    # CLEAR PAYMENT SESSION
+    # -----------------------------------------------------
+
+    session.pop(
+        "pending_paypal_order_id",
+        None
+    )
+
+    session.pop(
+        "pending_paypal_advertisement_id",
+        None
+    )
+
+    session.pop(
+        "pending_paypal_payment_id",
+        None
+    )
+
+    session.modified = True
+
+    # -----------------------------------------------------
+    # SUCCESS
+    # -----------------------------------------------------
 
     return render_template(
         "advertise_success.html",
@@ -2708,11 +3942,99 @@ def create_advertisement():
 
 
 # =========================================================
+# PAYPAL CANCEL
+# =========================================================
+
+@app.route(
+    "/advertise/paypal/cancel"
+)
+def paypal_cancel():
+
+    user = get_user()
+
+    advertisement_id = session.get(
+        "pending_paypal_advertisement_id"
+    )
+
+    payment_id = session.get(
+        "pending_paypal_payment_id"
+    )
+
+    if payment_id:
+
+        update_payment_record(
+            payment_id,
+            "cancelled"
+        )
+
+    if advertisement_id and DATABASE_URL:
+
+        try:
+
+            with database_connection() as connection:
+
+                with connection.cursor() as cursor:
+
+                    cursor.execute(
+                        """
+                        UPDATE advertisements
+                        SET
+                            status = 'cancelled',
+                            updated_at = %s
+                        WHERE id = %s
+                        AND status = 'pending'
+                        """,
+                        (
+                            utc_now().isoformat(),
+                            advertisement_id
+                        )
+                    )
+
+                connection.commit()
+
+        except Exception as error:
+
+            print(
+                f"⚠️ Could not cancel advertisement: {error}"
+            )
+
+    session.pop(
+        "pending_paypal_order_id",
+        None
+    )
+
+    session.pop(
+        "pending_paypal_advertisement_id",
+        None
+    )
+
+    session.pop(
+        "pending_paypal_payment_id",
+        None
+    )
+
+    session.modified = True
+
+    if not user:
+
+        return redirect(
+            "/"
+        )
+
+    return error_page(
+        "Payment cancelled",
+        "The PayPal payment was cancelled. The advertisement was not submitted.",
+        400,
+        user
+    )
+
+
+# =========================================================
 # ADMIN ADVERTISEMENT PANEL
 # =========================================================
 
 @app.route(
-    "/admin/advertisements"
+    "/admin/advertise"
 )
 def admin_advertisements():
 
@@ -2721,7 +4043,7 @@ def admin_advertisements():
     if not user:
 
         session["next_url"] = (
-            "/admin/advertisements"
+            "/admin/advertise"
         )
 
         return redirect(
@@ -2744,7 +4066,7 @@ def admin_advertisements():
     )
 
     return render_template(
-        "admin_advertisements.html",
+        "admin_advertise.html",
         user=user,
         advertisements=advertisements,
         is_admin=is_admin
@@ -2756,7 +4078,7 @@ def admin_advertisements():
 # =========================================================
 
 @app.route(
-    "/admin/advertisements/<int:advertisement_id>/approve",
+    "/admin/advertise/<int:advertisement_id>/approve",
     methods=["POST"]
 )
 def approve_advertisement(
@@ -2768,7 +4090,7 @@ def approve_advertisement(
     if not user:
 
         session["next_url"] = (
-            "/admin/advertisements"
+            "/admin/advertise"
         )
 
         return redirect(
@@ -2811,6 +4133,7 @@ def approve_advertisement(
                     """
                     SELECT
                         id,
+                        user_id,
                         duration_days,
                         status
                     FROM advertisements
@@ -2849,7 +4172,78 @@ def approve_advertisement(
         )
 
     # -----------------------------------------------------
-    # DURATION
+    # PAYMENT VERIFICATION
+    # -----------------------------------------------------
+
+    try:
+
+        with database_connection() as connection:
+
+            with connection.cursor(
+                cursor_factory=psycopg2.extras.RealDictCursor
+            ) as cursor:
+
+                cursor.execute(
+                    """
+                    SELECT
+                        id,
+                        amount,
+                        currency,
+                        status,
+                        provider,
+                        provider_order_id,
+                        provider_capture_id
+                    FROM advertisement_payments
+                    WHERE advertisement_id = %s
+                    AND provider = 'paypal'
+                    ORDER BY id DESC
+                    LIMIT 1
+                    """,
+                    (
+                        advertisement_id,
+                    )
+                )
+
+                payment = cursor.fetchone()
+
+    except Exception as error:
+
+        print(
+            f"❌ Advertisement payment lookup error: {error}"
+        )
+
+        return error_page(
+            "❌ Payment Error",
+            "The advertisement payment could not be verified.",
+            500,
+            user
+        )
+
+    if not payment:
+
+        return error_page(
+            "❌ Payment required",
+            "This advertisement has no PayPal payment record.",
+            402,
+            user
+        )
+
+    if str(
+        payment.get(
+            "status",
+            ""
+        )
+    ).lower() != "paid":
+
+        return error_page(
+            "❌ Payment required",
+            "This advertisement cannot be approved until the PayPal payment is completed.",
+            402,
+            user
+        )
+
+    # -----------------------------------------------------
+    # VERIFY STORED PRICE
     # -----------------------------------------------------
 
     try:
@@ -2865,18 +4259,95 @@ def approve_advertisement(
         TypeError
     ):
 
-        duration_days = 7
+        return error_page(
+            "❌ Advertisement Error",
+            "The advertisement duration is invalid.",
+            400,
+            user
+        )
 
-    if duration_days not in (
-        7,
-        14,
-        30
+    expected_amount = (
+        ADVERTISEMENT_PRICES.get(
+            duration_days
+        )
+    )
+
+    if expected_amount is None:
+
+        return error_page(
+            "❌ Advertisement Error",
+            "The advertisement duration has an invalid price.",
+            400,
+            user
+        )
+
+    try:
+
+        paid_amount = Decimal(
+            str(
+                payment.get(
+                    "amount"
+                )
+            )
+        ).quantize(
+            Decimal("0.01")
+        )
+
+    except (
+        InvalidOperation,
+        ValueError,
+        TypeError
     ):
 
-        duration_days = 7
+        return error_page(
+            "❌ Payment Error",
+            "The stored payment amount is invalid.",
+            500,
+            user
+        )
+
+    if paid_amount != expected_amount:
+
+        return error_page(
+            "❌ Payment Error",
+            "The payment amount does not match the advertisement duration.",
+            400,
+            user
+        )
+
+    if str(
+        payment.get(
+            "currency"
+        )
+        or
+        ""
+    ).upper() != PAYPAL_CURRENCY:
+
+        return error_page(
+            "❌ Payment Error",
+            "The payment currency is invalid.",
+            400,
+            user
+        )
 
     # -----------------------------------------------------
-    # CALCULATE END
+    # PREVENT RE-APPROVAL
+    # -----------------------------------------------------
+
+    if str(
+        advertisement.get(
+            "status"
+        )
+        or
+        ""
+    ).lower() == "active":
+
+        return redirect(
+            "/admin/advertise"
+        )
+
+    # -----------------------------------------------------
+    # CALCULATE START AND END
     # -----------------------------------------------------
 
     start_at = now
@@ -2887,6 +4358,30 @@ def approve_advertisement(
         timedelta(
             days=duration_days
         )
+    )
+
+    print(
+        "📢 Advertisement approved:"
+    )
+
+    print(
+        f"   ID: {advertisement_id}"
+    )
+
+    print(
+        f"   Duration: {duration_days} days"
+    )
+
+    print(
+        f"   Paid: €{paid_amount:.2f}"
+    )
+
+    print(
+        f"   Start: {start_at.isoformat()}"
+    )
+
+    print(
+        f"   End: {end_at.isoformat()}"
     )
 
     # -----------------------------------------------------
@@ -2934,7 +4429,7 @@ def approve_advertisement(
         )
 
     return redirect(
-        "/admin/advertisements"
+        "/admin/advertise"
     )
 
 
@@ -2943,7 +4438,7 @@ def approve_advertisement(
 # =========================================================
 
 @app.route(
-    "/admin/advertisements/<int:advertisement_id>/reject",
+    "/admin/advertise/<int:advertisement_id>/reject",
     methods=["POST"]
 )
 def reject_advertisement(
@@ -2955,7 +4450,7 @@ def reject_advertisement(
     if not user:
 
         session["next_url"] = (
-            "/admin/advertisements"
+            "/admin/advertise"
         )
 
         return redirect(
@@ -3020,7 +4515,7 @@ def reject_advertisement(
         )
 
     return redirect(
-        "/admin/advertisements"
+        "/admin/advertise"
     )
 
 
@@ -3029,7 +4524,7 @@ def reject_advertisement(
 # =========================================================
 
 @app.route(
-    "/admin/advertisements/<int:advertisement_id>/disable",
+    "/admin/advertise/<int:advertisement_id>/disable",
     methods=["POST"]
 )
 def disable_advertisement(
@@ -3041,7 +4536,7 @@ def disable_advertisement(
     if not user:
 
         session["next_url"] = (
-            "/admin/advertisements"
+            "/admin/advertise"
         )
 
         return redirect(
@@ -3095,7 +4590,7 @@ def disable_advertisement(
         )
 
     return redirect(
-        "/admin/advertisements"
+        "/admin/advertise"
     )
 
 
@@ -3218,18 +4713,28 @@ def health():
 
     return {
         "status": "ok",
+
         "database": bool(
             DATABASE_URL
         ),
+
         "discord": bool(
             CLIENT_ID
         ),
+
         "bot": bool(
             BOT_TOKEN
         ),
+
         "login_redirect": bool(
             DISCORD_LOGIN_REDIRECT_URI
-        )
+        ),
+
+        "paypal": paypal_is_configured(),
+
+        "paypal_mode": PAYPAL_MODE,
+
+        "paypal_currency": PAYPAL_CURRENCY
     }, 200
 
 
@@ -3286,6 +4791,33 @@ if __name__ == "__main__":
     )
 
     print(
+        f"💳 PayPal Client ID configured: "
+        f"{bool(PAYPAL_CLIENT_ID)}"
+    )
+
+    print(
+        f"💳 PayPal Client Secret configured: "
+        f"{bool(PAYPAL_CLIENT_SECRET)}"
+    )
+
+    print(
+        f"💳 PayPal Mode: "
+        f"{PAYPAL_MODE}"
+    )
+
+    print(
+        f"💶 PayPal Currency: "
+        f"{PAYPAL_CURRENCY}"
+    )
+
+    print(
+        f"💰 Advertisement Prices: "
+        f"7d €{ADVERTISEMENT_PRICES[7]:.2f} | "
+        f"14d €{ADVERTISEMENT_PRICES[14]:.2f} | "
+        f"30d €{ADVERTISEMENT_PRICES[30]:.2f}"
+    )
+
+    print(
         f"🗝️ Persistent Flask Secret: "
         f"{bool(os.getenv('FLASK_SECRET_KEY'))}"
     )
@@ -3304,4 +4836,3 @@ if __name__ == "__main__":
         port=PORT,
         debug=False
     )
-
