@@ -1,6 +1,7 @@
 import os
 import random
 import secrets
+import time
 
 from decimal import Decimal, InvalidOperation
 from datetime import datetime, timedelta, timezone
@@ -16,7 +17,8 @@ from flask import (
     session,
     request,
     render_template,
-    send_from_directory
+    send_from_directory,
+    g
 )
 
 from dotenv import load_dotenv
@@ -212,24 +214,6 @@ ADMIN_DISCORD_IDS = {
 }
 
 
-def is_admin(user=None):
-
-    if user is None:
-        user = get_user()
-
-    if not user:
-        return False
-
-    user_id = user.get("id")
-
-    if not user_id:
-        return False
-
-    return str(
-        user_id
-    ) in ADMIN_DISCORD_IDS
-
-
 # =========================================================
 # SECRET KEY
 # =========================================================
@@ -309,6 +293,34 @@ app.wsgi_app = ProxyFix(
     x_proto=1,
     x_host=1
 )
+
+
+# =========================================================
+# REQUEST CACHE
+# =========================================================
+#
+# Estes caches existem apenas durante o request atual.
+#
+# Antes:
+#
+#   get_user()
+#       -> Discord API
+#
+#   is_admin()
+#       -> get_user()
+#       -> Discord API outra vez
+#
+# Agora:
+#
+#   get_user()
+#       -> Discord API
+#
+#   is_admin()
+#       -> usa o mesmo resultado
+#
+# O mesmo acontece com guilds do utilizador, guilds do bot
+# e licenças.
+# =========================================================
 
 
 # =========================================================
@@ -1010,9 +1022,6 @@ def paypal_capture_order(
             "Could not capture the PayPal payment."
         ) from error
 
-    # A repeated callback can happen after a successful capture.
-    # In that case PayPal may return a conflict because the order
-    # has already been completed.
     if response.status_code not in (
         200,
         201
@@ -1277,7 +1286,7 @@ def update_payment_record(
 
 
 # =========================================================
-# LICENSE
+# LICENSE HELPERS — OPTIMIZED
 # =========================================================
 
 def get_license(guild_id):
@@ -1294,6 +1303,22 @@ def get_license(guild_id):
     ):
 
         return None
+
+    # -----------------------------------------------------
+    # REQUEST CACHE
+    # -----------------------------------------------------
+
+    license_cache = getattr(
+        g,
+        "license_cache",
+        None
+    )
+
+    if license_cache is not None:
+
+        return license_cache.get(
+            guild_id
+        )
 
     if not DATABASE_URL:
         return None
@@ -1345,11 +1370,210 @@ def get_license(guild_id):
         return None
 
 
-# =========================================================
-# LICENSE ACTIVE CHECK
-# =========================================================
+def get_licenses_for_guilds(
+    guild_ids
+):
+    """
+    Carrega as licenças de vários servidores numa única
+    query PostgreSQL.
 
-def license_is_active(guild_id):
+    Antes do optimization:
+
+        get_license(guild_1)
+        get_license(guild_2)
+        get_license(guild_3)
+        ...
+
+    Cada get_license() abria uma nova ligação PostgreSQL.
+
+    Agora:
+
+        SELECT ... WHERE guild_id = ANY(...)
+
+    Uma única consulta trata de todos os servidores.
+    """
+
+    # -----------------------------------------------------
+    # CACHE POR REQUEST
+    # -----------------------------------------------------
+
+    existing_cache = getattr(
+        g,
+        "license_cache",
+        None
+    )
+
+    if existing_cache is not None:
+
+        return existing_cache
+
+    result = {}
+
+    if not DATABASE_URL:
+
+        g.license_cache = result
+
+        return result
+
+    normalized_ids = []
+
+    for guild_id in guild_ids:
+
+        try:
+
+            normalized_ids.append(
+                int(guild_id)
+            )
+
+        except (
+            TypeError,
+            ValueError
+        ):
+
+            continue
+
+    # Remove duplicados
+    normalized_ids = list(
+        dict.fromkeys(
+            normalized_ids
+        )
+    )
+
+    if not normalized_ids:
+
+        g.license_cache = result
+
+        return result
+
+    try:
+
+        with database_connection() as connection:
+
+            with connection.cursor(
+                cursor_factory=psycopg2.extras.RealDictCursor
+            ) as cursor:
+
+                cursor.execute(
+                    """
+                    SELECT
+                        guild_id,
+                        license_key,
+                        status,
+                        expires_at,
+                        created_at
+                    FROM licenses
+                    WHERE guild_id = ANY(%s)
+                    """,
+                    (
+                        normalized_ids,
+                    )
+                )
+
+                rows = cursor.fetchall()
+
+    except Exception as error:
+
+        print(
+            f"❌ Could not load guild licenses: {error}"
+        )
+
+        g.license_cache = result
+
+        return result
+
+    now = utc_now()
+
+    expired_ids = []
+
+    for row in rows:
+
+        guild_id = int(
+            row["guild_id"]
+        )
+
+        status = str(
+            row["status"]
+            or ""
+        ).lower()
+
+        expires_at = row[
+            "expires_at"
+        ]
+
+        # -------------------------------------------------
+        # CHECK EXPIRATION
+        # -------------------------------------------------
+
+        if (
+            status == "active"
+            and
+            expires_at
+        ):
+
+            expiration = parse_datetime(
+                expires_at
+            )
+
+            if (
+                expiration
+                and
+                now >= expiration
+            ):
+
+                status = "expired"
+
+                expired_ids.append(
+                    guild_id
+                )
+
+        result[guild_id] = (
+            guild_id,
+            row["license_key"],
+            status,
+            expires_at,
+            row["created_at"]
+        )
+
+    # -----------------------------------------------------
+    # MARK EXPIRED
+    # -----------------------------------------------------
+
+    if expired_ids:
+
+        try:
+
+            with database_connection() as connection:
+
+                with connection.cursor() as cursor:
+
+                    cursor.execute(
+                        """
+                        UPDATE licenses
+                        SET status = 'expired'
+                        WHERE guild_id = ANY(%s)
+                        AND status = 'active'
+                        """,
+                        (
+                            expired_ids,
+                        )
+                    )
+
+                connection.commit()
+
+        except Exception as error:
+
+            print(
+                f"⚠️ Could not mark licenses as expired: {error}"
+            )
+
+    g.license_cache = result
+
+    return result
+
+
+def license_is_active(
+    guild_id
+):
 
     license_data = get_license(
         guild_id
@@ -1359,9 +1583,13 @@ def license_is_active(guild_id):
         return False
 
     status = license_data[2]
+
     expires_at = license_data[3]
 
-    if str(status).lower() != "active":
+    if str(
+        status
+    ).lower() != "active":
+
         return False
 
     if expires_at:
@@ -1374,6 +1602,11 @@ def license_is_active(guild_id):
             return False
 
         if utc_now() >= expiration:
+
+            # -------------------------------------------------
+            # If the license wasn't already bulk-loaded,
+            # update it here.
+            # -------------------------------------------------
 
             try:
 
@@ -1401,106 +1634,56 @@ def license_is_active(guild_id):
                     f"❌ License expiration error: {error}"
                 )
 
+            # Keep request cache consistent.
+            cache = getattr(
+                g,
+                "license_cache",
+                None
+            )
+
+            if cache is not None:
+
+                existing = cache.get(
+                    int(guild_id)
+                )
+
+                if existing:
+
+                    cache[
+                        int(guild_id)
+                    ] = (
+                        existing[0],
+                        existing[1],
+                        "expired",
+                        existing[3],
+                        existing[4]
+                    )
+
             return False
 
     return True
 
 
-# =========================================================
-# USER GUILDS
-# =========================================================
-
-def get_user_guilds():
-
-    access_token = session.get(
-        "access_token"
-    )
-
-    if not access_token:
-        return []
-
-    try:
-
-        response = requests.get(
-            f"{DISCORD_API}/users/@me/guilds",
-            headers={
-                "Authorization":
-                    f"Bearer {access_token}"
-            },
-            timeout=10
-        )
-
-    except requests.RequestException as error:
-
-        print(
-            f"❌ Discord guild request error: {error}"
-        )
-
-        return []
-
-    if response.status_code in (
-        401,
-        403
-    ):
-
-        session.clear()
-
-        return []
-
-    if response.status_code != 200:
-        return []
-
-    try:
-
-        data = response.json()
-
-    except ValueError:
-
-        return []
-
-    return (
-        data
-        if isinstance(data, list)
-        else []
-    )
-
-
-# =========================================================
-# USER HAS ACTIVE LICENSE
-# =========================================================
-
-def user_has_license():
-
-    guilds = get_user_guilds()
-
-    for guild in guilds:
-
-        guild_id = guild.get(
-            "id"
-        )
-
-        if (
-            guild_id
-            and
-            license_is_active(
-                guild_id
-            )
-        ):
-
-            return True
-
-    return False
-
-
-# =========================================================
-# ACTIVE LICENSE IDS
-# =========================================================
-
 def get_active_license_guild_ids():
+
+    cached = getattr(
+        g,
+        "active_license_ids",
+        None
+    )
+
+    if cached is not None:
+
+        return cached
 
     active_ids = set()
 
     if not DATABASE_URL:
+
+        g.active_license_ids = (
+            active_ids
+        )
+
         return active_ids
 
     try:
@@ -1527,6 +1710,10 @@ def get_active_license_guild_ids():
             f"❌ Could not load licenses: {error}"
         )
 
+        g.active_license_ids = (
+            active_ids
+        )
+
         return active_ids
 
     now = utc_now()
@@ -1536,10 +1723,15 @@ def get_active_license_guild_ids():
     for row in rows:
 
         guild_id = row[0]
+
         status = row[1]
+
         expires_at = row[2]
 
-        if str(status).lower() != "active":
+        if str(
+            status
+        ).lower() != "active":
+
             continue
 
         if expires_at:
@@ -1549,6 +1741,7 @@ def get_active_license_guild_ids():
             )
 
             if not expiration:
+
                 continue
 
             if now >= expiration:
@@ -1595,37 +1788,45 @@ def get_active_license_guild_ids():
                 f"⚠️ Could not mark licenses as expired: {error}"
             )
 
+    g.active_license_ids = (
+        active_ids
+    )
+
     return active_ids
 
 
 # =========================================================
-# DISCORD BOT HEADERS
-# =========================================================
-
-def discord_bot_headers():
-
-    if not BOT_TOKEN:
-        return {}
-
-    return {
-        "Authorization":
-            f"Bot {BOT_TOKEN}",
-        "Content-Type":
-            "application/json"
-    }
-
-
-# =========================================================
-# GET USER
+# DISCORD USER — OPTIMIZED
 # =========================================================
 
 def get_user():
+
+    # -----------------------------------------------------
+    # CACHE
+    # -----------------------------------------------------
+
+    if getattr(
+        g,
+        "user_loaded",
+        False
+    ):
+
+        return getattr(
+            g,
+            "user",
+            None
+        )
+
+    g.user_loaded = True
 
     access_token = session.get(
         "access_token"
     )
 
     if not access_token:
+
+        g.user = None
+
         return None
 
     try:
@@ -1645,6 +1846,8 @@ def get_user():
             f"❌ Discord user request error: {error}"
         )
 
+        g.user = None
+
         return None
 
     if response.status_code != 200:
@@ -1656,25 +1859,143 @@ def get_user():
 
             session.clear()
 
+        g.user = None
+
         return None
 
     try:
 
-        return response.json()
+        g.user = response.json()
 
     except ValueError:
 
-        return None
+        g.user = None
+
+    return g.user
 
 
 # =========================================================
-# GET BOT GUILDS
+# USER GUILDS — OPTIMIZED
+# =========================================================
+
+def get_user_guilds():
+
+    # -----------------------------------------------------
+    # CACHE
+    # -----------------------------------------------------
+
+    if getattr(
+        g,
+        "user_guilds_loaded",
+        False
+    ):
+
+        return getattr(
+            g,
+            "user_guilds",
+            []
+        )
+
+    g.user_guilds_loaded = True
+
+    access_token = session.get(
+        "access_token"
+    )
+
+    if not access_token:
+
+        g.user_guilds = []
+
+        return []
+
+
+    try:
+
+        response = requests.get(
+            f"{DISCORD_API}/users/@me/guilds",
+            headers={
+                "Authorization":
+                    f"Bearer {access_token}"
+            },
+            timeout=10
+        )
+
+    except requests.RequestException as error:
+
+        print(
+            f"❌ Discord guild request error: {error}"
+        )
+
+        g.user_guilds = []
+
+        return []
+
+    if response.status_code in (
+        401,
+        403
+    ):
+
+        session.clear()
+
+        g.user_guilds = []
+
+        return []
+
+    if response.status_code != 200:
+
+        g.user_guilds = []
+
+        return []
+
+    try:
+
+        data = response.json()
+
+    except ValueError:
+
+        g.user_guilds = []
+
+        return []
+
+    g.user_guilds = (
+        data
+        if isinstance(data, list)
+        else []
+    )
+
+    return g.user_guilds
+
+
+# =========================================================
+# BOT GUILDS — OPTIMIZED
 # =========================================================
 
 def get_bot_guilds():
 
+    # -----------------------------------------------------
+    # CACHE
+    # -----------------------------------------------------
+
+    if getattr(
+        g,
+        "bot_guilds_loaded",
+        False
+    ):
+
+        return getattr(
+            g,
+            "bot_guilds",
+            []
+        )
+
+    g.bot_guilds_loaded = True
+
     if not BOT_TOKEN:
+
+        g.bot_guilds = []
+
         return []
+
 
     try:
 
@@ -1693,9 +2014,14 @@ def get_bot_guilds():
             f"❌ Discord bot guild request error: {error}"
         )
 
+        g.bot_guilds = []
+
         return []
 
     if response.status_code != 200:
+
+        g.bot_guilds = []
+
         return []
 
     try:
@@ -1704,13 +2030,35 @@ def get_bot_guilds():
 
     except ValueError:
 
+        g.bot_guilds = []
+
         return []
 
-    return (
+    g.bot_guilds = (
         data
         if isinstance(data, list)
         else []
     )
+
+    return g.bot_guilds
+
+
+# =========================================================
+# DISCORD BOT HEADERS
+# =========================================================
+
+def discord_bot_headers():
+
+    if not BOT_TOKEN:
+        return {}
+
+    return {
+        "Authorization":
+            f"Bot {BOT_TOKEN}",
+
+        "Content-Type":
+            "application/json"
+    }
 
 
 # =========================================================
@@ -1719,6 +2067,27 @@ def get_bot_guilds():
 
 ADMINISTRATOR = 1 << 3
 MANAGE_GUILD = 1 << 5
+
+
+def is_admin(user=None):
+
+    if user is None:
+
+        user = get_user()
+
+    if not user:
+        return False
+
+    user_id = user.get(
+        "id"
+    )
+
+    if not user_id:
+        return False
+
+    return str(
+        user_id
+    ) in ADMIN_DISCORD_IDS
 
 
 def can_manage_guild(guild):
@@ -1831,6 +2200,7 @@ def create_oauth_state():
     )
 
     session.permanent = True
+
     session.modified = True
 
     return state
@@ -2307,6 +2677,7 @@ def login_callback():
     )
 
     session.permanent = True
+
     session.modified = True
 
     return redirect(
@@ -2330,7 +2701,9 @@ def logout():
 # REVIEWS
 # =========================================================
 
-def get_random_reviews(amount=6):
+def get_random_reviews(
+    amount=6
+):
 
     if not DATABASE_URL:
         return []
@@ -2375,8 +2748,12 @@ def get_random_reviews(amount=6):
                         rating,
                         created_at
                     FROM reviews
-                    ORDER BY id DESC
-                    """
+                    ORDER BY RANDOM()
+                    LIMIT %s
+                    """,
+                    (
+                        amount,
+                    )
                 )
 
                 rows = cursor.fetchall()
@@ -2416,11 +2793,7 @@ def get_random_reviews(amount=6):
                 row["created_at"]
         })
 
-    random.shuffle(
-        reviews
-    )
-
-    return reviews[:amount]
+    return reviews
 
 
 # =========================================================
@@ -2432,6 +2805,9 @@ def get_active_advertisements():
     if not DATABASE_URL:
         return []
 
+    # Expira primeiro e depois faz a query dos anúncios.
+    # O index() já não chama expire_advertisements()
+    # separadamente, evitando duas operações seguidas.
     expire_advertisements()
 
     try:
@@ -2480,11 +2856,15 @@ def get_active_advertisements():
     for advertisement in rows:
 
         start_at = parse_datetime(
-            advertisement.get("start_at")
+            advertisement.get(
+                "start_at"
+            )
         )
 
         end_at = parse_datetime(
-            advertisement.get("end_at")
+            advertisement.get(
+                "end_at"
+            )
         )
 
         if start_at is not None:
@@ -2625,6 +3005,77 @@ def get_all_advertisements():
 
 
 # =========================================================
+# USER HAS ACTIVE LICENSE — OPTIMIZED
+# =========================================================
+
+def user_has_license():
+
+    guilds = get_user_guilds()
+
+    guild_ids = [
+        guild.get("id")
+        for guild in guilds
+        if guild.get("id")
+    ]
+
+    if not guild_ids:
+        return False
+
+    # Uma única query para todas as guilds.
+    licenses = get_licenses_for_guilds(
+        guild_ids
+    )
+
+    now = utc_now()
+
+    for guild_id in guild_ids:
+
+        try:
+
+            license_data = licenses.get(
+                int(guild_id)
+            )
+
+        except (
+            TypeError,
+            ValueError
+        ):
+
+            continue
+
+        if not license_data:
+            continue
+
+        status = str(
+            license_data[2]
+            or ""
+        ).lower()
+
+        if status != "active":
+            continue
+
+        expires_at = license_data[3]
+
+        if expires_at:
+
+            expiration = parse_datetime(
+                expires_at
+            )
+
+            if (
+                not expiration
+                or
+                now >= expiration
+            ):
+
+                continue
+
+        return True
+
+    return False
+
+
+# =========================================================
 # HOME
 # =========================================================
 
@@ -2633,8 +3084,8 @@ def index():
 
     user = get_user()
 
-    expire_advertisements()
-
+    # get_active_advertisements() já faz a expiração.
+    # Antes isto era chamado duas vezes.
     reviews = get_random_reviews(
         6
     )
@@ -2653,11 +3104,13 @@ def index():
 
 
 # =========================================================
-# DASHBOARD
+# DASHBOARD — OPTIMIZED
 # =========================================================
 
 @app.route("/dashboard")
 def dashboard():
+
+    dashboard_start = time.perf_counter()
 
     user = get_user()
 
@@ -2671,22 +3124,85 @@ def dashboard():
             "/login"
         )
 
+    # -----------------------------------------------------
+    # DISCORD REQUESTS
+    # -----------------------------------------------------
+
     user_guilds = get_user_guilds()
 
     bot_guilds = get_bot_guilds()
 
     bot_guild_ids = {
-        str(guild.get("id"))
+        str(
+            guild.get("id")
+        )
         for guild in bot_guilds
         if guild.get("id")
     }
 
-    active_license_ids = (
-        get_active_license_guild_ids()
+    # -----------------------------------------------------
+    # LOAD ALL USER LICENSES AT ONCE
+    # -----------------------------------------------------
+
+    guild_ids = [
+        guild.get("id")
+        for guild in user_guilds
+        if guild.get("id")
+    ]
+
+    licenses = get_licenses_for_guilds(
+        guild_ids
     )
 
+    # -----------------------------------------------------
+    # ACTIVE LICENSE IDS
+    # -----------------------------------------------------
+    #
+    # Não fazemos uma segunda query a toda a tabela licenses.
+    # Usamos os dados que acabámos de carregar.
+    # -----------------------------------------------------
+
+    active_license_ids = set()
+
+    now = utc_now()
+
+    for guild_id, license_data in licenses.items():
+
+        status = str(
+            license_data[2]
+            or ""
+        ).lower()
+
+        if status != "active":
+            continue
+
+        expires_at = license_data[3]
+
+        if expires_at:
+
+            expiration = parse_datetime(
+                expires_at
+            )
+
+            if (
+                not expiration
+                or
+                now >= expiration
+            ):
+
+                continue
+
+        active_license_ids.add(
+            str(guild_id)
+        )
+
     authorized = []
+
     available = []
+
+    # -----------------------------------------------------
+    # PROCESS GUILDS
+    # -----------------------------------------------------
 
     for original_guild in user_guilds:
 
@@ -2702,9 +3218,18 @@ def dashboard():
         if not guild_id:
             continue
 
-        license_data = get_license(
-            guild_id
-        )
+        try:
+
+            license_data = licenses.get(
+                int(guild_id)
+            )
+
+        except (
+            TypeError,
+            ValueError
+        ):
+
+            license_data = None
 
         guild["license_data"] = (
             license_data
@@ -2726,6 +3251,10 @@ def dashboard():
             status
         )
 
+        # -------------------------------------------------
+        # BOT ALREADY INSTALLED
+        # -------------------------------------------------
+
         if guild_id in bot_guild_ids:
 
             authorized.append(
@@ -2733,6 +3262,10 @@ def dashboard():
             )
 
             continue
+
+        # -------------------------------------------------
+        # BOT NOT INSTALLED
+        # -------------------------------------------------
 
         guild["can_add"] = (
             can_manage_guild(
@@ -2749,6 +3282,10 @@ def dashboard():
         available.append(
             guild
         )
+
+    # -----------------------------------------------------
+    # SORT
+    # -----------------------------------------------------
 
     authorized.sort(
         key=lambda guild:
@@ -2773,6 +3310,28 @@ def dashboard():
                 )
             ).lower()
         )
+    )
+
+    # -----------------------------------------------------
+    # PERFORMANCE LOG
+    # -----------------------------------------------------
+    #
+    # Isto aparece nos logs do Render e permite perceber
+    # quanto tempo o dashboard realmente demora.
+    # -----------------------------------------------------
+
+    elapsed = (
+        time.perf_counter()
+        -
+        dashboard_start
+    )
+
+    print(
+        f"⚡ Dashboard loaded in "
+        f"{elapsed:.3f}s | "
+        f"user_guilds={len(user_guilds)} | "
+        f"bot_guilds={len(bot_guilds)} | "
+        f"licenses={len(licenses)}"
     )
 
     return render_template(
@@ -2846,16 +3405,29 @@ def manage(guild_id):
     bot_guilds = get_bot_guilds()
 
     bot_guild_ids = {
-        str(g.get("id"))
+        str(
+            g.get("id")
+        )
         for g in bot_guilds
         if g.get("id")
     }
 
-    if str(guild_id_int) not in bot_guild_ids:
+    if str(
+        guild_id_int
+    ) not in bot_guild_ids:
 
         return redirect(
             "/dashboard"
         )
+
+    # -----------------------------------------------------
+    # Load once into request cache.
+    # license_is_active() will reuse it.
+    # -----------------------------------------------------
+
+    get_licenses_for_guilds([
+        guild_id_int
+    ])
 
     license_data = get_license(
         guild_id_int
@@ -3552,6 +4124,7 @@ def create_advertisement():
     )
 
     session.permanent = True
+
     session.modified = True
 
     # =====================================================
@@ -3636,7 +4209,9 @@ def paypal_success():
 
     payment = paypal_payment_status_for_ad(
         advertisement_id,
-        str(user.get("id"))
+        str(
+            user.get("id")
+        )
     )
 
     if not payment:
@@ -3648,7 +4223,9 @@ def paypal_success():
             user
         )
 
-    if int(payment["id"]) != int(
+    if int(
+        payment["id"]
+    ) != int(
         payment_id
     ):
 
@@ -3771,7 +4348,7 @@ def paypal_success():
         )
 
     # -----------------------------------------------------
-    # VERIFY CAPTURE AMOUNT
+    # VERIFY PAYMENT AMOUNT
     # -----------------------------------------------------
 
     captured_amount, captured_currency = (
@@ -3787,7 +4364,9 @@ def paypal_success():
     try:
 
         stored_amount_decimal = Decimal(
-            str(stored_amount)
+            str(
+                stored_amount
+            )
         ).quantize(
             Decimal("0.01")
         )
@@ -3967,7 +4546,11 @@ def paypal_cancel():
             "cancelled"
         )
 
-    if advertisement_id and DATABASE_URL:
+    if (
+        advertisement_id
+        and
+        DATABASE_URL
+    ):
 
         try:
 
