@@ -745,20 +745,21 @@ def get_all_licenses():
 
         return {}
 
-
+LICENSE_SYSTEM_ENABLED = False
 # =========================================================
 # LICENSE ACTIVE CHECK
 # =========================================================
 
 def license_is_active(guild_id):
-
+    if not LICENSE_SYSTEM_ENABLED:
+    return True
     license_data = get_license(
         guild_id
     )
 
     if not license_data:
 
-        return True
+        return False
 
     status = license_data[2]
 
@@ -766,7 +767,7 @@ def license_is_active(guild_id):
 
     if status != "active":
 
-        return True
+        return False
 
     if expires_at:
 
@@ -776,7 +777,7 @@ def license_is_active(guild_id):
 
         if not expiration:
 
-            return True
+            return False
 
         if utc_now() >= expiration:
 
@@ -805,7 +806,7 @@ def license_is_active(guild_id):
                     f"❌ License expiration error: {error}"
                 )
 
-            return True
+            return False
 
     return True
 
