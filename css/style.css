@@ -1946,3 +1946,454 @@ html.misuki-page-ready
 
 }
 
+/* =========================================================
+   MISUKI — SIDE MENU
+========================================================= */
+
+/* ---------------------------------------------------------
+   HAMBURGER BUTTON
+--------------------------------------------------------- */
+
+.hamburger {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 11px;
+
+    background: rgba(255, 255, 255, 0.035);
+    color: #ffffff;
+
+    cursor: pointer;
+
+    position: relative;
+    z-index: 10001;
+
+    transition:
+        background 0.22s ease,
+        border-color 0.22s ease,
+        transform 0.22s ease,
+        opacity 0.22s ease;
+}
+
+.hamburger:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(145, 181, 255, 0.20);
+    transform: translateY(-1px);
+}
+
+.hamburger span {
+    display: block;
+
+    width: 19px;
+    height: 2px;
+
+    border-radius: 999px;
+
+    background: #ffffff;
+
+    transition:
+        transform 0.22s ease,
+        opacity 0.22s ease;
+}
+
+.hamburger.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+
+/* ---------------------------------------------------------
+   OVERLAY
+--------------------------------------------------------- */
+
+.overlay {
+    position: fixed;
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    background: rgba(0, 0, 0, 0.58);
+
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    z-index: 9998;
+
+    transition:
+        opacity 0.25s ease,
+        visibility 0.25s ease;
+}
+
+.overlay.show,
+.overlay.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+
+/* ---------------------------------------------------------
+   SIDE MENU
+--------------------------------------------------------- */
+
+.menu {
+    position: fixed;
+
+    top: 0;
+    right: 0;
+
+    width: min(360px, 88vw);
+    height: 100vh;
+    height: 100dvh;
+
+    display: flex;
+    flex-direction: column;
+
+    padding: 0 20px 25px;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(14, 20, 34, 0.98),
+            rgba(6, 9, 17, 0.99)
+        );
+
+    border-left:
+        1px solid
+        rgba(255, 255, 255, 0.08);
+
+    box-shadow:
+        -20px 0 60px
+        rgba(0, 0, 0, 0.35);
+
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+
+    transform: translateX(100%);
+
+    visibility: hidden;
+    pointer-events: none;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    z-index: 10000;
+
+    transition:
+        transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+        visibility 0.28s ease;
+}
+
+.menu.open,
+.menu.active {
+    transform: translateX(0);
+
+    visibility: visible;
+    pointer-events: auto;
+}
+
+
+/* ---------------------------------------------------------
+   MENU SCROLLBAR
+--------------------------------------------------------- */
+
+.menu::-webkit-scrollbar {
+    width: 5px;
+}
+
+.menu::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.menu::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+}
+
+.menu::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.20);
+}
+
+
+/* ---------------------------------------------------------
+   MENU HEADER
+--------------------------------------------------------- */
+
+.menu-header {
+    min-height: 82px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    border-bottom:
+        1px solid
+        rgba(255, 255, 255, 0.07);
+
+    flex: 0 0 auto;
+}
+
+.menu-title {
+    color: #ffffff;
+
+    font-size: 20px;
+    font-weight: 800;
+
+    letter-spacing: -0.4px;
+}
+
+.menu-close {
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.08);
+
+    border-radius: 10px;
+
+    background:
+        rgba(255, 255, 255, 0.035);
+
+    color: #ffffff;
+
+    font-size: 25px;
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.menu-close:hover {
+    background:
+        rgba(255, 255, 255, 0.08);
+
+    border-color:
+        rgba(255, 255, 255, 0.16);
+
+    transform: rotate(4deg);
+}
+
+
+/* ---------------------------------------------------------
+   MENU SECTIONS
+--------------------------------------------------------- */
+
+.menu-section {
+    margin-top: 25px;
+    margin-bottom: 8px;
+
+    padding:
+        0 10px;
+
+    color: #68748b;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+}
+
+
+/* ---------------------------------------------------------
+   MENU LINKS
+--------------------------------------------------------- */
+
+.menu a {
+    display: flex;
+    align-items: center;
+
+    min-height: 44px;
+
+    margin-bottom: 3px;
+    padding: 10px 12px;
+
+    border:
+        1px solid
+        transparent;
+
+    border-radius: 10px;
+
+    color: #aeb8ca;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    text-decoration: none;
+
+    transition:
+        background 0.18s ease,
+        color 0.18s ease,
+        border-color 0.18s ease,
+        transform 0.18s ease;
+}
+
+.menu a:hover {
+    background:
+        rgba(88, 101, 242, 0.10);
+
+    border-color:
+        rgba(115, 135, 255, 0.10);
+
+    color: #ffffff;
+
+    transform: translateX(2px);
+}
+
+.menu a:active {
+    transform: translateX(1px);
+}
+
+
+/* ---------------------------------------------------------
+   DISCORD LOGIN
+--------------------------------------------------------- */
+
+.menu a.discord-login {
+    margin-top: 8px;
+
+    justify-content: center;
+
+    background:
+        rgba(88, 101, 242, 0.15);
+
+    border-color:
+        rgba(115, 135, 255, 0.18);
+
+    color: #c2caff;
+}
+
+.menu a.discord-login:hover {
+    background:
+        rgba(88, 101, 242, 0.25);
+
+    border-color:
+        rgba(130, 150, 255, 0.28);
+
+    color: #ffffff;
+
+    transform: translateY(-1px);
+}
+
+
+/* ---------------------------------------------------------
+   BODY LOCK WHEN MENU IS OPEN
+--------------------------------------------------------- */
+
+body.menu-open {
+    overflow: hidden;
+}
+
+
+/* ---------------------------------------------------------
+   MOBILE
+--------------------------------------------------------- */
+
+@media (max-width: 600px) {
+
+    .hamburger {
+        width: 42px;
+        height: 42px;
+    }
+
+    .menu {
+        width: min(340px, 90vw);
+
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .menu-header {
+        min-height: 68px;
+    }
+
+    .menu-title {
+        font-size: 19px;
+    }
+
+    .menu a {
+        min-height: 46px;
+
+        padding:
+            11px 12px;
+
+        font-size: 14px;
+    }
+
+    .menu-section {
+        margin-top: 22px;
+    }
+
+}
+
+
+/* ---------------------------------------------------------
+   SMALL MOBILE
+--------------------------------------------------------- */
+
+@media (max-width: 480px) {
+
+    .hamburger {
+        width: 40px;
+        height: 40px;
+    }
+
+    .menu {
+        width: 92vw;
+    }
+
+    .menu-header {
+        min-height: 64px;
+    }
+
+    .menu-close {
+        width: 38px;
+        height: 38px;
+    }
+
+}
+
+
+/* ---------------------------------------------------------
+   REDUCED MOTION
+--------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .menu,
+    .overlay,
+    .hamburger,
+    .hamburger span,
+    .menu-close,
+    .menu a {
+        transition-duration: 0.01ms !important;
+    }
+
+}
+
