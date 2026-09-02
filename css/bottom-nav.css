@@ -1,5 +1,5 @@
 /* =========================================================
-   MISUKI - FOOTER NAVIGATION
+   MISUKI - BOTTOM FOOTER NAVIGATION
    ========================================================= */
 
 .bottom-nav {
@@ -7,20 +7,14 @@
     max-width: var(--container);
     margin: 0 auto;
 
+    padding: 40px 20px 30px;
+
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;
-
-    gap: 50px;
-
-    padding: 45px 20px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 60px;
 
     border-top: 1px solid var(--border);
 }
-
-
-/* =========================================================
-   COLUMNS
-   ========================================================= */
 
 .bottom-nav-column {
     display: flex;
@@ -29,11 +23,11 @@
 }
 
 .bottom-nav-column h3 {
-    margin: 0 0 15px;
+    margin: 0 0 16px;
 
     color: var(--text);
 
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
 
     text-transform: uppercase;
@@ -46,49 +40,14 @@
     color: var(--text-muted);
 
     font-size: 14px;
-    font-weight: 500;
 
     text-decoration: none;
 
-    transition:
-        color var(--transition),
-        transform var(--transition);
+    transition: color 0.2s ease;
 }
 
 .bottom-nav-column a:hover {
     color: var(--text);
-    transform: translateX(3px);
-}
-
-
-/* =========================================================
-   BRAND
-   ========================================================= */
-
-.bottom-nav-logo {
-    color: var(--text);
-
-    font-size: 27px;
-    font-weight: 800;
-
-    text-decoration: none;
-
-    margin-bottom: 10px;
-}
-
-.bottom-nav-logo span {
-    color: var(--blue);
-}
-
-.bottom-nav-brand p {
-    max-width: 250px;
-
-    margin: 0;
-
-    color: var(--text-muted);
-
-    font-size: 13px;
-    line-height: 1.6;
 }
 
 
@@ -96,31 +55,10 @@
    MOBILE
    ========================================================= */
 
-@media (max-width: 750px) {
+@media (max-width: 600px) {
 
     .bottom-nav {
         grid-template-columns: repeat(2, 1fr);
-        gap: 35px 25px;
-    }
-
-    .bottom-nav-brand {
-        grid-column: 1 / -1;
-    }
-}
-
-
-@media (max-width: 450px) {
-
-    .bottom-nav {
-        padding: 35px 15px;
-        gap: 30px 18px;
-    }
-
-    .bottom-nav-logo {
-        font-size: 24px;
-    }
-
-    .bottom-nav-column a {
-        font-size: 13px;
+        gap: 30px;
     }
 }
