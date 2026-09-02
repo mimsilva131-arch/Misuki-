@@ -1,5 +1,5 @@
 /* =========================================================
-   MISUKI - BOTTOM FOOTER NAVIGATION
+   MISUKI - FOOTER NAVIGATION
    ========================================================= */
 
 .bottom-nav {
@@ -15,6 +15,11 @@
 
     border-top: 1px solid var(--border);
 }
+
+
+/* =========================================================
+   FOOTER COLUMNS
+   ========================================================= */
 
 .bottom-nav-column {
     display: flex;
@@ -43,11 +48,35 @@
 
     text-decoration: none;
 
-    transition: color 0.2s ease;
+    transition:
+        color 0.2s ease,
+        transform 0.2s ease;
 }
 
 .bottom-nav-column a:hover {
     color: var(--text);
+
+    transform: translateX(2px);
+}
+
+
+/* =========================================================
+   COPYRIGHT
+   ========================================================= */
+
+.footer-copy {
+    width: 100%;
+
+    padding: 20px 20px 30px;
+
+    text-align: center;
+
+    color: var(--text-secondary);
+
+    font-size: 13px;
+    line-height: 1.5;
+
+    border-top: 1px solid var(--border);
 }
 
 
@@ -59,6 +88,30 @@
 
     .bottom-nav {
         grid-template-columns: repeat(2, 1fr);
+
         gap: 30px;
+
+        padding: 35px 20px 25px;
     }
+
+    .footer-copy {
+        padding: 18px 20px 25px;
+
+        font-size: 12px;
+    }
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 400px) {
+
+    .bottom-nav {
+        grid-template-columns: 1fr;
+
+        gap: 25px;
+    }
+
 }
