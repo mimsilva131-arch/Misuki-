@@ -1,318 +1,478 @@
-
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Advertisement — Misuki</title>
+```
+<title>Advertisement — Misuki</title>
 
-    <link rel="stylesheet" href="/css/stars.css">
-    <link rel="stylesheet" href="/static/css/style.css?v=16">
-    <link rel="stylesheet" href="/static/css/cookies.css?v=3">
-    <link rel="stylesheet" href="/static/css/menu.css?v=2">
-    <link rel="stylesheet" href="/static/css/mouse-trail.css?v=3">
-    <link rel="stylesheet" href="/static/css/advertise.css?v=3">
-    <link rel="stylesheet" href="/static/css/bottom-nav.css?v=1">
+<link rel="stylesheet" href="/css/stars.css?v=3">
+<link rel="stylesheet" href="/static/css/style.css?v=16">
+<link rel="stylesheet" href="/static/css/cookies.css?v=3">
+<link rel="stylesheet" href="/static/css/mouse-trail.css?v=3">
+<link rel="stylesheet" href="/static/css/advertise.css?v=3">
+<link rel="stylesheet" href="/static/css/bottom-nav.css?v=1">
+```
+
 </head>
-
-
 
 <body>
 
-    <!-- Stars -->
-    <div id="stars" aria-hidden="true"></div>
+```
+<!-- =====================================================
+     STARS
+====================================================== -->
 
-    <!-- Header -->
-    <header class="container">
-        <a class="logo" href="/">
-            Misuki<span>.</span>
-        </a>
+<div id="stars" aria-hidden="true"></div>
+
+
+<!-- =====================================================
+     HEADER
+====================================================== -->
+
+<header class="container">
+
+    <a class="logo" href="/">
+        Misuki<span>.</span>
+    </a>
+
+    <button
+        class="hamburger"
+        id="hamburger"
+        type="button"
+        aria-label="Open menu"
+        aria-controls="menu"
+        aria-expanded="false"
+    >
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+</header>
+
+
+<!-- =====================================================
+     OVERLAY
+====================================================== -->
+
+<div class="overlay" id="overlay"></div>
+
+
+<!-- =====================================================
+     MENU
+====================================================== -->
+
+<nav
+    class="menu"
+    id="menu"
+    aria-hidden="true"
+>
+
+    <div class="menu-header">
+
+        <div class="menu-title">
+            Menu
+        </div>
 
         <button
-            class="hamburger"
-            id="hamburger"
+            class="menu-close"
+            id="menuClose"
             type="button"
-            aria-label="Open menu"
-            aria-controls="menu"
-            aria-expanded="false"
+            aria-label="Close menu"
         >
-            <span></span>
-            <span></span>
-            <span></span>
+            ×
         </button>
-    </header>
 
-    <!-- Overlay -->
-    <div class="overlay" id="overlay"></div>
+    </div>
 
-    <!-- Menu -->
-    <nav class="menu" id="menu" aria-hidden="true">
 
-        <div class="menu-header">
-            <div class="menu-title">Menu</div>
+    <div class="menu-section">
+
+        <a href="/">
+            Home
+        </a>
+
+        <a href="/dashboard">
+            Dashboard
+        </a>
+
+        <a href="/reviews">
+            Reviews
+        </a>
+
+        <a href="/documentation">
+            Documentation
+        </a>
+
+        <a href="/support">
+            Support
+        </a>
+
+        <a href="/advertise">
+            Advertisement
+        </a>
+
+        {% if is_admin(user) %}
+            <a href="/admin/advertisements">
+                Admin Advertisement
+            </a>
+        {% endif %}
+
+    </div>
+
+
+    <div class="menu-section">
+
+        <a href="/terms">
+            Terms
+        </a>
+
+        <a href="/privacy">
+            Privacy
+        </a>
+
+        <a href="/data">
+            Data
+        </a>
+
+        <a href="/cookies">
+            Cookies
+        </a>
+
+    </div>
+
+
+    <div class="menu-section">
+
+        {% if user %}
+
+            <a href="/dashboard">
+                Account Dashboard
+            </a>
+
+            <a href="/logout">
+                Logout
+            </a>
+
+        {% else %}
+
+            <a
+                class="discord-login"
+                href="/login"
+            >
+                Login with Discord
+            </a>
+
+        {% endif %}
+
+    </div>
+
+</nav>
+
+
+<!-- =====================================================
+     MAIN
+====================================================== -->
+
+<main class="container advertise-page">
+
+    <section class="advertise-hero">
+
+        <span class="advertise-eyebrow">
+            MISUKI ADVERTISEMENT
+        </span>
+
+        <h1>
+            Advertise your server
+        </h1>
+
+        <p>
+            Promote your Discord server to the Misuki community.
+            Choose your duration and create your advertisement.
+        </p>
+
+    </section>
+
+
+    <!-- =================================================
+         ADVERTISEMENT FORM
+    ================================================== -->
+
+    <section class="advertise-card">
+
+        <form
+            method="POST"
+            action="/advertise"
+        >
+
+            <div class="advertise-field">
+
+                <label for="title">
+                    Advertisement title
+                </label>
+
+                <input
+                    id="title"
+                    type="text"
+                    name="title"
+                    placeholder="Your server name"
+                    maxlength="100"
+                    required
+                >
+
+            </div>
+
+
+            <div class="advertise-field">
+
+                <label for="description">
+                    Description
+                </label>
+
+                <textarea
+                    id="description"
+                    name="description"
+                    placeholder="Tell people what makes your server special..."
+                    maxlength="1000"
+                    rows="5"
+                    required
+                ></textarea>
+
+            </div>
+
+
+            <div class="advertise-field">
+
+                <label for="image_url">
+                    Image URL
+                </label>
+
+                <input
+                    id="image_url"
+                    type="url"
+                    name="image_url"
+                    placeholder="https://example.com/image.png"
+                    required
+                >
+
+            </div>
+
+
+            <div class="advertise-field">
+
+                <label for="target_url">
+                    Destination URL
+                </label>
+
+                <input
+                    id="target_url"
+                    type="url"
+                    name="target_url"
+                    placeholder="https://discord.gg/yourserver"
+                    required
+                >
+
+            </div>
+
+
+            <div class="advertise-field">
+
+                <label for="duration">
+                    Advertisement duration
+                </label>
+
+                <select
+                    id="duration"
+                    name="duration"
+                    required
+                >
+
+                    <option value="7">
+                        7 days — €0.99
+                    </option>
+
+                    <option value="14">
+                        14 days — €1.50
+                    </option>
+
+                    <option value="30">
+                        30 days — €2.50
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- =================================================
+                 PROMOTIONAL PRICING
+            ================================================== -->
+
+            <div class="advertise-pricing">
+
+                <div class="advertise-pricing-header">
+
+                    <div>
+
+                        <span class="advertise-pricing-label">
+                            SPECIAL OFFER
+                        </span>
+
+                        <h3>
+                            Promotional prices
+                        </h3>
+
+                    </div>
+
+                    <span class="advertise-promotion">
+                        SAVE MORE
+                    </span>
+
+                </div>
+
+
+                <div class="advertise-price-cards">
+
+
+                    <!-- 7 DAYS -->
+
+                    <div class="advertise-price-card">
+
+                        <span class="advertise-price-days">
+                            7 DAYS
+                        </span>
+
+                        <div class="advertise-price-old">
+                            €1.00
+                        </div>
+
+                        <div class="advertise-price-current">
+                            €0.99
+                        </div>
+
+                        <span class="advertise-price-save">
+                            Save €0.01
+                        </span>
+
+                    </div>
+
+
+                    <!-- 14 DAYS -->
+
+                    <div class="advertise-price-card advertise-price-featured">
+
+                        <span class="advertise-price-popular">
+                            POPULAR
+                        </span>
+
+                        <span class="advertise-price-days">
+                            14 DAYS
+                        </span>
+
+                        <div class="advertise-price-old">
+                            €2.00
+                        </div>
+
+                        <div class="advertise-price-current">
+                            €1.50
+                        </div>
+
+                        <span class="advertise-price-save">
+                            Save €0.50
+                        </span>
+
+                    </div>
+
+
+                    <!-- 30 DAYS -->
+
+                    <div class="advertise-price-card">
+
+                        <span class="advertise-price-days">
+                            30 DAYS
+                        </span>
+
+                        <div class="advertise-price-old">
+                            €3.00
+                        </div>
+
+                        <div class="advertise-price-current">
+                            €2.50
+                        </div>
+
+                        <span class="advertise-price-save">
+                            Save €0.50
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 PAYPAL
+            ================================================== -->
+
+            <div class="advertise-payment">
+
+                <div class="advertise-payment-icon">
+
+                    <img
+                        src="https://www.paypalobjects.com/webstatic/mktg/logo/pp_cc_mark_37x23.jpg"
+                        alt="PayPal"
+                    >
+
+                </div>
+
+                <div class="advertise-payment-content">
+
+                    <strong>
+                        Secure payment with PayPal
+                    </strong>
+
+                    <span>
+                        Your payment will be securely processed through PayPal.
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 SUBMIT
+            ================================================== -->
 
             <button
-                class="menu-close"
-                id="menuClose"
-                type="button"
-                aria-label="Close menu"
+                class="advertise-submit"
+                type="submit"
             >
-                ×
+                Continue to PayPal
             </button>
-        </div>
 
-        <div class="menu-section">
-            <a href="/">Home</a>
-            <a href="/dashboard">Dashboard</a>
-            <a href="/reviews">Reviews</a>
-            <a href="/documentation">Documentation</a>
-            <a href="/support">Support</a>
-            <a href="/advertise">Advertisement</a>
 
-            {% if is_admin(user) %}
-                <a href="/admin/advertisements">Admin Advertisement</a>
-            {% endif %}
-        </div>
-
-        <div class="menu-section">
-            <a href="/terms">Terms</a>
-            <a href="/privacy">Privacy</a>
-            <a href="/data">Data</a>
-            <a href="/cookies">Cookies</a>
-        </div>
-
-        <div class="menu-section">
-            {% if user %}
-                <a href="/dashboard">Account Dashboard</a>
-                <a href="/logout">Logout</a>
-            {% else %}
-                <a class="discord-login" href="/login">
-                    Login with Discord
-                </a>
-            {% endif %}
-        </div>
-
-    </nav>
-
-    <!-- Main -->
-    <main class="container advertise-page">
-
-        <section class="advertise-hero">
-            <span class="advertise-eyebrow">MISUKI ADVERTISEMENT</span>
-
-            <h1>Advertise your server</h1>
-
-            <p>
-                Promote your Discord server to the Misuki community.
-                Choose your duration and create your advertisement.
+            <p class="advertise-note">
+                Your advertisement will be reviewed and activated
+                after successful payment.
             </p>
-        </section>
 
-        <!-- Advertisement form -->
-        <section class="advertise-card">
+        </form>
 
-            <form method="POST" action="/advertise">
+    </section>
 
-                <div class="advertise-field">
-                    <label for="title">Advertisement title</label>
+</main>
 
-                    <input
-                        id="title"
-                        type="text"
-                        name="title"
-                        placeholder="Your server name"
-                        maxlength="100"
-                        required
-                    >
-                </div>
 
-                <div class="advertise-field">
-                    <label for="description">Description</label>
+<!-- =====================================================
+     FOOTER
+====================================================== -->
 
-                    <textarea
-                        id="description"
-                        name="description"
-                        placeholder="Tell people what makes your server special..."
-                        maxlength="1000"
-                        rows="5"
-                        required
-                    ></textarea>
-                </div>
-
-                <div class="advertise-field">
-                    <label for="image_url">Image URL</label>
-
-                    <input
-                        id="image_url"
-                        type="url"
-                        name="image_url"
-                        placeholder="https://example.com/image.png"
-                        required
-                    >
-                </div>
-
-                <div class="advertise-field">
-                    <label for="target_url">Destination URL</label>
-
-                    <input
-                        id="target_url"
-                        type="url"
-                        name="target_url"
-                        placeholder="https://discord.gg/yourserver"
-                        required
-                    >
-                </div>
-
-                <div class="advertise-field">
-                    <label for="duration">Advertisement duration</label>
-
-                    <select id="duration" name="duration" required>
-                        <option value="7">
-                            7 days — €0.99
-                        </option>
-
-                        <option value="14">
-                            14 days — €1.50
-                        </option>
-
-                        <option value="30">
-                            30 days — €2.50
-                        </option>
-                    </select>
-                </div>
-
-                <!-- Promotional pricing -->
-                <div class="advertise-pricing">
-
-                    <div class="advertise-pricing-header">
-                        <div>
-                            <span class="advertise-pricing-label">
-                                SPECIAL OFFER
-                            </span>
-
-                            <h3>Promotional prices</h3>
-                        </div>
-
-                        <span class="advertise-promotion">
-                            SAVE MORE
-                        </span>
-                    </div>
-
-                    <div class="advertise-price-cards">
-
-                        <!-- 7 days -->
-                        <div class="advertise-price-card">
-
-                            <span class="advertise-price-days">
-                                7 DAYS
-                            </span>
-
-                            <div class="advertise-price-old">
-                                €1.00
-                            </div>
-
-                            <div class="advertise-price-current">
-                                €0.99
-                            </div>
-
-                            <span class="advertise-price-save">
-                                Save €0.01
-                            </span>
-
-                        </div>
-
-                        <!-- 14 days -->
-                        <div class="advertise-price-card advertise-price-featured">
-
-                            <span class="advertise-price-popular">
-                                POPULAR
-                            </span>
-
-                            <span class="advertise-price-days">
-                                14 DAYS
-                            </span>
-
-                            <div class="advertise-price-old">
-                                €2.00
-                            </div>
-
-                            <div class="advertise-price-current">
-                                €1.50
-                            </div>
-
-                            <span class="advertise-price-save">
-                                Save €0.50
-                            </span>
-
-                        </div>
-
-                        <!-- 30 days -->
-                        <div class="advertise-price-card">
-
-                            <span class="advertise-price-days">
-                                30 DAYS
-                            </span>
-
-                            <div class="advertise-price-old">
-                                €3.00
-                            </div>
-
-                            <div class="advertise-price-current">
-                                €2.50
-                            </div>
-
-                            <span class="advertise-price-save">
-                                Save €0.50
-                            </span>
-
-                        </div>
-
-                    </div>
-                </div>
-
-                <!-- PayPal -->
-                <div class="advertise-payment">
-
-                    <div class="advertise-payment-icon">
-                        <img
-                            src="https://www.paypalobjects.com/webstatic/mktg/logo/pp_cc_mark_37x23.jpg"
-                            alt="PayPal"
-                        >
-                    </div>
-
-                    <div class="advertise-payment-content">
-                        <strong>
-                            Secure payment with PayPal
-                        </strong>
-
-                        <span>
-                            Your payment will be securely processed through PayPal.
-                        </span>
-                    </div>
-
-                </div>
-
-                <button
-                    class="advertise-submit"
-                    type="submit"
-                >
-                    Continue to PayPal
-                </button>
-
-                <p class="advertise-note">
-                    Your advertisement will be reviewed and activated
-                    after successful payment.
-                </p>
-
-            </form>
-
-        </section>
-
-    </main>
-
-    <!-- Footer -->
-    <footer>
+<footer>
 
     {% include "bottom-nav.html" %}
 
@@ -322,7 +482,8 @@
 
 </footer>
 
-    <!-- =====================================================
+
+<!-- =====================================================
      COOKIE BANNER
 ====================================================== -->
 
@@ -368,6 +529,7 @@
 
         </div>
 
+
         <div id="misukiCookieLegal">
 
             <a href="/terms">
@@ -388,12 +550,16 @@
 
 </div>
 
-    <!-- Scripts -->
-    <script src="/static/js/stars.js?v=3" defer></script>
-    <script src="/static/js/mouse-trail.js?v=3" defer></script>
-    <script src="/static/js/menu.js?v=2" defer></script>
-    <script src="/static/js/cookies.js?v=3" defer></script>
+
+<!-- =====================================================
+     SCRIPTS
+====================================================== -->
+
+<script src="/static/js/stars.js?v=3" defer></script>
+<script src="/static/js/mouse-trail.js?v=3" defer></script>
+<script src="/static/js/menu.js?v=2" defer></script>
+<script src="/static/js/cookies.js?v=3" defer></script>
+```
 
 </body>
 </html>
-
