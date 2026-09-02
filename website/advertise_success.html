@@ -38,8 +38,112 @@
         rel="stylesheet"
         href="/static/css/cookies.css?v=3"
     >
-    <link rel="stylesheet" href="/static/css/bottom-nav.css?v=1">
+
+    <link
+        rel="stylesheet"
+        href="/static/css/bottom-nav.css?v=1"
+    >
+
 </head>
+
+<body>
+
+<header class="container">
+
+    <a
+        class="logo"
+        href="/"
+    >
+        Misuki<span>.</span>
+    </a>
+
+    <a
+        href="/"
+        class="button manage"
+    >
+        Home
+    </a>
+
+</header>
+
+
+<main>
+
+    <section class="section">
+
+        <div class="container">
+
+            <div
+                class="card"
+                style="max-width: 760px; margin: 40px auto; text-align: center;"
+            >
+
+                <div
+                    class="advertise-badge"
+                    style="margin-bottom: 18px;"
+                >
+                    ✅ Advertisement Submitted
+                </div>
+
+                <h1>
+                    Your advertisement was sent successfully.
+                </h1>
+
+                <p>
+                    It is now pending review by the Misuki team.
+                    We will review it and decide whether it should be approved or rejected.
+                </p>
+
+                <div
+                    style="
+                        margin-top: 24px;
+                        display: flex;
+                        justify-content: center;
+                        gap: 12px;
+                        flex-wrap: wrap;
+                    "
+                >
+
+                    <a
+                        href="/advertise"
+                        class="button manage"
+                    >
+                        Submit another
+                    </a>
+
+                    <a
+                        href="/dashboard"
+                        class="button add"
+                    >
+                        Dashboard
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<!-- =====================================================
+     FOOTER NAVIGATION
+====================================================== -->
+
+<footer>
+
+    {% include "bottom-nav.html" %}
+
+    <div class="footer-copy">
+        © 2026 Misuki. All rights reserved.
+    </div>
+
+</footer>
+
+
 <!-- =====================================================
      COOKIES
 ====================================================== -->
@@ -102,97 +206,16 @@
     </div>
 
 </div>
-<script
-    src="/static/js/cookies.js?v=3"
-    defer
-></script>
 
 
-<script src="/static/js/bottom-nav.js?v=1" defer></script>
-<body>
-
-<header class="container">
-
-    <a
-        class="logo"
-        href="/"
-    >
-        Misuki<span>.</span>
-    </a>
-
-    <a
-        href="/"
-        class="button manage"
-    >
-        Home
-    </a>
-
-</header>
-
-<main>
-
-    <section class="section">
-
-        <div class="container">
-
-            <div class="card" style="max-width: 760px; margin: 40px auto; text-align: center;">
-
-                <div class="advertise-badge" style="margin-bottom: 18px;">
-                    ✅ Advertisement Submitted
-                </div>
-
-                <h1>
-                    Your advertisement was sent successfully.
-                </h1>
-
-                <p>
-                    It is now pending review by the Misuki team.
-                    We will review it and decide whether it should be approved or rejected.
-                </p>
-
-                <div style="margin-top: 24px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
-
-                    <a
-                        href="/advertise"
-                        class="button manage"
-                    >
-                        Submit another
-                    </a>
-
-                    <a
-                        href="/dashboard"
-                        class="button add"
-                    >
-                        Dashboard
-                    </a>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </section>
-
-</main>
-
-
+<!-- =====================================================
+     SCRIPTS
+====================================================== -->
 
 <script
     src="/static/js/stars.js?v=3"
     defer
 ></script>
-
-
-<footer>
-
-    {% include "bottom-nav.html" %}
-
-    <div class="footer-copy">
-        © 2026 Misuki. All rights reserved.
-    </div>
-
-</footer>
 
 </body>
 
