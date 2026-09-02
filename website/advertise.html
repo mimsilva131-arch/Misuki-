@@ -62,7 +62,7 @@
 
     <link
         rel="stylesheet"
-        href="/static/css/advertise.css?v=1"
+        href="/static/css/advertise.css?v=2"
     >
 
 </head>
@@ -185,10 +185,13 @@
         Advertisement
     </a>
 
+
     {% if is_admin(user) %}
+
         <a href="/admin/advertise">
             Advertisement Admin
         </a>
+
     {% endif %}
 
 
@@ -280,10 +283,8 @@
 
 
                 <p>
-
                     Promote your Discord server, project
                     or service to the Misuki community.
-
                 </p>
 
             </div>
@@ -324,7 +325,9 @@
                 >
 
 
-                    <!-- TITLE -->
+                    <!-- =================================================
+                         TITLE
+                    ================================================== -->
 
                     <div class="advertise-field">
 
@@ -344,7 +347,9 @@
                     </div>
 
 
-                    <!-- DESCRIPTION -->
+                    <!-- =================================================
+                         DESCRIPTION
+                    ================================================== -->
 
                     <div class="advertise-field">
 
@@ -368,13 +373,20 @@
                     </div>
 
 
-                    <!-- IMAGE -->
+                    <!-- =================================================
+                         IMAGE
+                    ================================================== -->
 
                     <div class="advertise-field">
 
                         <label for="advertise-image">
+
                             Image URL
-                            <span>Optional</span>
+
+                            <span>
+                                Optional
+                            </span>
+
                         </label>
 
                         <input
@@ -388,7 +400,9 @@
                     </div>
 
 
-                    <!-- DESTINATION -->
+                    <!-- =================================================
+                         DESTINATION
+                    ================================================== -->
 
                     <div class="advertise-field">
 
@@ -408,13 +422,16 @@
                     </div>
 
 
-                    <!-- DURATION -->
+                    <!-- =================================================
+                         DURATION
+                    ================================================== -->
 
                     <div class="advertise-field">
 
                         <label for="advertise-duration">
                             Campaign duration
                         </label>
+
 
                         <select
                             id="advertise-duration"
@@ -423,23 +440,147 @@
                         >
 
                             <option value="7">
-                                7 days
+                                7 days — €{{ prices[7] }}
                             </option>
+
 
                             <option value="14">
-                                14 days
+                                14 days — €{{ prices[14] }}
                             </option>
 
+
                             <option value="30">
-                                30 days
+                                30 days — €{{ prices[30] }}
                             </option>
 
                         </select>
 
+
+                        <div class="advertise-hint">
+                            Choose how long you want your advertisement to run.
+                        </div>
+
                     </div>
 
 
-                    <!-- SUBMIT -->
+                    <!-- =================================================
+                         PROMOTIONAL PRICING
+                    ================================================== -->
+
+                    <div class="advertise-pricing">
+
+                        <div class="advertise-pricing-title">
+                            🔥 Limited-time promotion
+                        </div>
+
+
+                        <div class="advertise-price-list">
+
+
+                            <!-- 7 DAYS -->
+
+                            <div class="advertise-price">
+
+                                <div class="advertise-price-info">
+
+                                    <span class="advertise-price-duration">
+                                        7 days
+                                    </span>
+
+                                    <span class="advertise-price-description">
+                                        Get your project noticed
+                                    </span>
+
+                                </div>
+
+
+                                <div class="advertise-price-values">
+
+                                    <span class="advertise-old-price">
+                                        €1.00
+                                    </span>
+
+                                    <strong>
+                                        €{{ prices[7] }}
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- 14 DAYS -->
+
+                            <div class="advertise-price">
+
+                                <div class="advertise-price-info">
+
+                                    <span class="advertise-price-duration">
+                                        14 days
+                                    </span>
+
+                                    <span class="advertise-price-description">
+                                        Extended visibility
+                                    </span>
+
+                                </div>
+
+
+                                <div class="advertise-price-values">
+
+                                    <span class="advertise-old-price">
+                                        €2.00
+                                    </span>
+
+                                    <strong>
+                                        €{{ prices[14] }}
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- 30 DAYS -->
+
+                            <div class="advertise-price">
+
+                                <div class="advertise-price-info">
+
+                                    <span class="advertise-price-duration">
+                                        30 days
+                                    </span>
+
+                                    <span class="advertise-price-description">
+                                        Maximum exposure
+                                    </span>
+
+                                </div>
+
+
+                                <div class="advertise-price-values">
+
+                                    <span class="advertise-old-price">
+                                        €3.00
+                                    </span>
+
+                                    <strong>
+                                        €{{ prices[30] }}
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         SUBMIT
+                    ================================================== -->
 
                     <button
                         type="submit"
@@ -468,6 +609,7 @@
                     before being displayed.
 
                 </div>
+
 
             </div>
 
@@ -517,43 +659,15 @@
 
 
 <!-- =====================================================
-     STARS
+     COOKIE BANNER
 ====================================================== -->
 
-<script
-    src="/static/js/stars.js?v=3"
-    defer
-></script>
-
-
-<!-- =====================================================
-     MOUSE TRAIL
-====================================================== -->
-
-<script
-    src="/static/js/mouse-trail.js?v=3"
-    defer
-></script>
-
-
-<!-- =====================================================
-     MENU
-====================================================== -->
-
-<script
-    src="/static/js/menu.js?v=2"
-    defer
-></script>
-
-
-<!-- =====================================================
-     COOKIES
-====================================================== -->
-
-
-
-
-<div id="misukiCookieBanner">
+<div
+    id="misukiCookieBanner"
+    role="dialog"
+    aria-label="Cookie consent"
+    aria-live="polite"
+>
 
     <div id="misukiCookieContent">
 
@@ -561,11 +675,13 @@
             🍪 We use cookies
         </h3>
 
+
         <p>
             Misuki uses cookies to improve your
             experience and keep the website working
             correctly.
         </p>
+
 
         <div id="misukiCookieButtons">
 
@@ -576,12 +692,14 @@
                 Accept All
             </button>
 
+
             <button
                 type="button"
                 id="misukiEssential"
             >
                 Essential Only
             </button>
+
 
             <button
                 type="button"
@@ -592,15 +710,18 @@
 
         </div>
 
+
         <div id="misukiCookieLegal">
 
             <a href="/terms">
                 Terms
             </a>
 
+
             <a href="/privacy">
                 Privacy
             </a>
+
 
             <a href="/cookies">
                 Cookie Policy
@@ -612,12 +733,37 @@
 
 </div>
 
+
+<!-- =====================================================
+     JAVASCRIPT
+====================================================== -->
+
+<script
+    src="/static/js/stars.js?v=3"
+    defer
+></script>
+
+
+<script
+    src="/static/js/mouse-trail.js?v=3"
+    defer
+></script>
+
+
+<script
+    src="/static/js/menu.js?v=2"
+    defer
+></script>
+
+
 <script
     src="/static/js/cookies.js?v=3"
     defer
 ></script>
 
+
 </body>
 
 </html>
+
 
