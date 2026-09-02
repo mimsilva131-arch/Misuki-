@@ -1,55 +1,34 @@
 /* =========================================================
-   MISUKI - FOOTER NAVIGATION
+   MISUKI - FIXED BOTTOM NAVIGATION
    ========================================================= */
 
-.footer-navigation {
+.bottom-nav {
+    position: fixed;
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+
     width: 100%;
-    max-width: var(--container);
-    margin: 0 auto 35px;
 
     display: grid;
     grid-template-columns: 2fr 1fr 1fr 1fr;
 
-    gap: 50px;
+    gap: 45px;
 
-    padding: 0 20px;
-}
+    padding: 28px 40px;
 
+    background: rgba(5, 7, 13, 0.96);
 
-/* =========================================================
-   BRAND
-   ========================================================= */
+    border-top: 1px solid var(--border);
 
-.footer-navigation-brand {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
 
-.footer-navigation-logo {
-    color: var(--text);
-    text-decoration: none;
+    box-shadow:
+        0 -10px 35px rgba(0, 0, 0, 0.25);
 
-    font-size: 26px;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-
-    margin-bottom: 10px;
-}
-
-.footer-navigation-logo span {
-    color: var(--blue);
-}
-
-.footer-navigation-brand p {
-    max-width: 240px;
-
-    margin: 0;
-
-    color: var(--text-muted);
-
-    font-size: 13px;
-    line-height: 1.6;
+    z-index: 1000;
 }
 
 
@@ -57,42 +36,73 @@
    COLUMNS
    ========================================================= */
 
-.footer-navigation-column {
+.bottom-nav-column {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
 }
 
-.footer-navigation-column h3 {
-    margin: 0 0 16px;
+.bottom-nav-column h3 {
+    margin: 0 0 12px;
 
     color: var(--text);
 
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
 
     text-transform: uppercase;
     letter-spacing: 0.8px;
 }
 
-.footer-navigation-column a {
-    margin-bottom: 11px;
+.bottom-nav-column a {
+    margin-bottom: 8px;
 
     color: var(--text-muted);
 
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
 
     text-decoration: none;
 
     transition:
-        color var(--transition),
-        transform var(--transition);
+        color 0.2s ease,
+        transform 0.2s ease;
 }
 
-.footer-navigation-column a:hover {
+.bottom-nav-column a:hover {
     color: var(--text);
-    transform: translateX(2px);
+    transform: translateX(3px);
+}
+
+
+/* =========================================================
+   BRAND
+   ========================================================= */
+
+.bottom-nav-logo {
+    color: var(--text);
+
+    font-size: 25px;
+    font-weight: 800;
+
+    text-decoration: none;
+
+    margin-bottom: 8px;
+}
+
+.bottom-nav-logo span {
+    color: var(--blue);
+}
+
+.bottom-nav-brand p {
+    max-width: 250px;
+
+    margin: 0;
+
+    color: var(--text-muted);
+
+    font-size: 12px;
+    line-height: 1.5;
 }
 
 
@@ -102,12 +112,15 @@
 
 @media (max-width: 750px) {
 
-    .footer-navigation {
+    .bottom-nav {
         grid-template-columns: repeat(2, 1fr);
-        gap: 35px 25px;
+
+        gap: 25px 30px;
+
+        padding: 25px 25px;
     }
 
-    .footer-navigation-brand {
+    .bottom-nav-brand {
         grid-column: 1 / -1;
     }
 }
@@ -115,17 +128,17 @@
 
 @media (max-width: 450px) {
 
-    .footer-navigation {
-        grid-template-columns: 1fr 1fr;
-        gap: 30px 18px;
-        padding: 0 10px;
+    .bottom-nav {
+        gap: 20px;
+
+        padding: 22px 18px;
     }
 
-    .footer-navigation-logo {
-        font-size: 23px;
+    .bottom-nav-logo {
+        font-size: 22px;
     }
 
-    .footer-navigation-column a {
-        font-size: 13px;
+    .bottom-nav-column a {
+        font-size: 12px;
     }
 }
