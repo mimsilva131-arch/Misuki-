@@ -1,0 +1,222 @@
+/* =========================================================
+   MISUKI - BOTTOM NAVIGATION
+   ========================================================= */
+
+.bottom-nav {
+    position: fixed;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+
+    width: min(680px, calc(100% - 32px));
+    height: 68px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+
+    padding: 8px;
+
+    background: rgba(10, 14, 25, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 20px;
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.35),
+        0 0 30px rgba(88, 101, 242, 0.08);
+
+    z-index: 900;
+
+    transition:
+        opacity 0.22s ease,
+        transform 0.22s ease,
+        background 0.22s ease;
+}
+
+/* =========================================================
+   ITEMS
+   ========================================================= */
+
+.bottom-nav-item {
+    position: relative;
+
+    flex: 1;
+    height: 52px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 4px;
+
+    color: #8e99ad;
+    text-decoration: none;
+
+    border-radius: 14px;
+
+    font-size: 11px;
+    font-weight: 600;
+
+    transition:
+        color 0.2s ease,
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.bottom-nav-item:hover {
+    color: #f5f7ff;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.bottom-nav-item:active {
+    transform: scale(0.94);
+}
+
+/* =========================================================
+   ICONS
+   ========================================================= */
+
+.bottom-nav-icon {
+    width: 22px;
+    height: 22px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 19px;
+    line-height: 1;
+
+    transition:
+        transform 0.2s ease,
+        color 0.2s ease;
+}
+
+.bottom-nav-item:hover .bottom-nav-icon {
+    transform: translateY(-1px);
+}
+
+/* =========================================================
+   ACTIVE ITEM
+   ========================================================= */
+
+.bottom-nav-item.active {
+    color: #ffffff;
+    background: rgba(88, 101, 242, 0.16);
+}
+
+.bottom-nav-item.active::after {
+    content: "";
+
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+
+    width: 18px;
+    height: 3px;
+
+    transform: translateX(-50%);
+
+    background: #5865f2;
+    border-radius: 999px;
+
+    box-shadow: 0 0 10px rgba(88, 101, 242, 0.45);
+}
+
+.bottom-nav-item.active .bottom-nav-icon {
+    color: #91b5ff;
+}
+
+/* =========================================================
+   MENU BUTTON
+   ========================================================= */
+
+.bottom-nav-menu {
+    cursor: pointer;
+    border: 0;
+    font-family: inherit;
+    background: transparent;
+}
+
+.bottom-nav-menu:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* =========================================================
+   PAGE SPACE
+   Prevents the bottom bar from covering content.
+   ========================================================= */
+
+body {
+    padding-bottom: 105px;
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .bottom-nav {
+        bottom: 10px;
+
+        width: calc(100% - 20px);
+        height: 64px;
+
+        border-radius: 18px;
+    }
+
+    .bottom-nav-item {
+        height: 50px;
+        font-size: 10px;
+    }
+
+    .bottom-nav-icon {
+        font-size: 18px;
+    }
+
+    body {
+        padding-bottom: 90px;
+    }
+}
+
+/* =========================================================
+   SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 420px) {
+
+    .bottom-nav {
+        width: calc(100% - 14px);
+        bottom: 7px;
+        padding: 6px;
+    }
+
+    .bottom-nav-item {
+        gap: 3px;
+        font-size: 9px;
+    }
+
+    .bottom-nav-icon {
+        width: 20px;
+        height: 20px;
+        font-size: 17px;
+    }
+}
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .bottom-nav,
+    .bottom-nav-item,
+    .bottom-nav-icon {
+        transition: none;
+    }
+}
