@@ -1,34 +1,51 @@
+
 <!DOCTYPE html>
 
 <html lang="en">
 
 <head>
-<link rel="icon" type="image/png" href="/assets/images/favicon.png?v=3">
-<link rel="shortcut icon" type="image/png" href="/assets/images/favicon.png?v=3">
-<link
-    rel="stylesheet"
-    href="/static/css/cookies.css?v=3"
->
-<meta charset="UTF-8">
 
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
+    <meta charset="UTF-8">
 
-<title>Misuki — Terms of Service</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-<link
-    rel="stylesheet"
-    href="/static/css/style.css?v=16"
->
+    <link
+        rel="icon"
+        type="image/png"
+        href="/assets/images/favicon.png?v=3"
+    >
 
-<link rel="stylesheet" href="/static/css/bottom-nav.css?v=1">
+    <link
+        rel="shortcut icon"
+        type="image/png"
+        href="/assets/images/favicon.png?v=3"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/static/css/style.css?v=17"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/static/css/cookies.css?v=3"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/static/css/bottom-nav.css?v=1"
+    >
+
+    <title>Misuki — Terms of Service</title>
+
 </head>
-<script src="/static/js/stars.js?v=3" defer></script>
 
 
 <body>
+
 
 <header class="container">
 
@@ -42,8 +59,12 @@
 
     <button
         class="hamburger"
-        onclick=""
+        id="menuOpen"
+        type="button"
+        onclick="openMenu()"
         aria-label="Open menu"
+        aria-controls="menu"
+        aria-expanded="false"
     >
 
         <span></span>
@@ -58,13 +79,14 @@
 <div
     class="overlay"
     id="overlay"
-   
+    onclick="closeMenu()"
 ></div>
 
 
 <nav
     class="menu"
     id="menu"
+    aria-hidden="true"
 >
 
     <div class="menu-header">
@@ -76,7 +98,10 @@
 
         <button
             class="menu-close"
-           
+            id="menuClose"
+            type="button"
+            onclick="closeMenu()"
+            aria-label="Close menu"
         >
             ×
         </button>
@@ -117,6 +142,20 @@
     <a href="/support">
         Support
     </a>
+
+
+    <a href="/advertise">
+        Advertisement
+    </a>
+
+
+    {% if is_admin(user) %}
+
+        <a href="/admin/advertise">
+            Advertisement Admin
+        </a>
+
+    {% endif %}
 
 
     <div class="menu-section">
@@ -394,53 +433,6 @@
 </footer>
 
 
-<script>
-
-    function openMenu() {
-
-        document
-            .getElementById("menu")
-            .classList.add("open");
-
-        document
-            .getElementById("overlay")
-            .classList.add("show");
-
-    }
-
-
-    function closeMenu() {
-
-        document
-            .getElementById("menu")
-            .classList.remove("open");
-
-        document
-            .getElementById("overlay")
-            .classList.remove("show");
-
-    }
-
-
-    document.addEventListener(
-        "keydown",
-        function(event) {
-
-            if (
-                event.key === "Escape"
-            ) {
-
-                closeMenu();
-
-            }
-
-        }
-    );
-
-</script>
-
-
-
 <div id="misukiCookieBanner">
 
     <div id="misukiCookieContent">
@@ -449,11 +441,13 @@
             🍪 We use cookies
         </h3>
 
+
         <p>
             Misuki uses cookies to improve your
             experience and keep the website working
             correctly.
         </p>
+
 
         <div id="misukiCookieButtons">
 
@@ -464,12 +458,14 @@
                 Accept All
             </button>
 
+
             <button
                 type="button"
                 id="misukiEssential"
             >
                 Essential Only
             </button>
+
 
             <button
                 type="button"
@@ -480,15 +476,18 @@
 
         </div>
 
+
         <div id="misukiCookieLegal">
 
             <a href="/terms">
                 Terms
             </a>
 
+
             <a href="/privacy">
                 Privacy
             </a>
+
 
             <a href="/cookies">
                 Cookie Policy
@@ -500,26 +499,153 @@
 
 </div>
 
+
 <script
     src="/static/js/stars.js?v=3"
     defer
 ></script>
+
 
 <script
     src="/static/js/mouse-trail.js?v=3"
     defer
 ></script>
 
-<script
-    src="/static/js/menu.js?v=2"
-    defer
-></script>
 
 <script
     src="/static/js/cookies.js?v=3"
     defer
 ></script>
 
+
+<script>
+
+    function openMenu() {
+
+        const menu =
+            document.getElementById("menu");
+
+        const overlay =
+            document.getElementById("overlay");
+
+        const hamburger =
+            document.getElementById("menuOpen");
+
+
+        if (!menu || !overlay) {
+            return;
+        }
+
+
+        menu.classList.add("open");
+
+        overlay.classList.add("show");
+
+        document.body.classList.add("menu-open");
+
+        menu.setAttribute(
+            "aria-hidden",
+            "false"
+        );
+
+
+        if (hamburger) {
+
+            hamburger.setAttribute(
+                "aria-expanded",
+                "true"
+            );
+
+        }
+
+    }
+
+
+    function closeMenu() {
+
+        const menu =
+            document.getElementById("menu");
+
+        const overlay =
+            document.getElementById("overlay");
+
+        const hamburger =
+            document.getElementById("menuOpen");
+
+
+        if (!menu || !overlay) {
+            return;
+        }
+
+
+        menu.classList.remove("open");
+
+        overlay.classList.remove("show");
+
+        document.body.classList.remove("menu-open");
+
+        menu.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
+
+        if (hamburger) {
+
+            hamburger.setAttribute(
+                "aria-expanded",
+                "false"
+            );
+
+        }
+
+    }
+
+
+    document.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (event.key === "Escape") {
+
+                closeMenu();
+
+            }
+
+        }
+    );
+
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function() {
+
+            const menuLinks =
+                document.querySelectorAll("#menu a");
+
+
+            menuLinks.forEach(
+                function(link) {
+
+                    link.addEventListener(
+                        "click",
+                        function() {
+
+                            closeMenu();
+
+                        }
+                    );
+
+                }
+            );
+
+        }
+    );
+
+</script>
+
+
 </body>
 
 </html>
+
