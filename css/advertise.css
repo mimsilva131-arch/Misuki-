@@ -325,7 +325,6 @@
 .advertise-payment {
     display: flex;
     align-items: center;
-
     gap: 12px;
 
     margin-top: 18px;
@@ -338,8 +337,8 @@
 }
 
 .advertise-payment-icon {
-    width: 38px;
-    height: 38px;
+    width: 42px;
+    height: 42px;
 
     display: flex;
     align-items: center;
@@ -349,28 +348,19 @@
 
     border-radius: 10px;
 
-    background: #ffffff;
+    background: transparent;
 
     overflow: hidden;
-
-    box-shadow:
-        0 5px 18px rgba(0, 0, 0, .20);
 }
-
-/*
-   IMPORTANT:
-   Keep the PayPal logo constrained.
-   This prevents global img rules from making it huge.
-*/
 
 .advertise-payment-icon img {
     display: block;
 
-    width: 24px !important;
-    height: 16px !important;
+    width: 34px !important;
+    height: auto !important;
 
-    max-width: 24px !important;
-    max-height: 16px !important;
+    max-width: 34px !important;
+    max-height: 24px !important;
 
     min-width: 0 !important;
     min-height: 0 !important;
@@ -384,10 +374,7 @@
 .advertise-payment-content {
     display: flex;
     flex-direction: column;
-
     gap: 3px;
-
-    min-width: 0;
 }
 
 .advertise-payment-content strong {
