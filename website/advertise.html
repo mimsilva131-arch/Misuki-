@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 
 <html lang="en">
@@ -25,7 +26,10 @@
         href="/assets/images/favicon.png?v=3"
     >
 
-    <!-- STYLES -->
+
+    <!-- =====================================================
+         STYLES
+    ====================================================== -->
 
     <link
         rel="stylesheet"
@@ -40,12 +44,6 @@
     <link
         rel="stylesheet"
         href="/static/css/cookies.css?v=3"
-    >
-
-    <!-- CORRECT MENU CSS -->
-    <link
-        rel="stylesheet"
-        href="/static/css/menu.css?v=2"
     >
 
     <link
@@ -150,95 +148,122 @@
     </div>
 
 
-    <!-- MAIN -->
+    <!-- =================================================
+         NAVIGATION
+    ================================================== -->
 
     <div class="menu-section">
+        Navigation
+    </div>
 
-        <a href="/">
-            Home
+
+    <a href="/">
+        Home
+    </a>
+
+
+    <a href="/dashboard">
+        Dashboard
+    </a>
+
+
+    <a href="/reviews">
+        Reviews
+    </a>
+
+
+    <!-- =================================================
+         RESOURCES
+    ================================================== -->
+
+    <div class="menu-section">
+        Resources
+    </div>
+
+
+    <a href="/documentation">
+        Documentation
+    </a>
+
+
+    <a href="/support">
+        Support
+    </a>
+
+
+    <a href="/advertise">
+        Advertisement
+    </a>
+
+
+    {% if is_admin(user) %}
+
+        <a href="/admin/advertise">
+            Advertisement Admin
         </a>
+
+    {% endif %}
+
+
+    <!-- =================================================
+         LEGAL
+    ================================================== -->
+
+    <div class="menu-section">
+        Legal
+    </div>
+
+
+    <a href="/terms">
+        Terms
+    </a>
+
+
+    <a href="/privacy">
+        Privacy
+    </a>
+
+
+    <a href="/data">
+        Data
+    </a>
+
+
+    <a href="/cookies">
+        Cookies
+    </a>
+
+
+    <!-- =================================================
+         ACCOUNT
+    ================================================== -->
+
+    <div class="menu-section">
+        Account
+    </div>
+
+
+    {% if user %}
 
         <a href="/dashboard">
             Dashboard
         </a>
 
-        <a href="/reviews">
-            Reviews
+
+        <a href="/logout">
+            Logout
         </a>
 
-        <a href="/documentation">
-            Documentation
+    {% else %}
+
+        <a
+            href="/login"
+            class="discord-login"
+        >
+            Login with Discord
         </a>
 
-        <a href="/support">
-            Support
-        </a>
-
-        <a href="/advertise">
-            Advertisement
-        </a>
-
-
-        {% if is_admin(user) %}
-
-            <a href="/admin/advertisements">
-                Admin Advertisement
-            </a>
-
-        {% endif %}
-
-    </div>
-
-
-    <!-- LEGAL -->
-
-    <div class="menu-section">
-
-        <a href="/terms">
-            Terms
-        </a>
-
-        <a href="/privacy">
-            Privacy
-        </a>
-
-        <a href="/data">
-            Data
-        </a>
-
-        <a href="/cookies">
-            Cookies
-        </a>
-
-    </div>
-
-
-    <!-- ACCOUNT -->
-
-    <div class="menu-section">
-
-        {% if user %}
-
-            <a href="/dashboard">
-                Account Dashboard
-            </a>
-
-            <a href="/logout">
-                Logout
-            </a>
-
-        {% else %}
-
-            <a
-                class="discord-login"
-                href="/login"
-            >
-                Login with Discord
-            </a>
-
-        {% endif %}
-
-    </div>
+    {% endif %}
 
 </nav>
 
@@ -387,9 +412,11 @@
                         7 days — €0.99
                     </option>
 
+
                     <option value="14">
                         14 days — €1.50
                     </option>
+
 
                     <option value="30">
                         30 days — €2.50
@@ -461,7 +488,9 @@
 
                     <!-- 14 DAYS -->
 
-                    <div class="advertise-price-card advertise-price-featured">
+                    <div
+                        class="advertise-price-card advertise-price-featured"
+                    >
 
                         <span class="advertise-price-popular">
                             POPULAR
@@ -652,9 +681,11 @@
                 Terms
             </a>
 
+
             <a href="/privacy">
                 Privacy
             </a>
+
 
             <a href="/cookies">
                 Cookie Policy
@@ -698,3 +729,4 @@
 </body>
 
 </html>
+

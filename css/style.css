@@ -1573,3 +1573,361 @@ html.misuki-page-ready
         font-size: 18px;
     }
 }
+/* =========================================================
+   MISUKI — SIDE MENU
+========================================================= */
+
+.hamburger {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    margin: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 5px;
+
+    border: 0;
+    border-radius: 10px;
+
+    background: rgba(255, 255, 255, 0.04);
+    color: #ffffff;
+
+    cursor: pointer;
+    position: relative;
+    z-index: 10002;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.hamburger:hover {
+    background: rgba(255, 255, 255, 0.09);
+    transform: translateY(-1px);
+}
+
+.hamburger span {
+    display: block;
+
+    width: 23px;
+    height: 2px;
+
+    flex-shrink: 0;
+
+    border-radius: 999px;
+
+    background: #ffffff;
+}
+
+body.menu-open .hamburger {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+
+/* =========================================================
+   MENU OVERLAY
+========================================================= */
+
+.overlay {
+    position: fixed;
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.60);
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    transition:
+        opacity 0.3s ease,
+        visibility 0.3s ease;
+
+    z-index: 9998;
+}
+
+.overlay.show,
+.overlay.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+
+/* =========================================================
+   SIDE MENU
+========================================================= */
+
+.menu {
+    position: fixed;
+
+    top: 0;
+    right: 0;
+
+    width: min(360px, 88vw);
+    height: 100vh;
+    height: 100dvh;
+
+    display: flex;
+    flex-direction: column;
+
+    padding: 0 20px 25px;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(14, 20, 34, 0.98),
+            rgba(6, 9, 17, 0.99)
+        );
+
+    border-left:
+        1px solid
+        rgba(255, 255, 255, 0.08);
+
+    box-shadow:
+        -20px 0 60px
+        rgba(0, 0, 0, 0.35);
+
+    backdrop-filter: blur(22px);
+
+    transform: translateX(100%);
+
+    visibility: hidden;
+    pointer-events: none;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    z-index: 10000;
+
+    transition:
+        transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+        visibility 0.28s ease;
+}
+
+.menu.open,
+.menu.active {
+    transform: translateX(0);
+
+    visibility: visible;
+    pointer-events: auto;
+}
+
+
+/* =========================================================
+   MENU HEADER
+========================================================= */
+
+.menu-header {
+    min-height: 82px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    flex-shrink: 0;
+}
+
+.menu-title {
+    color: #ffffff;
+
+    font-size: 22px;
+    line-height: 1.2;
+
+    font-weight: 600;
+}
+
+.menu-close {
+    width: 40px;
+    height: 40px;
+
+    padding: 0;
+    margin: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 0;
+    border-radius: 10px;
+
+    background: rgba(255, 255, 255, 0.06);
+
+    color: #ffffff;
+
+    font-family: inherit;
+    font-size: 27px;
+    line-height: 1;
+    font-weight: 400;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.menu-close:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: rotate(90deg);
+}
+
+
+/* =========================================================
+   MENU SECTION TITLES
+========================================================= */
+
+.menu-section {
+    margin-top: 18px;
+    margin-bottom: 7px;
+
+    padding: 0 14px;
+
+    color: #727d92;
+
+    font-size: 11px;
+    line-height: 1.4;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+
+/* =========================================================
+   MENU LINKS
+========================================================= */
+
+.menu a {
+    display: block;
+
+    margin: 3px 0;
+    padding: 11px 14px;
+
+    border-radius: 10px;
+
+    color: #dce2ef;
+
+    font-size: 15px;
+    line-height: 1.4;
+
+    font-weight: 400;
+
+    text-decoration: none;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.menu a:hover {
+    background: rgba(100, 140, 255, 0.10);
+
+    color: #ffffff;
+
+    transform: translateX(4px);
+}
+
+.menu a:active {
+    transform: translateX(2px);
+}
+
+
+/* =========================================================
+   DISCORD LOGIN
+========================================================= */
+
+.menu a.discord-login {
+    margin-top: 8px;
+
+    background:
+        rgba(88, 101, 242, 0.14);
+
+    color: #aeb8ff;
+}
+
+.menu a.discord-login:hover {
+    background:
+        rgba(88, 101, 242, 0.24);
+
+    color: #ffffff;
+}
+
+
+/* =========================================================
+   MENU SCROLLBAR
+========================================================= */
+
+.menu::-webkit-scrollbar {
+    width: 6px;
+}
+
+.menu::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.menu::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+}
+
+.menu::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.20);
+}
+
+
+/* =========================================================
+   BODY WHEN MENU IS OPEN
+========================================================= */
+
+body.menu-open {
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   MOBILE MENU
+========================================================= */
+
+@media (max-width: 600px) {
+
+    .menu {
+        width: min(340px, 90vw);
+        padding: 0 20px 24px;
+    }
+
+    .menu-header {
+        min-height: 72px;
+    }
+
+    .menu-title {
+        font-size: 21px;
+    }
+
+    .menu a {
+        font-size: 15px;
+    }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .menu,
+    .overlay,
+    .hamburger,
+    .menu-close,
+    .menu a {
+        transition: none !important;
+    }
+}
