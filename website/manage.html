@@ -106,6 +106,10 @@
         </div>
 
 
+        <!-- =================================================
+             CLOSE BUTTON
+        ================================================== -->
+
         <button
             class="menu-close"
             id="menuClose"
@@ -249,10 +253,13 @@
 
 
         <!-- =================================================
-             BACK
+             BACK TO DASHBOARD
         ================================================== -->
 
-        <a href="/dashboard">
+        <a
+            class="manage-back"
+            href="/dashboard"
+        >
             ← Back to Dashboard
         </a>
 
@@ -261,17 +268,14 @@
              SERVER CARD
         ================================================== -->
 
-        <div
-            class="card"
-            style="margin-top:25px;"
-        >
+        <div class="card manage-card">
 
 
             <!-- =================================================
                  SERVER HEADER
             ================================================== -->
 
-            <div class="server-top">
+            <div class="manage-server-header">
 
 
                 {% if guild.icon %}
@@ -285,15 +289,17 @@
                 {% else %}
 
                     <div class="server-icon-placeholder">
+
                         {{ guild.name[0] }}
+
                     </div>
 
                 {% endif %}
 
 
-                <div>
+                <div class="manage-server-info">
 
-                    <h1 style="margin:0;">
+                    <h1>
                         {{ guild.name }}
                     </h1>
 
@@ -312,113 +318,127 @@
                  LICENSE
             ================================================== -->
 
-            <h2 style="margin-top:35px;">
-                🔐 License
-            </h2>
+            <div class="manage-license">
 
 
-            {% if license_data %}
-
-                {% set status = license_data[2] %}
-
-
-                <p>
-
-                    Status:
+                <h2>
+                    🔐 License
+                </h2>
 
 
-                    {% if license_active %}
+                {% if license_data %}
 
-                        <span class="status-active">
-                            🟢 Active
-                        </span>
+                    {% set status = license_data[2] %}
 
 
-                    {% elif status == "expired" %}
+                    <!-- =================================================
+                         STATUS
+                    ================================================== -->
 
-                        <span class="status-expired">
-                            🔴 Expired
-                        </span>
+                    <p>
+
+                        Status:
 
 
-                    {% elif status == "revoked" %}
+                        {% if license_active %}
 
-                        <span class="status-revoked">
-                            ⛔ Revoked
-                        </span>
+                            <span class="status-active">
+                                🟢 Active
+                            </span>
 
+
+                        {% elif status == "expired" %}
+
+                            <span class="status-expired">
+                                🔴 Expired
+                            </span>
+
+
+                        {% elif status == "revoked" %}
+
+                            <span class="status-revoked">
+                                ⛔ Revoked
+                            </span>
+
+
+                        {% else %}
+
+                            <span>
+                                ⚪ {{ status }}
+                            </span>
+
+                        {% endif %}
+
+                    </p>
+
+
+                    <!-- =================================================
+                         LICENSE KEY
+                    ================================================== -->
+
+                    <p>
+
+                        <strong>
+                            License Key
+                        </strong>
+
+                    </p>
+
+
+                    <div class="license-key">
+
+                        {{ license_data[1] }}
+
+                    </div>
+
+
+                    <!-- =================================================
+                         EXPIRATION
+                    ================================================== -->
+
+                    <p class="manage-expiration">
+
+                        <strong>
+                            Expires
+                        </strong>
+
+                    </p>
+
+
+                    {% if license_data[3] %}
+
+                        <p>
+                            {{ license_data[3] }}
+                        </p>
 
                     {% else %}
 
-                        <span>
-                            ⚪ {{ status }}
-                        </span>
+                        <p>
+                            Never
+                        </p>
 
                     {% endif %}
 
-                </p>
-
-
-                <!-- =================================================
-                     LICENSE KEY
-                ================================================== -->
-
-                <p>
-
-                    <strong>
-                        License Key
-                    </strong>
-
-                </p>
-
-
-                <div class="license-key">
-
-                    {{ license_data[1] }}
-
-                </div>
-
-
-                <!-- =================================================
-                     EXPIRATION
-                ================================================== -->
-
-                <p style="margin-top:20px;">
-
-                    <strong>
-                        Expires
-                    </strong>
-
-                </p>
-
-
-                {% if license_data[3] %}
-
-                    <p>
-                        {{ license_data[3] }}
-                    </p>
 
                 {% else %}
 
-                    <p>
-                        Never
-                    </p>
+
+                    <!-- =================================================
+                         NO LICENSE
+                    ================================================== -->
+
+                    <div class="empty">
+
+                        🔒 This server does not
+                        have a Misuki license.
+
+                    </div>
+
 
                 {% endif %}
 
 
-            {% else %}
-
-
-                <div class="empty">
-
-                    🔒 This server does not
-                    have a Misuki license.
-
-                </div>
-
-
-            {% endif %}
+            </div>
 
 
         </div>
@@ -483,6 +503,7 @@
 
     <div id="misukiCookieContent">
 
+
         <h3>
             🍪 We use cookies
         </h3>
@@ -495,6 +516,7 @@
 
 
         <div id="misukiCookieButtons">
+
 
             <button
                 type="button"
@@ -519,10 +541,12 @@
                 Deny
             </button>
 
+
         </div>
 
 
         <div id="misukiCookieLegal">
+
 
             <a href="/terms">
                 Terms
@@ -538,7 +562,9 @@
                 Cookie Policy
             </a>
 
+
         </div>
+
 
     </div>
 
