@@ -1,4 +1,3 @@
-
 import os
 import random
 import secrets
@@ -1077,11 +1076,21 @@ def get_user():
 # GET USER GUILDS
 # =========================================================
 
-def get_user_guilds():
+def get_user_guilds(access_token=None):
 
-    access_token = session.get(
-        "access_token"
-    )
+    # When called normally during a Flask request,
+    # keep the existing behaviour and read the token
+    # from the Flask session.
+    #
+    # When called from a background/threaded task,
+    # receive the access token directly so that the
+    # Flask request context is not required.
+
+    if access_token is None:
+
+        access_token = session.get(
+            "access_token"
+        )
 
     if not access_token:
 
@@ -2063,6 +2072,30 @@ def dashboard():
         )
 
     # -----------------------------------------------------
+    # GET ACCESS TOKEN BEFORE STARTING THREADS
+    # -----------------------------------------------------
+    #
+    # Flask's session is request-context local.
+    # The ThreadPoolExecutor workers cannot access it.
+    # Therefore, capture the token while still inside the
+    # Flask request and pass it explicitly to the worker.
+    #
+
+    access_token = session.get(
+        "access_token"
+    )
+
+    if not access_token:
+
+        session[
+            "next_url"
+        ] = "/dashboard"
+
+        return redirect(
+            "/login"
+        )
+
+    # -----------------------------------------------------
     # PARALLEL EXTERNAL REQUESTS
     # -----------------------------------------------------
 
@@ -2071,7 +2104,8 @@ def dashboard():
     ) as executor:
 
         user_guilds_future = executor.submit(
-            get_user_guilds
+            get_user_guilds,
+            access_token
         )
 
         bot_guilds_future = executor.submit(
@@ -2808,4 +2842,3 @@ if __name__ == "__main__":
         debug=False
 
     )
-
