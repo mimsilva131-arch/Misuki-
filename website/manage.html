@@ -64,7 +64,6 @@
         class="hamburger"
         id="hamburger"
         type="button"
-       
         aria-label="Open menu"
         aria-controls="menu"
         aria-expanded="false"
@@ -86,7 +85,6 @@
 <div
     class="overlay"
     id="overlay"
-   
 ></div>
 
 
@@ -108,15 +106,10 @@
         </div>
 
 
-        <!-- =================================================
-             CLOSE BUTTON
-        ================================================== -->
-
         <button
             class="menu-close"
             id="menuClose"
             type="button"
-           
             aria-label="Close menu"
         >
             ×
@@ -134,26 +127,17 @@
     </div>
 
 
-    <a
-        href="/"
-       
-    >
+    <a href="/">
         Home
     </a>
 
 
-    <a
-        href="/dashboard"
-       
-    >
+    <a href="/dashboard">
         Dashboard
     </a>
 
 
-    <a
-        href="/reviews"
-       
-    >
+    <a href="/reviews">
         Reviews
     </a>
 
@@ -167,36 +151,27 @@
     </div>
 
 
-    <a
-        href="/documentation"
-       
-    >
+    <a href="/documentation">
         Documentation
     </a>
 
 
-    <a
-        href="/support"
-       
-    >
+    <a href="/support">
         Support
     </a>
 
 
-    <a
-        href="/advertise"
-       
-    >
+    <a href="/advertise">
         Advertisement
     </a>
 
+
     {% if is_admin(user) %}
-        <a
-            href="/admin/advertise"
-           
-        >
+
+        <a href="/admin/advertise">
             Advertisement Admin
         </a>
+
     {% endif %}
 
 
@@ -209,34 +184,22 @@
     </div>
 
 
-    <a
-        href="/terms"
-       
-    >
+    <a href="/terms">
         Terms
     </a>
 
 
-    <a
-        href="/privacy"
-       
-    >
+    <a href="/privacy">
         Privacy
     </a>
 
 
-    <a
-        href="/data"
-       
-    >
+    <a href="/data">
         Data
     </a>
 
 
-    <a
-        href="/cookies"
-       
-    >
+    <a href="/cookies">
         Cookies
     </a>
 
@@ -252,18 +215,12 @@
 
     {% if user %}
 
-        <a
-            href="/dashboard"
-           
-        >
+        <a href="/dashboard">
             Dashboard
         </a>
 
 
-        <a
-            href="/logout"
-           
-        >
+        <a href="/logout">
             Logout
         </a>
 
@@ -272,7 +229,6 @@
         <a
             href="/login"
             class="discord-login"
-           
         >
             Login with Discord
         </a>
@@ -292,14 +248,18 @@
     <div class="container">
 
 
-        <!-- BACK -->
+        <!-- =================================================
+             BACK
+        ================================================== -->
 
         <a href="/dashboard">
             ← Back to Dashboard
         </a>
 
 
-        <!-- SERVER CARD -->
+        <!-- =================================================
+             SERVER CARD
+        ================================================== -->
 
         <div
             class="card"
@@ -307,7 +267,9 @@
         >
 
 
-            <!-- SERVER HEADER -->
+            <!-- =================================================
+                 SERVER HEADER
+            ================================================== -->
 
             <div class="server-top">
 
@@ -322,9 +284,7 @@
 
                 {% else %}
 
-                    <div
-                        class="server-icon-placeholder"
-                    >
+                    <div class="server-icon-placeholder">
                         {{ guild.name[0] }}
                     </div>
 
@@ -399,7 +359,9 @@
                 </p>
 
 
-                <!-- LICENSE KEY -->
+                <!-- =================================================
+                     LICENSE KEY
+                ================================================== -->
 
                 <p>
 
@@ -417,7 +379,9 @@
                 </div>
 
 
-                <!-- EXPIRATION -->
+                <!-- =================================================
+                     EXPIRATION
+                ================================================== -->
 
                 <p style="margin-top:20px;">
 
@@ -510,7 +474,12 @@
      COOKIE BANNER
 ====================================================== -->
 
-<div id="misukiCookieBanner" role="dialog" aria-label="Cookie consent" aria-live="polite">
+<div
+    id="misukiCookieBanner"
+    role="dialog"
+    aria-label="Cookie consent"
+    aria-live="polite"
+>
 
     <div id="misukiCookieContent">
 
@@ -518,25 +487,40 @@
             🍪 We use cookies
         </h3>
 
+
         <p>
-            Misuki uses cookies to improve your experience and keep the website working correctly.
+            Misuki uses cookies to improve your experience
+            and keep the website working correctly.
         </p>
+
 
         <div id="misukiCookieButtons">
 
-            <button type="button" id="misukiAccept">
+            <button
+                type="button"
+                id="misukiAccept"
+            >
                 Accept All
             </button>
 
-            <button type="button" id="misukiEssential">
+
+            <button
+                type="button"
+                id="misukiEssential"
+            >
                 Essential Only
             </button>
 
-            <button type="button" id="misukiDeny">
+
+            <button
+                type="button"
+                id="misukiDeny"
+            >
                 Deny
             </button>
 
         </div>
+
 
         <div id="misukiCookieLegal">
 
@@ -544,9 +528,11 @@
                 Terms
             </a>
 
+
             <a href="/privacy">
                 Privacy
             </a>
+
 
             <a href="/cookies">
                 Cookie Policy
@@ -563,365 +549,29 @@
      JAVASCRIPT
 ====================================================== -->
 
-<script src="/static/js/stars.js?v=3" defer></script>
-<script src="/static/js/mouse-trail.js?v=3" defer></script>
-<script src="/static/js/menu.js?v=2" defer></script>
-<script src="/static/js/cookies.js?v=3" defer></script>
+<script
+    src="/static/js/stars.js?v=3"
+    defer
+></script>
 
 
-/* =====================================================
-   COOKIE INIT
-====================================================== */
+<script
+    src="/static/js/mouse-trail.js?v=3"
+    defer
+></script>
 
-if (
-    !localStorage.getItem(
-        "misuki_cookie_consent"
-    )
-) {
 
-    const cookieBanner =
-        document.getElementById(
-            "cookieBanner"
-        );
+<script
+    src="/static/js/menu.js?v=2"
+    defer
+></script>
 
-    if (cookieBanner) {
-
-        cookieBanner.style.display =
-            "block";
-
-    }
-
-}
-
-
-/* =====================================================
-   OPEN MENU
-====================================================== */
-
-function openMenu() {
-
-    const menu =
-        document.getElementById(
-            "menu"
-        );
-
-    const overlay =
-        document.getElementById(
-            "overlay"
-        );
-
-    const hamburger =
-        document.getElementById(
-            "hamburger"
-        );
-
-
-    if (
-        !menu ||
-        !overlay ||
-        !hamburger
-    ) {
-
-        return;
-
-    }
-
-
-    /* =================================================
-       OPEN MENU
-    ================================================== */
-
-    menu.classList.add(
-        "open"
-    );
-
-    menu.classList.add(
-        "active"
-    );
-
-
-    overlay.classList.add(
-        "show"
-    );
-
-    overlay.classList.add(
-        "active"
-    );
-
-
-    /* =================================================
-       HIDE HAMBURGER
-    ================================================== */
-
-    hamburger.classList.add(
-        "hidden"
-    );
-
-
-    /* =================================================
-       BLOCK PAGE SCROLL
-    ================================================== */
-
-    document.body.classList.add(
-        "menu-open"
-    );
-
-
-    /* =================================================
-       ACCESSIBILITY
-    ================================================== */
-
-    hamburger.setAttribute(
-        "aria-expanded",
-        "true"
-    );
-
-    hamburger.setAttribute(
-        "aria-hidden",
-        "true"
-    );
-
-    menu.setAttribute(
-        "aria-hidden",
-        "false"
-    );
-
-}
-
-
-/* =====================================================
-   CLOSE MENU
-====================================================== */
-
-function closeMenu() {
-
-    const menu =
-        document.getElementById(
-            "menu"
-        );
-
-    const overlay =
-        document.getElementById(
-            "overlay"
-        );
-
-    const hamburger =
-        document.getElementById(
-            "hamburger"
-        );
-
-
-    if (
-        !menu ||
-        !overlay ||
-        !hamburger
-    ) {
-
-        return;
-
-    }
-
-
-    /* =================================================
-       CLOSE MENU
-    ================================================== */
-
-    menu.classList.remove(
-        "open"
-    );
-
-    menu.classList.remove(
-        "active"
-    );
-
-
-    overlay.classList.remove(
-        "show"
-    );
-
-    overlay.classList.remove(
-        "active"
-    );
-
-
-    /* =================================================
-       SHOW HAMBURGER
-    ================================================== */
-
-    hamburger.classList.remove(
-        "hidden"
-    );
-
-
-    /* =================================================
-       UNBLOCK PAGE SCROLL
-    ================================================== */
-
-    document.body.classList.remove(
-        "menu-open"
-    );
-
-
-    /* =================================================
-       ACCESSIBILITY
-    ================================================== */
-
-    hamburger.setAttribute(
-        "aria-expanded",
-        "false"
-    );
-
-    hamburger.removeAttribute(
-        "aria-hidden"
-    );
-
-    menu.setAttribute(
-        "aria-hidden",
-        "true"
-    );
-
-}
-
-
-/* =====================================================
-   ESCAPE
-====================================================== */
-
-document.addEventListener(
-    "keydown",
-    function (event) {
-
-        if (
-            event.key === "Escape"
-        ) {
-
-            closeMenu();
-
-        }
-
-    }
-);
-
-
-/* =====================================================
-   INITIAL STATE
-====================================================== */
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
-
-        const menu =
-            document.getElementById(
-                "menu"
-            );
-
-        const hamburger =
-            document.getElementById(
-                "hamburger"
-            );
-
-
-        if (
-            menu &&
-            hamburger
-        ) {
-
-            menu.classList.remove(
-                "open"
-            );
-
-            menu.classList.remove(
-                "active"
-            );
-
-            hamburger.classList.remove(
-                "hidden"
-            );
-
-            hamburger.setAttribute(
-                "aria-expanded",
-                "false"
-            );
-
-            menu.setAttribute(
-                "aria-hidden",
-                "true"
-            );
-
-        }
-
-    }
-);
-
-
-</script>
-
-
-
-<div id="misukiCookieBanner">
-
-    <div id="misukiCookieContent">
-
-        <h3>
-            🍪 We use cookies
-        </h3>
-
-        <p>
-            Misuki uses cookies to improve your
-            experience and keep the website working
-            correctly.
-        </p>
-
-        <div id="misukiCookieButtons">
-
-            <button
-                type="button"
-                id="misukiAccept"
-            >
-                Accept All
-            </button>
-
-            <button
-                type="button"
-                id="misukiEssential"
-            >
-                Essential Only
-            </button>
-
-            <button
-                type="button"
-                id="misukiDeny"
-            >
-                Deny
-            </button>
-
-        </div>
-
-        <div id="misukiCookieLegal">
-
-            <a href="/terms">
-                Terms
-            </a>
-
-            <a href="/privacy">
-                Privacy
-            </a>
-
-            <a href="/cookies">
-                Cookie Policy
-            </a>
-
-        </div>
-
-    </div>
-
-</div>
 
 <script
     src="/static/js/cookies.js?v=3"
     defer
 ></script>
+
 
 </body>
 
