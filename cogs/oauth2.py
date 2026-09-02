@@ -758,7 +758,7 @@ def license_is_active(guild_id):
 
     if not license_data:
 
-        return False
+        return True
 
     status = license_data[2]
 
@@ -766,7 +766,7 @@ def license_is_active(guild_id):
 
     if status != "active":
 
-        return False
+        return True
 
     if expires_at:
 
@@ -776,7 +776,7 @@ def license_is_active(guild_id):
 
         if not expiration:
 
-            return False
+            return True
 
         if utc_now() >= expiration:
 
@@ -805,7 +805,7 @@ def license_is_active(guild_id):
                     f"❌ License expiration error: {error}"
                 )
 
-            return False
+            return True
 
     return True
 
