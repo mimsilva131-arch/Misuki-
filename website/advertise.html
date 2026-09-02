@@ -1,22 +1,70 @@
 <!DOCTYPE html>
 
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-<title>Advertisement — Misuki</title>
+    <title>Advertisement — Misuki</title>
 
-<link rel="stylesheet" href="/css/stars.css?v=3">
-<link rel="stylesheet" href="/static/css/style.css?v=16">
-<link rel="stylesheet" href="/static/css/cookies.css?v=3">
-<link rel="stylesheet" href="/static/css/mouse-trail.css?v=3">
-<link rel="stylesheet" href="/static/css/advertise.css?v=3">
-<link rel="stylesheet" href="/static/css/bottom-nav.css?v=1">
+    <link
+        rel="icon"
+        type="image/png"
+        href="/assets/images/favicon.png?v=3"
+    >
 
+    <link
+        rel="shortcut icon"
+        type="image/png"
+        href="/assets/images/favicon.png?v=3"
+    >
+
+    <!-- STYLES -->
+
+    <link
+        rel="stylesheet"
+        href="/css/stars.css?v=3"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/static/css/style.css?v=16"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/static/css/cookies.css?v=3"
+    >
+
+    <!-- CORRECT MENU CSS -->
+    <link
+        rel="stylesheet"
+        href="/static/css/menu.css?v=2"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/static/css/mouse-trail.css?v=3"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/static/css/advertise.css?v=3"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/static/css/bottom-nav.css?v=1"
+    >
 
 </head>
+
 
 <body>
 
@@ -25,7 +73,10 @@
      STARS
 ====================================================== -->
 
-<div id="stars" aria-hidden="true"></div>
+<div
+    id="stars"
+    aria-hidden="true"
+></div>
 
 
 <!-- =====================================================
@@ -34,9 +85,13 @@
 
 <header class="container">
 
-    <a class="logo" href="/">
+    <a
+        class="logo"
+        href="/"
+    >
         Misuki<span>.</span>
     </a>
+
 
     <button
         class="hamburger"
@@ -46,9 +101,11 @@
         aria-controls="menu"
         aria-expanded="false"
     >
+
         <span></span>
         <span></span>
         <span></span>
+
     </button>
 
 </header>
@@ -58,7 +115,10 @@
      OVERLAY
 ====================================================== -->
 
-<div class="overlay" id="overlay"></div>
+<div
+    class="overlay"
+    id="overlay"
+></div>
 
 
 <!-- =====================================================
@@ -77,6 +137,7 @@
             Menu
         </div>
 
+
         <button
             class="menu-close"
             id="menuClose"
@@ -88,6 +149,8 @@
 
     </div>
 
+
+    <!-- MAIN -->
 
     <div class="menu-section">
 
@@ -115,14 +178,19 @@
             Advertisement
         </a>
 
+
         {% if is_admin(user) %}
+
             <a href="/admin/advertisements">
                 Admin Advertisement
             </a>
+
         {% endif %}
 
     </div>
 
+
+    <!-- LEGAL -->
 
     <div class="menu-section">
 
@@ -144,6 +212,8 @@
 
     </div>
 
+
+    <!-- ACCOUNT -->
 
     <div class="menu-section">
 
@@ -179,15 +249,22 @@
 
 <main class="container advertise-page">
 
+
+    <!-- =================================================
+         HERO
+    ================================================== -->
+
     <section class="advertise-hero">
 
         <span class="advertise-eyebrow">
             MISUKI ADVERTISEMENT
         </span>
 
+
         <h1>
             Advertise your server
         </h1>
+
 
         <p>
             Promote your Discord server to the Misuki community.
@@ -208,11 +285,15 @@
             action="/advertise"
         >
 
+
+            <!-- TITLE -->
+
             <div class="advertise-field">
 
                 <label for="title">
                     Advertisement title
                 </label>
+
 
                 <input
                     id="title"
@@ -226,11 +307,14 @@
             </div>
 
 
+            <!-- DESCRIPTION -->
+
             <div class="advertise-field">
 
                 <label for="description">
                     Description
                 </label>
+
 
                 <textarea
                     id="description"
@@ -244,11 +328,14 @@
             </div>
 
 
+            <!-- IMAGE -->
+
             <div class="advertise-field">
 
                 <label for="image_url">
                     Image URL
                 </label>
+
 
                 <input
                     id="image_url"
@@ -261,11 +348,14 @@
             </div>
 
 
+            <!-- DESTINATION -->
+
             <div class="advertise-field">
 
                 <label for="target_url">
                     Destination URL
                 </label>
+
 
                 <input
                     id="target_url"
@@ -278,11 +368,14 @@
             </div>
 
 
+            <!-- DURATION -->
+
             <div class="advertise-field">
 
                 <label for="duration">
                     Advertisement duration
                 </label>
+
 
                 <select
                     id="duration"
@@ -313,6 +406,7 @@
 
             <div class="advertise-pricing">
 
+
                 <div class="advertise-pricing-header">
 
                     <div>
@@ -321,11 +415,13 @@
                             SPECIAL OFFER
                         </span>
 
+
                         <h3>
                             Promotional prices
                         </h3>
 
                     </div>
+
 
                     <span class="advertise-promotion">
                         SAVE MORE
@@ -345,13 +441,16 @@
                             7 DAYS
                         </span>
 
+
                         <div class="advertise-price-old">
                             €1.00
                         </div>
 
+
                         <div class="advertise-price-current">
                             €0.99
                         </div>
+
 
                         <span class="advertise-price-save">
                             Save €0.01
@@ -368,17 +467,21 @@
                             POPULAR
                         </span>
 
+
                         <span class="advertise-price-days">
                             14 DAYS
                         </span>
+
 
                         <div class="advertise-price-old">
                             €2.00
                         </div>
 
+
                         <div class="advertise-price-current">
                             €1.50
                         </div>
+
 
                         <span class="advertise-price-save">
                             Save €0.50
@@ -395,13 +498,16 @@
                             30 DAYS
                         </span>
 
+
                         <div class="advertise-price-old">
                             €3.00
                         </div>
 
+
                         <div class="advertise-price-current">
                             €2.50
                         </div>
+
 
                         <span class="advertise-price-save">
                             Save €0.50
@@ -429,11 +535,13 @@
 
                 </div>
 
+
                 <div class="advertise-payment-content">
 
                     <strong>
                         Secure payment with PayPal
                     </strong>
+
 
                     <span>
                         Your payment will be securely processed through PayPal.
@@ -476,6 +584,7 @@
 
     {% include "bottom-nav.html" %}
 
+
     <div class="footer-copy">
         © 2026 Misuki. All rights reserved.
     </div>
@@ -496,15 +605,20 @@
 
     <div id="misukiCookieContent">
 
+
         <h3>
             🍪 We use cookies
         </h3>
 
+
         <p>
-            Misuki uses cookies to improve your experience and keep the website working correctly.
+            Misuki uses cookies to improve your experience
+            and keep the website working correctly.
         </p>
 
+
         <div id="misukiCookieButtons">
+
 
             <button
                 type="button"
@@ -513,12 +627,14 @@
                 Accept All
             </button>
 
+
             <button
                 type="button"
                 id="misukiEssential"
             >
                 Essential Only
             </button>
+
 
             <button
                 type="button"
@@ -555,11 +671,30 @@
      SCRIPTS
 ====================================================== -->
 
-<script src="/static/js/stars.js?v=3" defer></script>
-<script src="/static/js/mouse-trail.js?v=3" defer></script>
-<script src="/static/js/menu.js?v=2" defer></script>
-<script src="/static/js/cookies.js?v=3" defer></script>
+<script
+    src="/static/js/stars.js?v=3"
+    defer
+></script>
+
+
+<script
+    src="/static/js/mouse-trail.js?v=3"
+    defer
+></script>
+
+
+<script
+    src="/static/js/menu.js?v=2"
+    defer
+></script>
+
+
+<script
+    src="/static/js/cookies.js?v=3"
+    defer
+></script>
 
 
 </body>
+
 </html>
