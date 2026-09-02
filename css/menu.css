@@ -1,12 +1,6 @@
 /* ========================================================
-   MISUKI — MENU
-   SIDE MENU
+   MISUKI — SIDE MENU
    ======================================================== */
-
-
-/* =========================================================
-   HAMBURGER
-   ========================================================= */
 
 .hamburger {
     width: 44px;
@@ -27,53 +21,31 @@
     color: #ffffff;
 
     cursor: pointer;
-
     position: relative;
     z-index: 10002;
-
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
 
     transition:
         background 0.2s ease,
         transform 0.2s ease;
 }
 
-
 .hamburger:hover {
     background: rgba(255, 255, 255, 0.09);
     transform: translateY(-1px);
 }
 
-
-/* =========================================================
-   HAMBURGER BARS
-   ========================================================= */
-
 .hamburger span {
     display: block;
-
     width: 23px;
     height: 2px;
-
     flex-shrink: 0;
 
     border-radius: 999px;
-
     background: #ffffff;
 }
 
-
-/* =========================================================
-   HAMBURGER — MENU OPEN
-   ========================================================= */
-
 body.menu-open .hamburger {
     display: none !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
 }
 
 
@@ -98,7 +70,6 @@ body.menu-open .hamburger {
     z-index: 9998;
 }
 
-
 .overlay.show,
 .overlay.active {
     opacity: 1;
@@ -113,7 +84,6 @@ body.menu-open .hamburger {
 
 .menu {
     position: fixed;
-
     top: 0;
     right: 0;
 
@@ -121,10 +91,10 @@ body.menu-open .hamburger {
     height: 100vh;
     height: 100dvh;
 
-    padding: 28px 28px 32px;
-
     display: flex;
     flex-direction: column;
+
+    padding: 28px;
 
     background: linear-gradient(
         180deg,
@@ -139,40 +109,25 @@ body.menu-open .hamburger {
 
     transform: translateX(100%);
 
-    opacity: 1;
-
     visibility: hidden;
     pointer-events: none;
-
-    transition:
-        transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-        visibility 0.35s ease;
 
     overflow-y: auto;
     overflow-x: hidden;
 
     z-index: 10000;
+
+    transition:
+        transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        visibility 0.35s ease;
 }
-
-
-/* =========================================================
-   MENU OPEN
-   ========================================================= */
 
 .menu.open,
 .menu.active {
     transform: translateX(0);
-
-    opacity: 1;
-
     visibility: visible;
     pointer-events: auto;
 }
-
-
-/* =========================================================
-   BODY MENU OPEN
-   ========================================================= */
 
 body.menu-open {
     overflow: hidden;
@@ -188,15 +143,11 @@ body.menu-open {
     align-items: center;
     justify-content: space-between;
 
-    min-height: 40px;
-
-    margin-bottom: 18px;
-
-    padding-bottom: 18px;
+    padding-bottom: 20px;
+    margin-bottom: 4px;
 
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
-
 
 .menu-title {
     color: #ffffff;
@@ -209,7 +160,7 @@ body.menu-open {
 
 
 /* =========================================================
-   MENU CLOSE
+   CLOSE BUTTON
    ========================================================= */
 
 .menu-close {
@@ -235,14 +186,10 @@ body.menu-open {
 
     cursor: pointer;
 
-    position: relative;
-    z-index: 10003;
-
     transition:
         background 0.2s ease,
         transform 0.2s ease;
 }
-
 
 .menu-close:hover {
     background: rgba(255, 255, 255, 0.12);
@@ -251,26 +198,29 @@ body.menu-open {
 
 
 /* =========================================================
-   MENU SECTIONS
+   SECTION TITLES
    ========================================================= */
 
 .menu-section {
-    margin: 0;
-    padding: 14px 0;
+    margin-top: 22px;
+    margin-bottom: 7px;
 
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
+    padding: 0 14px;
 
+    color: #727d92;
 
-/* Remove divider from the last section */
+    font-size: 11px;
+    line-height: 1.4;
 
-.menu-section:last-child {
-    border-bottom: none;
+    font-weight: 700;
+
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 
 /* =========================================================
-   MENU LINKS
+   LINKS
    ========================================================= */
 
 .menu a {
@@ -279,7 +229,7 @@ body.menu-open {
     margin: 3px 0;
     padding: 11px 14px;
 
-    border-radius: 9px;
+    border-radius: 10px;
 
     color: #dce2ef;
 
@@ -296,62 +246,47 @@ body.menu-open {
         transform 0.2s ease;
 }
 
-
 .menu a:hover {
     background: rgba(100, 140, 255, 0.10);
-
     color: #ffffff;
-
-    font-weight: 400;
 
     transform: translateX(4px);
 }
 
 
 /* =========================================================
-   LOGIN
+   DISCORD LOGIN
    ========================================================= */
 
 .menu .discord-login {
-    margin-top: 3px;
+    margin-top: 8px;
 
     background: rgba(88, 101, 242, 0.14);
-
     color: #aeb8ff;
-
-    font-weight: 400;
 }
-
 
 .menu .discord-login:hover {
     background: rgba(88, 101, 242, 0.24);
-
     color: #ffffff;
-
-    font-weight: 400;
 }
 
 
 /* =========================================================
-   MENU SCROLLBAR
+   SCROLLBAR
    ========================================================= */
 
 .menu::-webkit-scrollbar {
     width: 6px;
 }
 
-
 .menu::-webkit-scrollbar-track {
     background: transparent;
 }
 
-
 .menu::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.12);
-
     border-radius: 999px;
 }
-
 
 .menu::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.20);
@@ -363,22 +298,17 @@ body.menu-open {
    ========================================================= */
 
 @media (max-width: 600px) {
-
     .menu {
         width: min(340px, 90vw);
-
-        padding: 24px 22px 28px;
+        padding: 24px;
     }
-
 
     .menu-title {
         font-size: 21px;
     }
 
-
     .menu a {
         font-size: 15px;
-        padding: 11px 13px;
     }
 }
 
@@ -388,9 +318,14 @@ body.menu-open {
    ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
-
     .menu,
     .overlay,
+    .hamburger,
+    .menu-close,
+    .menu a {
+        transition: none !important;
+    }
+}
     .hamburger,
     .menu-close,
     .menu a {
