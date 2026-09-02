@@ -317,25 +317,71 @@
         </div>
     </footer>
 
-    <!-- Cookie banner -->
-    <div class="cookie-banner" id="cookieBanner">
+    <!-- =====================================================
+     COOKIE BANNER
+====================================================== -->
 
-        <div class="cookie-content">
-            <strong>Cookies</strong>
+<div
+    id="misukiCookieBanner"
+    role="dialog"
+    aria-label="Cookie consent"
+    aria-live="polite"
+>
 
-            <p>
-                We use cookies to keep Misuki working properly
-                and improve your experience.
-            </p>
+    <div id="misukiCookieContent">
+
+        <h3>
+            🍪 We use cookies
+        </h3>
+
+        <p>
+            Misuki uses cookies to improve your experience and keep the website working correctly.
+        </p>
+
+        <div id="misukiCookieButtons">
+
+            <button
+                type="button"
+                id="misukiAccept"
+            >
+                Accept All
+            </button>
+
+            <button
+                type="button"
+                id="misukiEssential"
+            >
+                Essential Only
+            </button>
+
+            <button
+                type="button"
+                id="misukiDeny"
+            >
+                Deny
+            </button>
+
         </div>
 
-        <div class="cookie-actions">
-            <button id="acceptCookies" type="button">
-                Accept
-            </button>
+        <div id="misukiCookieLegal">
+
+            <a href="/terms">
+                Terms
+            </a>
+
+            <a href="/privacy">
+                Privacy
+            </a>
+
+            <a href="/cookies">
+                Cookie Policy
+            </a>
+
         </div>
 
     </div>
+
+</div>
 
     <!-- Scripts -->
     <script src="/static/js/stars.js?v=3" defer></script>
