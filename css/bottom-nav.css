@@ -1,34 +1,20 @@
 /* =========================================================
-   MISUKI - FIXED BOTTOM NAVIGATION
+   MISUKI - FOOTER NAVIGATION
    ========================================================= */
 
 .bottom-nav {
-    position: fixed;
-
-    left: 0;
-    right: 0;
-    bottom: 0;
-
     width: 100%;
+    max-width: var(--container);
+    margin: 0 auto;
 
     display: grid;
     grid-template-columns: 2fr 1fr 1fr 1fr;
 
-    gap: 45px;
+    gap: 50px;
 
-    padding: 28px 40px;
-
-    background: rgba(5, 7, 13, 0.96);
+    padding: 45px 20px;
 
     border-top: 1px solid var(--border);
-
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-
-    box-shadow:
-        0 -10px 35px rgba(0, 0, 0, 0.25);
-
-    z-index: 1000;
 }
 
 
@@ -43,7 +29,7 @@
 }
 
 .bottom-nav-column h3 {
-    margin: 0 0 12px;
+    margin: 0 0 15px;
 
     color: var(--text);
 
@@ -55,18 +41,18 @@
 }
 
 .bottom-nav-column a {
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 
     color: var(--text-muted);
 
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
 
     text-decoration: none;
 
     transition:
-        color 0.2s ease,
-        transform 0.2s ease;
+        color var(--transition),
+        transform var(--transition);
 }
 
 .bottom-nav-column a:hover {
@@ -82,12 +68,12 @@
 .bottom-nav-logo {
     color: var(--text);
 
-    font-size: 25px;
+    font-size: 27px;
     font-weight: 800;
 
     text-decoration: none;
 
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
 .bottom-nav-logo span {
@@ -101,8 +87,8 @@
 
     color: var(--text-muted);
 
-    font-size: 12px;
-    line-height: 1.5;
+    font-size: 13px;
+    line-height: 1.6;
 }
 
 
@@ -114,10 +100,7 @@
 
     .bottom-nav {
         grid-template-columns: repeat(2, 1fr);
-
-        gap: 25px 30px;
-
-        padding: 25px 25px;
+        gap: 35px 25px;
     }
 
     .bottom-nav-brand {
@@ -129,16 +112,15 @@
 @media (max-width: 450px) {
 
     .bottom-nav {
-        gap: 20px;
-
-        padding: 22px 18px;
+        padding: 35px 15px;
+        gap: 30px 18px;
     }
 
     .bottom-nav-logo {
-        font-size: 22px;
+        font-size: 24px;
     }
 
     .bottom-nav-column a {
-        font-size: 12px;
+        font-size: 13px;
     }
 }
