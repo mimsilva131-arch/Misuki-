@@ -1939,29 +1939,44 @@ body.menu-open {
 
 .misuki-language {
     position: relative;
+
     display: inline-flex;
     align-items: center;
     justify-content: center;
+
     flex-shrink: 0;
+
+    width: auto;
+    height: 44px;
+
+    margin: 0;
+    padding: 0;
+
     z-index: 10001;
-    margin-right: 6px;
 }
 
-/* BOTÃO TODO CLICÁVEL */
+
+/* =========================================================
+   BOTÃO
+   ========================================================= */
+
 .misuki-language-button {
     width: 68px;
     height: 44px;
+
     padding: 0 10px;
 
     display: flex;
     align-items: center;
     justify-content: center;
+
     gap: 6px;
 
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 10px;
 
     background: rgba(255, 255, 255, 0.04);
+
     color: #ffffff;
 
     font-family: inherit;
@@ -1969,6 +1984,8 @@ body.menu-open {
     font-weight: 500;
 
     cursor: pointer;
+
+    outline: none;
 
     position: relative;
     z-index: 10002;
@@ -1979,9 +1996,14 @@ body.menu-open {
         transform 0.2s ease;
 }
 
+
+/* TODO O BOTÃO É CLICÁVEL */
+
 .misuki-language-button:hover {
     background: rgba(255, 255, 255, 0.08);
+
     border-color: rgba(255, 255, 255, 0.14);
+
     transform: translateY(-1px);
 }
 
@@ -1989,51 +2011,89 @@ body.menu-open {
     transform: translateY(0);
 }
 
-/* Conteúdo do botão */
-.misuki-language-flag,
-.misuki-language-short,
-.misuki-language-arrow {
-    pointer-events: none;
-}
+
+/* =========================================================
+   BANDEIRA
+   ========================================================= */
 
 .misuki-language-flag {
     display: inline-flex;
+
     align-items: center;
     justify-content: center;
 
-    font-size: 17px;
-    line-height: 1;
-}
+    width: 20px;
+    height: 20px;
 
-.misuki-language-short {
+    font-size: 18px;
     line-height: 1;
-}
 
-.misuki-language-arrow {
-    font-size: 10px;
-    line-height: 1;
-    opacity: 0.7;
+    flex-shrink: 0;
+
+    pointer-events: none;
 }
 
 
 /* =========================================================
-   DROPDOWN — ENCOSTADO AO BOTÃO
+   ABREVIATURA
+   ========================================================= */
+
+.misuki-language-short {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    line-height: 1;
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   SETA
+   ========================================================= */
+
+.misuki-language-arrow {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 10px;
+    line-height: 1;
+
+    opacity: 0.7;
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   DROPDOWN
    ========================================================= */
 
 .misuki-language-dropdown {
     position: absolute;
 
-    /* fica imediatamente por baixo */
+    /*
+       Fica directamente por baixo
+       do botão de idioma.
+    */
     top: calc(100% + 6px);
 
-    /* alinhado à direita do botão */
+    /*
+       Alinha pela direita.
+    */
     right: 0;
 
     width: 180px;
+
     padding: 6px;
 
     display: flex;
     flex-direction: column;
+
     gap: 2px;
 
     background: linear-gradient(
@@ -2043,12 +2103,16 @@ body.menu-open {
     );
 
     border: 1px solid rgba(255, 255, 255, 0.08);
+
     border-radius: 12px;
 
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.5);
 
     opacity: 0;
+
     visibility: hidden;
+
     pointer-events: none;
 
     transform: translateY(-6px);
@@ -2061,10 +2125,16 @@ body.menu-open {
     z-index: 99999;
 }
 
+
+/* DROPDOWN ABERTO */
+
 .misuki-language-dropdown.show {
     opacity: 1;
+
     visibility: visible;
+
     pointer-events: auto;
+
     transform: translateY(0);
 }
 
@@ -2075,25 +2145,36 @@ body.menu-open {
 
 .misuki-language-option {
     width: 100%;
+
     min-height: 42px;
+
     padding: 10px 12px;
 
     display: flex;
+
     align-items: center;
+
     gap: 10px;
 
     border: 0;
+
     border-radius: 8px;
 
     background: transparent;
+
     color: #dce2ef;
 
     font-family: inherit;
+
     font-size: 14px;
+
     font-weight: 400;
 
     text-align: left;
+
     cursor: pointer;
+
+    outline: none;
 
     transition:
         background 0.2s ease,
@@ -2102,12 +2183,16 @@ body.menu-open {
 
 .misuki-language-option:hover {
     background: rgba(255, 255, 255, 0.07);
+
     color: #ffffff;
 }
 
 .misuki-language-option:active {
     background: rgba(255, 255, 255, 0.11);
 }
+
+
+/* BANDEIRAS DENTRO DO DROPDOWN */
 
 .misuki-language-option span {
     pointer-events: none;
@@ -2117,10 +2202,42 @@ body.menu-open {
     width: 22px;
 
     display: inline-flex;
+
     align-items: center;
     justify-content: center;
 
-    font-size: 17px;
+    font-size: 18px;
+
+    line-height: 1;
+}
+
+
+/* =========================================================
+   POSIÇÃO RELATIVAMENTE AO MENU
+   ========================================================= */
+
+/*
+   O selector fica colado ao botão ☰.
+   Funciona se o JavaScript inserir o selector
+   imediatamente antes do hamburger.
+*/
+
+.misuki-language + .hamburger {
+    margin-left: 6px;
+}
+
+.misuki-language + #hamburger {
+    margin-left: 6px;
+
+    position: relative;
+    z-index: 10001;
+}
+
+
+/* Caso o header use outro botão de menu */
+
+.misuki-language + .menu-button {
+    margin-left: 6px;
 }
 
 
@@ -2131,22 +2248,51 @@ body.menu-open {
 @media (max-width: 600px) {
 
     .misuki-language {
-        margin-right: 4px;
+        height: 44px;
     }
 
     .misuki-language-button {
         width: 44px;
+
         padding: 0 8px;
+
+        gap: 0;
     }
+
+    /*
+       No telemóvel escondemos apenas PT/EN/etc.
+       A bandeira CONTINUA visível.
+    */
 
     .misuki-language-short {
         display: none;
     }
 
+    .misuki-language-flag {
+        display: inline-flex;
+
+        width: 20px;
+        height: 20px;
+
+        font-size: 18px;
+    }
+
+    .misuki-language-arrow {
+        display: none;
+    }
+
     .misuki-language-dropdown {
         width: 165px;
+
         top: calc(100% + 6px);
+
         right: 0;
+    }
+
+    .misuki-language + .hamburger,
+    .misuki-language + #hamburger,
+    .misuki-language + .menu-button {
+        margin-left: 4px;
     }
 }
 
