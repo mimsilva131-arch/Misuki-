@@ -198,22 +198,6 @@
             fr: "Déconnexion"
         },
 
-        "Last updated: August 2026": {
-            pt: "Última atualização: agosto de 2026",
-            en: "Last updated: August 2026",
-            de: "Zuletzt aktualisiert: August 2026",
-            es: "Última actualización: agosto de 2026",
-            fr: "Dernière mise à jour : août 2026"
-        },
-
-        "🍪 We use cookies": {
-            pt: "🍪 Utilizamos cookies",
-            en: "🍪 We use cookies",
-            de: "🍪 Wir verwenden Cookies",
-            es: "🍪 Usamos cookies",
-            fr: "🍪 Nous utilisons des cookies"
-        },
-
         "Accept All": {
             pt: "Aceitar todos",
             en: "Accept All",
@@ -246,6 +230,22 @@
             fr: "Politique des cookies"
         },
 
+        "Last updated: August 2026": {
+            pt: "Última atualização: agosto de 2026",
+            en: "Last updated: August 2026",
+            de: "Zuletzt aktualisiert: August 2026",
+            es: "Última actualización: agosto de 2026",
+            fr: "Dernière mise à jour : août 2026"
+        },
+
+        "🍪 We use cookies": {
+            pt: "🍪 Utilizamos cookies",
+            en: "🍪 We use cookies",
+            de: "🍪 Wir verwenden Cookies",
+            es: "🍪 Usamos cookies",
+            fr: "🍪 Nous utilisons des cookies"
+        },
+
         "© 2026 Misuki. All rights reserved.": {
             pt: "© 2026 Misuki. Todos os direitos reservados.",
             en: "© 2026 Misuki. All rights reserved.",
@@ -258,7 +258,7 @@
 
 
     /* =====================================================
-       PAGE TRANSLATIONS
+       PAGE TITLES
     ===================================================== */
 
     const pageTranslations = {
@@ -306,28 +306,7 @@
 
 
     /* =====================================================
-       ORIGINAL TEXT STORAGE
-    ===================================================== */
-
-    const originalTexts = new WeakMap();
-
-
-    function rememberTextNode(node) {
-
-        if (!originalTexts.has(node)) {
-
-            originalTexts.set(
-                node,
-                node.nodeValue
-            );
-
-        }
-
-    }
-
-
-    /* =====================================================
-       GET CLEAN TEXT
+       TEXT NORMALIZATION
     ===================================================== */
 
     function cleanText(text) {
@@ -380,10 +359,37 @@
 
 
     /* =====================================================
+       ORIGINAL TEXT STORAGE
+    ===================================================== */
+
+    const originalTexts =
+        new WeakMap();
+
+
+    function rememberTextNode(node) {
+
+        if (!originalTexts.has(node)) {
+
+            originalTexts.set(
+                node,
+                node.nodeValue
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
        TRANSLATE TEXT NODES
     ===================================================== */
 
     function translateTextNodes(root) {
+
+        if (!root) {
+            return;
+        }
+
 
         const walker =
             document.createTreeWalker(
@@ -418,18 +424,20 @@
             }
 
 
-            /*
-             * Ignore scripts, styles and inputs.
-             */
-
             const tag =
                 parent.tagName.toLowerCase();
 
 
+            /*
+             * Never touch scripts, styles
+             * or other non-visible elements.
+             */
+
             if (
                 tag === "script" ||
                 tag === "style" ||
-                tag === "noscript"
+                tag === "noscript" ||
+                tag === "textarea"
             ) {
 
                 return;
@@ -440,19 +448,21 @@
             rememberTextNode(textNode);
 
 
-            const original =
-                cleanText(
-                    originalTexts.get(textNode)
-                );
+            const source =
+                originalTexts.get(textNode);
 
 
-            if (!original) {
+            const clean =
+                cleanText(source);
+
+
+            if (!clean) {
                 return;
             }
 
 
             const translation =
-                getTranslation(original);
+                getTranslation(clean);
 
 
             if (!translation) {
@@ -461,12 +471,8 @@
 
 
             /*
-             * Preserve whitespace around the text.
+             * Preserve whitespace.
              */
-
-            const source =
-                originalTexts.get(textNode);
-
 
             const leading =
                 source.match(/^\s*/)?.[0] || "";
@@ -487,44 +493,17 @@
 
 
     /* =====================================================
-       TRANSLATE DOCUMENT
+       TRANSLATE ATTRIBUTES
     ===================================================== */
 
-    function translateDocument() {
-
-        translateTextNodes(
-            document.body
-        );
-
+    function translateAttributes() {
 
         /*
-         * Translate title.
-         */
-
-        const title =
-            document.title;
-
-
-        const titleTranslation =
-            getTranslation(title);
-
-
-        if (titleTranslation) {
-
-            document.title =
-                titleTranslation;
-
-        }
-
-
-        /*
-         * Translate aria labels.
+         * aria-label
          */
 
         document
-            .querySelectorAll(
-                "[aria-label]"
-            )
+            .querySelectorAll("[aria-label]")
             .forEach(function (element) {
 
                 const value =
@@ -552,13 +531,43 @@
 
 
         /*
-         * Translate placeholders.
+         * title
          */
 
         document
-            .querySelectorAll(
-                "[placeholder]"
-            )
+            .querySelectorAll("[title]")
+            .forEach(function (element) {
+
+                const value =
+                    cleanText(
+                        element.getAttribute(
+                            "title"
+                        )
+                    );
+
+
+                const translation =
+                    getTranslation(value);
+
+
+                if (translation) {
+
+                    element.setAttribute(
+                        "title",
+                        translation
+                    );
+
+                }
+
+            });
+
+
+        /*
+         * placeholder
+         */
+
+        document
+            .querySelectorAll("[placeholder]")
             .forEach(function (element) {
 
                 const value =
@@ -588,10 +597,60 @@
 
 
     /* =====================================================
-       LANGUAGE SELECTOR
+       TRANSLATE DOCUMENT
+    ===================================================== */
+
+    function translateDocument() {
+
+        translateTextNodes(
+            document.body
+        );
+
+
+        translateAttributes();
+
+
+        /*
+         * Translate page title.
+         */
+
+        const title =
+            cleanText(
+                document.title
+            );
+
+
+        const titleTranslation =
+            getTranslation(title);
+
+
+        if (titleTranslation) {
+
+            document.title =
+                titleTranslation;
+
+        }
+
+
+        /*
+         * Set HTML language.
+         */
+
+        document.documentElement.lang =
+            currentLanguage;
+
+    }
+
+
+    /* =====================================================
+       CREATE LANGUAGE SELECTOR
     ===================================================== */
 
     function createSelector() {
+
+        /*
+         * Don't create it twice.
+         */
 
         if (
             document.getElementById(
@@ -604,6 +663,17 @@
         }
 
 
+        /*
+         * Find the existing hamburger.
+         *
+         * This works with:
+         *
+         * class="hamburger"
+         *
+         * regardless of whether the page
+         * uses id="hamburger" or id="menuOpen".
+         */
+
         const hamburger =
             document.querySelector(
                 ".hamburger"
@@ -613,13 +683,17 @@
         if (!hamburger) {
 
             console.warn(
-                "⚠️ Misuki language selector: hamburger not found."
+                "⚠️ Misuki: hamburger not found."
             );
 
             return;
 
         }
 
+
+        /* =================================================
+           CREATE WRAPPER
+        ================================================= */
 
         const wrapper =
             document.createElement(
@@ -634,6 +708,10 @@
         wrapper.className =
             "misuki-language";
 
+
+        /* =================================================
+           CREATE HTML
+        ================================================= */
 
         wrapper.innerHTML = `
 
@@ -704,11 +782,19 @@
         `;
 
 
+        /* =================================================
+           INSERT NEXT TO HAMBURGER
+        ================================================= */
+
         hamburger.parentNode.insertBefore(
             wrapper,
             hamburger
         );
 
+
+        /* =================================================
+           ELEMENT REFERENCES
+        ================================================= */
 
         const button =
             document.getElementById(
@@ -722,6 +808,10 @@
             );
 
 
+        /* =================================================
+           OPEN / CLOSE DROPDOWN
+        ================================================= */
+
         button.addEventListener(
             "click",
             function (event) {
@@ -730,7 +820,7 @@
                 event.stopPropagation();
 
 
-                const open =
+                const isOpen =
                     dropdown.classList.contains(
                         "show"
                     );
@@ -738,18 +828,22 @@
 
                 dropdown.classList.toggle(
                     "show",
-                    !open
+                    !isOpen
                 );
 
 
                 button.setAttribute(
                     "aria-expanded",
-                    String(!open)
+                    String(!isOpen)
                 );
 
             }
         );
 
+
+        /* =================================================
+           LANGUAGE OPTIONS
+        ================================================= */
 
         dropdown
             .querySelectorAll(
@@ -775,22 +869,15 @@
                             language
                         );
 
-
-                        dropdown.classList.remove(
-                            "show"
-                        );
-
-
-                        button.setAttribute(
-                            "aria-expanded",
-                            "false"
-                        );
-
                     }
                 );
 
             });
 
+
+        /* =================================================
+           CLOSE WHEN CLICKING OUTSIDE
+        ================================================= */
 
         document.addEventListener(
             "click",
@@ -821,7 +908,7 @@
 
 
     /* =====================================================
-       UPDATE SELECTOR
+       UPDATE LANGUAGE BUTTON
     ===================================================== */
 
     function updateSelector() {
@@ -861,7 +948,7 @@
 
 
     /* =====================================================
-       SET LANGUAGE
+       CHANGE LANGUAGE
     ===================================================== */
 
     function setLanguage(language) {
@@ -886,12 +973,8 @@
 
 
         /*
-         * Reloading is intentional.
-         *
-         * It guarantees every page gets the
-         * selected language and avoids having
-         * translated text become the source
-         * text on the next language change.
+         * Reload so every page starts
+         * from its original English text.
          */
 
         window.location.reload();
@@ -933,10 +1016,6 @@
         translateDocument();
 
         updateSelector();
-
-
-        document.documentElement.lang =
-            currentLanguage;
 
 
         console.log(
