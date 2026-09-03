@@ -1,4 +1,3 @@
-
 /* =========================================================
    MISUKI — TRANSLATION.JS
    AUTOMATIC LANGUAGE SYSTEM
@@ -297,11 +296,8 @@
     let currentLanguage =
         localStorage.getItem("misuki_language");
 
-
     if (!languages[currentLanguage]) {
-
         currentLanguage = "en";
-
     }
 
 
@@ -327,11 +323,9 @@
         const clean =
             cleanText(text);
 
-
         if (!clean) {
             return null;
         }
-
 
         if (
             dictionary[clean] &&
@@ -342,7 +336,6 @@
 
         }
 
-
         if (
             pageTranslations[clean] &&
             pageTranslations[clean][currentLanguage]
@@ -351,7 +344,6 @@
             return pageTranslations[clean][currentLanguage];
 
         }
-
 
         return null;
 
@@ -390,19 +382,15 @@
             return;
         }
 
-
         const walker =
             document.createTreeWalker(
                 root,
                 NodeFilter.SHOW_TEXT
             );
 
-
         const nodes = [];
 
-
         let node;
-
 
         while (
             node = walker.nextNode()
@@ -412,26 +400,17 @@
 
         }
 
-
         nodes.forEach(function (textNode) {
 
             const parent =
                 textNode.parentElement;
 
-
             if (!parent) {
                 return;
             }
 
-
             const tag =
                 parent.tagName.toLowerCase();
-
-
-            /*
-             * Never touch scripts, styles
-             * or other non-visible elements.
-             */
 
             if (
                 tag === "script" ||
@@ -444,43 +423,30 @@
 
             }
 
-
             rememberTextNode(textNode);
-
 
             const source =
                 originalTexts.get(textNode);
 
-
             const clean =
                 cleanText(source);
-
 
             if (!clean) {
                 return;
             }
 
-
             const translation =
                 getTranslation(clean);
-
 
             if (!translation) {
                 return;
             }
 
-
-            /*
-             * Preserve whitespace.
-             */
-
             const leading =
                 source.match(/^\s*/)?.[0] || "";
 
-
             const trailing =
                 source.match(/\s*$/)?.[0] || "";
-
 
             textNode.nodeValue =
                 leading +
@@ -498,10 +464,6 @@
 
     function translateAttributes() {
 
-        /*
-         * aria-label
-         */
-
         document
             .querySelectorAll("[aria-label]")
             .forEach(function (element) {
@@ -513,10 +475,8 @@
                         )
                     );
 
-
                 const translation =
                     getTranslation(value);
-
 
                 if (translation) {
 
@@ -530,10 +490,6 @@
             });
 
 
-        /*
-         * title
-         */
-
         document
             .querySelectorAll("[title]")
             .forEach(function (element) {
@@ -545,10 +501,8 @@
                         )
                     );
 
-
                 const translation =
                     getTranslation(value);
-
 
                 if (translation) {
 
@@ -562,10 +516,6 @@
             });
 
 
-        /*
-         * placeholder
-         */
-
         document
             .querySelectorAll("[placeholder]")
             .forEach(function (element) {
@@ -577,10 +527,8 @@
                         )
                     );
 
-
                 const translation =
                     getTranslation(value);
-
 
                 if (translation) {
 
@@ -606,23 +554,16 @@
             document.body
         );
 
-
         translateAttributes();
 
-
-        /*
-         * Translate page title.
-         */
 
         const title =
             cleanText(
                 document.title
             );
 
-
         const titleTranslation =
             getTranslation(title);
-
 
         if (titleTranslation) {
 
@@ -631,10 +572,6 @@
 
         }
 
-
-        /*
-         * Set HTML language.
-         */
 
         document.documentElement.lang =
             currentLanguage;
@@ -648,10 +585,6 @@
 
     function createSelector() {
 
-        /*
-         * Don't create it twice.
-         */
-
         if (
             document.getElementById(
                 "misukiLanguageSelector"
@@ -663,22 +596,14 @@
         }
 
 
-        /*
-         * Find the existing hamburger.
-         *
-         * This works with:
-         *
-         * class="hamburger"
-         *
-         * regardless of whether the page
-         * uses id="hamburger" or id="menuOpen".
-         */
+        /* =================================================
+           FIND HAMBURGER
+        ================================================= */
 
         const hamburger =
             document.querySelector(
                 ".hamburger"
             );
-
 
         if (!hamburger) {
 
@@ -692,7 +617,23 @@
 
 
         /* =================================================
-           CREATE WRAPPER
+           CREATE ACTIONS GROUP
+        ================================================= */
+
+        const actions =
+            document.createElement(
+                "div"
+            );
+
+        actions.className =
+            "misuki-menu-actions";
+
+        actions.id =
+            "misukiMenuActions";
+
+
+        /* =================================================
+           CREATE LANGUAGE WRAPPER
         ================================================= */
 
         const wrapper =
@@ -700,17 +641,15 @@
                 "div"
             );
 
-
         wrapper.id =
             "misukiLanguageSelector";
-
 
         wrapper.className =
             "misuki-language";
 
 
         /* =================================================
-           CREATE HTML
+           CREATE SELECTOR HTML
         ================================================= */
 
         wrapper.innerHTML = `
@@ -783,11 +722,20 @@
 
 
         /* =================================================
-           INSERT NEXT TO HAMBURGER
+           CRITICAL:
+           LANGUAGE + HAMBURGER ARE PUT IN SAME GROUP
         ================================================= */
 
         hamburger.parentNode.insertBefore(
-            wrapper,
+            actions,
+            hamburger
+        );
+
+        actions.appendChild(
+            wrapper
+        );
+
+        actions.appendChild(
             hamburger
         );
 
@@ -800,7 +748,6 @@
             document.getElementById(
                 "misukiLanguageButton"
             );
-
 
         const dropdown =
             document.getElementById(
@@ -819,18 +766,15 @@
                 event.preventDefault();
                 event.stopPropagation();
 
-
                 const isOpen =
                     dropdown.classList.contains(
                         "show"
                     );
 
-
                 dropdown.classList.toggle(
                     "show",
                     !isOpen
                 );
-
 
                 button.setAttribute(
                     "aria-expanded",
@@ -858,12 +802,10 @@
                         event.preventDefault();
                         event.stopPropagation();
 
-
                         const language =
                             option.getAttribute(
                                 "data-language"
                             );
-
 
                         setLanguage(
                             language
@@ -893,7 +835,6 @@
                         "show"
                     );
 
-
                     button.setAttribute(
                         "aria-expanded",
                         "false"
@@ -916,18 +857,15 @@
         const language =
             languages[currentLanguage];
 
-
         const flag =
             document.getElementById(
                 "misukiLanguageFlag"
             );
 
-
         const short =
             document.getElementById(
                 "misukiLanguageShort"
             );
-
 
         if (flag) {
 
@@ -935,7 +873,6 @@
                 language.flag;
 
         }
-
 
         if (short) {
 
@@ -961,21 +898,13 @@
 
         }
 
-
         currentLanguage =
             language;
-
 
         localStorage.setItem(
             "misuki_language",
             language
         );
-
-
-        /*
-         * Reload so every page starts
-         * from its original English text.
-         */
 
         window.location.reload();
 
@@ -1017,7 +946,6 @@
 
         updateSelector();
 
-
         console.log(
             "🌍 Misuki translation initialized:",
             currentLanguage
@@ -1043,4 +971,3 @@
 
 
 })();
-
