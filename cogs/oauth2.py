@@ -1792,6 +1792,10 @@ def create_verification_request(
     "/verify",
     methods=["GET"]
 )
+@app.route(
+    "/verification",
+    methods=["GET"]
+)
 def verification():
 
     user = get_user()
@@ -1945,6 +1949,10 @@ def verification():
 
 @app.route(
     "/verify",
+    methods=["POST"]
+)
+@app.route(
+    "/verification",
     methods=["POST"]
 )
 def submit_verification():
