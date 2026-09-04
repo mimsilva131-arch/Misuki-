@@ -188,8 +188,8 @@
                ===================================================== */
 
             statistics: {
-                hero_description: "Overview of the Miskui service and its current statistics.",
-                service_description: "General statistics about the Miskui service.",
+                hero_description: "Overview of the Misuki service and its current statistics.",
+                service_description: "General statistics about the Misuki service.",
                 servers: "Servers",
                 users: "Users",
                 channels: "Channels",
@@ -197,7 +197,7 @@
                 tickets_created: "Tickets created",
                 verifications: "Verifications",
                 system_status: "System status",
-                system_description: "Current status of the Miskui service.",
+                system_description: "Current status of the Misuki service.",
                 discord_bot: "Discord Bot",
                 website: "Website",
                 database: "Database",
@@ -212,7 +212,7 @@
                 version: "Version",
                 milliseconds: "ms",
                 administrator_statistics: "🔐 Administrator statistics",
-                admin_description: "Detailed information available only to Miskui administrators.",
+                admin_description: "Detailed information available only to Misuki administrators.",
                 admin: "ADMIN",
                 members: "Members",
                 no_server_information: "No server information available.",
@@ -223,7 +223,7 @@
                 moderation_actions: "Moderation actions",
                 announcements: "Announcements",
                 privacy: "Privacy",
-                privacy_description: "Public statistics are presented in an aggregated form. Specific server and user information is restricted to authorized Miskui administrators."
+                privacy_description: "Public statistics are presented in an aggregated form. Specific server and user information is restricted to authorized Misuki administrators."
             },
 
             cookies: {
@@ -375,8 +375,8 @@
                ===================================================== */
 
             statistics: {
-                hero_description: "Visão geral do serviço Miskui e das suas estatísticas atuais.",
-                service_description: "Estatísticas gerais sobre o serviço Miskui.",
+                hero_description: "Visão geral do serviço Misuki e das suas estatísticas atuais.",
+                service_description: "Estatísticas gerais sobre o serviço Misuki.",
                 servers: "Servidores",
                 users: "Utilizadores",
                 channels: "Canais",
@@ -384,7 +384,7 @@
                 tickets_created: "Tickets criados",
                 verifications: "Verificações",
                 system_status: "Estado do sistema",
-                system_description: "Estado atual do serviço Miskui.",
+                system_description: "Estado atual do serviço Misuki.",
                 discord_bot: "Bot do Discord",
                 website: "Website",
                 database: "Base de dados",
@@ -399,7 +399,7 @@
                 version: "Versão",
                 milliseconds: "ms",
                 administrator_statistics: "🔐 Estatísticas do administrador",
-                admin_description: "Informação detalhada disponível apenas para administradores do Miskui.",
+                admin_description: "Informação detalhada disponível apenas para administradores do Misuki.",
                 admin: "ADMIN",
                 members: "Membros",
                 no_server_information: "Não existem informações de servidores disponíveis.",
@@ -410,7 +410,7 @@
                 moderation_actions: "Ações de moderação",
                 announcements: "Anúncios",
                 privacy: "Privacidade",
-                privacy_description: "As estatísticas públicas são apresentadas de forma agregada. As informações específicas de servidores e utilizadores estão restritas aos administradores autorizados do Miskui."
+                privacy_description: "As estatísticas públicas são apresentadas de forma agregada. As informações específicas de servidores e utilizadores estão restritas aos administradores autorizados do Misuki."
             },
 
             cookies: {
@@ -562,8 +562,8 @@
                ===================================================== */
 
             statistics: {
-                hero_description: "Übersicht über den Miskui-Dienst und seine aktuellen Statistiken.",
-                service_description: "Allgemeine Statistiken über den Miskui-Dienst.",
+                hero_description: "Übersicht über den Misuki-Dienst und seine aktuellen Statistiken.",
+                service_description: "Allgemeine Statistiken über den Misuki-Dienst.",
                 servers: "Server",
                 users: "Benutzer",
                 channels: "Kanäle",
@@ -571,7 +571,7 @@
                 tickets_created: "Erstellte Tickets",
                 verifications: "Verifizierungen",
                 system_status: "Systemstatus",
-                system_description: "Aktueller Status des Miskui-Dienstes.",
+                system_description: "Aktueller Status des Misuki-Dienstes.",
                 discord_bot: "Discord-Bot",
                 website: "Website",
                 database: "Datenbank",
@@ -586,7 +586,7 @@
                 version: "Version",
                 milliseconds: "ms",
                 administrator_statistics: "🔐 Administratorstatistiken",
-                admin_description: "Detaillierte Informationen sind nur für Miskui-Administratoren verfügbar.",
+                admin_description: "Detaillierte Informationen sind nur für Misuki-Administratoren verfügbar.",
                 admin: "ADMIN",
                 members: "Mitglieder",
                 no_server_information: "Keine Serverinformationen verfügbar.",
@@ -597,7 +597,7 @@
                 moderation_actions: "Moderationsaktionen",
                 announcements: "Ankündigungen",
                 privacy: "Datenschutz",
-                privacy_description: "Öffentliche Statistiken werden in aggregierter Form angezeigt. Spezifische Server- und Benutzerinformationen sind auf autorisierte Miskui-Administratoren beschränkt."
+                privacy_description: "Öffentliche Statistiken werden in aggregierter Form angezeigt. Spezifische Server- und Benutzerinformationen sind auf autorisierte Misuki-Administratoren beschränkt."
             },
 
             cookies: {
@@ -749,8 +749,8 @@
                ===================================================== */
 
             statistics: {
-                hero_description: "Descripción general del servicio Miskui y sus estadísticas actuales.",
-                service_description: "Estadísticas generales sobre el servicio Miskui.",
+                hero_description: "Descripción general del servicio Misuki y sus estadísticas actuales.",
+                service_description: "Estadísticas generales sobre el servicio Misuki.",
                 servers: "Servidores",
                 users: "Usuarios",
                 channels: "Canales",
@@ -758,7 +758,7 @@
                 tickets_created: "Tickets creados",
                 verifications: "Verificaciones",
                 system_status: "Estado del sistema",
-                system_description: "Estado actual del servicio Miskui.",
+                system_description: "Estado actual del servicio Misuki.",
                 discord_bot: "Bot de Discord",
                 website: "Sitio web",
                 database: "Base de datos",
@@ -773,7 +773,7 @@
                 version: "Versión",
                 milliseconds: "ms",
                 administrator_statistics: "🔐 Estadísticas del administrador",
-                admin_description: "La información detallada solo está disponible para los administradores de Miskui.",
+                admin_description: "La información detallada solo está disponible para los administradores de Misuki.",
                 admin: "ADMIN",
                 members: "Miembros",
                 no_server_information: "No hay información de servidores disponible.",
@@ -784,7 +784,7 @@
                 moderation_actions: "Acciones de moderación",
                 announcements: "Anuncios",
                 privacy: "Privacidad",
-                privacy_description: "Las estadísticas públicas se presentan de forma agregada. La información específica de servidores y usuarios está restringida a los administradores autorizados de Miskui."
+                privacy_description: "Las estadísticas públicas se presentan de forma agregada. La información específica de servidores y usuarios está restringida a los administradores autorizados de Misuki."
             },
 
             cookies: {
@@ -936,8 +936,8 @@
                ===================================================== */
 
             statistics: {
-                hero_description: "Vue d’ensemble du service Miskui et de ses statistiques actuelles.",
-                service_description: "Statistiques générales du service Miskui.",
+                hero_description: "Vue d’ensemble du service Misuki et de ses statistiques actuelles.",
+                service_description: "Statistiques générales du service Misuki.",
                 servers: "Serveurs",
                 users: "Utilisateurs",
                 channels: "Salons",
@@ -945,7 +945,7 @@
                 tickets_created: "Tickets créés",
                 verifications: "Vérifications",
                 system_status: "État du système",
-                system_description: "État actuel du service Miskui.",
+                system_description: "État actuel du service Misuki.",
                 discord_bot: "Bot Discord",
                 website: "Site web",
                 database: "Base de données",
@@ -960,7 +960,7 @@
                 version: "Version",
                 milliseconds: "ms",
                 administrator_statistics: "🔐 Statistiques administrateur",
-                admin_description: "Les informations détaillées sont disponibles uniquement pour les administrateurs de Miskui.",
+                admin_description: "Les informations détaillées sont disponibles uniquement pour les administrateurs de Misuki.",
                 admin: "ADMIN",
                 members: "Membres",
                 no_server_information: "Aucune information sur les serveurs n’est disponible.",
@@ -971,7 +971,7 @@
                 moderation_actions: "Actions de modération",
                 announcements: "Annonces",
                 privacy: "Confidentialité",
-                privacy_description: "Les statistiques publiques sont présentées sous forme agrégée. Les informations spécifiques aux serveurs et aux utilisateurs sont réservées aux administrateurs Miskui autorisés."
+                privacy_description: "Les statistiques publiques sont présentées sous forme agrégée. Les informations spécifiques aux serveurs et aux utilisateurs sont réservées aux administrateurs Misuki autorisés."
             },
 
             cookies: {

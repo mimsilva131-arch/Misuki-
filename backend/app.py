@@ -3864,7 +3864,7 @@ def statistics():
         # Resultado True/False para a área
         # administrativa da Statistics.
 
-        is_miskui_admin=user_is_admin,
+        is_misuki_admin=user_is_admin,
 
         statistics=statistics_data,
 
