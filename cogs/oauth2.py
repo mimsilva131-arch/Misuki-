@@ -492,6 +492,41 @@ def create_database():
                     """
                 )
 
+                # -------------------------------------------------
+                # VERIFICATION REQUESTS
+                # -------------------------------------------------
+                #
+                # The verification cog also creates this table.
+                # Keeping IF NOT EXISTS here makes the web side
+                # safe even if Flask starts before the bot.
+                #
+
+                cursor.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS verification_requests (
+
+                        id BIGSERIAL PRIMARY KEY,
+
+                        guild_id BIGINT NOT NULL,
+
+                        user_id BIGINT NOT NULL,
+
+                        username TEXT,
+
+                        status TEXT NOT NULL DEFAULT 'pending',
+
+                        created_at DOUBLE PRECISION NOT NULL,
+
+                        processed_at DOUBLE PRECISION,
+
+                        UNIQUE (
+                            guild_id,
+                            user_id
+                        )
+                    )
+                    """
+                )
+
             connection.commit()
 
         print(
@@ -756,13 +791,18 @@ def get_all_licenses():
 
         return {}
 
+
 LICENSE_SYSTEM_ENABLED = False
+
+
 # =========================================================
 # LICENSE ACTIVE CHECK
 # =========================================================
 
 def license_is_active(guild_id):
+
     if not LICENSE_SYSTEM_ENABLED:
+
         return True
 
     license_data = get_license(
@@ -1220,7 +1260,7 @@ def get_bot_guilds():
     except requests.RequestException as error:
 
         print(
-            f"❌ Bot guild request error: {error}"
+            f"❌ Discord bot guild request error: {error}"
         )
 
         return BOT_GUILD_CACHE["data"]
@@ -1228,7 +1268,7 @@ def get_bot_guilds():
     if response.status_code != 200:
 
         print(
-            f"❌ Bot guild request returned "
+            f"❌ Discord bot guild request returned "
             f"{response.status_code}"
         )
 
@@ -1602,6 +1642,533 @@ def error_page(
         title=title,
         message=message
     ), status_code
+
+
+# =========================================================
+# VERIFICATION HELPERS
+# =========================================================
+
+def get_verification_guild(
+    guild_id,
+    access_token
+):
+
+    try:
+
+        guild_id = str(
+            int(guild_id)
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        return None
+
+    user_guilds = get_user_guilds(
+        access_token
+    )
+
+    for guild in user_guilds:
+
+        if str(
+            guild.get(
+                "id",
+                ""
+            )
+        ) == guild_id:
+
+            return guild
+
+    return None
+
+
+def bot_is_in_guild(
+    guild_id
+):
+
+    guild_id = str(
+        guild_id
+    )
+
+    bot_guilds = get_bot_guilds()
+
+    return any(
+
+        str(
+            guild.get(
+                "id",
+                ""
+            )
+        ) == guild_id
+
+        for guild in bot_guilds
+
+    )
+
+
+def create_verification_request(
+    guild_id,
+    user_id,
+    username
+):
+
+    if not DATABASE_URL or not db_pool:
+
+        return False
+
+    try:
+
+        with database_connection() as connection:
+
+            with connection.cursor() as cursor:
+
+                cursor.execute(
+                    """
+                    INSERT INTO verification_requests (
+                        guild_id,
+                        user_id,
+                        username,
+                        status,
+                        created_at,
+                        processed_at
+                    )
+
+                    VALUES (
+                        %s,
+                        %s,
+                        %s,
+                        'pending',
+                        %s,
+                        NULL
+                    )
+
+                    ON CONFLICT (
+                        guild_id,
+                        user_id
+                    )
+
+                    DO UPDATE SET
+
+                        username =
+                            EXCLUDED.username,
+
+                        status =
+                            'pending',
+
+                        created_at =
+                            EXCLUDED.created_at,
+
+                        processed_at =
+                            NULL
+                    """,
+                    (
+                        int(guild_id),
+                        int(user_id),
+                        username,
+                        time.time()
+                    )
+                )
+
+            connection.commit()
+
+        return True
+
+    except Exception as error:
+
+        print(
+            f"❌ Verification request error: {error}"
+        )
+
+        return False
+
+
+# =========================================================
+# DISCORD VERIFICATION
+# =========================================================
+
+@app.route(
+    "/verify",
+    methods=["GET"]
+)
+def verification():
+
+    user = get_user()
+
+    # -----------------------------------------------------
+    # LOGIN REQUIRED
+    # -----------------------------------------------------
+
+    if not user:
+
+        guild_id = request.args.get(
+            "guild_id",
+            ""
+        ).strip()
+
+        if guild_id:
+
+            session[
+                "next_url"
+            ] = (
+                f"/verify?guild_id={guild_id}"
+            )
+
+        else:
+
+            session[
+                "next_url"
+            ] = "/verify"
+
+        return redirect(
+            "/login"
+        )
+
+    # -----------------------------------------------------
+    # GUILD ID
+    # -----------------------------------------------------
+
+    guild_id = request.args.get(
+        "guild_id",
+        ""
+    ).strip()
+
+    if not guild_id:
+
+        return error_page(
+            "❌ Verification Error",
+            "No server was specified for verification.",
+            400,
+            user
+        )
+
+    try:
+
+        guild_id_int = int(
+            guild_id
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        return error_page(
+            "❌ Verification Error",
+            "The server ID is invalid.",
+            400,
+            user
+        )
+
+    # -----------------------------------------------------
+    # ACCESS TOKEN
+    # -----------------------------------------------------
+
+    access_token = session.get(
+        "access_token"
+    )
+
+    if not access_token:
+
+        session[
+            "next_url"
+        ] = (
+            f"/verify?guild_id={guild_id_int}"
+        )
+
+        return redirect(
+            "/login"
+        )
+
+    # -----------------------------------------------------
+    # CHECK USER MEMBERSHIP
+    # -----------------------------------------------------
+
+    guild = get_verification_guild(
+        guild_id_int,
+        access_token
+    )
+
+    if guild is None:
+
+        return error_page(
+            "❌ Access denied",
+            "You are not a member of this Discord server.",
+            403,
+            user
+        )
+
+    # -----------------------------------------------------
+    # CHECK BOT
+    # -----------------------------------------------------
+
+    if not bot_is_in_guild(
+        guild_id_int
+    ):
+
+        return error_page(
+            "❌ Verification unavailable",
+            "The Misuki bot is not installed on this server.",
+            400,
+            user
+        )
+
+    # -----------------------------------------------------
+    # SHOW VERIFICATION PAGE
+    # -----------------------------------------------------
+
+    guild_name = guild.get(
+        "name"
+    ) or "Discord Server"
+
+    return render_template(
+        "verification.html",
+        user=user,
+        username=(
+            user.get("global_name")
+            or
+            user.get("username")
+            or
+            "Discord User"
+        ),
+        guild_name=guild_name,
+        guild_id=str(
+            guild_id_int
+        )
+    )
+
+
+# =========================================================
+# SUBMIT VERIFICATION
+# =========================================================
+
+@app.route(
+    "/verify",
+    methods=["POST"]
+)
+def submit_verification():
+
+    user = get_user()
+
+    # -----------------------------------------------------
+    # LOGIN REQUIRED
+    # -----------------------------------------------------
+
+    if not user:
+
+        guild_id = request.form.get(
+            "guild_id",
+            ""
+        ).strip()
+
+        if guild_id:
+
+            session[
+                "next_url"
+            ] = (
+                f"/verify?guild_id={guild_id}"
+            )
+
+        else:
+
+            session[
+                "next_url"
+            ] = "/verify"
+
+        return redirect(
+            "/login"
+        )
+
+    # -----------------------------------------------------
+    # GUILD ID
+    # -----------------------------------------------------
+
+    guild_id = request.form.get(
+        "guild_id",
+        ""
+    ).strip()
+
+    if not guild_id:
+
+        return error_page(
+            "❌ Verification Error",
+            "No server was specified for verification.",
+            400,
+            user
+        )
+
+    try:
+
+        guild_id_int = int(
+            guild_id
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        return error_page(
+            "❌ Verification Error",
+            "The server ID is invalid.",
+            400,
+            user
+        )
+
+    # -----------------------------------------------------
+    # ACCESS TOKEN
+    # -----------------------------------------------------
+
+    access_token = session.get(
+        "access_token"
+    )
+
+    if not access_token:
+
+        session[
+            "next_url"
+        ] = (
+            f"/verify?guild_id={guild_id_int}"
+        )
+
+        return redirect(
+            "/login"
+        )
+
+    # -----------------------------------------------------
+    # CHECK USER MEMBERSHIP
+    # -----------------------------------------------------
+
+    guild = get_verification_guild(
+        guild_id_int,
+        access_token
+    )
+
+    if guild is None:
+
+        return error_page(
+            "❌ Access denied",
+            "You are not a member of this Discord server.",
+            403,
+            user
+        )
+
+    # -----------------------------------------------------
+    # CHECK BOT
+    # -----------------------------------------------------
+
+    if not bot_is_in_guild(
+        guild_id_int
+    ):
+
+        return error_page(
+            "❌ Verification unavailable",
+            "The Misuki bot is not installed on this server.",
+            400,
+            user
+        )
+
+    # -----------------------------------------------------
+    # USER INFORMATION
+    # -----------------------------------------------------
+
+    user_id = user.get(
+        "id"
+    )
+
+    if not user_id:
+
+        return error_page(
+            "❌ Verification Error",
+            "Your Discord account could not be identified.",
+            400,
+            user
+        )
+
+    username = (
+
+        user.get(
+            "global_name"
+        )
+
+        or
+
+        user.get(
+            "username"
+        )
+
+        or
+
+        "Discord User"
+
+    )
+
+    # -----------------------------------------------------
+    # CREATE REQUEST
+    # -----------------------------------------------------
+
+    success = create_verification_request(
+        guild_id_int,
+        user_id,
+        username
+    )
+
+    if not success:
+
+        return error_page(
+            "❌ Verification Error",
+            "The verification request could not be created. Please try again.",
+            500,
+            user
+        )
+
+    print(
+        "=========================================="
+    )
+
+    print(
+        "🔐 VERIFICATION REQUEST CREATED"
+    )
+
+    print(
+        f"👤 User: {username}"
+    )
+
+    print(
+        f"🆔 User ID: {user_id}"
+    )
+
+    print(
+        f"🏠 Guild: {guild.get('name')}"
+    )
+
+    print(
+        f"🏠 Guild ID: {guild_id_int}"
+    )
+
+    print(
+        "🤖 Waiting for Misuki bot..."
+    )
+
+    print(
+        "=========================================="
+    )
+
+    return render_template(
+        "verification.html",
+        user=user,
+        username=username,
+        guild_name=(
+            guild.get("name")
+            or
+            "Discord Server"
+        ),
+        guild_id=str(
+            guild_id_int
+        ),
+        verification_submitted=True
+    )
 
 
 # =========================================================
