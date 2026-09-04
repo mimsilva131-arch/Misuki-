@@ -21,7 +21,7 @@ Misuki — Statistics
             </h1>
 
             <p data-i18n="statistics.hero_description">
-                Overview of the Misuki service and its current statistics.
+                Overview of the Miskui service and its current statistics.
             </p>
 
         </div>
@@ -45,7 +45,7 @@ Misuki — Statistics
                 class="statistics-description"
                 data-i18n="statistics.service_description"
             >
-                General statistics about the Misuki service.
+                General statistics about the Miskui service.
             </p>
 
 
@@ -72,7 +72,10 @@ Misuki — Statistics
                             Servers
                         </span>
 
-                        <strong class="statistics-value">
+                        <strong
+                            class="statistics-value"
+                            id="statistics-servers"
+                        >
                             {{ statistics.servers if statistics is defined and statistics.servers is defined else "—" }}
                         </strong>
 
@@ -98,7 +101,10 @@ Misuki — Statistics
                             Users
                         </span>
 
-                        <strong class="statistics-value">
+                        <strong
+                            class="statistics-value"
+                            id="statistics-users"
+                        >
                             {{ statistics.users if statistics is defined and statistics.users is defined else "—" }}
                         </strong>
 
@@ -124,7 +130,10 @@ Misuki — Statistics
                             Channels
                         </span>
 
-                        <strong class="statistics-value">
+                        <strong
+                            class="statistics-value"
+                            id="statistics-channels"
+                        >
                             {{ statistics.channels if statistics is defined and statistics.channels is defined else "—" }}
                         </strong>
 
@@ -150,7 +159,10 @@ Misuki — Statistics
                             Commands available
                         </span>
 
-                        <strong class="statistics-value">
+                        <strong
+                            class="statistics-value"
+                            id="statistics-commands"
+                        >
                             {{ statistics.commands if statistics is defined and statistics.commands is defined else "—" }}
                         </strong>
 
@@ -176,7 +188,10 @@ Misuki — Statistics
                             Tickets created
                         </span>
 
-                        <strong class="statistics-value">
+                        <strong
+                            class="statistics-value"
+                            id="statistics-tickets"
+                        >
                             {{ statistics.tickets if statistics is defined and statistics.tickets is defined else "—" }}
                         </strong>
 
@@ -202,7 +217,10 @@ Misuki — Statistics
                             Verifications
                         </span>
 
-                        <strong class="statistics-value">
+                        <strong
+                            class="statistics-value"
+                            id="statistics-verifications"
+                        >
                             {{ statistics.verifications if statistics is defined and statistics.verifications is defined else "—" }}
                         </strong>
 
@@ -231,9 +249,9 @@ Misuki — Statistics
 
             <p
                 class="statistics-description"
-                data-i18n="statistics.status_description"
+                data-i18n="statistics.system_description"
             >
-                Current status of the Misuki service.
+                Current status of the Miskui service.
             </p>
 
 
@@ -243,7 +261,10 @@ Misuki — Statistics
 
                 <div class="status-card">
 
-                    <div class="status-indicator"></div>
+                    <div
+                        class="status-indicator"
+                        id="bot-status-indicator"
+                    ></div>
 
                     <div>
 
@@ -251,7 +272,10 @@ Misuki — Statistics
                             Discord Bot
                         </strong>
 
-                        <span>
+                        <span
+                            id="bot-status"
+                            data-i18n-status="bot"
+                        >
                             {{ statistics.bot_status if statistics is defined and statistics.bot_status is defined else "—" }}
                         </span>
 
@@ -264,7 +288,7 @@ Misuki — Statistics
 
                 <div class="status-card">
 
-                    <div class="status-indicator"></div>
+                    <div class="status-indicator operational"></div>
 
                     <div>
 
@@ -285,7 +309,10 @@ Misuki — Statistics
 
                 <div class="status-card">
 
-                    <div class="status-indicator"></div>
+                    <div
+                        class="status-indicator"
+                        id="database-status-indicator"
+                    ></div>
 
                     <div>
 
@@ -293,7 +320,10 @@ Misuki — Statistics
                             Database
                         </strong>
 
-                        <span>
+                        <span
+                            id="database-status"
+                            data-i18n-status="database"
+                        >
                             {{ statistics.database_status if statistics is defined and statistics.database_status is defined else "—" }}
                         </span>
 
@@ -306,7 +336,10 @@ Misuki — Statistics
 
                 <div class="status-card">
 
-                    <div class="status-indicator"></div>
+                    <div
+                        class="status-indicator"
+                        id="api-status-indicator"
+                    ></div>
 
                     <div>
 
@@ -314,7 +347,10 @@ Misuki — Statistics
                             API
                         </strong>
 
-                        <span>
+                        <span
+                            id="api-status"
+                            data-i18n-status="api"
+                        >
                             {{ statistics.api_status if statistics is defined and statistics.api_status is defined else "—" }}
                         </span>
 
@@ -337,13 +373,13 @@ Misuki — Statistics
 
         <div class="container">
 
-            <h2 data-i18n="statistics.performance">
+            <h2 data-i18n="common.performance">
                 Performance
             </h2>
 
             <p
                 class="statistics-description"
-                data-i18n="statistics.performance_description"
+                data-i18n="common.performance_description"
             >
                 Current performance information.
             </p>
@@ -362,21 +398,18 @@ Misuki — Statistics
                         Bot latency
                     </span>
 
-                    <strong class="performance-value">
-
+                    <strong
+                        class="performance-value"
+                        id="statistics-latency"
+                    >
                         {% if statistics is defined and statistics.latency is not none %}
-
                             {{ statistics.latency }}
-                            <span data-i18n="common.milliseconds">
+                            <span data-i18n="statistics.milliseconds">
                                 ms
                             </span>
-
                         {% else %}
-
                             —
-
                         {% endif %}
-
                     </strong>
 
                 </div>
@@ -393,7 +426,10 @@ Misuki — Statistics
                         Uptime
                     </span>
 
-                    <strong class="performance-value">
+                    <strong
+                        class="performance-value"
+                        id="statistics-uptime"
+                    >
                         {{ statistics.uptime if statistics is defined and statistics.uptime is not none else "—" }}
                     </strong>
 
@@ -411,7 +447,10 @@ Misuki — Statistics
                         Version
                     </span>
 
-                    <strong class="performance-value">
+                    <strong
+                        class="performance-value"
+                        id="statistics-version"
+                    >
                         {{ statistics.version if statistics is defined and statistics.version is not none else "—" }}
                     </strong>
 
@@ -454,7 +493,7 @@ Misuki — Statistics
 
                 <span
                     class="admin-badge"
-                    data-i18n="statistics.admin_badge"
+                    data-i18n="statistics.admin"
                 >
                     ADMIN
                 </span>
@@ -496,7 +535,6 @@ Misuki — Statistics
 
                         {% endif %}
 
-
                         <div class="admin-server-info">
 
                             <strong>
@@ -506,19 +544,12 @@ Misuki — Statistics
                             {% if server.id %}
 
                             <span>
-
-                                <span data-i18n="statistics.id">
-                                    ID
-                                </span>:
-
-                                {{ server.id }}
-
+                                ID: {{ server.id }}
                             </span>
 
                             {% endif %}
 
                         </div>
-
 
                         {% if server.members is defined %}
 
@@ -590,7 +621,6 @@ Misuki — Statistics
 
                         {% endif %}
 
-
                         <div class="admin-user-info">
 
                             <strong>
@@ -600,13 +630,7 @@ Misuki — Statistics
                             {% if user.id %}
 
                             <span>
-
-                                <span data-i18n="statistics.id">
-                                    ID
-                                </span>:
-
-                                {{ user.id }}
-
+                                ID: {{ user.id }}
                             </span>
 
                             {% endif %}
@@ -645,8 +669,6 @@ Misuki — Statistics
 
                 <div class="statistics-grid admin-statistics-grid">
 
-                    <!-- COMMANDS -->
-
                     <div class="statistics-card">
 
                         <div class="statistics-card-icon">
@@ -670,8 +692,6 @@ Misuki — Statistics
 
                     </div>
 
-
-                    <!-- TICKETS -->
 
                     <div class="statistics-card">
 
@@ -697,8 +717,6 @@ Misuki — Statistics
                     </div>
 
 
-                    <!-- MODERATION -->
-
                     <div class="statistics-card">
 
                         <div class="statistics-card-icon">
@@ -722,8 +740,6 @@ Misuki — Statistics
 
                     </div>
 
-
-                    <!-- ANNOUNCEMENTS -->
 
                     <div class="statistics-card">
 
@@ -793,21 +809,587 @@ Misuki — Statistics
 
     </section>
 
-
-    <!-- =====================================================
-         AUTOMATIC REFRESH
-    ====================================================== -->
-
-    <script>
-        (function () {
-            const REFRESH_INTERVAL = 30000;
-
-            setInterval(function () {
-                window.location.reload();
-            }, REFRESH_INTERVAL);
-        })();
-    </script>
-
 </main>
+
+
+<!-- =========================================================
+     LIVE STATISTICS
+========================================================= -->
+
+<script>
+
+(function () {
+
+    "use strict";
+
+
+    const STATISTICS_REFRESH_INTERVAL = 10000;
+
+
+    function getTranslation(key, fallback) {
+
+        try {
+
+            if (
+                window.MisukiTranslation &&
+                typeof window.MisukiTranslation.getTranslation === "function"
+            ) {
+
+                const language =
+                    window.MisukiTranslation.getLanguage();
+
+                const translated =
+                    window.MisukiTranslation.getTranslation(
+                        language,
+                        key
+                    );
+
+                if (translated) {
+
+                    return translated;
+
+                }
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "Statistics translation error:",
+                error
+            );
+
+        }
+
+        return fallback;
+
+    }
+
+
+    function translateStatus(element, statusType) {
+
+        if (!element) {
+
+            return;
+
+        }
+
+
+        const value =
+            element.dataset.rawStatus ||
+            element.textContent.trim();
+
+
+        const status =
+            value.toLowerCase();
+
+
+        const statusTranslations = {
+
+            bot: {
+
+                online: "statistics.online",
+
+                offline: "statistics.offline"
+
+            },
+
+            database: {
+
+                operational: "statistics.operational",
+
+                error: "statistics.error"
+
+            },
+
+            api: {
+
+                operational: "statistics.operational",
+
+                unavailable: "statistics.unavailable",
+
+                offline: "statistics.offline"
+
+            }
+
+        };
+
+
+        const key =
+            statusTranslations[
+                statusType
+            ]?.[
+                status
+            ];
+
+
+        if (key) {
+
+            element.textContent =
+                getTranslation(
+                    key,
+                    value
+                );
+
+        }
+
+    }
+
+
+    function updateBotIndicator(status) {
+
+        const indicator =
+            document.getElementById(
+                "bot-status-indicator"
+            );
+
+
+        if (!indicator) {
+
+            return;
+
+        }
+
+
+        indicator.classList.remove(
+            "online",
+            "offline"
+        );
+
+
+        if (
+            String(status).toLowerCase()
+            === "online"
+        ) {
+
+            indicator.classList.add(
+                "online"
+            );
+
+        } else {
+
+            indicator.classList.add(
+                "offline"
+            );
+
+        }
+
+    }
+
+
+    function updateDatabaseIndicator(status) {
+
+        const indicator =
+            document.getElementById(
+                "database-status-indicator"
+            );
+
+
+        if (!indicator) {
+
+            return;
+
+        }
+
+
+        indicator.classList.remove(
+            "online",
+            "offline"
+        );
+
+
+        if (
+            String(status).toLowerCase()
+            === "operational"
+        ) {
+
+            indicator.classList.add(
+                "online"
+            );
+
+        } else {
+
+            indicator.classList.add(
+                "offline"
+            );
+
+        }
+
+    }
+
+
+    function updateApiIndicator(status) {
+
+        const indicator =
+            document.getElementById(
+                "api-status-indicator"
+            );
+
+
+        if (!indicator) {
+
+            return;
+
+        }
+
+
+        indicator.classList.remove(
+            "online",
+            "offline"
+        );
+
+
+        if (
+            String(status).toLowerCase()
+            === "operational"
+        ) {
+
+            indicator.classList.add(
+                "online"
+            );
+
+        } else {
+
+            indicator.classList.add(
+                "offline"
+            );
+
+        }
+
+    }
+
+
+    function updateLatency(latency) {
+
+        const element =
+            document.getElementById(
+                "statistics-latency"
+            );
+
+
+        if (!element) {
+
+            return;
+
+        }
+
+
+        if (
+            latency === null ||
+            latency === undefined
+        ) {
+
+            element.textContent = "—";
+
+            return;
+
+        }
+
+
+        element.innerHTML =
+            `${latency} <span data-i18n="statistics.milliseconds">ms</span>`;
+
+
+        translateMilliseconds();
+
+    }
+
+
+    function translateMilliseconds() {
+
+        const element =
+            document.querySelector(
+                "#statistics-latency [data-i18n='statistics.milliseconds']"
+            );
+
+
+        if (!element) {
+
+            return;
+
+        }
+
+
+        element.textContent =
+            getTranslation(
+                "statistics.milliseconds",
+                "ms"
+            );
+
+    }
+
+
+    function updateStatistics(data) {
+
+        if (!data) {
+
+            return;
+
+        }
+
+
+        const servers =
+            document.getElementById(
+                "statistics-servers"
+            );
+
+        const users =
+            document.getElementById(
+                "statistics-users"
+            );
+
+        const channels =
+            document.getElementById(
+                "statistics-channels"
+            );
+
+        const commands =
+            document.getElementById(
+                "statistics-commands"
+            );
+
+        const tickets =
+            document.getElementById(
+                "statistics-tickets"
+            );
+
+        const verifications =
+            document.getElementById(
+                "statistics-verifications"
+            );
+
+        const uptime =
+            document.getElementById(
+                "statistics-uptime"
+            );
+
+        const version =
+            document.getElementById(
+                "statistics-version"
+            );
+
+        const botStatus =
+            document.getElementById(
+                "bot-status"
+            );
+
+        const databaseStatus =
+            document.getElementById(
+                "database-status"
+            );
+
+        const apiStatus =
+            document.getElementById(
+                "api-status"
+            );
+
+
+        if (servers) {
+
+            servers.textContent =
+                data.servers ?? "—";
+
+        }
+
+
+        if (users) {
+
+            users.textContent =
+                data.users ?? "—";
+
+        }
+
+
+        if (channels) {
+
+            channels.textContent =
+                data.channels ?? "—";
+
+        }
+
+
+        if (commands) {
+
+            commands.textContent =
+                data.commands ?? "—";
+
+        }
+
+
+        if (tickets) {
+
+            tickets.textContent =
+                data.tickets ?? "—";
+
+        }
+
+
+        if (verifications) {
+
+            verifications.textContent =
+                data.verifications ?? "—";
+
+        }
+
+
+        if (uptime) {
+
+            uptime.textContent =
+                data.uptime ?? "—";
+
+        }
+
+
+        if (version) {
+
+            version.textContent =
+                data.version ?? "—";
+
+        }
+
+
+        if (botStatus) {
+
+            botStatus.dataset.rawStatus =
+                data.bot_status || "Offline";
+
+            translateStatus(
+                botStatus,
+                "bot"
+            );
+
+        }
+
+
+        if (databaseStatus) {
+
+            databaseStatus.dataset.rawStatus =
+                data.database_status || "Error";
+
+            translateStatus(
+                databaseStatus,
+                "database"
+            );
+
+        }
+
+
+        if (apiStatus) {
+
+            apiStatus.dataset.rawStatus =
+                data.api_status || "Unavailable";
+
+            translateStatus(
+                apiStatus,
+                "api"
+            );
+
+        }
+
+
+        updateLatency(
+            data.latency
+        );
+
+
+        updateBotIndicator(
+            data.bot_status
+        );
+
+
+        updateDatabaseIndicator(
+            data.database_status
+        );
+
+
+        updateApiIndicator(
+            data.api_status
+        );
+
+    }
+
+
+    async function refreshStatistics() {
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/statistics",
+                    {
+                        method: "GET",
+                        cache: "no-store",
+                        headers: {
+                            "Accept": "application/json"
+                        }
+                    }
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    `HTTP ${response.status}`
+                );
+
+            }
+
+
+            const data =
+                await response.json();
+
+
+            updateStatistics(
+                data
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "Unable to refresh statistics:",
+                error
+            );
+
+        }
+
+    }
+
+
+    window.refreshMisukiStatistics =
+        refreshStatistics;
+
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            setTimeout(
+                refreshStatistics,
+                500
+            );
+
+            setInterval(
+                refreshStatistics,
+                STATISTICS_REFRESH_INTERVAL
+            );
+
+        }
+    );
+
+
+    window.addEventListener(
+        "misukiLanguageChanged",
+        function () {
+
+            refreshStatistics();
+
+            translateMilliseconds();
+
+        }
+    );
+
+})();
+
+</script>
 
 {% endblock %}

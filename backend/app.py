@@ -18,6 +18,7 @@ from flask import (
     redirect,
     session,
     request,
+    jsonify,
     render_template,
     send_from_directory,
     g
@@ -3872,6 +3873,441 @@ def statistics():
         admin_servers=admin_servers,
 
         admin_users=[]
+    )
+
+# =========================================================
+# LIVE STATISTICS API
+# =========================================================
+
+@app.route("/api/statistics")
+def statistics_api():
+
+    current_user = get_user()
+
+    user_is_admin = is_admin(
+        current_user
+    )
+
+    statistics_data = {
+
+        "servers": 0,
+        "users": 0,
+        "channels": 0,
+        "latency": 0,
+        "commands": 0,
+        "tickets": 0,
+        "verifications": 0,
+
+        "bot_status": "Offline",
+
+        "database_status": "Operational",
+
+        "api_status": "Unavailable",
+
+        "version": os.getenv(
+            "MISUKI_VERSION",
+            "1.0.0"
+        ),
+
+        "uptime": "0s",
+
+        "last_seen": None,
+    }
+
+
+    # =====================================================
+    # BOT STATISTICS — NEON / POSTGRESQL
+    # =====================================================
+
+    bot_snapshot = {}
+
+    try:
+
+        database_url = os.getenv(
+            "DATABASE_URL"
+        )
+
+        if not database_url:
+
+            raise RuntimeError(
+                "DATABASE_URL não está configurado."
+            )
+
+
+        with psycopg2.connect(
+            database_url,
+            connect_timeout=10
+        ) as connection:
+
+            with connection.cursor() as cursor:
+
+                cursor.execute(
+                    """
+                    SELECT
+                        servers,
+                        users,
+                        channels,
+                        latency,
+                        commands,
+                        bot_status,
+                        uptime,
+                        version,
+                        last_seen,
+                        admin_servers
+                    FROM bot_statistics
+                    WHERE id = 1
+                    """
+                )
+
+                result = cursor.fetchone()
+
+
+                if result:
+
+                    bot_snapshot = {
+
+                        "servers": result[0],
+
+                        "users": result[1],
+
+                        "channels": result[2],
+
+                        "latency": result[3],
+
+                        "commands": result[4],
+
+                        "bot_status": result[5],
+
+                        "uptime": result[6],
+
+                        "version": result[7],
+
+                        "last_seen": result[8],
+
+                        "admin_servers": result[9] or [],
+                    }
+
+
+    except (
+        OSError,
+        psycopg2.Error,
+        TypeError,
+        ValueError,
+        RuntimeError
+    ) as error:
+
+        print(
+            f"❌ Statistics API database error: {error}"
+        )
+
+
+    # =====================================================
+    # COPY BOT DATA
+    # =====================================================
+
+    for key in (
+        "servers",
+        "users",
+        "channels",
+        "latency",
+        "commands",
+        "uptime",
+        "version",
+        "last_seen",
+    ):
+
+        if key in bot_snapshot:
+
+            statistics_data[key] = (
+                bot_snapshot[key]
+            )
+
+
+    # =====================================================
+    # HEARTBEAT
+    # =====================================================
+
+    current_time = time.time()
+
+    last_seen = bot_snapshot.get(
+        "last_seen"
+    )
+
+
+    if last_seen is not None:
+
+        try:
+
+            heartbeat_age = (
+                current_time
+                - float(last_seen)
+            )
+
+
+            if heartbeat_age <= 30:
+
+                statistics_data[
+                    "bot_status"
+                ] = "Online"
+
+            else:
+
+                statistics_data[
+                    "bot_status"
+                ] = "Offline"
+
+
+        except (
+            TypeError,
+            ValueError
+        ):
+
+            statistics_data[
+                "bot_status"
+            ] = "Offline"
+
+    else:
+
+        statistics_data[
+            "bot_status"
+        ] = "Offline"
+
+
+    # =====================================================
+    # API STATUS
+    # =====================================================
+
+    if statistics_data[
+        "bot_status"
+    ] == "Online":
+
+        statistics_data[
+            "api_status"
+        ] = "Operational"
+
+    else:
+
+        statistics_data[
+            "api_status"
+        ] = "Unavailable"
+
+
+    # =====================================================
+    # TICKETS
+    # =====================================================
+
+    database_ok = True
+
+    try:
+
+        tickets_database = os.path.join(
+            BASE_DIR,
+            "data",
+            "tickets.db"
+        )
+
+
+        with sqlite3.connect(
+            tickets_database
+        ) as connection:
+
+            result = connection.execute(
+                """
+                SELECT
+                    COALESCE(
+                        SUM(number),
+                        0
+                    )
+                FROM ticket_counter
+                """
+            ).fetchone()
+
+
+            statistics_data[
+                "tickets"
+            ] = int(
+                result[0] or 0
+            )
+
+
+    except (
+        OSError,
+        sqlite3.Error,
+        TypeError,
+        ValueError
+    ):
+
+        database_ok = False
+
+        statistics_data[
+            "tickets"
+        ] = 0
+
+
+    # =====================================================
+    # MODERATION
+    # =====================================================
+
+    moderation_actions = 0
+
+    try:
+
+        moderation_database = os.path.join(
+            BASE_DIR,
+            "data",
+            "moderation.db"
+        )
+
+
+        with sqlite3.connect(
+            moderation_database
+        ) as connection:
+
+            result = connection.execute(
+                """
+                SELECT
+                    COUNT(*)
+                FROM warnings
+                """
+            ).fetchone()
+
+
+            moderation_actions = int(
+                result[0] or 0
+            )
+
+
+    except (
+        OSError,
+        sqlite3.Error,
+        TypeError,
+        ValueError
+    ):
+
+        database_ok = False
+
+        moderation_actions = 0
+
+
+    # =====================================================
+    # DATABASE STATUS
+    # =====================================================
+
+    if database_ok:
+
+        statistics_data[
+            "database_status"
+        ] = "Operational"
+
+    else:
+
+        statistics_data[
+            "database_status"
+        ] = "Error"
+
+
+    # =====================================================
+    # VERIFICATIONS
+    # =====================================================
+
+    statistics_data[
+        "verifications"
+    ] = 0
+
+
+    # =====================================================
+    # RESPONSE
+    # =====================================================
+
+    response = {
+
+        "servers": statistics_data[
+            "servers"
+        ],
+
+        "users": statistics_data[
+            "users"
+        ],
+
+        "channels": statistics_data[
+            "channels"
+        ],
+
+        "latency": statistics_data[
+            "latency"
+        ],
+
+        "commands": statistics_data[
+            "commands"
+        ],
+
+        "tickets": statistics_data[
+            "tickets"
+        ],
+
+        "verifications": statistics_data[
+            "verifications"
+        ],
+
+        "bot_status": statistics_data[
+            "bot_status"
+        ],
+
+        "database_status": statistics_data[
+            "database_status"
+        ],
+
+        "api_status": statistics_data[
+            "api_status"
+        ],
+
+        "uptime": statistics_data[
+            "uptime"
+        ],
+
+        "version": statistics_data[
+            "version"
+        ],
+
+        "last_seen": statistics_data[
+            "last_seen"
+        ],
+    }
+
+
+    # =====================================================
+    # ADMIN DATA
+    # =====================================================
+
+    if user_is_admin:
+
+        response[
+            "admin_servers"
+        ] = bot_snapshot.get(
+            "admin_servers",
+            []
+        )
+
+        response[
+            "admin_statistics"
+        ] = {
+
+            "commands": statistics_data[
+                "commands"
+            ],
+
+            "tickets": statistics_data[
+                "tickets"
+            ],
+
+            "moderation": moderation_actions,
+
+            "announcements": 0,
+        }
+
+
+    return jsonify(
+        response
     )
 # =========================================================
 # SUBMIT REVIEW

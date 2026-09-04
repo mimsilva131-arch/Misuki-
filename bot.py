@@ -9,21 +9,11 @@ import json
 import time
 
 import discord
+import psycopg2
 
 from discord.ext import commands
 
 from dotenv import load_dotenv
-
-
-BASE_DIR = os.path.dirname(
-    os.path.abspath(__file__)
-)
-
-BOT_STATS_FILE = os.path.join(
-    BASE_DIR,
-    "data",
-    "bot_stats.json"
-)
 
 
 # =========================================================
@@ -31,6 +21,11 @@ BOT_STATS_FILE = os.path.join(
 # =========================================================
 
 load_dotenv()
+
+
+DATABASE_URL = os.getenv(
+    "DATABASE_URL"
+)
 
 
 # =========================================================
@@ -147,26 +142,146 @@ def get_uptime():
 
 
 # =========================================================
+# DATABASE CONNECTION
+# =========================================================
+
+def get_database_connection():
+
+    if not DATABASE_URL:
+
+        raise RuntimeError(
+            "DATABASE_URL não está configurado."
+        )
+
+    return psycopg2.connect(
+        DATABASE_URL,
+        connect_timeout=10
+    )
+
+
+# =========================================================
+# CREATE STATISTICS TABLE
+# =========================================================
+
+def initialize_statistics_database():
+
+    connection = None
+
+    try:
+
+        connection = get_database_connection()
+
+        with connection.cursor() as cursor:
+
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS bot_statistics (
+
+                    id INTEGER PRIMARY KEY,
+
+                    servers INTEGER NOT NULL DEFAULT 0,
+
+                    users INTEGER NOT NULL DEFAULT 0,
+
+                    channels INTEGER NOT NULL DEFAULT 0,
+
+                    latency INTEGER NOT NULL DEFAULT 0,
+
+                    commands INTEGER NOT NULL DEFAULT 0,
+
+                    bot_status TEXT NOT NULL DEFAULT 'Offline',
+
+                    uptime TEXT NOT NULL DEFAULT '0s',
+
+                    version TEXT NOT NULL DEFAULT '1.0.0',
+
+                    last_seen DOUBLE PRECISION,
+
+                    admin_servers JSONB NOT NULL DEFAULT '[]'::jsonb,
+
+                    updated_at DOUBLE PRECISION NOT NULL
+                )
+                """
+            )
+
+            cursor.execute(
+                """
+                INSERT INTO bot_statistics (
+                    id,
+                    servers,
+                    users,
+                    channels,
+                    latency,
+                    commands,
+                    bot_status,
+                    uptime,
+                    version,
+                    last_seen,
+                    admin_servers,
+                    updated_at
+                )
+
+                VALUES (
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    'Offline',
+                    '0s',
+                    %s,
+                    NULL,
+                    '[]'::jsonb,
+                    %s
+                )
+
+                ON CONFLICT (id)
+                DO NOTHING
+                """,
+                (
+                    os.getenv(
+                        "MISUKI_VERSION",
+                        "1.0.0"
+                    ),
+                    time.time()
+                )
+            )
+
+        connection.commit()
+
+        print(
+            "🗄️ Statistics database initialized."
+        )
+
+    except Exception as error:
+
+        if connection:
+
+            connection.rollback()
+
+        print(
+            f"❌ Error initializing statistics database: {error}"
+        )
+
+        raise
+
+    finally:
+
+        if connection:
+
+            connection.close()
+
+
+# =========================================================
 # WRITE STATISTICS
 # =========================================================
 
 async def update_stats_snapshot():
 
+    connection = None
+
     try:
-
-        # -------------------------------------------------
-        # CREATE DATA DIRECTORY
-        # -------------------------------------------------
-
-        data_directory = os.path.dirname(
-            BOT_STATS_FILE
-        )
-
-        os.makedirs(
-            data_directory,
-            exist_ok=True
-        )
-
 
         # -------------------------------------------------
         # COMMANDS
@@ -218,136 +333,153 @@ async def update_stats_snapshot():
 
 
         # -------------------------------------------------
-        # LAST SEEN / HEARTBEAT
+        # HEARTBEAT
         # -------------------------------------------------
 
         last_seen = time.time()
 
 
         # -------------------------------------------------
-        # SNAPSHOT
+        # SNAPSHOT VALUES
         # -------------------------------------------------
 
-        snapshot = {
+        latency = round(
+            bot.latency * 1000
+        )
 
-            "servers": len(
-                bot.guilds
-            ),
+        bot_status = (
+            "Online"
+            if bot.is_ready()
+            else "Offline"
+        )
 
-            "users": sum(
-                guild.member_count or 0
-                for guild in bot.guilds
-            ),
+        uptime = get_uptime()
 
-            "channels": sum(
-                len(guild.channels)
-                for guild in bot.guilds
-            ),
-
-            "latency": round(
-                bot.latency * 1000
-            ),
-
-            "commands": commands_count,
-
-            "bot_status": (
-                "Online"
-                if bot.is_ready()
-                else "Offline"
-            ),
-
-            "uptime": get_uptime(),
-
-            "version": os.getenv(
-                "MISUKI_VERSION",
-                "1.0.0"
-            ),
-
-            "last_seen": last_seen,
-
-            "admin_servers": admin_servers,
-        }
-
-
-        # -------------------------------------------------
-        # TEMPORARY FILE
-        # -------------------------------------------------
-
-        temporary_file = (
-            BOT_STATS_FILE
-            + ".tmp"
+        version = os.getenv(
+            "MISUKI_VERSION",
+            "1.0.0"
         )
 
 
         # -------------------------------------------------
-        # WRITE
+        # DATABASE
         # -------------------------------------------------
 
-        with open(
-            temporary_file,
-            "w",
-            encoding="utf-8"
-        ) as file:
+        connection = get_database_connection()
 
-            json.dump(
-                snapshot,
-                file,
-                ensure_ascii=False,
-                indent=2
+        with connection.cursor() as cursor:
+
+            cursor.execute(
+                """
+                UPDATE bot_statistics
+
+                SET
+                    servers = %s,
+                    users = %s,
+                    channels = %s,
+                    latency = %s,
+                    commands = %s,
+                    bot_status = %s,
+                    uptime = %s,
+                    version = %s,
+                    last_seen = %s,
+                    admin_servers = %s::jsonb,
+                    updated_at = %s
+
+                WHERE id = 1
+                """,
+                (
+                    len(
+                        bot.guilds
+                    ),
+
+                    sum(
+                        guild.member_count or 0
+                        for guild in bot.guilds
+                    ),
+
+                    sum(
+                        len(guild.channels)
+                        for guild in bot.guilds
+                    ),
+
+                    latency,
+
+                    commands_count,
+
+                    bot_status,
+
+                    uptime,
+
+                    version,
+
+                    last_seen,
+
+                    json.dumps(
+                        admin_servers,
+                        ensure_ascii=False
+                    ),
+
+                    time.time()
+                )
             )
 
+        connection.commit()
+
 
         # -------------------------------------------------
-        # REPLACE
+        # LOG
         # -------------------------------------------------
-
-        os.replace(
-            temporary_file,
-            BOT_STATS_FILE
-        )
-
 
         print(
             "📊 Bot statistics updated:"
         )
 
         print(
-            f"   Servers: {snapshot['servers']}"
+            f"   Servers: {len(bot.guilds)}"
         )
 
         print(
-            f"   Users: {snapshot['users']}"
+            f"   Users: {sum(guild.member_count or 0 for guild in bot.guilds)}"
         )
 
         print(
-            f"   Channels: {snapshot['channels']}"
+            f"   Channels: {sum(len(guild.channels) for guild in bot.guilds)}"
         )
 
         print(
-            f"   Commands: {snapshot['commands']}"
+            f"   Commands: {commands_count}"
         )
 
         print(
-            f"   Latency: {snapshot['latency']}ms"
+            f"   Latency: {latency}ms"
         )
 
         print(
-            f"   Uptime: {snapshot['uptime']}"
+            f"   Uptime: {uptime}"
         )
 
         print(
-            f"   Status: {snapshot['bot_status']}"
+            f"   Status: {bot_status}"
         )
 
         print(
-            f"   Heartbeat: {snapshot['last_seen']}"
+            f"   Heartbeat: {last_seen}"
         )
+
 
     except Exception as error:
 
         print(
             f"❌ Error updating bot statistics: {error}"
         )
+
+
+    finally:
+
+        if connection:
+
+            connection.close()
 
 
 # =========================================================
@@ -363,7 +495,7 @@ async def statistics_loop():
         await update_stats_snapshot()
 
         await asyncio.sleep(
-            30
+            10
         )
 
 
@@ -478,7 +610,7 @@ async def on_ready():
                     )
 
 
-        # Atualizar novamente depois do sync.
+        # Atualizar depois do sync.
 
         await update_stats_snapshot()
 
@@ -505,7 +637,7 @@ async def on_ready():
 
 
         # Mesmo que o sync falhe,
-        # continuar a atualizar o heartbeat.
+        # continuar com o heartbeat.
 
         await update_stats_snapshot()
 
@@ -610,6 +742,13 @@ async def main():
     print(
         "🗄️ DATABASE_URL encontrada."
     )
+
+
+    # =====================================================
+    # INITIALIZE STATISTICS DATABASE
+    # =====================================================
+
+    initialize_statistics_database()
 
 
     # =====================================================

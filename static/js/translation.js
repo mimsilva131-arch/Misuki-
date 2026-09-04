@@ -1,4 +1,3 @@
-
 (function () {
     "use strict";
 
@@ -176,12 +175,55 @@
                 join_discord: "Join Discord",
                 support_description: "Join the Misuki Discord server to get help, report problems, and talk with the community.",
                 documentation: "📚 Documentation",
-                 view_documentation: "View Documentation",
-                 advertisement: "Advertisement",
-                 what_users_say: "⭐ What users say",
-                 report_problem: "🐛 Report a Problem",
-                 documentation_help: "Check the documentation for information about configuring and using Misuki.",
-                 report_problem_text: "Found a bug or something that isn't working correctly? Contact the Misuki support team through Discord."
+                view_documentation: "View Documentation",
+                advertisement: "Advertisement",
+                what_users_say: "⭐ What users say",
+                report_problem: "🐛 Report a Problem",
+                documentation_help: "Check the documentation for information about configuring and using Misuki.",
+                report_problem_text: "Found a bug or something that isn't working correctly? Contact the Misuki support team through Discord."
+            },
+
+            /* =====================================================
+               STATISTICS
+               ===================================================== */
+
+            statistics: {
+                hero_description: "Overview of the Miskui service and its current statistics.",
+                service_description: "General statistics about the Miskui service.",
+                servers: "Servers",
+                users: "Users",
+                channels: "Channels",
+                commands_available: "Commands available",
+                tickets_created: "Tickets created",
+                verifications: "Verifications",
+                system_status: "System status",
+                system_description: "Current status of the Miskui service.",
+                discord_bot: "Discord Bot",
+                website: "Website",
+                database: "Database",
+                api: "API",
+                operational: "Operational",
+                unavailable: "Unavailable",
+                online: "Online",
+                offline: "Offline",
+                error: "Error",
+                bot_latency: "Bot latency",
+                uptime: "Uptime",
+                version: "Version",
+                milliseconds: "ms",
+                administrator_statistics: "🔐 Administrator statistics",
+                admin_description: "Detailed information available only to Miskui administrators.",
+                admin: "ADMIN",
+                members: "Members",
+                no_server_information: "No server information available.",
+                no_user_information: "No user information available.",
+                activity: "Activity",
+                commands: "Commands",
+                tickets: "Tickets",
+                moderation_actions: "Moderation actions",
+                announcements: "Announcements",
+                privacy: "Privacy",
+                privacy_description: "Public statistics are presented in an aggregated form. Specific server and user information is restricted to authorized Miskui administrators."
             },
 
             cookies: {
@@ -320,12 +362,55 @@
                 join_discord: "Entrar no Discord",
                 support_description: "Entre no servidor Discord do Misuki para obter ajuda, reportar problemas e falar com a comunidade.",
                 documentation: "📚 Documentação",
-                 view_documentation: "Ver documentação",
-                 advertisement: "Publicidade",
-                 what_users_say: "⭐ O que dizem os utilizadores",
-                 report_problem: "🐛 Reportar um problema",
-                 documentation_help: "Consulte a documentação para obter informações sobre como configurar e utilizar o Misuki.",
-                 report_problem_text: "Encontrou um erro ou algo que não está a funcionar corretamente? Contacte a equipa de suporte do Misuki através do Discord."
+                view_documentation: "Ver documentação",
+                advertisement: "Publicidade",
+                what_users_say: "⭐ O que dizem os utilizadores",
+                report_problem: "🐛 Reportar um problema",
+                documentation_help: "Consulte a documentação para obter informações sobre como configurar e utilizar o Misuki.",
+                report_problem_text: "Encontrou um erro ou algo que não está a funcionar corretamente? Contacte a equipa de suporte do Misuki através do Discord."
+            },
+
+            /* =====================================================
+               ESTATÍSTICAS
+               ===================================================== */
+
+            statistics: {
+                hero_description: "Visão geral do serviço Miskui e das suas estatísticas atuais.",
+                service_description: "Estatísticas gerais sobre o serviço Miskui.",
+                servers: "Servidores",
+                users: "Utilizadores",
+                channels: "Canais",
+                commands_available: "Comandos disponíveis",
+                tickets_created: "Tickets criados",
+                verifications: "Verificações",
+                system_status: "Estado do sistema",
+                system_description: "Estado atual do serviço Miskui.",
+                discord_bot: "Bot do Discord",
+                website: "Website",
+                database: "Base de dados",
+                api: "API",
+                operational: "Operacional",
+                unavailable: "Indisponível",
+                online: "Online",
+                offline: "Offline",
+                error: "Erro",
+                bot_latency: "Latência do bot",
+                uptime: "Tempo de atividade",
+                version: "Versão",
+                milliseconds: "ms",
+                administrator_statistics: "🔐 Estatísticas do administrador",
+                admin_description: "Informação detalhada disponível apenas para administradores do Miskui.",
+                admin: "ADMIN",
+                members: "Membros",
+                no_server_information: "Não existem informações de servidores disponíveis.",
+                no_user_information: "Não existem informações de utilizadores disponíveis.",
+                activity: "Atividade",
+                commands: "Comandos",
+                tickets: "Tickets",
+                moderation_actions: "Ações de moderação",
+                announcements: "Anúncios",
+                privacy: "Privacidade",
+                privacy_description: "As estatísticas públicas são apresentadas de forma agregada. As informações específicas de servidores e utilizadores estão restritas aos administradores autorizados do Miskui."
             },
 
             cookies: {
@@ -472,6 +557,49 @@
                 report_problem_text: "Hast du einen Fehler gefunden oder funktioniert etwas nicht korrekt? Kontaktiere das Misuki-Supportteam über Discord."
             },
 
+            /* =====================================================
+               STATISTIKEN
+               ===================================================== */
+
+            statistics: {
+                hero_description: "Übersicht über den Miskui-Dienst und seine aktuellen Statistiken.",
+                service_description: "Allgemeine Statistiken über den Miskui-Dienst.",
+                servers: "Server",
+                users: "Benutzer",
+                channels: "Kanäle",
+                commands_available: "Verfügbare Befehle",
+                tickets_created: "Erstellte Tickets",
+                verifications: "Verifizierungen",
+                system_status: "Systemstatus",
+                system_description: "Aktueller Status des Miskui-Dienstes.",
+                discord_bot: "Discord-Bot",
+                website: "Website",
+                database: "Datenbank",
+                api: "API",
+                operational: "Betriebsbereit",
+                unavailable: "Nicht verfügbar",
+                online: "Online",
+                offline: "Offline",
+                error: "Fehler",
+                bot_latency: "Bot-Latenz",
+                uptime: "Betriebszeit",
+                version: "Version",
+                milliseconds: "ms",
+                administrator_statistics: "🔐 Administratorstatistiken",
+                admin_description: "Detaillierte Informationen sind nur für Miskui-Administratoren verfügbar.",
+                admin: "ADMIN",
+                members: "Mitglieder",
+                no_server_information: "Keine Serverinformationen verfügbar.",
+                no_user_information: "Keine Benutzerinformationen verfügbar.",
+                activity: "Aktivität",
+                commands: "Befehle",
+                tickets: "Tickets",
+                moderation_actions: "Moderationsaktionen",
+                announcements: "Ankündigungen",
+                privacy: "Datenschutz",
+                privacy_description: "Öffentliche Statistiken werden in aggregierter Form angezeigt. Spezifische Server- und Benutzerinformationen sind auf autorisierte Miskui-Administratoren beschränkt."
+            },
+
             cookies: {
                 consent: "Cookie-Einwilligung",
                 title: "🍪 Wir verwenden Cookies",
@@ -616,6 +744,49 @@
                 report_problem_text: "¿Has encontrado un error o algo no funciona correctamente? Contacta con el equipo de soporte de Misuki a través de Discord."
             },
 
+            /* =====================================================
+               ESTADÍSTICAS
+               ===================================================== */
+
+            statistics: {
+                hero_description: "Descripción general del servicio Miskui y sus estadísticas actuales.",
+                service_description: "Estadísticas generales sobre el servicio Miskui.",
+                servers: "Servidores",
+                users: "Usuarios",
+                channels: "Canales",
+                commands_available: "Comandos disponibles",
+                tickets_created: "Tickets creados",
+                verifications: "Verificaciones",
+                system_status: "Estado del sistema",
+                system_description: "Estado actual del servicio Miskui.",
+                discord_bot: "Bot de Discord",
+                website: "Sitio web",
+                database: "Base de datos",
+                api: "API",
+                operational: "Operativa",
+                unavailable: "No disponible",
+                online: "En línea",
+                offline: "Fuera de línea",
+                error: "Error",
+                bot_latency: "Latencia del bot",
+                uptime: "Tiempo de actividad",
+                version: "Versión",
+                milliseconds: "ms",
+                administrator_statistics: "🔐 Estadísticas del administrador",
+                admin_description: "La información detallada solo está disponible para los administradores de Miskui.",
+                admin: "ADMIN",
+                members: "Miembros",
+                no_server_information: "No hay información de servidores disponible.",
+                no_user_information: "No hay información de usuarios disponible.",
+                activity: "Actividad",
+                commands: "Comandos",
+                tickets: "Tickets",
+                moderation_actions: "Acciones de moderación",
+                announcements: "Anuncios",
+                privacy: "Privacidad",
+                privacy_description: "Las estadísticas públicas se presentan de forma agregada. La información específica de servidores y usuarios está restringida a los administradores autorizados de Miskui."
+            },
+
             cookies: {
                 consent: "Consentimiento de cookies",
                 title: "🍪 Utilizamos cookies",
@@ -758,6 +929,49 @@
                 report_problem: "🐛 Signaler un problème",
                 documentation_help: "Consultez la documentation pour savoir comment configurer et utiliser Misuki.",
                 report_problem_text: "Vous avez trouvé un bug ou quelque chose ne fonctionne pas correctement ? Contactez l'équipe support de Misuki via Discord."
+            },
+
+            /* =====================================================
+               STATISTIQUES
+               ===================================================== */
+
+            statistics: {
+                hero_description: "Vue d’ensemble du service Miskui et de ses statistiques actuelles.",
+                service_description: "Statistiques générales du service Miskui.",
+                servers: "Serveurs",
+                users: "Utilisateurs",
+                channels: "Salons",
+                commands_available: "Commandes disponibles",
+                tickets_created: "Tickets créés",
+                verifications: "Vérifications",
+                system_status: "État du système",
+                system_description: "État actuel du service Miskui.",
+                discord_bot: "Bot Discord",
+                website: "Site web",
+                database: "Base de données",
+                api: "API",
+                operational: "Opérationnelle",
+                unavailable: "Indisponible",
+                online: "En ligne",
+                offline: "Hors ligne",
+                error: "Erreur",
+                bot_latency: "Latence du bot",
+                uptime: "Temps de fonctionnement",
+                version: "Version",
+                milliseconds: "ms",
+                administrator_statistics: "🔐 Statistiques administrateur",
+                admin_description: "Les informations détaillées sont disponibles uniquement pour les administrateurs de Miskui.",
+                admin: "ADMIN",
+                members: "Membres",
+                no_server_information: "Aucune information sur les serveurs n’est disponible.",
+                no_user_information: "Aucune information sur les utilisateurs n’est disponible.",
+                activity: "Activité",
+                commands: "Commandes",
+                tickets: "Tickets",
+                moderation_actions: "Actions de modération",
+                announcements: "Annonces",
+                privacy: "Confidentialité",
+                privacy_description: "Les statistiques publiques sont présentées sous forme agrégée. Les informations spécifiques aux serveurs et aux utilisateurs sont réservées aux administrateurs Miskui autorisés."
             },
 
             cookies: {
@@ -1509,6 +1723,10 @@
             return getSavedLanguage();
         },
 
+        getTranslation: function (language, key) {
+            return getTranslation(language, key);
+        },
+
         getTranslations: function () {
             return translations;
         },
@@ -1553,4 +1771,3 @@
     }
 
 })();
-

@@ -2,11 +2,12 @@
   "servers": 2,
   "users": 42,
   "channels": 46,
-  "latency": 92,
+  "latency": 91,
   "commands": 27,
   "bot_status": "Online",
-  "uptime": "3s",
+  "uptime": "16m",
   "version": "1.0.0",
+  "last_seen": 1788543573.0018072,
   "admin_servers": [
     {
       "name": "Misuki",
