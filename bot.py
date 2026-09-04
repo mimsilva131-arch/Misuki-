@@ -218,6 +218,13 @@ async def update_stats_snapshot():
 
 
         # -------------------------------------------------
+        # LAST SEEN / HEARTBEAT
+        # -------------------------------------------------
+
+        last_seen = time.time()
+
+
+        # -------------------------------------------------
         # SNAPSHOT
         # -------------------------------------------------
 
@@ -255,6 +262,8 @@ async def update_stats_snapshot():
                 "MISUKI_VERSION",
                 "1.0.0"
             ),
+
+            "last_seen": last_seen,
 
             "admin_servers": admin_servers,
         }
@@ -328,6 +337,10 @@ async def update_stats_snapshot():
 
         print(
             f"   Status: {snapshot['bot_status']}"
+        )
+
+        print(
+            f"   Heartbeat: {snapshot['last_seen']}"
         )
 
     except Exception as error:
@@ -423,9 +436,6 @@ async def on_ready():
     # INITIAL STATISTICS
     # =====================================================
 
-    # Criar o bot_stats.json imediatamente
-    # quando o bot fica online.
-
     await update_stats_snapshot()
 
 
@@ -468,9 +478,7 @@ async def on_ready():
                     )
 
 
-        # Atualizar novamente depois do sync,
-        # garantindo que o número de comandos
-        # está atualizado.
+        # Atualizar novamente depois do sync.
 
         await update_stats_snapshot()
 
@@ -495,8 +503,9 @@ async def on_ready():
             f"❌ Error syncing commands: {error}"
         )
 
-        # Mesmo que o sync falhe, manter
-        # as estatísticas atualizadas.
+
+        # Mesmo que o sync falhe,
+        # continuar a atualizar o heartbeat.
 
         await update_stats_snapshot()
 

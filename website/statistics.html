@@ -20,7 +20,7 @@ Misuki — Statistics
                 Statistics
             </h1>
 
-            <p data-i18n="common.hero_description">
+            <p data-i18n="statistics.hero_description">
                 Overview of the Misuki service and its current statistics.
             </p>
 
@@ -41,7 +41,10 @@ Misuki — Statistics
                 Service overview
             </h2>
 
-            <p class="statistics-description">
+            <p
+                class="statistics-description"
+                data-i18n="statistics.service_description"
+            >
                 General statistics about the Misuki service.
             </p>
 
@@ -62,7 +65,10 @@ Misuki — Statistics
 
                     <div class="statistics-card-content">
 
-                        <span class="statistics-label">
+                        <span
+                            class="statistics-label"
+                            data-i18n="statistics.servers"
+                        >
                             Servers
                         </span>
 
@@ -85,7 +91,10 @@ Misuki — Statistics
 
                     <div class="statistics-card-content">
 
-                        <span class="statistics-label">
+                        <span
+                            class="statistics-label"
+                            data-i18n="statistics.users"
+                        >
                             Users
                         </span>
 
@@ -108,7 +117,10 @@ Misuki — Statistics
 
                     <div class="statistics-card-content">
 
-                        <span class="statistics-label">
+                        <span
+                            class="statistics-label"
+                            data-i18n="statistics.channels"
+                        >
                             Channels
                         </span>
 
@@ -131,8 +143,11 @@ Misuki — Statistics
 
                     <div class="statistics-card-content">
 
-                        <span class="statistics-label">
-                                Commands available
+                        <span
+                            class="statistics-label"
+                            data-i18n="statistics.commands_available"
+                        >
+                            Commands available
                         </span>
 
                         <strong class="statistics-value">
@@ -154,7 +169,10 @@ Misuki — Statistics
 
                     <div class="statistics-card-content">
 
-                        <span class="statistics-label">
+                        <span
+                            class="statistics-label"
+                            data-i18n="statistics.tickets_created"
+                        >
                             Tickets created
                         </span>
 
@@ -177,7 +195,10 @@ Misuki — Statistics
 
                     <div class="statistics-card-content">
 
-                        <span class="statistics-label">
+                        <span
+                            class="statistics-label"
+                            data-i18n="statistics.verifications"
+                        >
                             Verifications
                         </span>
 
@@ -204,11 +225,14 @@ Misuki — Statistics
 
         <div class="container">
 
-            <h2>
+            <h2 data-i18n="statistics.system_status">
                 System status
             </h2>
 
-            <p class="statistics-description">
+            <p
+                class="statistics-description"
+                data-i18n="statistics.status_description"
+            >
                 Current status of the Misuki service.
             </p>
 
@@ -222,10 +246,15 @@ Misuki — Statistics
                     <div class="status-indicator"></div>
 
                     <div>
-                        <strong>Discord Bot</strong>
+
+                        <strong data-i18n="statistics.discord_bot">
+                            Discord Bot
+                        </strong>
+
                         <span>
                             {{ statistics.bot_status if statistics is defined and statistics.bot_status is defined else "—" }}
                         </span>
+
                     </div>
 
                 </div>
@@ -238,10 +267,15 @@ Misuki — Statistics
                     <div class="status-indicator"></div>
 
                     <div>
-                        <strong>Website</strong>
-                        <span>
+
+                        <strong data-i18n="statistics.website">
+                            Website
+                        </strong>
+
+                        <span data-i18n="statistics.operational">
                             Operational
                         </span>
+
                     </div>
 
                 </div>
@@ -254,10 +288,15 @@ Misuki — Statistics
                     <div class="status-indicator"></div>
 
                     <div>
-                        <strong>Database</strong>
+
+                        <strong data-i18n="statistics.database">
+                            Database
+                        </strong>
+
                         <span>
                             {{ statistics.database_status if statistics is defined and statistics.database_status is defined else "—" }}
                         </span>
+
                     </div>
 
                 </div>
@@ -270,10 +309,15 @@ Misuki — Statistics
                     <div class="status-indicator"></div>
 
                     <div>
-                        <strong>API</strong>
+
+                        <strong data-i18n="statistics.api">
+                            API
+                        </strong>
+
                         <span>
                             {{ statistics.api_status if statistics is defined and statistics.api_status is defined else "—" }}
                         </span>
+
                     </div>
 
                 </div>
@@ -293,37 +337,59 @@ Misuki — Statistics
 
         <div class="container">
 
-            <h2>
+            <h2 data-i18n="statistics.performance">
                 Performance
             </h2>
 
-            <p class="statistics-description">
+            <p
+                class="statistics-description"
+                data-i18n="statistics.performance_description"
+            >
                 Current performance information.
             </p>
 
 
             <div class="performance-grid">
 
+                <!-- LATENCY -->
+
                 <div class="performance-card">
 
-                    <span class="statistics-label">
+                    <span
+                        class="statistics-label"
+                        data-i18n="statistics.bot_latency"
+                    >
                         Bot latency
                     </span>
 
                     <strong class="performance-value">
+
                         {% if statistics is defined and statistics.latency is not none %}
-                            {{ statistics.latency }} ms
+
+                            {{ statistics.latency }}
+                            <span data-i18n="common.milliseconds">
+                                ms
+                            </span>
+
                         {% else %}
+
                             —
+
                         {% endif %}
+
                     </strong>
 
                 </div>
 
 
+                <!-- UPTIME -->
+
                 <div class="performance-card">
 
-                    <span class="statistics-label">
+                    <span
+                        class="statistics-label"
+                        data-i18n="statistics.uptime"
+                    >
                         Uptime
                     </span>
 
@@ -334,9 +400,14 @@ Misuki — Statistics
                 </div>
 
 
+                <!-- VERSION -->
+
                 <div class="performance-card">
 
-                    <span class="statistics-label">
+                    <span
+                        class="statistics-label"
+                        data-i18n="statistics.version"
+                    >
                         Version
                     </span>
 
@@ -368,17 +439,23 @@ Misuki — Statistics
 
                 <div>
 
-                    <h2>
+                    <h2 data-i18n="statistics.administrator_statistics">
                         🔐 Administrator statistics
                     </h2>
 
-                    <p class="statistics-description">
+                    <p
+                        class="statistics-description"
+                        data-i18n="statistics.admin_description"
+                    >
                         Detailed information available only to Miskui administrators.
                     </p>
 
                 </div>
 
-                <span class="admin-badge">
+                <span
+                    class="admin-badge"
+                    data-i18n="statistics.admin_badge"
+                >
                     ADMIN
                 </span>
 
@@ -391,7 +468,7 @@ Misuki — Statistics
 
             <div class="admin-subsection">
 
-                <h3>
+                <h3 data-i18n="statistics.servers">
                     Servers
                 </h3>
 
@@ -404,16 +481,21 @@ Misuki — Statistics
                     <div class="admin-server-card">
 
                         {% if server.icon %}
+
                         <img
                             src="{{ server.icon }}"
                             alt=""
                             class="admin-server-icon"
                         >
+
                         {% else %}
+
                         <div class="admin-server-icon-placeholder">
                             🏠
                         </div>
+
                         {% endif %}
+
 
                         <div class="admin-server-info">
 
@@ -422,17 +504,27 @@ Misuki — Statistics
                             </strong>
 
                             {% if server.id %}
+
                             <span>
-                                ID: {{ server.id }}
+
+                                <span data-i18n="statistics.id">
+                                    ID
+                                </span>:
+
+                                {{ server.id }}
+
                             </span>
+
                             {% endif %}
 
                         </div>
 
+
                         {% if server.members is defined %}
+
                         <div class="admin-server-stat">
 
-                            <span>
+                            <span data-i18n="statistics.members">
                                 Members
                             </span>
 
@@ -441,6 +533,7 @@ Misuki — Statistics
                             </strong>
 
                         </div>
+
                         {% endif %}
 
                     </div>
@@ -451,7 +544,10 @@ Misuki — Statistics
 
                 {% else %}
 
-                <div class="statistics-empty">
+                <div
+                    class="statistics-empty"
+                    data-i18n="statistics.no_server_information"
+                >
                     No server information available.
                 </div>
 
@@ -466,7 +562,7 @@ Misuki — Statistics
 
             <div class="admin-subsection">
 
-                <h3>
+                <h3 data-i18n="statistics.users">
                     Users
                 </h3>
 
@@ -479,16 +575,21 @@ Misuki — Statistics
                     <div class="admin-user-card">
 
                         {% if user.avatar %}
+
                         <img
                             src="{{ user.avatar }}"
                             alt=""
                             class="admin-user-avatar"
                         >
+
                         {% else %}
+
                         <div class="admin-user-avatar-placeholder">
                             👤
                         </div>
+
                         {% endif %}
+
 
                         <div class="admin-user-info">
 
@@ -497,9 +598,17 @@ Misuki — Statistics
                             </strong>
 
                             {% if user.id %}
+
                             <span>
-                                ID: {{ user.id }}
+
+                                <span data-i18n="statistics.id">
+                                    ID
+                                </span>:
+
+                                {{ user.id }}
+
                             </span>
+
                             {% endif %}
 
                         </div>
@@ -512,7 +621,10 @@ Misuki — Statistics
 
                 {% else %}
 
-                <div class="statistics-empty">
+                <div
+                    class="statistics-empty"
+                    data-i18n="statistics.no_user_information"
+                >
                     No user information available.
                 </div>
 
@@ -527,11 +639,13 @@ Misuki — Statistics
 
             <div class="admin-subsection">
 
-                <h3>
+                <h3 data-i18n="statistics.activity">
                     Activity
                 </h3>
 
                 <div class="statistics-grid admin-statistics-grid">
+
+                    <!-- COMMANDS -->
 
                     <div class="statistics-card">
 
@@ -541,7 +655,10 @@ Misuki — Statistics
 
                         <div class="statistics-card-content">
 
-                            <span class="statistics-label">
+                            <span
+                                class="statistics-label"
+                                data-i18n="statistics.commands"
+                            >
                                 Commands
                             </span>
 
@@ -554,6 +671,8 @@ Misuki — Statistics
                     </div>
 
 
+                    <!-- TICKETS -->
+
                     <div class="statistics-card">
 
                         <div class="statistics-card-icon">
@@ -562,7 +681,10 @@ Misuki — Statistics
 
                         <div class="statistics-card-content">
 
-                            <span class="statistics-label">
+                            <span
+                                class="statistics-label"
+                                data-i18n="statistics.tickets"
+                            >
                                 Tickets
                             </span>
 
@@ -575,6 +697,8 @@ Misuki — Statistics
                     </div>
 
 
+                    <!-- MODERATION -->
+
                     <div class="statistics-card">
 
                         <div class="statistics-card-icon">
@@ -583,7 +707,10 @@ Misuki — Statistics
 
                         <div class="statistics-card-content">
 
-                            <span class="statistics-label">
+                            <span
+                                class="statistics-label"
+                                data-i18n="statistics.moderation_actions"
+                            >
                                 Moderation actions
                             </span>
 
@@ -596,6 +723,8 @@ Misuki — Statistics
                     </div>
 
 
+                    <!-- ANNOUNCEMENTS -->
+
                     <div class="statistics-card">
 
                         <div class="statistics-card-icon">
@@ -604,7 +733,10 @@ Misuki — Statistics
 
                         <div class="statistics-card-content">
 
-                            <span class="statistics-label">
+                            <span
+                                class="statistics-label"
+                                data-i18n="statistics.announcements"
+                            >
                                 Announcements
                             </span>
 
@@ -643,11 +775,11 @@ Misuki — Statistics
 
                 <div>
 
-                    <h3>
+                    <h3 data-i18n="statistics.privacy">
                         Privacy
                     </h3>
 
-                    <p>
+                    <p data-i18n="statistics.privacy_description">
                         Public statistics are presented in an aggregated form.
                         Specific server and user information is restricted to
                         authorized Miskui administrators.
@@ -660,6 +792,21 @@ Misuki — Statistics
         </div>
 
     </section>
+
+
+    <!-- =====================================================
+         AUTOMATIC REFRESH
+    ====================================================== -->
+
+    <script>
+        (function () {
+            const REFRESH_INTERVAL = 30000;
+
+            setInterval(function () {
+                window.location.reload();
+            }, REFRESH_INTERVAL);
+        })();
+    </script>
 
 </main>
 

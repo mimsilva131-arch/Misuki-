@@ -1,0 +1,24 @@
+{
+  "servers": 2,
+  "users": 42,
+  "channels": 46,
+  "latency": 92,
+  "commands": 27,
+  "bot_status": "Online",
+  "uptime": "3s",
+  "version": "1.0.0",
+  "admin_servers": [
+    {
+      "name": "Misuki",
+      "id": "1146084969937117214",
+      "icon": "https://cdn.discordapp.com/icons/1146084969937117214/75d5bd28fc254d63389688599d9100b1.png?size=1024",
+      "members": 28
+    },
+    {
+      "name": "Servidor de Squirrel13",
+      "id": "1156602326639988867",
+      "icon": null,
+      "members": 14
+    }
+  ]
+}

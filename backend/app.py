@@ -3574,6 +3574,7 @@ def statistics():
                 file
             )
 
+
         for key in (
             "servers",
             "users",
@@ -3591,6 +3592,7 @@ def statistics():
                     bot_snapshot[key]
                 )
 
+
     except (
         OSError,
         json.JSONDecodeError,
@@ -3602,20 +3604,76 @@ def statistics():
 
 
     # =====================================================
-    # API STATUS
+    # HEARTBEAT
     # =====================================================
 
-    if statistics_data["bot_status"] == "Online":
+    current_time = time.time()
 
-        statistics_data["api_status"] = (
-            "Operational"
-        )
+    last_seen = bot_snapshot.get(
+        "last_seen"
+    )
+
+
+    if last_seen is not None:
+
+        try:
+
+            heartbeat_age = (
+                current_time
+                - float(last_seen)
+            )
+
+
+            # -------------------------------------------------
+            # 60 SEGUNDOS SEM HEARTBEAT = OFFLINE
+            # -------------------------------------------------
+
+            if heartbeat_age <= 60:
+
+                statistics_data[
+                    "bot_status"
+                ] = "Online"
+
+            else:
+
+                statistics_data[
+                    "bot_status"
+                ] = "Offline"
+
+
+        except (
+            TypeError,
+            ValueError
+        ):
+
+            statistics_data[
+                "bot_status"
+            ] = "Offline"
 
     else:
 
-        statistics_data["api_status"] = (
-            "Unavailable"
-        )
+        statistics_data[
+            "bot_status"
+        ] = "Offline"
+
+
+    # =====================================================
+    # API STATUS
+    # =====================================================
+
+    if statistics_data[
+        "bot_status"
+    ] == "Online":
+
+        statistics_data[
+            "api_status"
+        ] = "Operational"
+
+    else:
+
+        statistics_data[
+            "api_status"
+        ] = "Unavailable"
 
 
     # =====================================================
@@ -3637,6 +3695,7 @@ def statistics():
             "tickets.db"
         )
 
+
         with sqlite3.connect(
             tickets_database
         ) as connection:
@@ -3652,9 +3711,13 @@ def statistics():
                 """
             ).fetchone()
 
-            statistics_data["tickets"] = int(
+
+            statistics_data[
+                "tickets"
+            ] = int(
                 result[0] or 0
             )
+
 
     except (
         OSError,
@@ -3665,7 +3728,9 @@ def statistics():
 
         database_ok = False
 
-        statistics_data["tickets"] = 0
+        statistics_data[
+            "tickets"
+        ] = 0
 
 
     # -----------------------------------------------------
@@ -3674,6 +3739,7 @@ def statistics():
 
     moderation_actions = 0
 
+
     try:
 
         moderation_database = os.path.join(
@@ -3681,6 +3747,7 @@ def statistics():
             "data",
             "moderation.db"
         )
+
 
         with sqlite3.connect(
             moderation_database
@@ -3694,9 +3761,11 @@ def statistics():
                 """
             ).fetchone()
 
+
             moderation_actions = int(
                 result[0] or 0
             )
+
 
     except (
         OSError,
@@ -3738,6 +3807,7 @@ def statistics():
     # =====================================================
 
     admin_servers = []
+
 
     if user_is_admin:
 
@@ -3785,11 +3855,14 @@ def statistics():
         user=current_user,
 
         # IMPORTANTE:
-        # is_admin tem de continuar a ser a função,
-        # porque o base.html usa is_admin(user).
+        # is_admin continua a ser a função.
+        # O base.html usa is_admin(user).
+
         is_admin=is_admin,
 
-        # Resultado True/False para a página Statistics.
+        # Resultado True/False para a área
+        # administrativa da Statistics.
+
         is_miskui_admin=user_is_admin,
 
         statistics=statistics_data,
