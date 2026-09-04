@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="pt-PT">
 
 <head>
@@ -10,7 +11,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Verificação — Misuki</title>
+    <title>Verificação — Miskui</title>
 
     <style>
 
@@ -25,7 +26,9 @@
             min-height: 100vh;
 
             display: flex;
+
             align-items: center;
+
             justify-content: center;
 
             background:
@@ -51,11 +54,14 @@
         .container {
 
             width: 100%;
+
             max-width: 460px;
 
-            background: rgba(18, 18, 27, 0.94);
+            background:
+                rgba(18, 18, 27, 0.94);
 
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border:
+                1px solid rgba(255, 255, 255, 0.08);
 
             border-radius: 18px;
 
@@ -72,21 +78,35 @@
         .icon {
 
             width: 76px;
+
             height: 76px;
 
             margin: 0 auto 24px;
 
             display: flex;
+
             align-items: center;
+
             justify-content: center;
 
             border-radius: 50%;
 
-            background: rgba(88, 101, 242, 0.14);
+            background:
+                rgba(88, 101, 242, 0.14);
 
-            border: 1px solid rgba(88, 101, 242, 0.3);
+            border:
+                1px solid rgba(88, 101, 242, 0.3);
 
             font-size: 34px;
+        }
+
+        .success-icon {
+
+            background:
+                rgba(67, 181, 129, 0.14);
+
+            border-color:
+                rgba(67, 181, 129, 0.3);
         }
 
         h1 {
@@ -112,6 +132,7 @@
         .user-box {
 
             display: flex;
+
             align-items: center;
 
             gap: 12px;
@@ -122,9 +143,11 @@
 
             margin-bottom: 24px;
 
-            background: rgba(255, 255, 255, 0.04);
+            background:
+                rgba(255, 255, 255, 0.04);
 
-            border: 1px solid rgba(255, 255, 255, 0.07);
+            border:
+                1px solid rgba(255, 255, 255, 0.07);
 
             border-radius: 12px;
         }
@@ -132,17 +155,23 @@
         .user-icon {
 
             width: 42px;
+
             height: 42px;
 
             display: flex;
+
             align-items: center;
+
             justify-content: center;
 
             border-radius: 50%;
 
-            background: rgba(88, 101, 242, 0.18);
+            background:
+                rgba(88, 101, 242, 0.18);
 
             font-size: 20px;
+
+            flex-shrink: 0;
         }
 
         .user-info {
@@ -231,6 +260,32 @@
             transform: translateY(0);
         }
 
+        .success-box {
+
+            padding: 18px;
+
+            margin-top: 20px;
+
+            background:
+                rgba(67, 181, 129, 0.08);
+
+            border:
+                1px solid rgba(67, 181, 129, 0.2);
+
+            border-radius: 12px;
+
+            color: #c9f2df;
+
+            font-size: 14px;
+
+            line-height: 1.6;
+        }
+
+        .success-box strong {
+
+            color: #ffffff;
+        }
+
         .info {
 
             margin-top: 20px;
@@ -248,7 +303,8 @@
 
             padding-top: 20px;
 
-            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            border-top:
+                1px solid rgba(255, 255, 255, 0.06);
 
             color: #666673;
 
@@ -265,13 +321,11 @@
             .container {
 
                 padding: 32px 22px;
-
             }
 
             h1 {
 
                 font-size: 24px;
-
             }
         }
 
@@ -279,94 +333,295 @@
 
 </head>
 
+
 <body>
 
     <main class="container">
 
-        <div class="icon">
-            🔐
-        </div>
 
-        <h1>
-            Verificação
-        </h1>
+        {% if verification_submitted %}
 
-        <p class="subtitle">
-            Verifique a sua conta Discord para obter
-            acesso ao servidor.
-        </p>
+            <!-- =====================================================
+                 VERIFICATION SUCCESS
+                 ===================================================== -->
 
-        {% if username %}
+            <div class="icon success-icon">
 
-        <div class="user-box">
-
-            <div class="user-icon">
-                👤
-            </div>
-
-            <div class="user-info">
-
-                <div class="user-label">
-                    Conta autenticada
-                </div>
-
-                <div class="username">
-                    {{ username }}
-                </div>
+                ✅
 
             </div>
 
-        </div>
+
+            <h1 data-i18n="verification.confirmed">
+
+                Verificação confirmada
+
+            </h1>
+
+
+            <p
+                class="subtitle"
+                data-i18n="verification.request_sent"
+            >
+
+                O seu pedido de verificação foi enviado com sucesso.
+
+            </p>
+
+
+            {% if username %}
+
+            <div class="user-box">
+
+                <div class="user-icon">
+
+                    👤
+
+                </div>
+
+
+                <div class="user-info">
+
+                    <div
+                        class="user-label"
+                        data-i18n="verification.verified_account"
+                    >
+
+                        Conta verificada
+
+                    </div>
+
+
+                    <div class="username">
+
+                        {{ username }}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+
+            {% if guild_name %}
+
+            <div class="server">
+
+                <span data-i18n="verification.server">
+
+                    Servidor
+
+                </span>:
+
+                <strong>
+
+                    {{ guild_name }}
+
+                </strong>
+
+            </div>
+
+            {% endif %}
+
+
+            <div class="success-box">
+
+                <strong
+                    data-i18n="verification.received"
+                >
+
+                    O Miskui recebeu o seu pedido.
+
+                </strong>
+
+
+                <br>
+
+
+                <span
+                    data-i18n="verification.processing"
+                >
+
+                    O bot irá processar a verificação e atribuir
+                    o cargo correspondente no servidor.
+
+                </span>
+
+            </div>
+
+
+            <p
+                class="info"
+                data-i18n="verification.return_discord"
+            >
+
+                Pode voltar ao Discord. Se a atribuição do cargo
+                demorar alguns segundos, aguarde enquanto o Miskui
+                processa o pedido.
+
+            </p>
+
+
+        {% else %}
+
+            <!-- =====================================================
+                 VERIFICATION FORM
+                 ===================================================== -->
+
+            <div class="icon">
+
+                🔐
+
+            </div>
+
+
+            <h1 data-i18n="verification.title">
+
+                Confirmar verificação
+
+            </h1>
+
+
+            <p
+                class="subtitle"
+                data-i18n="verification.subtitle"
+            >
+
+                Confirme a sua conta Discord para obter
+                acesso ao servidor.
+
+            </p>
+
+
+            {% if username %}
+
+            <div class="user-box">
+
+                <div class="user-icon">
+
+                    👤
+
+                </div>
+
+
+                <div class="user-info">
+
+                    <div
+                        class="user-label"
+                        data-i18n="verification.authenticated_account"
+                    >
+
+                        Conta autenticada
+
+                    </div>
+
+
+                    <div class="username">
+
+                        {{ username }}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+
+            {% if guild_name %}
+
+            <div class="server">
+
+                <span data-i18n="verification.server">
+
+                    Servidor
+
+                </span>:
+
+                <strong>
+
+                    {{ guild_name }}
+
+                </strong>
+
+            </div>
+
+            {% endif %}
+
+
+            <form
+                method="POST"
+                action="/verify"
+            >
+
+                <input
+                    type="hidden"
+                    name="guild_id"
+                    value="{{ guild_id }}"
+                >
+
+
+                <button
+                    type="submit"
+                    class="verify-button"
+                >
+
+                    🔐
+
+                    <span data-i18n="verification.confirm">
+
+                        Confirmar verificação
+
+                    </span>
+
+                </button>
+
+            </form>
+
+
+            <p
+                class="info"
+                data-i18n="verification.info"
+            >
+
+                Ao continuar, o Miskui irá confirmar a sua
+                conta Discord e enviar um pedido ao bot para
+                atribuir o cargo de verificação.
+
+            </p>
 
         {% endif %}
 
-        {% if guild_name %}
 
-        <div class="server">
+        <div class="footer">
 
-            Servidor:
+            <span data-i18n="verification.footer">
+
+                Protegido por
+
+            </span>
+
             <strong>
-                {{ guild_name }}
+
+                Miskui
+
             </strong>
 
         </div>
 
-        {% endif %}
-
-        <form
-            method="POST"
-            action="/verify"
-        >
-
-            <input
-                type="hidden"
-                name="guild_id"
-                value="{{ guild_id }}"
-            >
-
-            <button
-                type="submit"
-                class="verify-button"
-            >
-                🔐 Verificar conta
-            </button>
-
-        </form>
-
-        <p class="info">
-            Ao continuar, o Misuki irá confirmar a sua
-            conta Discord e solicitar ao bot que atribua
-            o cargo de verificação.
-        </p>
-
-        <div class="footer">
-
-            Protegido por
-            <strong>Misuki</strong>
-
-        </div>
 
     </main>
+
+
+    <!-- =========================================================
+         TRANSLATION SYSTEM
+         ========================================================= -->
+
+    <script src="/static/js/translation.js"></script>
+
 
 </body>
 

@@ -55,7 +55,12 @@
 
     const translations = {
 
+        /* =====================================================
+           ENGLISH
+           ===================================================== */
+
         en: {
+
             language: {
                 select: "Select language",
                 en: "English",
@@ -183,10 +188,6 @@
                 report_problem_text: "Found a bug or something that isn't working correctly? Contact the Misuki support team through Discord."
             },
 
-            /* =====================================================
-               STATISTICS
-               ===================================================== */
-
             statistics: {
                 hero_description: "Overview of the Misuki service and its current statistics.",
                 service_description: "General statistics about the Misuki service.",
@@ -229,19 +230,39 @@
             cookies: {
                 consent: "Cookie consent",
                 title: "🍪 We use cookies",
-                description:
-                    "Misuki uses cookies to improve your experience and keep the website working correctly.",
+                description: "Misuki uses cookies to improve your experience and keep the website working correctly.",
                 accept: "Accept All",
                 essential: "Essential Only",
                 deny: "Deny",
                 terms: "Terms",
                 privacy: "Privacy",
                 policy: "Cookie Policy"
+            },
+
+            verification: {
+                title: "Verification",
+                subtitle: "Confirm your Discord account to get access to the server.",
+                authenticated_account: "Authenticated account",
+                verified_account: "Verification account",
+                server: "Server",
+                confirm: "Confirm verification",
+                confirmed: "Verification confirmed",
+                request_sent: "Your verification request was sent successfully.",
+                received: "Miskui received your request.",
+                processing: "The bot will process your verification and assign the appropriate role on the server.",
+                return_discord: "You can return to Discord. If the role takes a few seconds to be assigned, please wait while Miskui processes your request.",
+                info: "By continuing, Miskui will confirm your Discord account and send a verification request to the bot to assign your verification role.",
+                footer: "Protected by Miskui"
             }
         },
 
 
+        /* =====================================================
+           PORTUGUÊS
+           ===================================================== */
+
         pt: {
+
             language: {
                 select: "Selecionar idioma",
                 en: "Inglês",
@@ -319,8 +340,7 @@
             },
 
             footer: {
-                copyright:
-                    "© 2026 Misuki. Todos os direitos reservados."
+                copyright: "© 2026 Misuki. Todos os direitos reservados."
             },
 
             common: {
@@ -370,10 +390,6 @@
                 report_problem_text: "Encontrou um erro ou algo que não está a funcionar corretamente? Contacte a equipa de suporte do Misuki através do Discord."
             },
 
-            /* =====================================================
-               ESTATÍSTICAS
-               ===================================================== */
-
             statistics: {
                 hero_description: "Visão geral do serviço Misuki e das suas estatísticas atuais.",
                 service_description: "Estatísticas gerais sobre o serviço Misuki.",
@@ -416,19 +432,39 @@
             cookies: {
                 consent: "Consentimento de cookies",
                 title: "🍪 Utilizamos cookies",
-                description:
-                    "O Misuki utiliza cookies para melhorar a sua experiência e manter o website a funcionar corretamente.",
+                description: "O Misuki utiliza cookies para melhorar a sua experiência e manter o website a funcionar corretamente.",
                 accept: "Aceitar todos",
                 essential: "Apenas essenciais",
                 deny: "Recusar",
                 terms: "Termos",
                 privacy: "Privacidade",
                 policy: "Política de Cookies"
+            },
+
+            verification: {
+                title: "Verificação",
+                subtitle: "Confirme a sua conta Discord para obter acesso ao servidor.",
+                authenticated_account: "Conta autenticada",
+                verified_account: "Conta verificada",
+                server: "Servidor",
+                confirm: "Confirmar verificação",
+                confirmed: "Verificação confirmada",
+                request_sent: "O seu pedido de verificação foi enviado com sucesso.",
+                received: "O Miskui recebeu o seu pedido.",
+                processing: "O bot irá processar a sua verificação e atribuir o cargo correspondente no servidor.",
+                return_discord: "Pode voltar ao Discord. Se a atribuição do cargo demorar alguns segundos, aguarde enquanto o Miskui processa o seu pedido.",
+                info: "Ao continuar, o Miskui irá confirmar a sua conta Discord e enviar um pedido de verificação ao bot para atribuir o seu cargo de verificação.",
+                footer: "Protegido por Miskui"
             }
         },
 
 
+        /* =====================================================
+           DEUTSCH
+           ===================================================== */
+
         de: {
+
             language: {
                 select: "Sprache auswählen",
                 en: "Englisch",
@@ -506,8 +542,7 @@
             },
 
             footer: {
-                copyright:
-                    "© 2026 Misuki. Alle Rechte vorbehalten."
+                copyright: "© 2026 Misuki. Alle Rechte vorbehalten."
             },
 
             common: {
@@ -557,10 +592,6 @@
                 report_problem_text: "Hast du einen Fehler gefunden oder funktioniert etwas nicht korrekt? Kontaktiere das Misuki-Supportteam über Discord."
             },
 
-            /* =====================================================
-               STATISTIKEN
-               ===================================================== */
-
             statistics: {
                 hero_description: "Übersicht über den Misuki-Dienst und seine aktuellen Statistiken.",
                 service_description: "Allgemeine Statistiken über den Misuki-Dienst.",
@@ -603,19 +634,39 @@
             cookies: {
                 consent: "Cookie-Einwilligung",
                 title: "🍪 Wir verwenden Cookies",
-                description:
-                    "Misuki verwendet Cookies, um Ihre Erfahrung zu verbessern und die Website ordnungsgemäß funktionsfähig zu halten.",
+                description: "Misuki verwendet Cookies, um Ihre Erfahrung zu verbessern und die Website ordnungsgemäß funktionsfähig zu halten.",
                 accept: "Alle akzeptieren",
                 essential: "Nur notwendige",
                 deny: "Ablehnen",
                 terms: "Bedingungen",
                 privacy: "Datenschutz",
                 policy: "Cookie-Richtlinie"
+            },
+
+            verification: {
+                title: "Verifizierung",
+                subtitle: "Bestätigen Sie Ihr Discord-Konto, um Zugriff auf den Server zu erhalten.",
+                authenticated_account: "Authentifiziertes Konto",
+                verified_account: "Verifiziertes Konto",
+                server: "Server",
+                confirm: "Verifizierung bestätigen",
+                confirmed: "Verifizierung bestätigt",
+                request_sent: "Ihre Verifizierungsanfrage wurde erfolgreich gesendet.",
+                received: "Miskui hat Ihre Anfrage erhalten.",
+                processing: "Der Bot wird Ihre Verifizierung bearbeiten und die entsprechende Rolle auf dem Server vergeben.",
+                return_discord: "Sie können zu Discord zurückkehren. Wenn die Vergabe der Rolle einige Sekunden dauert, warten Sie bitte, während Miskui Ihre Anfrage verarbeitet.",
+                info: "Wenn Sie fortfahren, bestätigt Miskui Ihr Discord-Konto und sendet eine Verifizierungsanfrage an den Bot, damit Ihre Verifizierungsrolle vergeben werden kann.",
+                footer: "Geschützt durch Miskui"
             }
         },
 
 
+        /* =====================================================
+           ESPAÑOL
+           ===================================================== */
+
         es: {
+
             language: {
                 select: "Seleccionar idioma",
                 en: "Inglés",
@@ -693,8 +744,7 @@
             },
 
             footer: {
-                copyright:
-                    "© 2026 Misuki. Todos los derechos reservados."
+                copyright: "© 2026 Misuki. Todos los derechos reservados."
             },
 
             common: {
@@ -744,10 +794,6 @@
                 report_problem_text: "¿Has encontrado un error o algo no funciona correctamente? Contacta con el equipo de soporte de Misuki a través de Discord."
             },
 
-            /* =====================================================
-               ESTADÍSTICAS
-               ===================================================== */
-
             statistics: {
                 hero_description: "Descripción general del servicio Misuki y sus estadísticas actuales.",
                 service_description: "Estadísticas generales sobre el servicio Misuki.",
@@ -790,19 +836,39 @@
             cookies: {
                 consent: "Consentimiento de cookies",
                 title: "🍪 Utilizamos cookies",
-                description:
-                    "Misuki utiliza cookies para mejorar su experiencia y mantener el sitio web funcionando correctamente.",
+                description: "Misuki utiliza cookies para mejorar su experiencia y mantener el sitio web funcionando correctamente.",
                 accept: "Aceptar todos",
                 essential: "Solo esenciales",
                 deny: "Rechazar",
                 terms: "Términos",
                 privacy: "Privacidad",
                 policy: "Política de Cookies"
+            },
+
+            verification: {
+                title: "Verificación",
+                subtitle: "Confirma tu cuenta de Discord para obtener acceso al servidor.",
+                authenticated_account: "Cuenta autenticada",
+                verified_account: "Cuenta verificada",
+                server: "Servidor",
+                confirm: "Confirmar verificación",
+                confirmed: "Verificación confirmada",
+                request_sent: "Tu solicitud de verificación se ha enviado correctamente.",
+                received: "Miskui ha recibido tu solicitud.",
+                processing: "El bot procesará tu verificación y asignará el rol correspondiente en el servidor.",
+                return_discord: "Puedes volver a Discord. Si el rol tarda unos segundos en asignarse, espera mientras Miskui procesa tu solicitud.",
+                info: "Al continuar, Miskui confirmará tu cuenta de Discord y enviará una solicitud de verificación al bot para asignar tu rol de verificación.",
+                footer: "Protegido por Miskui"
             }
         },
 
 
+        /* =====================================================
+           FRANÇAIS
+           ===================================================== */
+
         fr: {
+
             language: {
                 select: "Sélectionner la langue",
                 en: "Anglais",
@@ -880,8 +946,7 @@
             },
 
             footer: {
-                copyright:
-                    "© 2026 Misuki. Tous droits réservés."
+                copyright: "© 2026 Misuki. Tous droits réservés."
             },
 
             common: {
@@ -931,10 +996,6 @@
                 report_problem_text: "Vous avez trouvé un bug ou quelque chose ne fonctionne pas correctement ? Contactez l'équipe support de Misuki via Discord."
             },
 
-            /* =====================================================
-               STATISTIQUES
-               ===================================================== */
-
             statistics: {
                 hero_description: "Vue d’ensemble du service Misuki et de ses statistiques actuelles.",
                 service_description: "Statistiques générales du service Misuki.",
@@ -977,14 +1038,29 @@
             cookies: {
                 consent: "Consentement aux cookies",
                 title: "🍪 Nous utilisons des cookies",
-                description:
-                    "Misuki utilise des cookies pour améliorer votre expérience et assurer le bon fonctionnement du site.",
+                description: "Misuki utilise des cookies pour améliorer votre expérience et assurer le bon fonctionnement du site.",
                 accept: "Tout accepter",
                 essential: "Essentiels uniquement",
                 deny: "Refuser",
                 terms: "Conditions",
                 privacy: "Confidentialité",
                 policy: "Politique relative aux cookies"
+            },
+
+            verification: {
+                title: "Vérification",
+                subtitle: "Confirmez votre compte Discord pour obtenir l'accès au serveur.",
+                authenticated_account: "Compte authentifié",
+                verified_account: "Compte vérifié",
+                server: "Serveur",
+                confirm: "Confirmer la vérification",
+                confirmed: "Vérification confirmée",
+                request_sent: "Votre demande de vérification a été envoyée avec succès.",
+                received: "Miskui a reçu votre demande.",
+                processing: "Le bot traitera votre vérification et attribuera le rôle correspondant sur le serveur.",
+                return_discord: "Vous pouvez retourner sur Discord. Si l'attribution du rôle prend quelques secondes, veuillez patienter pendant que Miskui traite votre demande.",
+                info: "En continuant, Miskui confirmera votre compte Discord et enverra une demande de vérification au bot afin d'attribuer votre rôle de vérification.",
+                footer: "Protégé par Miskui"
             }
         }
     };
@@ -1010,8 +1086,12 @@
                 typeof value !== "object" ||
                 !(part in value)
             ) {
+
                 if (language !== DEFAULT_LANGUAGE) {
-                    return getTranslation(DEFAULT_LANGUAGE, key);
+                    return getTranslation(
+                        DEFAULT_LANGUAGE,
+                        key
+                    );
                 }
 
                 return null;
@@ -1082,13 +1162,19 @@
 
         return {
             selector:
-                document.getElementById("languageSelector"),
+                document.getElementById(
+                    "languageSelector"
+                ),
 
             button:
-                document.getElementById("languageButton"),
+                document.getElementById(
+                    "languageButton"
+                ),
 
             dropdown:
-                document.getElementById("languageDropdown")
+                document.getElementById(
+                    "languageDropdown"
+                )
         };
     }
 
@@ -1111,22 +1197,25 @@
             LANGUAGE_INFO[language] ||
             LANGUAGE_INFO[DEFAULT_LANGUAGE];
 
-
         const flag =
-            button.querySelector(".language-flag");
+            button.querySelector(
+                ".language-flag"
+            );
 
         if (flag) {
-            flag.textContent = info.flag;
+            flag.textContent =
+                info.flag;
         }
-
 
         const short =
-            button.querySelector(".language-short");
+            button.querySelector(
+                ".language-short"
+            );
 
         if (short) {
-            short.textContent = info.short;
+            short.textContent =
+                info.short;
         }
-
 
         const translatedLabel =
             getTranslation(
@@ -1134,10 +1223,10 @@
                 "language.select"
             );
 
-
         button.setAttribute(
             "aria-label",
-            translatedLabel || "Select language"
+            translatedLabel ||
+            "Select language"
         );
     }
 
@@ -1156,8 +1245,9 @@
         options.forEach(function (option) {
 
             const active =
-                option.getAttribute("data-lang") ===
-                language;
+                option.getAttribute(
+                    "data-lang"
+                ) === language;
 
             option.classList.toggle(
                 "active",
@@ -1166,7 +1256,9 @@
 
             option.setAttribute(
                 "aria-selected",
-                active ? "true" : "false"
+                active
+                    ? "true"
+                    : "false"
             );
         });
     }
@@ -1179,7 +1271,9 @@
     function translateAttributes(language) {
 
         document
-            .querySelectorAll("[data-i18n-attr]")
+            .querySelectorAll(
+                "[data-i18n-attr]"
+            )
             .forEach(function (element) {
 
                 const definitions =
@@ -1204,12 +1298,17 @@
 
                         const attribute =
                             definition
-                                .slice(0, separator)
+                                .slice(
+                                    0,
+                                    separator
+                                )
                                 .trim();
 
                         const key =
                             definition
-                                .slice(separator + 1)
+                                .slice(
+                                    separator + 1
+                                )
                                 .trim();
 
                         const translated =
@@ -1218,7 +1317,9 @@
                                 key
                             );
 
-                        if (translated !== null) {
+                        if (
+                            translated !== null
+                        ) {
 
                             element.setAttribute(
                                 attribute,
@@ -1230,27 +1331,59 @@
     }
 
 
+    /* =========================================================
+       TRANSLATE DOCUMENT TITLE
+       ========================================================= */
+
     function translateDocumentTitle(language) {
 
         const titleKeys = {
+
             "/": "common.home_title",
+
             "/dashboard": "nav.dashboard",
+
             "/reviews": "nav.reviews",
+
             "/statistics": "nav.statistics",
+
             "/documentation": "nav.documentation",
+
             "/support": "nav.support",
+
             "/advertise": "nav.advertisement",
+
             "/terms": "nav.terms",
+
             "/privacy": "nav.privacy",
+
             "/data": "nav.data",
-            "/cookies": "nav.cookies"
+
+            "/cookies": "nav.cookies",
+
+            "/verify": "verification.title"
         };
 
-        const key = titleKeys[window.location.pathname];
-        const translated = key ? getTranslation(language, key) : null;
+        const key =
+            titleKeys[
+                window.location.pathname
+            ];
 
-        if (translated !== null) {
-            document.title = translated + " — Misuki";
+        const translated =
+            key
+                ? getTranslation(
+                    language,
+                    key
+                )
+                : null;
+
+        if (
+            translated !== null
+        ) {
+
+            document.title =
+                translated +
+                " — Misuki";
         }
     }
 
@@ -1262,14 +1395,19 @@
     function translatePage(language) {
 
         if (
-            !SUPPORTED_LANGUAGES.includes(language)
+            !SUPPORTED_LANGUAGES.includes(
+                language
+            )
         ) {
-            language = DEFAULT_LANGUAGE;
+
+            language =
+                DEFAULT_LANGUAGE;
         }
 
-
         document
-            .querySelectorAll("[data-i18n]")
+            .querySelectorAll(
+                "[data-i18n]"
+            )
             .forEach(function (element) {
 
                 const key =
@@ -1287,34 +1425,45 @@
                         key
                     );
 
-                if (translated !== null) {
+                if (
+                    translated !== null
+                ) {
 
                     element.textContent =
                         translated;
                 }
             });
 
+        translateAttributes(
+            language
+        );
 
-        translateAttributes(language);
-
-        translateDocumentTitle(language);
-
+        translateDocumentTitle(
+            language
+        );
 
         document.documentElement.lang =
             language;
 
+        updateLanguageButton(
+            language
+        );
 
-        updateLanguageButton(language);
-        updateActiveLanguage(language);
-        saveLanguage(language);
+        updateActiveLanguage(
+            language
+        );
 
+        saveLanguage(
+            language
+        );
 
         window.dispatchEvent(
             new CustomEvent(
                 "misukiLanguageChanged",
                 {
                     detail: {
-                        language: language
+                        language:
+                            language
                     }
                 }
             )
@@ -1334,7 +1483,11 @@
             dropdown
         } = getLanguageElements();
 
-        if (!selector || !button || !dropdown) {
+        if (
+            !selector ||
+            !button ||
+            !dropdown
+        ) {
             return;
         }
 
@@ -1343,9 +1496,12 @@
             "active"
         );
 
-        dropdown.classList.remove("show");
+        dropdown.classList.remove(
+            "show"
+        );
 
-        dropdown.style.display = "none";
+        dropdown.style.display =
+            "none";
 
         dropdown.setAttribute(
             "aria-hidden",
@@ -1371,36 +1527,53 @@
             dropdown
         } = getLanguageElements();
 
-        if (!selector || !button || !dropdown) {
+        if (
+            !selector ||
+            !button ||
+            !dropdown
+        ) {
+
             console.warn(
                 "Misuki: language selector elements missing."
             );
+
             return;
         }
 
-
         const menu =
-            document.getElementById("menu");
-
+            document.getElementById(
+                "menu"
+            );
 
         if (
-            document.body.classList.contains("menu-open") ||
+            document.body.classList.contains(
+                "menu-open"
+            ) ||
             (
                 menu &&
                 (
-                    menu.classList.contains("open") ||
-                    menu.classList.contains("active")
+                    menu.classList.contains(
+                        "open"
+                    ) ||
+                    menu.classList.contains(
+                        "active"
+                    )
                 )
             )
         ) {
             return;
         }
 
+        selector.classList.add(
+            "open"
+        );
 
-        selector.classList.add("open");
-        dropdown.classList.add("show");
+        dropdown.classList.add(
+            "show"
+        );
 
-        dropdown.style.display = "flex";
+        dropdown.style.display =
+            "flex";
 
         dropdown.setAttribute(
             "aria-hidden",
@@ -1429,8 +1602,12 @@
         }
 
         if (
-            selector.classList.contains("open") ||
-            selector.classList.contains("active")
+            selector.classList.contains(
+                "open"
+            ) ||
+            selector.classList.contains(
+                "active"
+            )
         ) {
 
             closeLanguageDropdown();
@@ -1455,7 +1632,6 @@
         if (!button) {
             return;
         }
-
 
         button.addEventListener(
             "click",
@@ -1482,7 +1658,6 @@
                 "#languageDropdown [data-lang]"
             );
 
-
         options.forEach(function (option) {
 
             option.addEventListener(
@@ -1492,12 +1667,10 @@
                     event.preventDefault();
                     event.stopPropagation();
 
-
                     const language =
                         option.getAttribute(
                             "data-lang"
                         );
-
 
                     if (
                         !SUPPORTED_LANGUAGES.includes(
@@ -1507,14 +1680,14 @@
                         return;
                     }
 
-
-                    translatePage(language);
+                    translatePage(
+                        language
+                    );
 
                     closeLanguageDropdown();
 
                 }
             );
-
         });
     }
 
@@ -1537,7 +1710,6 @@
                     return;
                 }
 
-
                 if (
                     !selector.contains(
                         event.target
@@ -1546,7 +1718,6 @@
 
                     closeLanguageDropdown();
                 }
-
             }
         );
     }
@@ -1568,7 +1739,6 @@
 
                     closeLanguageDropdown();
                 }
-
             }
         );
     }
@@ -1581,8 +1751,9 @@
     function setupMenuIntegration() {
 
         const hamburger =
-            document.getElementById("hamburger");
-
+            document.getElementById(
+                "hamburger"
+            );
 
         if (hamburger) {
 
@@ -1596,41 +1767,45 @@
             );
         }
 
-
         const menu =
-            document.getElementById("menu");
-
+            document.getElementById(
+                "menu"
+            );
 
         if (!menu) {
             return;
         }
-
 
         const observer =
             new MutationObserver(
                 function () {
 
                     if (
-                        menu.classList.contains("open") ||
-                        menu.classList.contains("active") ||
-                        document.body.classList.contains("menu-open")
+                        menu.classList.contains(
+                            "open"
+                        ) ||
+                        menu.classList.contains(
+                            "active"
+                        ) ||
+                        document.body.classList.contains(
+                            "menu-open"
+                        )
                     ) {
 
                         closeLanguageDropdown();
                     }
-
                 }
             );
-
 
         observer.observe(
             menu,
             {
                 attributes: true,
-                attributeFilter: ["class"]
+                attributeFilter: [
+                    "class"
+                ]
             }
         );
-
 
         const bodyObserver =
             new MutationObserver(
@@ -1644,16 +1819,16 @@
 
                         closeLanguageDropdown();
                     }
-
                 }
             );
-
 
         bodyObserver.observe(
             document.body,
             {
                 attributes: true,
-                attributeFilter: ["class"]
+                attributeFilter: [
+                    "class"
+                ]
             }
         );
     }
@@ -1675,24 +1850,30 @@
             getSavedLanguage()
         );
 
+        if (
+            !selector ||
+            !button ||
+            !dropdown
+        ) {
 
-        if (!selector || !button || !dropdown) {
             console.warn(
                 "⚠️ Misuki language selector elements not found; page translation was applied."
             );
+
             return;
         }
 
-
         closeLanguageDropdown();
 
-
         setupLanguageButton();
-        setupLanguageOptions();
-        setupOutsideClick();
-        setupKeyboard();
-        setupMenuIntegration();
 
+        setupLanguageOptions();
+
+        setupOutsideClick();
+
+        setupKeyboard();
+
+        setupMenuIntegration();
 
         console.log(
             "✅ Misuki translation system initialized."
@@ -1706,7 +1887,9 @@
 
     window.MisukiTranslation = {
 
-        setLanguage: function (language) {
+        setLanguage: function (
+            language
+        ) {
 
             if (
                 !SUPPORTED_LANGUAGES.includes(
@@ -1716,34 +1899,51 @@
                 return;
             }
 
-            translatePage(language);
+            translatePage(
+                language
+            );
         },
 
         getLanguage: function () {
+
             return getSavedLanguage();
         },
 
-        getTranslation: function (language, key) {
-            return getTranslation(language, key);
+        getTranslation: function (
+            language,
+            key
+        ) {
+
+            return getTranslation(
+                language,
+                key
+            );
         },
 
         getTranslations: function () {
+
             return translations;
         },
 
         getSupportedLanguages: function () {
-            return [...SUPPORTED_LANGUAGES];
+
+            return [
+                ...SUPPORTED_LANGUAGES
+            ];
         },
 
         openLanguageSelector: function () {
+
             openLanguageDropdown();
         },
 
         closeLanguageSelector: function () {
+
             closeLanguageDropdown();
         },
 
         toggleLanguageSelector: function () {
+
             toggleLanguageDropdown();
         }
     };
@@ -1754,7 +1954,8 @@
        ========================================================= */
 
     if (
-        document.readyState === "loading"
+        document.readyState ===
+        "loading"
     ) {
 
         document.addEventListener(
