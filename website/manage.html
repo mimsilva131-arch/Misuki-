@@ -1,246 +1,10 @@
+{% extends "base.html" %}
 
-<!DOCTYPE html>
+{% block title %}
+Misuki
+{% endblock %}
 
-<html lang="en">
-
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Misuki</title>
-
-    <link
-        rel="icon"
-        type="image/png"
-        href="/assets/images/favicon.png?v=3"
-    >
-
-    <link
-        rel="shortcut icon"
-        type="image/png"
-        href="/assets/images/favicon.png?v=3"
-    >
-
-    <link
-        rel="stylesheet"
-        href="/static/css/style.css?v=16"
-    >
-
-    <link
-        rel="stylesheet"
-        href="/static/css/cookies.css?v=3"
-    >
-    <link rel="stylesheet" href="/static/css/bottom-nav.css?v=1">
-</head>
-
-
-
-
-<!-- =====================================================
-     HEADER
-====================================================== -->
-
-<header class="container">
-
-    <a
-        class="logo"
-        href="/"
-    >
-        Misuki<span>.</span>
-    </a>
-
-
-    <!-- =================================================
-         HAMBURGER
-    ================================================== -->
-
-    <button
-        class="hamburger"
-        id="hamburger"
-        type="button"
-        aria-label="Open menu"
-        aria-controls="menu"
-        aria-expanded="false"
-    >
-
-        <span></span>
-        <span></span>
-        <span></span>
-
-    </button>
-
-</header>
-
-
-<!-- =====================================================
-     OVERLAY
-====================================================== -->
-
-<div
-    class="overlay"
-    id="overlay"
-></div>
-
-
-<!-- =====================================================
-     SIDE MENU
-====================================================== -->
-
-<nav
-    class="menu"
-    id="menu"
-    aria-hidden="true"
->
-
-
-    <div class="menu-header">
-
-        <div class="menu-title">
-            Menu
-        </div>
-
-
-        <!-- =================================================
-             CLOSE BUTTON
-        ================================================== -->
-
-        <button
-            class="menu-close"
-            id="menuClose"
-            type="button"
-            aria-label="Close menu"
-        >
-            ×
-        </button>
-
-    </div>
-
-
-    <!-- =================================================
-         NAVIGATION
-    ================================================== -->
-
-    <div class="menu-section">
-        Navigation
-    </div>
-
-
-    <a href="/">
-        Home
-    </a>
-
-
-    <a href="/dashboard">
-        Dashboard
-    </a>
-
-
-    <a href="/reviews">
-        Reviews
-    </a>
-
-
-    <!-- =================================================
-         RESOURCES
-    ================================================== -->
-
-    <div class="menu-section">
-        Resources
-    </div>
-
-
-    <a href="/documentation">
-        Documentation
-    </a>
-
-
-    <a href="/support">
-        Support
-    </a>
-
-
-    <a href="/advertise">
-        Advertisement
-    </a>
-
-
-    {% if is_admin(user) %}
-
-        <a href="/admin/advertise">
-            Advertisement Admin
-        </a>
-
-    {% endif %}
-
-
-    <!-- =================================================
-         LEGAL
-    ================================================== -->
-
-    <div class="menu-section">
-        Legal
-    </div>
-
-
-    <a href="/terms">
-        Terms
-    </a>
-
-
-    <a href="/privacy">
-        Privacy
-    </a>
-
-
-    <a href="/data">
-        Data
-    </a>
-
-
-    <a href="/cookies">
-        Cookies
-    </a>
-
-
-    <!-- =================================================
-         ACCOUNT
-    ================================================== -->
-
-    <div class="menu-section">
-        Account
-    </div>
-
-
-    {% if user %}
-
-        <a href="/dashboard">
-            Dashboard
-        </a>
-
-
-        <a href="/logout">
-            Logout
-        </a>
-
-    {% else %}
-
-        <a
-            href="/login"
-            class="discord-login"
-        >
-            Login with Discord
-        </a>
-
-    {% endif %}
-
-
-</nav>
-
+{% block content %}
 
 <!-- =====================================================
      SERVER MANAGEMENT
@@ -250,7 +14,6 @@
 
     <div class="container">
 
-
         <!-- =================================================
              BACK TO DASHBOARD
         ================================================== -->
@@ -258,6 +21,7 @@
         <a
             class="manage-back"
             href="/dashboard"
+            data-i18n="license.back_to_dashboard"
         >
             ← Back to Dashboard
         </a>
@@ -269,13 +33,11 @@
 
         <div class="card manage-card">
 
-
             <!-- =================================================
                  SERVER HEADER
             ================================================== -->
 
             <div class="manage-server-header">
-
 
                 {% if guild.icon %}
 
@@ -288,9 +50,7 @@
                 {% else %}
 
                     <div class="server-icon-placeholder">
-
                         {{ guild.name[0] }}
-
                     </div>
 
                 {% endif %}
@@ -302,13 +62,11 @@
                         {{ guild.name }}
                     </h1>
 
-
                     <div class="server-id">
                         {{ guild.id }}
                     </div>
 
                 </div>
-
 
             </div>
 
@@ -319,8 +77,7 @@
 
             <div class="manage-license">
 
-
-                <h2>
+                <h2 data-i18n="license.title">
                     🔐 License
                 </h2>
 
@@ -336,29 +93,25 @@
 
                     <p>
 
-                        Status:
-
+                        <span data-i18n="license.status">Status</span>:
 
                         {% if license_active %}
 
-                            <span class="status-active">
+                            <span class="status-active" data-i18n="license.active">
                                 🟢 Active
                             </span>
 
-
                         {% elif status == "expired" %}
 
-                            <span class="status-expired">
+                            <span class="status-expired" data-i18n="license.expired">
                                 🔴 Expired
                             </span>
 
-
                         {% elif status == "revoked" %}
 
-                            <span class="status-revoked">
+                            <span class="status-revoked" data-i18n="license.revoked">
                                 ⛔ Revoked
                             </span>
-
 
                         {% else %}
 
@@ -377,7 +130,7 @@
 
                     <p>
 
-                        <strong>
+                        <strong data-i18n="license.key">
                             License Key
                         </strong>
 
@@ -385,9 +138,7 @@
 
 
                     <div class="license-key">
-
                         {{ license_data[1] }}
-
                     </div>
 
 
@@ -397,7 +148,7 @@
 
                     <p class="manage-expiration">
 
-                        <strong>
+                        <strong data-i18n="license.expires">
                             Expires
                         </strong>
 
@@ -412,7 +163,7 @@
 
                     {% else %}
 
-                        <p>
+                        <p data-i18n="license.never">
                             Never
                         </p>
 
@@ -421,158 +172,25 @@
 
                 {% else %}
 
-
                     <!-- =================================================
                          NO LICENSE
                     ================================================== -->
 
-                    <div class="empty">
+                    <div class="empty" data-i18n="license.missing">
 
                         🔒 This server does not
                         have a Misuki license.
 
                     </div>
 
-
                 {% endif %}
-
 
             </div>
 
-
         </div>
-
 
     </div>
 
 </section>
 
-
-<!-- =====================================================
-     FOOTER
-====================================================== -->
-
-<footer>
-
-    {% include "bottom-nav.html" %}
-
-    <div class="footer-copy">
-        © 2026 Misuki. All rights reserved.
-    </div>
-
-</footer>
-
-
-<!-- =====================================================
-     COOKIE BANNER
-====================================================== -->
-
-<div
-    id="misukiCookieBanner"
-    role="dialog"
-    aria-label="Cookie consent"
-    aria-live="polite"
->
-
-    <div id="misukiCookieContent">
-
-
-        <h3>
-            🍪 We use cookies
-        </h3>
-
-
-        <p>
-            Misuki uses cookies to improve your experience
-            and keep the website working correctly.
-        </p>
-
-
-        <div id="misukiCookieButtons">
-
-
-            <button
-                type="button"
-                id="misukiAccept"
-            >
-                Accept All
-            </button>
-
-
-            <button
-                type="button"
-                id="misukiEssential"
-            >
-                Essential Only
-            </button>
-
-
-            <button
-                type="button"
-                id="misukiDeny"
-            >
-                Deny
-            </button>
-
-
-        </div>
-
-
-        <div id="misukiCookieLegal">
-
-
-            <a href="/terms">
-                Terms
-            </a>
-
-
-            <a href="/privacy">
-                Privacy
-            </a>
-
-
-            <a href="/cookies">
-                Cookie Policy
-            </a>
-
-
-        </div>
-
-
-    </div>
-
-</div>
-
-
-<!-- =====================================================
-     JAVASCRIPT
-====================================================== -->
-
-<script
-    src="/static/js/stars.js?v=3"
-    defer
-></script>
-
-
-<script
-    src="/static/js/mouse-trail.js?v=3"
-    defer
-></script>
-
-
-<script
-    src="/static/js/menu.js?v=2"
-    defer
-></script>
-
-
-<script
-    src="/static/js/cookies.js?v=3"
-    defer
-></script>
-
-<script src="/static/js/translation.js?v=1" defer></script>
-</body>
-
-</html>
-
+{% endblock %}

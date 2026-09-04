@@ -5,6 +5,9 @@
 footer {
     width: 100%;
     display: block !important;
+    min-height: 220px;
+    background: #000000;
+    margin-top: auto;
 }
 
 
@@ -14,15 +17,18 @@ footer {
 
 .bottom-nav {
     width: 100%;
-    max-width: var(--container);
+    max-width: 960px;
     margin: 0 auto;
 
     padding: 40px 20px 30px;
 
     display: grid !important;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 60px;
+    gap: 40px;
 
+    justify-items: center;
+
+    background: #000000;
     border-top: 1px solid var(--border);
 }
 
@@ -39,11 +45,12 @@ footer {
     align-items: flex-start;
 
     min-width: 0;
+    /* Centers the column itself */
+    justify-self: center;
+    text-align: left;
 }
-
 .bottom-nav-column h3 {
     margin: 0 0 16px;
-
     color: var(--text);
 
     font-size: 13px;
@@ -51,6 +58,8 @@ footer {
 
     text-transform: uppercase;
     letter-spacing: 0.8px;
+
+    text-align: left;
 }
 
 .bottom-nav-column a {
@@ -63,6 +72,8 @@ footer {
     font-size: 14px;
 
     text-decoration: none;
+
+    text-align: left;
 
     transition:
         color 0.2s ease,
@@ -97,7 +108,8 @@ footer .footer-copy {
     font-size: 13px;
     line-height: 1.5;
 
-    border-top: 1px solid var(--border);
+    background: #000000;
+    border-top: 0;
 }
 
 

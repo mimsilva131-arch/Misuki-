@@ -1,197 +1,10 @@
+{% extends "base.html" %}
 
-<!DOCTYPE html>
-<html lang="en">
+{% block title %}
+Misuki — Privacy Policy
+{% endblock %}
 
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <link
-        rel="icon"
-        type="image/png"
-        href="/assets/images/favicon.png?v=3"
-    >
-
-    <link
-        rel="shortcut icon"
-        type="image/png"
-        href="/assets/images/favicon.png?v=3"
-    >
-
-    <link
-        rel="stylesheet"
-        href="/static/css/style.css?v=17"
-    >
-
-    <link
-        rel="stylesheet"
-        href="/static/css/cookies.css?v=3"
-    >
-
-    <link
-        rel="stylesheet"
-        href="/static/css/bottom-nav.css?v=1"
-    >
-
-    <title>Misuki — Privacy Policy</title>
-
-</head>
-
-<body>
-
-<header class="container">
-
-    <a
-        class="logo"
-        href="/"
-    >
-        Misuki<span>.</span>
-    </a>
-
-    <button
-        class="hamburger"
-        id="menuOpen"
-        type="button"
-        onclick="openMenu()"
-        aria-label="Open menu"
-        aria-controls="menu"
-        aria-expanded="false"
-    >
-        <span></span>
-        <span></span>
-        <span></span>
-    </button>
-
-</header>
-
-
-<div
-    class="overlay"
-    id="overlay"
-    onclick="closeMenu()"
-></div>
-
-
-<nav
-    class="menu"
-    id="menu"
-    aria-hidden="true"
->
-
-    <div class="menu-header">
-
-        <div class="menu-title">
-            Menu
-        </div>
-
-        <button
-            class="menu-close"
-            id="menuClose"
-            type="button"
-            onclick="closeMenu()"
-            aria-label="Close menu"
-        >
-            ×
-        </button>
-
-    </div>
-
-
-    <div class="menu-section">
-        Navigation
-    </div>
-
-    <a href="/">
-        Home
-    </a>
-
-    <a href="/dashboard">
-        Dashboard
-    </a>
-
-    <a href="/reviews">
-        Reviews
-    </a>
-
-
-    <div class="menu-section">
-        Resources
-    </div>
-
-    <a href="/documentation">
-        Documentation
-    </a>
-
-    <a href="/support">
-        Support
-    </a>
-
-    <a href="/advertise">
-        Advertisement
-    </a>
-
-    {% if is_admin(user) %}
-
-        <a href="/admin/advertise">
-            Advertisement Admin
-        </a>
-
-    {% endif %}
-
-
-    <div class="menu-section">
-        Legal
-    </div>
-
-    <a href="/terms">
-        Terms
-    </a>
-
-    <a href="/privacy">
-        Privacy
-    </a>
-
-    <a href="/data">
-        Data
-    </a>
-
-    <a href="/cookies">
-        Cookies
-    </a>
-
-
-    <div class="menu-section">
-        Account
-    </div>
-
-    {% if user %}
-
-        <a href="/dashboard">
-            Dashboard
-        </a>
-
-        <a href="/logout">
-            Logout
-        </a>
-
-    {% else %}
-
-        <a
-            href="/login"
-            class="discord-login"
-        >
-            Login with Discord
-        </a>
-
-    {% endif %}
-
-</nav>
-
+{% block content %}
 
 <main>
 
@@ -201,15 +14,13 @@
 
             <div class="card legal-page">
 
-                <h1>
+                <h1 data-i18n="nav.privacy">
                     Privacy Policy
                 </h1>
-
 
                 <p class="muted">
                     Last updated: August 2026
                 </p>
-
 
                 <p>
                     This Privacy Policy explains how
@@ -218,11 +29,9 @@
                     our services.
                 </p>
 
-
                 <h2>
                     1. Information We Collect
                 </h2>
-
 
                 <p>
                     Depending on the features you use,
@@ -231,7 +40,6 @@
                     interaction with the service.
                 </p>
 
-
                 <p>
                     This may include information such as
                     your Discord user ID, username,
@@ -239,17 +47,14 @@
                     data required for Misuki to operate.
                 </p>
 
-
                 <h2>
                     2. Discord Authentication
                 </h2>
-
 
                 <p>
                     Misuki may use Discord OAuth2 to
                     authenticate users.
                 </p>
-
 
                 <p>
                     When you sign in with Discord, Discord
@@ -257,22 +62,18 @@
                     the OAuth2 scopes requested by Misuki.
                 </p>
 
-
                 <p>
                     Misuki does not receive or store your
                     Discord password.
                 </p>
 
-
                 <h2>
                     3. How We Use Information
                 </h2>
 
-
                 <p>
                     Information may be used to:
                 </p>
-
 
                 <ul>
 
@@ -298,11 +99,9 @@
 
                 </ul>
 
-
                 <h2>
                     4. Data Storage
                 </h2>
-
 
                 <p>
                     Some information may be stored in
@@ -310,23 +109,19 @@
                     of Misuki.
                 </p>
 
-
                 <p>
                     We aim to retain only information that
                     is necessary for providing the service.
                 </p>
 
-
                 <h2>
                     5. Data Sharing
                 </h2>
-
 
                 <p>
                     Misuki does not sell personal
                     information.
                 </p>
-
 
                 <p>
                     Information may be processed by
@@ -334,11 +129,9 @@
                     when necessary to operate Misuki.
                 </p>
 
-
                 <h2>
                     6. Security
                 </h2>
-
 
                 <p>
                     Reasonable technical measures are used
@@ -347,17 +140,14 @@
                     disclosure.
                 </p>
 
-
                 <p>
                     However, no online service can
                     guarantee absolute security.
                 </p>
 
-
                 <h2>
                     7. Data Retention
                 </h2>
-
 
                 <p>
                     Information is retained only for as
@@ -367,11 +157,9 @@
                     required by law.
                 </p>
 
-
                 <h2>
                     8. Your Rights
                 </h2>
-
 
                 <p>
                     Depending on applicable law, you may
@@ -381,17 +169,14 @@
                     of your data.
                 </p>
 
-
                 <p>
                     For data-related requests, please
                     contact Misuki support.
                 </p>
 
-
                 <h2>
                     9. Children's Privacy
                 </h2>
-
 
                 <p>
                     Misuki is not intended to knowingly
@@ -400,17 +185,14 @@
                     laws.
                 </p>
 
-
                 <h2>
                     10. Third-Party Services
                 </h2>
-
 
                 <p>
                     Misuki may interact with third-party
                     services, including Discord.
                 </p>
-
 
                 <p>
                     Those services have their own privacy
@@ -418,11 +200,9 @@
                     your use of them.
                 </p>
 
-
                 <h2>
                     11. Changes to This Policy
                 </h2>
-
 
                 <p>
                     This Privacy Policy may be updated
@@ -430,11 +210,9 @@
                     reflected on this page.
                 </p>
 
-
                 <h2>
                     12. Contact
                 </h2>
-
 
                 <p>
                     If you have questions about this
@@ -450,182 +228,4 @@
 
 </main>
 
-
-<footer>
-
-    {% include "bottom-nav.html" %}
-
-    <div class="footer-copy">
-        © 2026 Misuki. All rights reserved.
-    </div>
-
-</footer>
-
-
-<div id="misukiCookieBanner">
-
-    <div id="misukiCookieContent">
-
-        <h3>
-            🍪 We use cookies
-        </h3>
-
-        <p>
-            Misuki uses cookies to improve your
-            experience and keep the website working
-            correctly.
-        </p>
-
-        <div id="misukiCookieButtons">
-
-            <button
-                type="button"
-                id="misukiAccept"
-            >
-                Accept All
-            </button>
-
-            <button
-                type="button"
-                id="misukiEssential"
-            >
-                Essential Only
-            </button>
-
-            <button
-                type="button"
-                id="misukiDeny"
-            >
-                Deny
-            </button>
-
-        </div>
-
-        <div id="misukiCookieLegal">
-
-            <a href="/terms">
-                Terms
-            </a>
-
-            <a href="/privacy">
-                Privacy
-            </a>
-
-            <a href="/cookies">
-                Cookie Policy
-            </a>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-<script
-    src="/static/js/stars.js?v=3"
-    defer
-></script>
-
-<script
-    src="/static/js/mouse-trail.js?v=3"
-    defer
-></script>
-
-<script
-    src="/static/js/cookies.js?v=3"
-    defer
-></script>
-
-
-<script>
-
-    function openMenu() {
-
-        const menu = document.getElementById("menu");
-        const overlay = document.getElementById("overlay");
-        const hamburger = document.getElementById("menuOpen");
-
-        if (!menu || !overlay) {
-            return;
-        }
-
-        menu.classList.add("open");
-        overlay.classList.add("show");
-
-        document.body.classList.add("menu-open");
-
-        menu.setAttribute("aria-hidden", "false");
-
-        if (hamburger) {
-            hamburger.setAttribute("aria-expanded", "true");
-        }
-
-    }
-
-
-    function closeMenu() {
-
-        const menu = document.getElementById("menu");
-        const overlay = document.getElementById("overlay");
-        const hamburger = document.getElementById("menuOpen");
-
-        if (!menu || !overlay) {
-            return;
-        }
-
-        menu.classList.remove("open");
-        overlay.classList.remove("show");
-
-        document.body.classList.remove("menu-open");
-
-        menu.setAttribute("aria-hidden", "true");
-
-        if (hamburger) {
-            hamburger.setAttribute("aria-expanded", "false");
-        }
-
-    }
-
-
-    document.addEventListener(
-        "keydown",
-        function(event) {
-
-            if (event.key === "Escape") {
-                closeMenu();
-            }
-
-        }
-    );
-
-
-    document.addEventListener(
-        "DOMContentLoaded",
-        function() {
-
-            const menuLinks =
-                document.querySelectorAll("#menu a");
-
-            menuLinks.forEach(
-                function(link) {
-
-                    link.addEventListener(
-                        "click",
-                        function() {
-                            closeMenu();
-                        }
-                    );
-
-                }
-            );
-
-        }
-    );
-
-</script>
-<script src="/static/js/translation.js?v=1" defer></script>
-</body>
-
-</html>
-
+{% endblock %}

@@ -1,450 +1,339 @@
-<!DOCTYPE html>
-
-<html lang="en">
-
-<head>
+{% extends "base.html" %}
 
 
-<meta charset="UTF-8">
-
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
-
-<title>Advertisement Admin — Misuki</title>
+{% block title %}
+Advertisement Admin — Misuki
+{% endblock %}
 
 
-<!-- =====================================================
-     FAVICON
-====================================================== -->
-
-<link
-    rel="icon"
-    type="image/png"
-    href="/assets/images/favicon.png?v=3"
->
-
-<link
-    rel="shortcut icon"
-    type="image/png"
-    href="/assets/images/favicon.png?v=3"
->
-<link rel="stylesheet" href="/static/css/bottom-nav.css?v=1">
-
-<!-- =====================================================
-     STYLES
-====================================================== -->
-
-<link
-    rel="stylesheet"
-    href="/css/stars.css?v=3"
->
-
-<link
-    rel="stylesheet"
-    href="/css/style.css?v=16"
->
-
-<link
-    rel="stylesheet"
-    href="/css/cookies.css?v=3"
->
-<link rel="stylesheet" href="/static/css/bottom-nav.css?v=1">
-
-</head>
-
-<!-- =====================================================
-     STARS
-====================================================== -->
-
-<script
-    src="/js/stars.js?v=3"
-    defer
-></script>
-
-
-<!-- =====================================================
-     HEADER
-====================================================== -->
-
-<header class="container">
-
-    <a
-        class="logo"
-        href="/"
-    >
-        Misuki<span>.</span>
-    </a>
-
-
-    <a
-        href="/"
-        class="button manage"
-    >
-        Home
-    </a>
-
-</header>
-
+{% block content %}
 
 <!-- =====================================================
      MAIN
 ====================================================== -->
 
-<main>
+<section class="section">
 
-    <section class="section">
-
-        <div class="container">
+    <div class="container">
 
 
-            <h1>
-                 Advertisement Management
-            </h1>
+        <h1 data-i18n="nav.advertisement_admin">
+            Advertisement Management
+        </h1>
 
 
-            {% if advertisements %}
+        {% if advertisements %}
 
 
-                <div class="server-grid">
+            <div class="server-grid">
 
 
-                    {% for ad in advertisements %}
+                {% for ad in advertisements %}
 
 
-                        <div class="card server-card">
+                    <div class="card server-card">
 
 
-                            <!-- =================================================
-                                 IMAGE
-                            ================================================== -->
+                        <!-- =================================================
+                             IMAGE
+                        ================================================== -->
 
-                            {% if ad.image_url %}
+                        {% if ad.image_url %}
 
-                                <img
-                                    class="server-icon"
-                                    src="{{ ad.image_url }}"
-                                    alt="{{ ad.title }}"
-                                >
+                            <img
+                                class="server-icon"
+                                src="{{ ad.image_url }}"
+                                alt="{{ ad.title }}"
+                            >
 
-                            {% endif %}
-
-
-                            <!-- =================================================
-                                 INFORMATION
-                            ================================================== -->
-
-                            <div>
-
-                                <div class="server-name">
-
-                                    {{ ad.title }}
-
-                                </div>
+                        {% endif %}
 
 
-                                <div class="server-id">
+                        <!-- =================================================
+                             INFORMATION
+                        ================================================== -->
 
-                                    User ID:
-                                    {{ ad.user_id }}
+                        <div>
 
-                                </div>
+                            <div class="server-name">
 
-
-                                <div class="server-id">
-
-                                    Duration:
-                                    {{ ad.duration_days }}
-                                    days
-
-                                </div>
+                                {{ ad.title }}
 
                             </div>
 
 
-                            <!-- =================================================
-                                 DESCRIPTION
-                            ================================================== -->
+                            <div class="server-id">
 
-                            <p>
-
-                                {{ ad.description }}
-
-                            </p>
-
-
-                            <!-- =================================================
-                                 STATUS
-                            ================================================== -->
-
-                            <div class="badges">
-
-
-                                {% if ad.status == "pending" %}
-
-                                    <span class="badge badge-warning">
-
-                                        🟡 Pending
-
-                                    </span>
-
-
-                                {% elif ad.status == "active" %}
-
-                                    <span class="badge badge-active">
-
-                                        🟢 Active
-
-                                    </span>
-
-
-                                {% elif ad.status == "rejected" %}
-
-                                    <span class="badge badge-expired">
-
-                                        🔴 Rejected
-
-                                    </span>
-
-
-                                {% elif ad.status == "expired" %}
-
-                                    <span class="badge badge-none">
-
-                                        ⚪ Expired
-
-                                    </span>
-
-
-                                {% elif ad.status == "disabled" %}
-
-                                    <span class="badge badge-none">
-
-                                        ⚫ Disabled
-
-                                    </span>
-
-
-                                {% endif %}
-
+                                User ID:
+                                {{ ad.user_id }}
 
                             </div>
 
 
-                            <!-- =================================================
-                                 START DATE
-                            ================================================== -->
+                            <div class="server-id">
 
-                            {% if ad.start_at %}
-
-                                <p class="server-id">
-
-                                    Start:
-                                    {{ ad.start_at }}
-
-                                </p>
-
-                            {% endif %}
-
-
-                            <!-- =================================================
-                                 END DATE
-                            ================================================== -->
-
-                            {% if ad.end_at %}
-
-                                <p class="server-id">
-
-                                    End:
-                                    {{ ad.end_at }}
-
-                                </p>
-
-                            {% endif %}
-
-
-                            <!-- =================================================
-                                 REJECTION REASON
-                            ================================================== -->
-
-                            {% if ad.rejection_reason %}
-
-                                <p>
-
-                                    <strong>
-                                        Rejection reason:
-                                    </strong>
-
-                                    {{ ad.rejection_reason }}
-
-                                </p>
-
-                            {% endif %}
-
-
-                            <!-- =================================================
-                                 ACTIONS
-                            ================================================== -->
-
-                            <div class="badges">
-
-
-                                <!-- OPEN ADVERTISEMENT -->
-
-                                <a
-                                    href="{{ ad.target_url }}"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    class="button manage"
-                                >
-
-                                    🔗 Open
-
-                                </a>
-
-
-                                <!-- =================================================
-                                     PENDING
-                                ================================================== -->
-
-                                {% if ad.status == "pending" %}
-
-
-                                    <!-- APPROVE -->
-
-                                    <form
-                                        method="POST"
-                                        action="/admin/advertise/{{ ad.id }}/approve"
-                                    >
-
-                                        <button
-                                            type="submit"
-                                            class="button add"
-                                        >
-
-                                            ✅ Approve
-
-                                        </button>
-
-                                    </form>
-
-
-                                    <!-- REJECT -->
-
-                                    <form
-                                        method="POST"
-                                        action="/admin/advertise/{{ ad.id }}/reject"
-                                    >
-
-                                        <input
-                                            type="text"
-                                            name="reason"
-                                            placeholder="Reason for rejection (optional)"
-                                            maxlength="500"
-                                            autocomplete="off"
-                                        >
-
-                                        <button
-                                            type="submit"
-                                            class="button manage"
-                                        >
-
-                                            ❌ Reject
-
-                                        </button>
-
-                                    </form>
-
-
-                                <!-- =================================================
-                                     ACTIVE
-                                ================================================== -->
-
-                                {% elif ad.status == "active" %}
-
-
-                                    <!-- DISABLE -->
-
-                                    <form
-                                        method="POST"
-                                        action="/admin/advertise/{{ ad.id }}/disable"
-                                    >
-
-                                        <button
-                                            type="submit"
-                                            class="button manage"
-                                        >
-
-                                            ⛔ Disable
-
-                                        </button>
-
-                                    </form>
-
-
-                                {% endif %}
-
+                                Duration:
+                                {{ ad.duration_days }}
+                                days
 
                             </div>
+
+                        </div>
+
+
+                        <!-- =================================================
+                             DESCRIPTION
+                        ================================================== -->
+
+                        <p>
+
+                            {{ ad.description }}
+
+                        </p>
+
+
+                        <!-- =================================================
+                             STATUS
+                        ================================================== -->
+
+                        <div class="badges">
+
+
+                            {% if ad.status == "pending" %}
+
+                                <span class="badge badge-warning">
+
+                                    🟡 Pending
+
+                                </span>
+
+
+                            {% elif ad.status == "active" %}
+
+                                <span class="badge badge-active">
+
+                                    🟢 Active
+
+                                </span>
+
+
+                            {% elif ad.status == "rejected" %}
+
+                                <span class="badge badge-expired">
+
+                                    🔴 Rejected
+
+                                </span>
+
+
+                            {% elif ad.status == "expired" %}
+
+                                <span class="badge badge-none">
+
+                                    ⚪ Expired
+
+                                </span>
+
+
+                            {% elif ad.status == "disabled" %}
+
+                                <span class="badge badge-none">
+
+                                    ⚫ Disabled
+
+                                </span>
+
+
+                            {% endif %}
 
 
                         </div>
 
 
-                    {% endfor %}
+                        <!-- =================================================
+                             START DATE
+                        ================================================== -->
+
+                        {% if ad.start_at %}
+
+                            <p class="server-id">
+
+                                Start:
+                                {{ ad.start_at }}
+
+                            </p>
+
+                        {% endif %}
 
 
-                </div>
+                        <!-- =================================================
+                             END DATE
+                        ================================================== -->
+
+                        {% if ad.end_at %}
+
+                            <p class="server-id">
+
+                                End:
+                                {{ ad.end_at }}
+
+                            </p>
+
+                        {% endif %}
 
 
-            {% else %}
+                        <!-- =================================================
+                             REJECTION REASON
+                        ================================================== -->
+
+                        {% if ad.rejection_reason %}
+
+                            <p>
+
+                                <strong>
+                                    Rejection reason:
+                                </strong>
+
+                                {{ ad.rejection_reason }}
+
+                            </p>
+
+                        {% endif %}
 
 
-                <!-- =================================================
-                     EMPTY
-                ================================================== -->
+                        <!-- =================================================
+                             ACTIONS
+                        ================================================== -->
 
-                <div class="empty">
-
-                    No advertisements yet.
-
-                </div>
-
-            {% endif %}
+                        <div class="badges">
 
 
-        </div>
+                            <!-- OPEN ADVERTISEMENT -->
 
-    </section>
+                            <a
+                                href="{{ ad.target_url }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="button manage"
+                            >
 
-</main>
+                                🔗 Open
 
-
-
-
-
-<!-- =====================================================
-     COOKIE JAVASCRIPT
-====================================================== -->
-
+                            </a>
 
 
-<!-- =====================================================
-     FOOTER
-====================================================== -->
+                            <!-- =================================================
+                                 PENDING
+                            ================================================== -->
 
-<footer>
+                            {% if ad.status == "pending" %}
 
-    {% include "bottom-nav.html" %}
 
-    <div class="footer-copy">
-        © 2026 Misuki. All rights reserved.
+                                <!-- APPROVE -->
+
+                                <form
+                                    method="POST"
+                                    action="/admin/advertise/{{ ad.id }}/approve"
+                                >
+
+                                    <button
+                                        type="submit"
+                                        class="button add"
+                                    >
+
+                                        ✅ Approve
+
+                                    </button>
+
+                                </form>
+
+
+                                <!-- REJECT -->
+
+                                <form
+                                    method="POST"
+                                    action="/admin/advertise/{{ ad.id }}/reject"
+                                >
+
+                                    <input
+                                        type="text"
+                                        name="reason"
+                                        placeholder="Reason for rejection (optional)"
+                                        maxlength="500"
+                                        autocomplete="off"
+                                    >
+
+                                    <button
+                                        type="submit"
+                                        class="button manage"
+                                    >
+
+                                        ❌ Reject
+
+                                    </button>
+
+                                </form>
+
+
+                            <!-- =================================================
+                                 ACTIVE
+                            ================================================== -->
+
+                            {% elif ad.status == "active" %}
+
+
+                                <!-- DISABLE -->
+
+                                <form
+                                    method="POST"
+                                    action="/admin/advertise/{{ ad.id }}/disable"
+                                >
+
+                                    <button
+                                        type="submit"
+                                        class="button manage"
+                                    >
+
+                                        ⛔ Disable
+
+                                    </button>
+
+                                </form>
+
+
+                            {% endif %}
+
+
+                        </div>
+
+
+                    </div>
+
+
+                {% endfor %}
+
+
+            </div>
+
+
+        {% else %}
+
+
+            <!-- =================================================
+                 EMPTY
+            ================================================== -->
+
+            <div class="empty">
+
+                No advertisements yet.
+
+            </div>
+
+        {% endif %}
+
+
     </div>
 
-</footer>
+</section>
 
-<script src="/static/js/translation.js?v=1" defer></script>
-</body>
-
-</html>
+{% endblock %}

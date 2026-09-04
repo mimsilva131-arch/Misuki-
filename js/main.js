@@ -371,6 +371,8 @@
                 4
             ) + "px";
 
+        line.style.height = "1px";
+
 
         line.style.setProperty(
             "--trail-angle",

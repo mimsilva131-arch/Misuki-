@@ -1,8 +1,10 @@
 /* =========================================================
-   MISUKI — MAIN STYLES
+   MISUKI - MAIN STYLES
+   ========================================================= */
 
-   Responsive Desktop / Laptop / Tablet / Mobile
-========================================================= */
+/* =========================================================
+   RESET
+   ========================================================= */
 
 * {
     margin: 0;
@@ -10,62 +12,47 @@
     box-sizing: border-box;
 }
 
+/* =========================================================
+   ROOT
+   ========================================================= */
+
 :root {
     --background: #05070d;
     --background-light: #0b1020;
+
     --card: rgba(15, 22, 38, 0.78);
     --card-hover: rgba(22, 32, 55, 0.88);
+
     --text: #f5f7ff;
     --text-muted: #aab4c8;
     --text-secondary: #8e99ad;
+
     --blue: #5865f2;
     --blue-light: #91b5ff;
     --blue-bright: #78a7ff;
+
     --border: rgba(255, 255, 255, 0.08);
+
     --radius: 15px;
     --transition: 0.22s ease;
+
     --container: 1180px;
 }
 
-
 /* =========================================================
-   HTML
-========================================================= */
+   HTML / BODY
+   ========================================================= */
 
 html {
-    scroll-behavior: smooth;
+    min-height: 100%;
     background: var(--background);
-    width: 100%;
-    overflow-x: hidden;
+    scroll-behavior: smooth;
 }
-
-
-/* =========================================================
-   BODY
-========================================================= */
 
 body {
     min-height: 100vh;
-    width: 100%;
-    background:
-        radial-gradient(
-            ellipse 70% 55% at 50% 32%,
-            rgba(72, 130, 255, 0.20),
-            rgba(40, 75, 145, 0.10) 35%,
-            transparent 72%
-        ),
-        radial-gradient(
-            ellipse 55% 40% at 50% 72%,
-            rgba(70, 115, 230, 0.10),
-            transparent 70%
-        ),
-        linear-gradient(
-            180deg,
-            #080c18 0%,
-            #060a13 48%,
-            #03050a 100%
-        );
     color: var(--text);
+    background: #07080c;
     font-family:
         Inter,
         system-ui,
@@ -74,12 +61,13 @@ body {
         "Segoe UI",
         sans-serif;
     overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
-
 /* =========================================================
-   BACKGROUND LIGHT
-========================================================= */
+   BACKGROUND EFFECTS
+   ========================================================= */
 
 body::before {
     content: "";
@@ -87,219 +75,242 @@ body::before {
     inset: 0;
     pointer-events: none;
     z-index: 0;
+
     background:
         radial-gradient(
-            ellipse at center,
-            rgba(90, 145, 255, 0.11) 0%,
-            rgba(55, 95, 180, 0.06) 32%,
-            transparent 70%
+            circle at 50% 42%,
+            rgba(92, 150, 255, 0.24),
+            rgba(30, 55, 105, 0.12) 38%,
+            transparent 74%
+        ),
+        radial-gradient(
+            circle at 15% 20%,
+            rgba(88, 101, 242, 0.08),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 85% 70%,
+            rgba(120, 167, 255, 0.06),
+            transparent 30%
         );
-    opacity: 1;
 }
-
-
-/* =========================================================
-   VIGNETTE
-========================================================= */
 
 body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    background:
-        radial-gradient(
-            ellipse at center,
-            transparent 45%,
-            rgba(0, 0, 0, 0.38) 100%
-        );
+    display: none;
 }
 
-
 /* =========================================================
-   GLOBAL
-========================================================= */
+   GLOBAL ELEMENTS
+   ========================================================= */
 
 a {
     color: inherit;
+    text-decoration: none;
 }
 
 button {
-    font-family: inherit;
+    font: inherit;
 }
 
 img {
     max-width: 100%;
+    display: block;
 }
 
-header,
+/*
+   IMPORTANT:
+   Header is above main/footer so its buttons remain clickable.
+   It is still below the overlay and side menu.
+*/
+
+header {
+    position: relative;
+    z-index: 20;
+}
+
 main,
 footer {
     position: relative;
     z-index: 5;
 }
 
-
 /* =========================================================
    CONTAINER
-========================================================= */
+   ========================================================= */
 
 .container {
-    width:
-        min(
-            var(--container),
-            calc(100% - 40px)
-        );
+    width: min(
+        calc(100% - 40px),
+        var(--container)
+    );
+
     margin-inline: auto;
 }
 
-
 /* =========================================================
    HEADER
-========================================================= */
+   ========================================================= */
 
-header {
-    min-height: 82px;
+header.container {
+    min-height: 78px;
+
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 20px;
+
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
+.header-left,
+.header-right {
+    display: flex;
+    align-items: center;
+}
+
+.header-right {
+    justify-content: flex-end;
+    gap: 10px;
+    position: relative;
+    z-index: 20;
+}
 
 /* =========================================================
    LOGO
-========================================================= */
+   ========================================================= */
 
 .logo {
-    color: #ffffff;
-    font-size: 25px;
+    display: inline-flex;
+    align-items: center;
+
+    font-size: 27px;
     font-weight: 800;
-    text-decoration: none;
-    letter-spacing: -0.5px;
-    white-space: nowrap;
+    letter-spacing: -0.8px;
+
+    color: #ffffff;
+
+    transition:
+        transform var(--transition),
+        opacity var(--transition);
 }
 
 .logo span {
-    color: var(--blue-light);
+    color: var(--blue);
 }
 
+.logo:hover {
+    transform: translateY(-1px);
+    opacity: 0.9;
+}
 
 /* =========================================================
    HERO
-========================================================= */
+   ========================================================= */
 
 .hero {
     position: relative;
-    min-height:
-        clamp(
-            480px,
-            75vh,
-            620px
-        );
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 80px 0;
+    padding: 80px 0 60px;
 }
 
 .hero .container {
-    position: relative;
-    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
 }
 
-
-/* =========================================================
-   HERO ICON
-========================================================= */
-
 .hero-icon {
-    width: 92px;
-    height: 92px;
-    margin: 0 auto 28px;
+    width: 96px;
+    height: 96px;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
+    margin-bottom: 28px;
+
     border-radius: 24px;
-    background: rgba(255, 255, 255, 0.05);
-    border:
-        1px solid
-        rgba(255, 255, 255, 0.10);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(88, 101, 242, 0.20),
+            rgba(120, 167, 255, 0.08)
+        );
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
     box-shadow:
-        0 0 45px
-        rgba(88, 101, 242, 0.20);
-    overflow: hidden;
+        0 20px 60px rgba(0, 0, 0, 0.35),
+        0 0 50px rgba(88, 101, 242, 0.10);
 }
 
 .hero-icon img {
     width: 100%;
     height: 100%;
+
     object-fit: cover;
-    border-radius: inherit;
-    display: block;
+
+    border-radius: 24px;
 }
 
-
-/* =========================================================
-   HERO TITLE
-========================================================= */
-
 .hero h1 {
-    font-size:
-        clamp(
-            42px,
-            7vw,
-            86px
-        );
-    line-height: 1;
+    max-width: 850px;
+
+    margin-bottom: 18px;
+
+    font-size: clamp(42px, 7vw, 76px);
+    line-height: 0.98;
     letter-spacing: -3px;
-    font-weight: 800;
-    margin-bottom: 26px;
+    font-weight: 850;
+
+    color: #ffffff;
 }
 
 .hero h1 span {
     color: var(--blue-light);
 }
 
-
-/* =========================================================
-   HERO DESCRIPTION
-========================================================= */
-
 .hero p {
-    width: 100%;
     max-width: 680px;
-    margin: 0 auto 34px;
+
+    margin-bottom: 30px;
+
     color: var(--text-muted);
+
     font-size: 18px;
     line-height: 1.7;
 }
 
-
 /* =========================================================
    BUTTONS
-========================================================= */
+   ========================================================= */
 
 .button,
 .dashboard-button {
+    min-height: 46px;
+
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 42px;
-    padding: 11px 17px;
-    border-radius: 10px;
-    border: 1px solid transparent;
-    background: var(--blue);
-    color: white;
-    font-size: 14px;
+
+    padding: 0 20px;
+
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 11px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--blue),
+            #6875ff
+        );
+
+    color: #ffffff;
+
     font-weight: 700;
-    text-decoration: none;
     cursor: pointer;
-    box-shadow:
-        0 10px 28px
-        rgba(88, 101, 242, 0.22);
+
     transition:
         transform 0.2s ease,
         box-shadow 0.2s ease,
@@ -310,517 +321,391 @@ header {
 .button:hover,
 .dashboard-button:hover {
     transform: translateY(-2px);
-    background: #6975f5;
+
     box-shadow:
-        0 14px 34px
-        rgba(88, 101, 242, 0.32);
+        0 12px 30px rgba(88, 101, 242, 0.28);
 }
 
+.button:active,
+.dashboard-button:active {
+    transform: translateY(0);
+}
 
 /* =========================================================
    SECTIONS
-========================================================= */
+   ========================================================= */
 
 .section {
-    position: relative;
-    padding: 90px 0;
+    padding: 65px 0;
 }
 
 .section-title {
-    margin-bottom: 34px;
-    color: white;
-    font-size: 30px;
-    font-weight: 750;
-    text-align: left;
-}
+    margin-bottom: 30px;
 
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.8px;
+}
 
 /* =========================================================
    SERVER GRID
-========================================================= */
+   ========================================================= */
 
 .server-grid {
     display: grid;
+
     grid-template-columns:
         repeat(
-            3,
-            minmax(0, 1fr)
+            auto-fit,
+            minmax(280px, 1fr)
         );
-    gap: 20px;
-}
 
-
-/* =========================================================
-   CARD
-========================================================= */
-
-.card {
-    min-width: 0;
-    padding: 27px;
-    border:
-        1px solid
-        var(--border);
-    border-radius: 17px;
-    background:
-        rgba(17, 24, 39, 0.72);
-    backdrop-filter: blur(10px);
-    box-shadow:
-        0 15px 45px
-        rgba(0, 0, 0, 0.16);
-    transition:
-        transform 0.25s ease,
-        border-color 0.25s ease,
-        background 0.25s ease;
-}
-
-.card:hover {
-    transform: translateY(-4px);
-    background:
-        rgba(23, 32, 51, 0.82);
-    border-color:
-        rgba(130, 160, 255, 0.16);
-}
-
-.card h3 {
-    margin-bottom: 11px;
-    color: #ffffff;
-    font-size: 18px;
-}
-
-.card p {
-    color: var(--text-muted);
-    line-height: 1.65;
-    font-size: 14px;
-}
-
-
-/* =========================================================
-   SERVER CARD
-========================================================= */
-
-.server-card {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
     gap: 18px;
 }
 
+/* =========================================================
+   CARDS
+   ========================================================= */
+
+.card {
+    background: var(--card);
+
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+
+    backdrop-filter: blur(18px);
+
+    transition:
+        transform var(--transition),
+        box-shadow var(--transition),
+        background 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.card:hover {
+    background: var(--card-hover);
+
+    border-color:
+        rgba(120, 167, 255, 0.15);
+
+    box-shadow:
+        0 18px 45px rgba(0, 0, 0, 0.20);
+}
 
 /* =========================================================
-   SERVER TOP
-========================================================= */
+   SERVER CARD
+   ========================================================= */
+
+.server-card {
+    padding: 20px;
+}
 
 .server-top {
     display: flex;
     align-items: center;
-    gap: 13px;
-    min-width: 0;
+    gap: 14px;
+
+    margin-bottom: 18px;
 }
 
-
-/* =========================================================
-   SERVER ICON
-========================================================= */
-
-.server-icon {
-    width: 52px;
-    height: 52px;
-    flex: 0 0 52px;
-    border-radius: 13px;
-    object-fit: cover;
-    display: block;
-    background: #151d31;
-    border:
-        1px solid
-        rgba(255, 255, 255, 0.08);
-}
-
-
-/* =========================================================
-   SERVER ICON PLACEHOLDER
-========================================================= */
-
+.server-icon,
 .server-icon-placeholder {
     width: 52px;
     height: 52px;
+
     flex: 0 0 52px;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 13px;
+
+    border-radius: 14px;
+
+    overflow: hidden;
+
     background:
-        linear-gradient(
-            135deg,
-            #5865f2,
-            #7289da
-        );
-    color: white;
-    font-size: 20px;
-    font-weight: 800;
+        rgba(255, 255, 255, 0.06);
+
+    border: 1px solid
+        rgba(255, 255, 255, 0.08);
 }
 
+.server-icon img {
+    width: 100%;
+    height: 100%;
 
-/* =========================================================
-   SERVER NAME
-========================================================= */
+    object-fit: cover;
+}
+
+.server-icon-placeholder {
+    color: var(--text-muted);
+    font-size: 21px;
+}
 
 .server-name {
     min-width: 0;
+
     overflow: hidden;
-    white-space: nowrap;
     text-overflow: ellipsis;
-    color: white;
-    font-size: 15px;
-    font-weight: 700;
+    white-space: nowrap;
+
+    font-size: 17px;
+    font-weight: 750;
 }
-
-
-/* =========================================================
-   SERVER ID
-========================================================= */
 
 .server-id {
-    margin-top: 3px;
-    min-width: 0;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    color: #6f7b91;
-    font-size: 11px;
+    margin-top: 4px;
+
+    color: var(--text-secondary);
+
+    font-size: 12px;
 }
-
-
-/* =========================================================
-   BADGES
-========================================================= */
 
 .badges {
     display: flex;
-    align-items: center;
     flex-wrap: wrap;
     gap: 7px;
+
+    margin-bottom: 17px;
 }
 
 .badge {
     display: inline-flex;
     align-items: center;
-    min-height: 28px;
-    padding: 5px 9px;
-    border-radius: 8px;
-    border:
-        1px solid
-        rgba(255, 255, 255, 0.07);
-    font-size: 11px;
-    font-weight: 700;
-    white-space: nowrap;
+
+    min-height: 25px;
+    padding: 0 9px;
+
+    border-radius: 999px;
+
+    background:
+        rgba(255, 255, 255, 0.06);
+
+    border: 1px solid
+        rgba(255, 255, 255, 0.08);
+
+    color: var(--text-muted);
+
+    font-size: 12px;
+    font-weight: 650;
 }
 
 .badge-active {
+    color: #a7ffc0;
+
     background:
-        rgba(87, 242, 135, 0.10);
-    color: #75f29a;
+        rgba(65, 200, 110, 0.10);
+
+    border-color:
+        rgba(65, 200, 110, 0.20);
 }
 
 .badge-expired {
+    color: #ffaaaa;
+
     background:
-        rgba(237, 66, 69, 0.10);
-    color: #ff777a;
+        rgba(255, 70, 70, 0.10);
+
+    border-color:
+        rgba(255, 70, 70, 0.20);
 }
 
 .badge-none {
-    background:
-        rgba(255, 255, 255, 0.05);
-    color: #a3adbf;
+    color: var(--text-muted);
 }
 
 .badge-warning {
+    color: #ffd98a;
+
     background:
-        rgba(250, 166, 26, 0.10);
-    color: #ffc15c;
+        rgba(255, 190, 60, 0.10);
+
+    border-color:
+        rgba(255, 190, 60, 0.20);
 }
-
-
-/* =========================================================
-   SERVER CARD BUTTON
-========================================================= */
 
 .server-card .button {
     width: 100%;
-    margin-top: auto;
-    min-height: 43px;
 }
 
-
-/* =========================================================
-   MANAGE BUTTON
-========================================================= */
-
-.server-card .manage {
+.manage {
     background:
-        rgba(88, 101, 242, 0.16);
-    border-color:
-        rgba(115, 135, 255, 0.18);
-    color: #b8c2ff;
-    box-shadow: none;
+        rgba(255, 255, 255, 0.04);
 }
 
-.server-card .manage:hover {
+.add {
     background:
-        rgba(88, 101, 242, 0.28);
-    border-color:
-        rgba(130, 150, 255, 0.30);
-    color: #ffffff;
-    box-shadow:
-        0 10px 25px
-        rgba(88, 101, 242, 0.18);
+        linear-gradient(
+            135deg,
+            var(--blue),
+            #6875ff
+        );
 }
 
-
-/* =========================================================
-   ADD BUTTON
-========================================================= */
-
-.server-card .add {
-    background:
-        rgba(87, 242, 135, 0.12);
-    border-color:
-        rgba(87, 242, 135, 0.18);
-    color: #8af5aa;
-    box-shadow: none;
-}
-
-.server-card .add:hover {
-    background:
-        rgba(87, 242, 135, 0.20);
-    border-color:
-        rgba(87, 242, 135, 0.30);
-    color: #b8ffcb;
-}
-
-
-/* =========================================================
-   BLOCKED BUTTON
-========================================================= */
-
-.server-card .blocked {
-    background:
-        rgba(255, 255, 255, 0.045);
-    border-color:
-        rgba(255, 255, 255, 0.07);
-    color: #727c90;
+.blocked {
+    opacity: 0.6;
     cursor: not-allowed;
-    box-shadow: none;
-    transform: none;
 }
-
-.server-card .blocked:hover {
-    background:
-        rgba(255, 255, 255, 0.045);
-    transform: none;
-    box-shadow: none;
-}
-
 
 /* =========================================================
    REVIEWS
-========================================================= */
+   ========================================================= */
 
 .review-grid {
     display: grid;
+
     grid-template-columns:
         repeat(
-            3,
-            minmax(0, 1fr)
+            auto-fit,
+            minmax(280px, 1fr)
         );
-    gap: 20px;
+
+    gap: 18px;
 }
 
 .review-card {
-    min-height: 170px;
+    padding: 22px;
 }
-
-
-/* =========================================================
-   REVIEW USER
-========================================================= */
 
 .review-user {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 17px;
-    min-width: 0;
+
+    margin-bottom: 16px;
 }
-
-.review-user > div:last-child {
-    min-width: 0;
-}
-
-.review-user strong {
-    color: white;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    display: block;
-}
-
-
-/* =========================================================
-   REVIEW AVATAR
-========================================================= */
 
 .review-avatar {
     width: 42px;
     height: 42px;
+
     flex: 0 0 42px;
+
     border-radius: 50%;
+
     object-fit: cover;
+
+    background:
+        rgba(255, 255, 255, 0.06);
 }
-
-
-/* =========================================================
-   STARS
-========================================================= */
 
 .stars {
-    margin-top: 3px;
-    color: #ffd76a;
+    color: #ffd76b;
+
     letter-spacing: 1px;
-    white-space: nowrap;
 }
-
-
-/* =========================================================
-   REVIEW TEXT
-========================================================= */
 
 .review-text {
-    color: #c1c8d6;
+    color: var(--text-muted);
+
     line-height: 1.65;
-    font-size: 14px;
-    overflow-wrap: anywhere;
 }
-
-
-/* =========================================================
-   EMPTY
-========================================================= */
 
 .empty {
-    padding: 30px;
-    border:
-        1px solid
-        var(--border);
-    border-radius: 15px;
-    color: var(--text-muted);
+    padding: 35px;
+
     text-align: center;
-    overflow-wrap: anywhere;
+
+    color: var(--text-muted);
+
+    border: 1px dashed
+        rgba(255, 255, 255, 0.10);
+
+    border-radius: var(--radius);
 }
 
-
 /* =========================================================
-   LEGAL
-========================================================= */
+   LEGAL PAGES
+   ========================================================= */
 
 .legal-page {
-    width: 100%;
-    max-width: 900px;
+    max-width: 850px;
+
     margin: 0 auto;
+
+    padding: 60px 0 100px;
 }
 
 .legal-page h1 {
-    margin-bottom: 10px;
-    font-size:
-        clamp(
-            32px,
-            5vw,
-            48px
-        );
-    letter-spacing: -1.5px;
-    overflow-wrap: anywhere;
+    margin-bottom: 30px;
+
+    font-size: clamp(36px, 6vw, 56px);
+
+    letter-spacing: -2px;
 }
 
 .legal-page h2 {
-    margin-top: 34px;
+    margin-top: 35px;
     margin-bottom: 12px;
-    color: #ffffff;
-    font-size: 21px;
+
+    font-size: 23px;
 }
 
 .legal-page p,
 .legal-page li {
     color: var(--text-muted);
-    font-size: 15px;
-    line-height: 1.75;
-    overflow-wrap: anywhere;
+
+    line-height: 1.8;
 }
 
 .legal-page ul {
-    margin:
-        12px 0
-        12px 22px;
+    padding-left: 22px;
 }
 
-.legal-page .muted {
-    color: #778297;
-    font-size: 13px;
+.muted {
+    color: var(--text-muted);
 }
-
 
 /* =========================================================
    FOOTER
-========================================================= */
+   ========================================================= */
 
 footer {
-    width:
-        min(
-            var(--container),
-            calc(100% - 40px)
-        );
-    margin: 0 auto;
-    padding: 35px 0 45px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 30px;
-    color: #7f899b;
-    font-size: 13px;
-    border-top:
-        1px solid
+    padding: 45px 0 35px;
+
+    border-top: 1px solid
         rgba(255, 255, 255, 0.06);
 }
 
 .footer-links {
     display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 22px;
     flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+
+    gap: 18px;
+
+    color: var(--text-secondary);
+
+    font-size: 14px;
 }
 
 .footer-links a {
-    color: #929bad;
-    text-decoration: none;
     transition:
-        color 0.2s ease;
+        color var(--transition);
 }
 
 .footer-links a:hover {
-    color: white;
+    color: #ffffff;
 }
-
 
 /* =========================================================
    PAGE TRANSITION
-========================================================= */
+   ========================================================= */
 
 #misuki-page-transition {
     position: fixed;
     inset: 0;
-    background: #05070d;
-    opacity: 0;
+
+    z-index: 20000;
+
     pointer-events: none;
-    z-index: 2147483000;
+
+    background:
+        var(--background);
+
+    opacity: 1;
+
     transition:
         opacity 0.35s ease;
 }
@@ -835,539 +720,96 @@ html.misuki-page-ready
     opacity: 0;
 }
 
-
 /* =========================================================
    MOUSE TRAIL
-========================================================= */
+   ========================================================= */
 
 .misuki-mouse-trail {
     position: fixed;
-    left: 0;
-    top: 0;
-    width: 16px;
-    height: 2px;
-    margin: 0;
-    padding: 0;
-    border-radius: 999px;
+
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+
     pointer-events: none;
-    z-index: 999999;
+
+    z-index: 15000;
+
     background:
-        linear-gradient(
-            90deg,
-            rgba(255, 255, 255, 0),
-            rgba(145, 181, 255, 0.45),
-            rgba(255, 255, 255, 0.95)
-        );
+        rgba(120, 167, 255, 0.65);
+
     box-shadow:
-        0 0 4px
-        rgba(145, 181, 255, 0.65),
-        0 0 9px
-        rgba(120, 160, 255, 0.25);
+        0 0 18px
+        rgba(120, 167, 255, 0.45);
+
     transform:
         translate(-50%, -50%);
-    will-change:
-        opacity,
-        transform;
-    opacity: 0.75;
+
+    opacity: 0;
+
+    transition:
+        opacity 0.2s ease;
 }
-
-.misuki-mouse-trail::before,
-.misuki-mouse-trail::after {
-    display: none;
-}
-
-
-/* =========================================================
-   LARGE DESKTOP
-   1200px+
-========================================================= */
-
-@media (min-width: 1200px) {
-    .container {
-        width: min(
-            var(--container),
-            calc(100% - 48px)
-        );
-    }
-
-    .hero h1 {
-        font-size: clamp(
-            60px,
-            7vw,
-            86px
-        );
-    }
-}
-
-
-/* =========================================================
-   LAPTOP / SMALL DESKTOP
-   1051px — 1199px
-========================================================= */
-
-@media (max-width: 1199px) {
-    .server-grid,
-    .review-grid {
-        grid-template-columns:
-            repeat(
-                2,
-                minmax(0, 1fr)
-            );
-    }
-
-    .hero {
-        min-height: 560px;
-    }
-}
-
-
-/* =========================================================
-   TABLET / SMALL LAPTOP
-   801px — 1050px
-========================================================= */
-
-@media (max-width: 1050px) {
-    .container {
-        width:
-            calc(100% - 36px);
-    }
-
-    .server-grid,
-    .review-grid {
-        grid-template-columns:
-            repeat(
-                2,
-                minmax(0, 1fr)
-            );
-        gap: 18px;
-    }
-
-    .card {
-        padding: 24px;
-    }
-
-    .section {
-        padding: 75px 0;
-    }
-
-    footer {
-        width:
-            calc(100% - 36px);
-    }
-}
-
-
-/* =========================================================
-   TABLET
-   601px — 800px
-========================================================= */
-
-@media (max-width: 800px) {
-    header {
-        min-height: 72px;
-    }
-
-    .hero {
-        min-height: 540px;
-        padding:
-            60px 0
-            70px;
-    }
-
-    .hero h1 {
-        font-size:
-            clamp(
-                40px,
-                8vw,
-                64px
-            );
-        letter-spacing: -2.5px;
-    }
-
-    .hero p {
-        max-width: 620px;
-        font-size: 17px;
-    }
-
-    .section {
-        padding: 70px 0;
-    }
-
-    .section-title {
-        font-size: 28px;
-    }
-
-    footer {
-        flex-direction: column;
-        text-align: center;
-        gap: 18px;
-    }
-
-    .footer-links {
-        justify-content: center;
-        gap:
-            12px 20px;
-    }
-}
-
-
-/* =========================================================
-   MOBILE
-   481px — 600px
-========================================================= */
-
-@media (max-width: 600px) {
-    .container {
-        width:
-            calc(100% - 30px);
-    }
-
-    header {
-        min-height: 68px;
-    }
-
-    .logo {
-        font-size: 23px;
-    }
-
-    .hero {
-        min-height: auto;
-        padding:
-            65px 0
-            80px;
-    }
-
-    .hero-icon {
-        width: 78px;
-        height: 78px;
-        margin-bottom: 24px;
-        border-radius: 20px;
-    }
-
-    .hero h1 {
-        font-size:
-            clamp(
-                36px,
-                12vw,
-                52px
-            );
-        line-height: 1.02;
-        letter-spacing: -2px;
-        margin-bottom: 22px;
-    }
-
-    .hero p {
-        font-size: 16px;
-        line-height: 1.65;
-        margin-bottom: 28px;
-    }
-
-    .button,
-    .dashboard-button {
-        min-height: 44px;
-        padding:
-            11px 16px;
-        font-size: 14px;
-    }
-
-    .section {
-        padding: 60px 0;
-    }
-
-    .section-title {
-        font-size: 26px;
-        margin-bottom: 28px;
-    }
-
-    .server-grid,
-    .review-grid {
-        grid-template-columns: 1fr;
-        gap: 16px;
-    }
-
-    .card {
-        padding: 21px;
-        border-radius: 15px;
-    }
-
-    .server-card {
-        gap: 16px;
-    }
-
-    .server-top {
-        gap: 11px;
-    }
-
-    .server-icon,
-    .server-icon-placeholder {
-        width: 48px;
-        height: 48px;
-        flex-basis: 48px;
-        border-radius: 12px;
-    }
-
-    .server-name {
-        font-size: 14px;
-    }
-
-    .server-id {
-        font-size: 10px;
-    }
-
-    .review-card {
-        min-height: 0;
-    }
-
-    .review-user {
-        gap: 10px;
-    }
-
-    .review-avatar {
-        width: 40px;
-        height: 40px;
-        flex-basis: 40px;
-    }
-
-    .review-text {
-        font-size: 14px;
-        line-height: 1.6;
-    }
-
-    .empty {
-        padding: 24px 18px;
-    }
-
-    .legal-page h1 {
-        font-size:
-            clamp(
-                30px,
-                9vw,
-                42px
-            );
-        letter-spacing: -1px;
-    }
-
-    .legal-page h2 {
-        font-size: 19px;
-        margin-top: 30px;
-    }
-
-    .legal-page p,
-    .legal-page li {
-        font-size: 14px;
-        line-height: 1.7;
-    }
-
-    footer {
-        width:
-            calc(100% - 30px);
-        padding:
-            30px 0
-            38px;
-        font-size: 12px;
-    }
-
-    .footer-links {
-        gap:
-            10px 16px;
-    }
-}
-
-
-/* =========================================================
-   SMALL MOBILE
-   480px and below
-========================================================= */
-
-@media (max-width: 480px) {
-    .container {
-        width:
-            calc(100% - 22px);
-    }
-
-    header {
-        min-height: 64px;
-    }
-
-    .logo {
-        font-size: 22px;
-    }
-
-    .hero {
-        padding:
-            55px 0
-            70px;
-    }
-
-    .hero-icon {
-        width: 70px;
-        height: 70px;
-        margin-bottom: 21px;
-        border-radius: 18px;
-    }
-
-    .hero h1 {
-        font-size:
-            clamp(
-                32px,
-                12vw,
-                46px
-            );
-        letter-spacing: -1.5px;
-    }
-
-    .hero p {
-        font-size: 15px;
-        line-height: 1.6;
-    }
-
-    .button,
-    .dashboard-button {
-        width: 100%;
-        min-height: 45px;
-    }
-
-    .section {
-        padding: 52px 0;
-    }
-
-    .section-title {
-        font-size: 24px;
-    }
-
-    .card {
-        padding: 18px;
-    }
-
-    .server-grid,
-    .review-grid {
-        gap: 14px;
-    }
-
-    .badge {
-        font-size: 10px;
-        min-height: 26px;
-        padding:
-            4px 8px;
-    }
-
-    .legal-page h1 {
-        font-size: 30px;
-    }
-
-    .legal-page h2 {
-        font-size: 18px;
-    }
-
-    .legal-page p,
-    .legal-page li {
-        font-size: 14px;
-    }
-
-    footer {
-        width:
-            calc(100% - 22px);
-    }
-}
-
-
-/* =========================================================
-   TOUCH DEVICES
-========================================================= */
-
-@media (hover: none) and (pointer: coarse) {
-    .card:hover,
-    .button:hover,
-    .dashboard-button:hover {
-        transform: none;
-    }
-
-    .button,
-    .dashboard-button {
-        min-height: 44px;
-    }
-}
-
-
-/* =========================================================
-   REDUCE MOTION
-========================================================= */
-
-@media (prefers-reduced-motion: reduce) {
-    html {
-        scroll-behavior: auto;
-    }
-
-    *,
-    *::before,
-    *::after {
-        transition-duration: 0.01ms !important;
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-    }
-}
-
 
 /* =========================================================
    ADVERTISEMENTS
-========================================================= */
+   ========================================================= */
 
 .advertisement-card {
-    display: block;
-    color: inherit;
-    text-decoration: none;
+    display: flex;
+    align-items: stretch;
+
     overflow: hidden;
-    cursor: pointer;
+
+    border-radius: var(--radius);
+
+    background: var(--card);
+
+    border: 1px solid var(--border);
+
     transition:
-        transform 0.25s ease,
-        border-color 0.25s ease,
-        box-shadow 0.25s ease;
+        transform var(--transition),
+        box-shadow var(--transition);
 }
 
 .advertisement-card:hover {
-    transform: translateY(-4px);
-    border-color: rgba(255, 255, 255, 0.18);
+    transform: translateY(-2px);
+
     box-shadow:
-        0 18px 45px
-        rgba(0, 0, 0, 0.35);
+        0 15px 40px rgba(0, 0, 0, 0.22);
 }
 
 .advertisement-image {
-    display: block;
-    width: 100%;
-    max-height: 220px;
+    width: 180px;
+
+    flex: 0 0 180px;
+
     object-fit: cover;
-    border-radius: 12px;
-    margin-bottom: 16px;
 }
 
-.advertisement-content h3 {
-    margin-bottom: 8px;
+.advertisement-content {
+    padding: 22px;
 }
-
-.advertisement-content p {
-    margin: 0;
-}
-
 
 /* =========================================================
-   SERVER MANAGEMENT
-========================================================= */
+   MANAGEMENT
+   ========================================================= */
 
 .manage-card {
-    margin-top: 25px;
+    max-width: 850px;
+
+    margin: 0 auto;
+
+    padding: 25px;
 }
-
-
-/* =========================================================
-   MANAGEMENT SERVER HEADER
-========================================================= */
 
 .manage-server-header {
     display: flex;
     align-items: center;
     gap: 15px;
-    min-width: 0;
+
+    margin-bottom: 25px;
 }
 
 .manage-server-info {
@@ -1375,211 +817,102 @@ html.misuki-page-ready
 }
 
 .manage-server-info h1 {
-    margin: 0;
-    color: #ffffff;
-    font-size: 28px;
-    font-weight: 800;
-    letter-spacing: -0.8px;
-    overflow-wrap: anywhere;
+    margin-bottom: 5px;
+
+    font-size: 25px;
 }
 
+.manage-server-info p {
+    color: var(--text-muted);
 
-/* =========================================================
-   LICENSE SECTION
-========================================================= */
+    font-size: 13px;
+}
 
 .manage-license {
-    margin-top: 35px;
+    padding: 22px;
+
+    border-radius: 14px;
+
+    background:
+        rgba(255, 255, 255, 0.035);
+
+    border: 1px solid
+        rgba(255, 255, 255, 0.07);
 }
 
 .manage-license h2 {
-    margin-bottom: 18px;
-    color: #ffffff;
-    font-size: 21px;
-    font-weight: 750;
+    margin-bottom: 8px;
+
+    font-size: 19px;
 }
 
 .manage-license p {
-    margin-bottom: 10px;
-}
+    color: var(--text-muted);
 
-
-/* =========================================================
-   LICENSE STATUS
-========================================================= */
-
-.status-active,
-.status-expired,
-.status-revoked {
-    display: inline-flex;
-    align-items: center;
-    min-height: 28px;
-    margin-left: 6px;
-    padding: 5px 10px;
-    border-radius: 8px;
-    border:
-        1px solid
-        rgba(255, 255, 255, 0.07);
-    font-size: 12px;
-    font-weight: 700;
+    line-height: 1.6;
 }
 
 .status-active {
-    background:
-        rgba(87, 242, 135, 0.10);
-    border-color:
-        rgba(87, 242, 135, 0.18);
-    color: #75f29a;
+    color: #a7ffc0;
 }
 
 .status-expired {
-    background:
-        rgba(237, 66, 69, 0.10);
-    border-color:
-        rgba(237, 66, 69, 0.18);
-    color: #ff777a;
+    color: #ffaaaa;
 }
 
-.status-revoked {
-    background:
-        rgba(237, 66, 69, 0.10);
-    border-color:
-        rgba(237, 66, 69, 0.18);
-    color: #ff777a;
+.status-warning {
+    color: #ffd98a;
 }
-
-
-/* =========================================================
-   LICENSE KEY
-========================================================= */
 
 .license-key {
-    width: 100%;
-    margin-top: 8px;
-    padding: 14px 16px;
-    border:
-        1px solid
-        rgba(255, 255, 255, 0.08);
-    border-radius: 11px;
+    display: block;
+
+    margin-top: 15px;
+    padding: 13px 15px;
+
+    overflow-x: auto;
+
+    border-radius: 9px;
+
     background:
-        rgba(5, 7, 13, 0.55);
-    color: #b8c2ff;
+        rgba(0, 0, 0, 0.25);
+
+    border: 1px solid
+        rgba(255, 255, 255, 0.06);
+
+    color: #dce4ff;
+
     font-family:
         "SFMono-Regular",
         Consolas,
         "Liberation Mono",
         monospace;
+
     font-size: 13px;
-    font-weight: 600;
-    overflow-x: auto;
-    white-space: nowrap;
-    box-shadow:
-        inset 0 0 20px
-        rgba(0, 0, 0, 0.12);
 }
 
-
-/* =========================================================
-   LICENSE EXPIRATION
-========================================================= */
-
 .manage-expiration {
+    margin-top: 13px;
+
+    color: var(--text-secondary);
+}
+
+.manage-back {
     margin-top: 20px;
 }
 
-.manage-expiration strong,
-.manage-license > p strong {
-    color: #ffffff;
-}
-
-
-/* =========================================================
-   MANAGEMENT BACK LINK
-========================================================= */
-
-.manage-back {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    color: #aab4c8;
-    font-size: 14px;
-    font-weight: 600;
-    text-decoration: none;
-    transition:
-        color 0.2s ease,
-        transform 0.2s ease;
-}
-
-.manage-back:hover {
-    color: #ffffff;
-    transform: translateX(-2px);
-}
-
-
-/* =========================================================
-   MANAGEMENT EMPTY STATE
-========================================================= */
-
 .manage-license .empty {
-    margin-top: 12px;
+    margin-top: 15px;
 }
-
 
 /* =========================================================
-   MANAGEMENT RESPONSIVE
-========================================================= */
-
-@media (max-width: 600px) {
-    .manage-server-header {
-        gap: 12px;
-    }
-
-    .manage-server-info h1 {
-        font-size: 22px;
-        letter-spacing: -0.5px;
-    }
-
-    .manage-license {
-        margin-top: 28px;
-    }
-
-    .manage-license h2 {
-        font-size: 19px;
-    }
-
-    .license-key {
-        padding: 12px 13px;
-        font-size: 11px;
-    }
-
-    .status-active,
-    .status-expired,
-    .status-revoked {
-        font-size: 11px;
-        padding: 4px 8px;
-    }
-}
-
-@media (max-width: 480px) {
-    .manage-server-header {
-        align-items: flex-start;
-    }
-
-    .manage-server-info h1 {
-        font-size: 20px;
-    }
-
-    .manage-license h2 {
-        font-size: 18px;
-    }
-}
-/* =========================================================
-   MISUKI — SIDE MENU
-========================================================= */
+   HAMBURGER
+   ========================================================= */
 
 .hamburger {
     width: 44px;
     height: 44px;
+
     padding: 0;
     margin: 0;
 
@@ -1587,17 +920,23 @@ html.misuki-page-ready
     align-items: center;
     justify-content: center;
     flex-direction: column;
+
     gap: 5px;
 
     border: 0;
     border-radius: 10px;
 
-    background: rgba(255, 255, 255, 0.04);
+    background:
+        rgba(255, 255, 255, 0.04);
+
     color: #ffffff;
 
     cursor: pointer;
+
     position: relative;
     z-index: 10002;
+
+    pointer-events: auto;
 
     transition:
         background 0.2s ease,
@@ -1605,43 +944,54 @@ html.misuki-page-ready
 }
 
 .hamburger:hover {
-    background: rgba(255, 255, 255, 0.09);
+    background:
+        rgba(255, 255, 255, 0.09);
+
     transform: translateY(-1px);
 }
 
-.hamburger span {
-    display: block;
+.hamburger:active {
+    transform: translateY(0);
+}
 
-    width: 23px;
+.hamburger span {
+    width: 20px;
     height: 2px;
 
-    flex-shrink: 0;
+    display: block;
 
-    border-radius: 999px;
+    border-radius: 2px;
 
     background: #ffffff;
+
+    transition:
+        transform 0.25s ease,
+        opacity 0.25s ease;
 }
+
+/*
+   The hamburger is hidden while the side menu is open.
+*/
 
 body.menu-open .hamburger {
     display: none !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
 }
 
-
 /* =========================================================
-   MENU OVERLAY
-========================================================= */
+   OVERLAY
+   ========================================================= */
 
 .overlay {
     position: fixed;
+
     inset: 0;
 
-    background: rgba(0, 0, 0, 0.60);
+    background:
+        rgba(0, 0, 0, 0.60);
 
     opacity: 0;
     visibility: hidden;
+
     pointer-events: none;
 
     transition:
@@ -1654,14 +1004,15 @@ body.menu-open .hamburger {
 .overlay.show,
 .overlay.active {
     opacity: 1;
+
     visibility: visible;
+
     pointer-events: auto;
 }
 
-
 /* =========================================================
    SIDE MENU
-========================================================= */
+   ========================================================= */
 
 .menu {
     position: fixed;
@@ -1670,6 +1021,7 @@ body.menu-open .hamburger {
     right: 0;
 
     width: min(360px, 88vw);
+
     height: 100vh;
     height: 100dvh;
 
@@ -1681,23 +1033,24 @@ body.menu-open .hamburger {
     background:
         linear-gradient(
             180deg,
-            rgba(14, 20, 34, 0.98),
-            rgba(6, 9, 17, 0.99)
+            rgba(13, 17, 29, 0.98),
+            rgba(7, 10, 18, 0.99)
         );
 
     border-left:
-        1px solid
-        rgba(255, 255, 255, 0.08);
+        1px solid rgba(255, 255, 255, 0.08);
 
     box-shadow:
         -20px 0 60px
-        rgba(0, 0, 0, 0.35);
+        rgba(0, 0, 0, 0.45);
 
     backdrop-filter: blur(22px);
 
-    transform: translateX(100%);
+    transform:
+        translateX(100%);
 
     visibility: hidden;
+
     pointer-events: none;
 
     overflow-y: auto;
@@ -1706,7 +1059,8 @@ body.menu-open .hamburger {
     z-index: 10000;
 
     transition:
-        transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.28s
+        cubic-bezier(0.4, 0, 0.2, 1),
         visibility 0.28s ease;
 }
 
@@ -1715,55 +1069,47 @@ body.menu-open .hamburger {
     transform: translateX(0);
 
     visibility: visible;
+
     pointer-events: auto;
 }
 
-
 /* =========================================================
    MENU HEADER
-========================================================= */
+   ========================================================= */
 
 .menu-header {
-    min-height: 82px;
+    min-height: 78px;
 
     display: flex;
     align-items: center;
     justify-content: space-between;
 
-    flex-shrink: 0;
+    border-bottom:
+        1px solid rgba(255, 255, 255, 0.07);
+
+    margin-bottom: 15px;
 }
 
 .menu-title {
-    color: #ffffff;
-
-    font-size: 22px;
-    line-height: 1.2;
-
-    font-weight: 600;
+    font-size: 20px;
+    font-weight: 800;
 }
 
 .menu-close {
     width: 40px;
     height: 40px;
 
-    padding: 0;
-    margin: 0;
-
     display: flex;
     align-items: center;
     justify-content: center;
 
     border: 0;
-    border-radius: 10px;
+    border-radius: 9px;
 
-    background: rgba(255, 255, 255, 0.06);
+    background:
+        rgba(255, 255, 255, 0.05);
 
     color: #ffffff;
-
-    font-family: inherit;
-    font-size: 27px;
-    line-height: 1;
-    font-weight: 400;
 
     cursor: pointer;
 
@@ -1773,53 +1119,43 @@ body.menu-open .hamburger {
 }
 
 .menu-close:hover {
-    background: rgba(255, 255, 255, 0.12);
-    transform: rotate(90deg);
+    background:
+        rgba(255, 255, 255, 0.10);
+
+    transform: rotate(3deg);
 }
 
-
 /* =========================================================
-   MENU SECTION TITLES
-========================================================= */
+   MENU SECTIONS
+   ========================================================= */
 
 .menu-section {
-    margin-top: 18px;
-    margin-bottom: 7px;
+    margin-bottom: 25px;
+}
 
-    padding: 0 14px;
+.menu-section h3 {
+    margin-bottom: 9px;
 
-    color: #727d92;
+    color: var(--text-secondary);
 
     font-size: 11px;
-    line-height: 1.4;
-
-    font-weight: 700;
+    font-weight: 750;
 
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 
-
-/* =========================================================
-   MENU LINKS
-========================================================= */
-
 .menu a {
-    display: block;
+    display: flex;
+    align-items: center;
 
-    margin: 3px 0;
-    padding: 11px 14px;
+    min-height: 44px;
 
-    border-radius: 10px;
+    padding: 0 12px;
 
-    color: #dce2ef;
+    border-radius: 9px;
 
-    font-size: 15px;
-    line-height: 1.4;
-
-    font-weight: 400;
-
-    text-decoration: none;
+    color: var(--text-muted);
 
     transition:
         background 0.2s ease,
@@ -1828,143 +1164,75 @@ body.menu-open .hamburger {
 }
 
 .menu a:hover {
-    background: rgba(100, 140, 255, 0.10);
-
     color: #ffffff;
 
-    transform: translateX(4px);
-}
+    background:
+        rgba(255, 255, 255, 0.06);
 
-.menu a:active {
     transform: translateX(2px);
 }
 
-
 /* =========================================================
    DISCORD LOGIN
-========================================================= */
-
-.menu a.discord-login {
-    margin-top: 8px;
-
-    background:
-        rgba(88, 101, 242, 0.14);
-
-    color: #aeb8ff;
-}
-
-.menu a.discord-login:hover {
-    background:
-        rgba(88, 101, 242, 0.24);
-
-    color: #ffffff;
-}
-
-
-/* =========================================================
-   MENU SCROLLBAR
-========================================================= */
-
-.menu::-webkit-scrollbar {
-    width: 6px;
-}
-
-.menu::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.menu::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.12);
-    border-radius: 999px;
-}
-
-.menu::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.20);
-}
-
-
-/* =========================================================
-   BODY WHEN MENU IS OPEN
-========================================================= */
-
-body.menu-open {
-    overflow: hidden;
-}
-
-
-/* =========================================================
-   MOBILE MENU
-========================================================= */
-
-@media (max-width: 600px) {
-
-    .menu {
-        width: min(340px, 90vw);
-        padding: 0 20px 24px;
-    }
-
-    .menu-header {
-        min-height: 72px;
-    }
-
-    .menu-title {
-        font-size: 21px;
-    }
-
-    .menu a {
-        font-size: 15px;
-    }
-}
-
-
-/* =========================================================
-   REDUCED MOTION
-========================================================= */
-
-@media (prefers-reduced-motion: reduce) {
-
-    .menu,
-    .overlay,
-    .hamburger,
-    .menu-close,
-    .menu a {
-        transition: none !important;
-    }
-}
-
- 
-/* =========================================================
-   MISUKI — LANGUAGE SELECTOR
    ========================================================= */
 
-.misuki-language {
-    position: relative;
+.discord-login {
+    width: 100%;
 
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
 
-    flex-shrink: 0;
+    min-height: 46px;
 
-    width: auto;
-    height: 44px;
+    padding: 0 16px;
 
-    margin: 0;
-    padding: 0;
+    margin-top: auto;
 
-    z-index: 10001;
+    border-radius: 10px;
+
+    background:
+        var(--blue);
+
+    color: #ffffff;
+
+    font-weight: 750;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
+.discord-login:hover {
+    background:
+        #6875ff;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 10px 25px
+        rgba(88, 101, 242, 0.25);
+}
 
 /* =========================================================
-   BOTÃO
+   LANGUAGE SELECTOR
    ========================================================= */
 
-.misuki-language-button {
-    width: 68px;
-    height: 44px;
+.language-selector {
+    position: relative;
+    display: flex;
+    align-items: center;
+    z-index: 10003;
+    pointer-events: auto;
+}
 
-    padding: 0 10px;
+.language-button {
+    width: auto;
+    min-width: 72px;
+    height: 42px;
+
+    padding: 0 12px;
 
     display: flex;
     align-items: center;
@@ -1972,23 +1240,26 @@ body.menu-open {
 
     gap: 6px;
 
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 10px;
-
-    background: rgba(255, 255, 255, 0.04);
-
+    background: rgba(255, 255, 255, 0.06);
     color: #ffffff;
 
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+
     font-family: inherit;
-    font-size: 13px;
-    font-weight: 500;
+    font-size: 14px;
+    font-weight: 600;
 
     cursor: pointer;
-
-    outline: none;
+    pointer-events: auto;
 
     position: relative;
-    z-index: 10002;
+    z-index: 10004;
+
+    appearance: none;
+    -webkit-appearance: none;
+
+    outline: none;
 
     transition:
         background 0.2s ease,
@@ -1996,315 +1267,390 @@ body.menu-open {
         transform 0.2s ease;
 }
 
-
-/* TODO O BOTÃO É CLICÁVEL */
-
-.misuki-language-button:hover {
-    background: rgba(255, 255, 255, 0.08);
-
-    border-color: rgba(255, 255, 255, 0.14);
-
-    transform: translateY(-1px);
+.language-button:hover {
+    background: rgba(255, 255, 255, 0.10);
+    border-color: rgba(255, 255, 255, 0.20);
 }
 
-.misuki-language-button:active {
-    transform: translateY(0);
+.language-button:active {
+    transform: scale(0.97);
 }
 
+.language-button:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.35);
+    outline-offset: 2px;
+}
 
-/* =========================================================
-   BANDEIRA
-   ========================================================= */
-
-.misuki-language-flag {
-    display: inline-flex;
-
-    align-items: center;
-    justify-content: center;
-
-    width: 20px;
-    height: 20px;
-
-    font-size: 18px;
-    line-height: 1;
-
-    flex-shrink: 0;
-
+.language-button > span {
     pointer-events: none;
 }
 
-
-/* =========================================================
-   ABREVIATURA
-   ========================================================= */
-
-.misuki-language-short {
+.language-flag {
     display: inline-flex;
-
     align-items: center;
     justify-content: center;
 
     line-height: 1;
-
-    pointer-events: none;
 }
 
+.language-short {
+    line-height: 1;
+}
 
-/* =========================================================
-   SETA
-   ========================================================= */
+.language-arrow {
+    display: inline-block;
 
-.misuki-language-arrow {
-    display: inline-flex;
-
-    align-items: center;
-    justify-content: center;
-
-    font-size: 10px;
+    font-size: 9px;
     line-height: 1;
 
-    opacity: 0.7;
+    transition: transform 0.2s ease;
+}
 
-    pointer-events: none;
+.language-selector.open .language-arrow,
+.language-selector.active .language-arrow {
+    transform: rotate(180deg);
 }
 
 
 /* =========================================================
-   DROPDOWN
+   LANGUAGE DROPDOWN
    ========================================================= */
 
-.misuki-language-dropdown {
+.language-dropdown {
     position: absolute;
 
-    /*
-       Fica directamente por baixo
-       do botão de idioma.
-    */
-    top: calc(100% + 6px);
-
-    /*
-       Alinha pela direita.
-    */
+    top: calc(100% + 8px);
     right: 0;
 
-    width: 180px;
+    width: 170px;
 
     padding: 6px;
 
-    display: flex;
+    display: none;
     flex-direction: column;
 
     gap: 2px;
 
-    background: linear-gradient(
-        180deg,
-        #111522 0%,
-        #090c14 100%
-    );
+    background: #111118;
 
-    border: 1px solid rgba(255, 255, 255, 0.08);
-
+    border: 1px solid rgba(255, 255, 255, 0.10);
     border-radius: 12px;
 
     box-shadow:
-        0 20px 50px rgba(0, 0, 0, 0.5);
+        0 15px 40px rgba(0, 0, 0, 0.45);
 
-    opacity: 0;
-
-    visibility: hidden;
-
-    pointer-events: none;
-
-    transform: translateY(-6px);
-
-    transition:
-        opacity 0.2s ease,
-        transform 0.2s ease,
-        visibility 0.2s ease;
-
-    z-index: 99999;
-}
-
-
-/* DROPDOWN ABERTO */
-
-.misuki-language-dropdown.show {
-    opacity: 1;
-
-    visibility: visible;
+    z-index: 10005;
 
     pointer-events: auto;
-
-    transform: translateY(0);
 }
 
+.language-selector.open .language-dropdown,
+.language-selector.active .language-dropdown,
+.language-dropdown.show {
+    display: flex;
+}
 
-/* =========================================================
-   OPÇÕES
-   ========================================================= */
-
-.misuki-language-option {
+.language-dropdown button {
     width: 100%;
-
-    min-height: 42px;
-
-    padding: 10px 12px;
+    min-height: 40px;
 
     display: flex;
-
     align-items: center;
 
-    gap: 10px;
+    padding: 0 10px;
 
     border: 0;
-
     border-radius: 8px;
 
     background: transparent;
-
-    color: #dce2ef;
+    color: #ffffff;
 
     font-family: inherit;
-
-    font-size: 14px;
-
-    font-weight: 400;
+    font-size: 13px;
 
     text-align: left;
 
     cursor: pointer;
+    pointer-events: auto;
 
-    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
 
     transition:
         background 0.2s ease,
         color 0.2s ease;
 }
 
-.misuki-language-option:hover {
-    background: rgba(255, 255, 255, 0.07);
+.language-dropdown .language-code {
+    min-width: 24px;
+    margin-right: 10px;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: lowercase;
+}
 
+.language-dropdown button:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.language-dropdown button:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.25);
+    outline-offset: -2px;
+}
+
+.language-dropdown button.active {
+    background: rgba(88, 101, 242, 0.18);
     color: #ffffff;
 }
 
-.misuki-language-option:active {
-    background: rgba(255, 255, 255, 0.11);
+.feature-card {
+    min-height: 190px;
+    padding: 32px;
+}
+
+.feature-card h3 {
+    margin-bottom: 16px;
+}
+
+.feature-card p {
+    max-width: 34ch;
+    line-height: 1.7;
 }
 
 
-/* BANDEIRAS DENTRO DO DROPDOWN */
+/* =========================================================
+   LANGUAGE SELECTOR WHEN SIDE MENU IS OPEN
+   ========================================================= */
 
-.misuki-language-option span {
+body.menu-open .language-dropdown {
+    display: none !important;
+}
+
+body.menu-open .language-selector {
     pointer-events: none;
 }
 
-.misuki-language-option span:first-child {
-    width: 22px;
-
-    display: inline-flex;
-
-    align-items: center;
-    justify-content: center;
-
-    font-size: 18px;
-
-    line-height: 1;
+body.menu-open .language-button {
+    pointer-events: none;
 }
-
-
 /* =========================================================
-   POSIÇÃO RELATIVAMENTE AO MENU
+   MENU + LANGUAGE INTERACTION
    ========================================================= */
 
 /*
-   O selector fica colado ao botão ☰.
-   Funciona se o JavaScript inserir o selector
-   imediatamente antes do hamburger.
+   When the side menu is open, the language selector should
+   not interfere with it.
 */
 
-.misuki-language + .hamburger {
-    margin-left: 6px;
+body.menu-open .language-dropdown {
+    display: none !important;
 }
 
-.misuki-language + #hamburger {
-    margin-left: 6px;
-
-    position: relative;
-    z-index: 10001;
+body.menu-open .language-selector {
+    pointer-events: none;
 }
-
-
-/* Caso o header use outro botão de menu */
-
-.misuki-language + .menu-button {
-    margin-left: 6px;
-}
-
 
 /* =========================================================
-   MOBILE
+   RESPONSIVE
    ========================================================= */
 
-@media (max-width: 600px) {
+@media (min-width: 1200px) {
+    .hero {
+        padding-top: 95px;
+    }
+}
 
-    .misuki-language {
-        height: 44px;
+@media (max-width: 1199px) {
+    .hero {
+        padding-top: 70px;
+    }
+}
+
+@media (max-width: 1050px) {
+    .container {
+        width: min(
+            calc(100% - 32px),
+            var(--container)
+        );
     }
 
-    .misuki-language-button {
-        width: 44px;
+    .hero h1 {
+        font-size: clamp(40px, 7vw, 65px);
+    }
+}
+
+@media (max-width: 800px) {
+    .section {
+        padding: 50px 0;
+    }
+
+    .hero {
+        padding: 60px 0 45px;
+    }
+
+    .advertisement-card {
+        flex-direction: column;
+    }
+
+    .advertisement-image {
+        width: 100%;
+        height: 180px;
+
+        flex-basis: auto;
+    }
+
+    .manage-card {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 600px) {
+    .container {
+        width: min(
+            calc(100% - 24px),
+            var(--container)
+        );
+    }
+
+    header.container {
+        min-height: 68px;
+    }
+
+    .hero {
+        padding: 45px 0 35px;
+    }
+
+    .hero-icon {
+        width: 78px;
+        height: 78px;
+
+        margin-bottom: 22px;
+
+        border-radius: 20px;
+    }
+
+    .hero-icon img {
+        width: 58px;
+        height: 58px;
+
+        border-radius: 15px;
+    }
+
+    .hero h1 {
+        font-size: clamp(35px, 11vw, 52px);
+
+        letter-spacing: -2px;
+    }
+
+    .hero p {
+        font-size: 16px;
+    }
+
+    .section-title {
+        font-size: 26px;
+    }
+
+    .server-grid,
+    .review-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .menu {
+        width: min(360px, 92vw);
+    }
+
+    .language-button {
+        min-width: 68px;
+
+        height: 40px;
+
+        padding: 0 10px;
+    }
+
+    .language-dropdown {
+        width: 160px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        width: calc(100% - 20px);
+    }
+
+    header.container {
+        padding-top: 8px;
+        padding-bottom: 8px;
+    }
+
+    .logo {
+        font-size: 24px;
+    }
+
+    .header-right {
+        gap: 7px;
+    }
+
+    .language-button {
+        min-width: 62px;
 
         padding: 0 8px;
 
-        gap: 0;
+        font-size: 13px;
     }
 
-    /*
-       No telemóvel escondemos apenas PT/EN/etc.
-       A bandeira CONTINUA visível.
-    */
-
-    .misuki-language-short {
-        display: none;
+    .hamburger {
+        width: 42px;
+        height: 42px;
     }
 
-    .misuki-language-flag {
-        display: inline-flex;
-
-        width: 20px;
-        height: 20px;
-
-        font-size: 18px;
+    .hero h1 {
+        font-size: 36px;
     }
 
-    .misuki-language-arrow {
-        display: none;
+    .manage-server-header {
+        align-items: flex-start;
     }
 
-    .misuki-language-dropdown {
-        width: 165px;
-
-        top: calc(100% + 6px);
-
-        right: 0;
+    .manage-card {
+        padding: 15px;
     }
 
-    .misuki-language + .hamburger,
-    .misuki-language + #hamburger,
-    .misuki-language + .menu-button {
-        margin-left: 4px;
+    .manage-license {
+        padding: 17px;
     }
 }
 
+/* =========================================================
+   TOUCH DEVICES
+   ========================================================= */
+
+@media (hover: none) {
+    .button:hover,
+    .dashboard-button:hover,
+    .card:hover,
+    .language-button:hover,
+    .hamburger:hover,
+    .menu a:hover {
+        transform: none;
+    }
+}
 
 /* =========================================================
    REDUCED MOTION
    ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
 
-    .misuki-language-button,
-    .misuki-language-dropdown {
-        transition: none;
+    .misuki-mouse-trail {
+        display: none !important;
     }
 }

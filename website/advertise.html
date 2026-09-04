@@ -1,272 +1,12 @@
+{% extends "base.html" %}
 
-<!DOCTYPE html>
 
-<html lang="en">
+{% block title %}
+Advertisement — Misuki
+{% endblock %}
 
-<head>
 
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Advertisement — Misuki</title>
-
-    <link
-        rel="icon"
-        type="image/png"
-        href="/assets/images/favicon.png?v=3"
-    >
-
-    <link
-        rel="shortcut icon"
-        type="image/png"
-        href="/assets/images/favicon.png?v=3"
-    >
-
-
-    <!-- =====================================================
-         STYLES
-    ====================================================== -->
-
-    <link
-        rel="stylesheet"
-        href="/css/stars.css?v=3"
-    >
-
-    <link
-        rel="stylesheet"
-        href="/static/css/style.css?v=16"
-    >
-
-    <link
-        rel="stylesheet"
-        href="/static/css/cookies.css?v=3"
-    >
-
-    <link
-        rel="stylesheet"
-        href="/static/css/mouse-trail.css?v=3"
-    >
-
-    <link
-        rel="stylesheet"
-        href="/static/css/advertise.css?v=3"
-    >
-
-    <link
-        rel="stylesheet"
-        href="/static/css/bottom-nav.css?v=1"
-    >
-
-</head>
-
-
-<body>
-
-
-<!-- =====================================================
-     STARS
-====================================================== -->
-
-<div
-    id="stars"
-    aria-hidden="true"
-></div>
-
-
-<!-- =====================================================
-     HEADER
-====================================================== -->
-
-<header class="container">
-
-    <a
-        class="logo"
-        href="/"
-    >
-        Misuki<span>.</span>
-    </a>
-
-
-    <button
-        class="hamburger"
-        id="hamburger"
-        type="button"
-        aria-label="Open menu"
-        aria-controls="menu"
-        aria-expanded="false"
-    >
-
-        <span></span>
-        <span></span>
-        <span></span>
-
-    </button>
-
-</header>
-
-
-<!-- =====================================================
-     OVERLAY
-====================================================== -->
-
-<div
-    class="overlay"
-    id="overlay"
-></div>
-
-
-<!-- =====================================================
-     MENU
-====================================================== -->
-
-<nav
-    class="menu"
-    id="menu"
-    aria-hidden="true"
->
-
-    <div class="menu-header">
-
-        <div class="menu-title">
-            Menu
-        </div>
-
-
-        <button
-            class="menu-close"
-            id="menuClose"
-            type="button"
-            aria-label="Close menu"
-        >
-            ×
-        </button>
-
-    </div>
-
-
-    <!-- =================================================
-         NAVIGATION
-    ================================================== -->
-
-    <div class="menu-section">
-        Navigation
-    </div>
-
-
-    <a href="/">
-        Home
-    </a>
-
-
-    <a href="/dashboard">
-        Dashboard
-    </a>
-
-
-    <a href="/reviews">
-        Reviews
-    </a>
-
-
-    <!-- =================================================
-         RESOURCES
-    ================================================== -->
-
-    <div class="menu-section">
-        Resources
-    </div>
-
-
-    <a href="/documentation">
-        Documentation
-    </a>
-
-
-    <a href="/support">
-        Support
-    </a>
-
-
-    <a href="/advertise">
-        Advertisement
-    </a>
-
-
-    {% if is_admin(user) %}
-
-        <a href="/admin/advertise">
-            Advertisement Admin
-        </a>
-
-    {% endif %}
-
-
-    <!-- =================================================
-         LEGAL
-    ================================================== -->
-
-    <div class="menu-section">
-        Legal
-    </div>
-
-
-    <a href="/terms">
-        Terms
-    </a>
-
-
-    <a href="/privacy">
-        Privacy
-    </a>
-
-
-    <a href="/data">
-        Data
-    </a>
-
-
-    <a href="/cookies">
-        Cookies
-    </a>
-
-
-    <!-- =================================================
-         ACCOUNT
-    ================================================== -->
-
-    <div class="menu-section">
-        Account
-    </div>
-
-
-    {% if user %}
-
-        <a href="/dashboard">
-            Dashboard
-        </a>
-
-
-        <a href="/logout">
-            Logout
-        </a>
-
-    {% else %}
-
-        <a
-            href="/login"
-            class="discord-login"
-        >
-            Login with Discord
-        </a>
-
-    {% endif %}
-
-</nav>
-
+{% block content %}
 
 <!-- =====================================================
      MAIN
@@ -286,12 +26,12 @@
         </span>
 
 
-        <h1>
+        <h1 data-i18n="nav.advertisement">
             Advertise your server
         </h1>
 
 
-        <p>
+        <p data-i18n="common.advertise_intro">
             Promote your Discord server to the Misuki community.
             Choose your duration and create your advertisement.
         </p>
@@ -315,7 +55,7 @@
 
             <div class="advertise-field">
 
-                <label for="title">
+                <label for="title" data-i18n="common.advertisement_title">
                     Advertisement title
                 </label>
 
@@ -325,6 +65,7 @@
                     type="text"
                     name="title"
                     placeholder="Your server name"
+                    data-i18n-attr="placeholder:common.server_name_placeholder"
                     maxlength="100"
                     required
                 >
@@ -336,7 +77,7 @@
 
             <div class="advertise-field">
 
-                <label for="description">
+                <label for="description" data-i18n="common.description">
                     Description
                 </label>
 
@@ -345,6 +86,7 @@
                     id="description"
                     name="description"
                     placeholder="Tell people what makes your server special..."
+                    data-i18n-attr="placeholder:common.description_placeholder"
                     maxlength="1000"
                     rows="5"
                     required
@@ -357,7 +99,7 @@
 
             <div class="advertise-field">
 
-                <label for="image_url">
+                <label for="image_url" data-i18n="common.image_url">
                     Image URL
                 </label>
 
@@ -377,7 +119,7 @@
 
             <div class="advertise-field">
 
-                <label for="target_url">
+                <label for="target_url" data-i18n="common.destination_url">
                     Destination URL
                 </label>
 
@@ -397,7 +139,7 @@
 
             <div class="advertise-field">
 
-                <label for="duration">
+                <label for="duration" data-i18n="common.advertisement_duration">
                     Advertisement duration
                 </label>
 
@@ -604,129 +346,4 @@
 
 </main>
 
-
-<!-- =====================================================
-     FOOTER
-====================================================== -->
-
-<footer>
-
-    {% include "bottom-nav.html" %}
-
-
-    <div class="footer-copy">
-        © 2026 Misuki. All rights reserved.
-    </div>
-
-</footer>
-
-
-<!-- =====================================================
-     COOKIE BANNER
-====================================================== -->
-
-<div
-    id="misukiCookieBanner"
-    role="dialog"
-    aria-label="Cookie consent"
-    aria-live="polite"
->
-
-    <div id="misukiCookieContent">
-
-
-        <h3>
-            🍪 We use cookies
-        </h3>
-
-
-        <p>
-            Misuki uses cookies to improve your experience
-            and keep the website working correctly.
-        </p>
-
-
-        <div id="misukiCookieButtons">
-
-
-            <button
-                type="button"
-                id="misukiAccept"
-            >
-                Accept All
-            </button>
-
-
-            <button
-                type="button"
-                id="misukiEssential"
-            >
-                Essential Only
-            </button>
-
-
-            <button
-                type="button"
-                id="misukiDeny"
-            >
-                Deny
-            </button>
-
-        </div>
-
-
-        <div id="misukiCookieLegal">
-
-            <a href="/terms">
-                Terms
-            </a>
-
-
-            <a href="/privacy">
-                Privacy
-            </a>
-
-
-            <a href="/cookies">
-                Cookie Policy
-            </a>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-<!-- =====================================================
-     SCRIPTS
-====================================================== -->
-
-<script
-    src="/static/js/stars.js?v=3"
-    defer
-></script>
-
-
-<script
-    src="/static/js/mouse-trail.js?v=3"
-    defer
-></script>
-
-
-<script
-    src="/static/js/menu.js?v=2"
-    defer
-></script>
-
-
-<script
-    src="/static/js/cookies.js?v=3"
-    defer
-></script>
-
-<script src="/static/js/translation.js?v=1" defer></script>
-</body>
-
-</html>
-
+{% endblock %}

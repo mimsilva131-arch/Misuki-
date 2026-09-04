@@ -10,54 +10,30 @@
     left: 0;
     top: 0;
 
-    width: 20px;
-    height: 2px;
-
+    width: 18px;
+    height: 1px;
     min-width: 5px;
-
     padding: 0;
     margin: 0;
-
-    border: 0;
-
     border-radius: 999px;
-
     pointer-events: none;
     user-select: none;
-
     z-index: 2147483647;
-
-    transform:
-        translateY(-50%)
-        rotate(var(--trail-angle, 0deg));
-
-    transform-origin:
-        0 50%;
-
-    background:
-        linear-gradient(
-            to right,
-            rgba(142, 167, 255, 0),
-            rgba(142, 167, 255, .35) 35%,
-            rgba(255, 255, 255, .95) 100%
-        );
-
+    transform: translateY(-50%) rotate(var(--trail-angle, 0deg));
+    transform-origin: 0 50%;
+    background: linear-gradient(
+        to right,
+        rgba(142, 167, 255, 0),
+        rgba(88, 125, 242, .18) 20%,
+        rgba(120, 167, 255, .58) 65%,
+        rgba(210, 225, 255, .88) 100%
+    );
     box-shadow:
-        0 0 4px rgba(142, 167, 255, .70),
-        0 0 10px rgba(88, 101, 242, .35);
-
-    opacity: .9;
-
-    will-change:
-        transform,
-        opacity,
-        width;
-
-    animation:
-        misuki-mouse-fade
-        420ms
-        ease-out
-        forwards;
+        0 0 3px rgba(120, 167, 255, .55),
+        0 0 8px rgba(88, 101, 242, .28);
+    opacity: .82;
+    will-change: transform, opacity, width;
+    animation: misuki-mouse-fade 560ms cubic-bezier(.22, .61, .36, 1) forwards;
 }
 
 
@@ -68,7 +44,7 @@
 @keyframes misuki-mouse-fade {
 
     0% {
-        opacity: .9;
+        opacity: .82;
     }
 
     45% {

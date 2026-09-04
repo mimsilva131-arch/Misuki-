@@ -343,8 +343,19 @@ def database_connection():
 )
 def static_files(filename):
 
-    return send_from_directory(
+    root_file = os.path.join(
         BASE_DIR,
+        filename
+    )
+
+    if os.path.isfile(root_file):
+        return send_from_directory(
+            BASE_DIR,
+            filename
+        )
+
+    return send_from_directory(
+        os.path.join(BASE_DIR, "static"),
         filename
     )
 
@@ -752,7 +763,8 @@ LICENSE_SYSTEM_ENABLED = False
 
 def license_is_active(guild_id):
     if not LICENSE_SYSTEM_ENABLED:
-    return True
+        return True
+
     license_data = get_license(
         guild_id
     )

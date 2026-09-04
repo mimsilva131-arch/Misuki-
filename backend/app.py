@@ -1,7 +1,9 @@
 import os
 import random
 import secrets
+import sqlite3
 import time
+import json
 
 from decimal import Decimal, InvalidOperation
 from datetime import datetime, timedelta, timezone
@@ -23,6 +25,9 @@ from flask import (
 
 from dotenv import load_dotenv
 from werkzeug.middleware.proxy_fix import ProxyFix
+
+
+APP_START_TIME = time.time()
 
 
 # =========================================================
@@ -60,6 +65,11 @@ JS_DIR = os.path.join(
 ASSETS_DIR = os.path.join(
     BASE_DIR,
     "assets"
+)
+
+STATIC_DIR = os.path.join(
+    BASE_DIR,
+    "static"
 )
 
 
@@ -257,7 +267,7 @@ if not DATABASE_URL:
 app = Flask(
     __name__,
     template_folder=WEBSITE_DIR,
-    static_folder=BASE_DIR,
+    static_folder=None,
     static_url_path="/static"
 )
 
@@ -333,6 +343,32 @@ def inject_template_helpers():
     return {
         "is_admin": is_admin
     }
+
+
+# =========================================================
+# STATIC FILES
+# =========================================================
+
+@app.route("/static/<path:filename>")
+def static_files(filename):
+
+    # Keep compatibility with both asset folder layouts.
+    root_file = os.path.join(
+        BASE_DIR,
+        filename
+    )
+
+    if os.path.isfile(root_file):
+
+        return send_from_directory(
+            BASE_DIR,
+            filename
+        )
+
+    return send_from_directory(
+        STATIC_DIR,
+        filename
+    )
 
 
 # =========================================================
@@ -3477,6 +3513,293 @@ def reviews():
     )
 
 
+# =========================================================
+# STATISTICS PAGE
+# =========================================================
+
+@app.route("/statistics")
+def statistics():
+
+    current_user = get_user()
+
+    user_is_admin = is_admin(
+        current_user
+    )
+
+    statistics_data = {
+
+        "servers": 0,
+        "users": 0,
+        "channels": 0,
+        "latency": 0,
+        "commands": 0,
+        "tickets": 0,
+        "verifications": 0,
+
+        "bot_status": "Offline",
+
+        "database_status": "Operational",
+
+        "api_status": "Offline",
+
+        "version": os.getenv(
+            "MISUKI_VERSION",
+            "1.0.0"
+        ),
+
+        "uptime": "0s",
+    }
+
+
+    # =====================================================
+    # BOT SNAPSHOT
+    # =====================================================
+
+    bot_snapshot = {}
+
+    try:
+
+        bot_stats_file = os.path.join(
+            BASE_DIR,
+            "data",
+            "bot_stats.json"
+        )
+
+        with open(
+            bot_stats_file,
+            encoding="utf-8"
+        ) as file:
+
+            bot_snapshot = json.load(
+                file
+            )
+
+        for key in (
+            "servers",
+            "users",
+            "channels",
+            "latency",
+            "commands",
+            "bot_status",
+            "uptime",
+            "version",
+        ):
+
+            if key in bot_snapshot:
+
+                statistics_data[key] = (
+                    bot_snapshot[key]
+                )
+
+    except (
+        OSError,
+        json.JSONDecodeError,
+        TypeError,
+        ValueError
+    ):
+
+        pass
+
+
+    # =====================================================
+    # API STATUS
+    # =====================================================
+
+    if statistics_data["bot_status"] == "Online":
+
+        statistics_data["api_status"] = (
+            "Operational"
+        )
+
+    else:
+
+        statistics_data["api_status"] = (
+            "Unavailable"
+        )
+
+
+    # =====================================================
+    # DATABASE STATUS
+    # =====================================================
+
+    database_ok = True
+
+
+    # -----------------------------------------------------
+    # TICKETS DATABASE
+    # -----------------------------------------------------
+
+    try:
+
+        tickets_database = os.path.join(
+            BASE_DIR,
+            "data",
+            "tickets.db"
+        )
+
+        with sqlite3.connect(
+            tickets_database
+        ) as connection:
+
+            result = connection.execute(
+                """
+                SELECT
+                    COALESCE(
+                        SUM(number),
+                        0
+                    )
+                FROM ticket_counter
+                """
+            ).fetchone()
+
+            statistics_data["tickets"] = int(
+                result[0] or 0
+            )
+
+    except (
+        OSError,
+        sqlite3.Error,
+        TypeError,
+        ValueError
+    ):
+
+        database_ok = False
+
+        statistics_data["tickets"] = 0
+
+
+    # -----------------------------------------------------
+    # MODERATION DATABASE
+    # -----------------------------------------------------
+
+    moderation_actions = 0
+
+    try:
+
+        moderation_database = os.path.join(
+            BASE_DIR,
+            "data",
+            "moderation.db"
+        )
+
+        with sqlite3.connect(
+            moderation_database
+        ) as connection:
+
+            result = connection.execute(
+                """
+                SELECT
+                    COUNT(*)
+                FROM warnings
+                """
+            ).fetchone()
+
+            moderation_actions = int(
+                result[0] or 0
+            )
+
+    except (
+        OSError,
+        sqlite3.Error,
+        TypeError,
+        ValueError
+    ):
+
+        database_ok = False
+
+        moderation_actions = 0
+
+
+    if database_ok:
+
+        statistics_data[
+            "database_status"
+        ] = "Operational"
+
+    else:
+
+        statistics_data[
+            "database_status"
+        ] = "Error"
+
+
+    # =====================================================
+    # VERIFICATIONS
+    # =====================================================
+    # Ainda não existe sistema de verification.
+
+    statistics_data[
+        "verifications"
+    ] = 0
+
+
+    # =====================================================
+    # ADMIN SERVER INFORMATION
+    # =====================================================
+
+    admin_servers = []
+
+    if user_is_admin:
+
+        try:
+
+            admin_servers = (
+                bot_snapshot.get(
+                    "admin_servers",
+                    []
+                )
+            )
+
+        except Exception:
+
+            admin_servers = []
+
+
+    # =====================================================
+    # ADMIN STATISTICS
+    # =====================================================
+
+    admin_statistics = {
+
+        "commands": statistics_data[
+            "commands"
+        ],
+
+        "tickets": statistics_data[
+            "tickets"
+        ],
+
+        "moderation": moderation_actions,
+
+        "announcements": 0,
+    }
+
+
+    # =====================================================
+    # RENDER
+    # =====================================================
+
+    return render_template(
+        "statistics.html",
+
+        user=current_user,
+
+        # IMPORTANTE:
+        # is_admin tem de continuar a ser a função,
+        # porque o base.html usa is_admin(user).
+        is_admin=is_admin,
+
+        # Resultado True/False para a página Statistics.
+        is_miskui_admin=user_is_admin,
+
+        statistics=statistics_data,
+
+        admin_statistics=admin_statistics,
+
+        admin_servers=admin_servers,
+
+        admin_users=[]
+    )
 # =========================================================
 # SUBMIT REVIEW
 # =========================================================

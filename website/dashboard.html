@@ -1,236 +1,23 @@
+{% extends "base.html" %}
 
-<!DOCTYPE html>
-<html lang="en">
+{% block title %}
+Misuki — Dashboard
+{% endblock %}
 
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Misuki — Dashboard</title>
-
-    <link
-        rel="icon"
-        type="image/png"
-        href="/assets/images/favicon.png?v=3"
-    >
-
-    <link
-        rel="shortcut icon"
-        type="image/png"
-        href="/assets/images/favicon.png?v=3"
-    >
-
-    <link
-        rel="stylesheet"
-        href="/css/stars.css"
-    >
-
-    <link
-        rel="stylesheet"
-        href="/static/css/style.css?v=16"
-    >
-
-    <link
-        rel="stylesheet"
-        href="/static/css/dashboard.css"
-    >
-
-    <script
-        src="/static/js/stars.js?v=3"
-        defer
-    ></script>
-    <link
+{% block extra_css %}
+<link
     rel="stylesheet"
-    href="/static/css/cookies.css?v=3"
+    href="/static/css/dashboard.css"
 >
-    <link rel="stylesheet" href="/static/css/bottom-nav.css?v=1">
-</head>
+{% endblock %}
 
-
-
-
-<!-- =====================================================
-     STAR BACKGROUND
-====================================================== -->
-
-<div id="misuki-stars"></div>
-
-
-<!-- =====================================================
-     HEADER
-====================================================== -->
-
-<header class="container">
-
-    <a
-        class="logo"
-        href="/"
-    >
-        Misuki<span>.</span>
-    </a>
-
-    <button
-        class="hamburger"
-        id="hamburger"
-        aria-label="Open menu"
-    >
-        <span></span>
-        <span></span>
-        <span></span>
-    </button>
-
-</header>
-
-
-<!-- =====================================================
-     OVERLAY
-====================================================== -->
-
-<div
-    class="overlay"
-    id="overlay"
-></div>
-
-
-<!-- =====================================================
-     MENU
-====================================================== -->
-
-<nav
-    class="menu"
-    id="menu"
->
-
-    <div class="menu-header">
-
-        <div class="menu-title">
-            Menu
-        </div>
-
-        <button
-            class="menu-close"
-            id="menuClose"
-            aria-label="Close menu"
-        >
-            ×
-        </button>
-
-    </div>
-
-
-    <div class="menu-section">
-        Navigation
-    </div>
-
-    <a href="/">
-        Home
-    </a>
-
-    <a href="/dashboard">
-        Dashboard
-    </a>
-
-    <a href="/reviews">
-        Reviews
-    </a>
-
-
-    <!-- =================================================
-         ADVERTISE
-    ================================================== -->
-
-    <div class="menu-section">
-        Advertise
-    </div>
-
-    <a href="/advertise">
-        Advertise
-    </a>
-
-    {% if is_admin(user) %}
-
-        <a href="/admin/advertise">
-            Admin Advertise
-        </a>
-
-    {% endif %}
-
-
-    <!-- =================================================
-         RESOURCES
-    ================================================== -->
-
-    <div class="menu-section">
-        Resources
-    </div>
-
-    <a href="/documentation">
-        Documentation
-    </a>
-
-    <a href="/support">
-        Support
-    </a>
-
-
-    <!-- =================================================
-         LEGAL
-    ================================================== -->
-
-    <div class="menu-section">
-        Legal
-    </div>
-
-    <a href="/terms">
-        Terms
-    </a>
-
-    <a href="/privacy">
-        Privacy
-    </a>
-
-    <a href="/data">
-        Data
-    </a>
-
-    <a href="/cookies">
-        Cookies
-    </a>
-
-
-    <!-- =================================================
-         ACCOUNT
-    ================================================== -->
-
-    <div class="menu-section">
-        Account
-    </div>
-
-    <a
-        href="/logout"
-        class="discord-login"
-    >
-        🚪 Logout
-    </a>
-
-</nav>
-
-
-<!-- =====================================================
-     DASHBOARD
-====================================================== -->
+{% block content %}
 
 <main>
 
     <section class="section">
 
         <div class="container">
-
 
             <!-- =================================================
                  PAGE HEADER
@@ -240,13 +27,13 @@
 
                 <div>
 
-                    <h1>
+                    <h1 data-i18n="nav.dashboard">
                         Dashboard
                     </h1>
 
                     <p class="dashboard-user">
 
-                        Logged in as
+                        <span data-i18n="common.logged_in_as">Logged in as</span>
 
                         <strong>
                             {{ user.global_name or user.username }}
@@ -263,7 +50,7 @@
                  AUTHORIZED SERVERS
             ================================================== -->
 
-            <h2
+            <h2 data-i18n="common.authorized_servers"
                 class="section-title"
                 style="margin-top:50px;"
             >
@@ -278,7 +65,6 @@
                     {% for guild in authorized %}
 
                         <div class="card server-card">
-
 
                             <!-- SERVER INFO -->
 
@@ -323,25 +109,25 @@
                                 {% if guild.license_active %}
 
                                     <span class="badge badge-active">
-                                        License 🟢
+                                        <span data-i18n="dashboard.license">License</span> 🟢
                                     </span>
 
                                 {% elif guild.license_status == "expired" %}
 
                                     <span class="badge badge-expired">
-                                        License 🔴
+                                        <span data-i18n="dashboard.license">License</span> 🔴
                                     </span>
 
                                 {% elif guild.license_status == "revoked" %}
 
                                     <span class="badge badge-expired">
-                                        License ⛔
+                                        <span data-i18n="dashboard.license">License</span> ⛔
                                     </span>
 
                                 {% else %}
 
                                     <span class="badge badge-none">
-                                        License ⚪
+                                        <span data-i18n="dashboard.license">License</span> ⚪
                                     </span>
 
                                 {% endif %}
@@ -355,7 +141,7 @@
                                 class="button manage"
                                 href="/manage/{{ guild.id }}"
                             >
-                                ⚙️ Manage
+                                <span data-i18n="common.manage">⚙️ Manage</span>
                             </a>
 
                         </div>
@@ -366,7 +152,7 @@
 
             {% else %}
 
-                <div class="empty">
+                <div class="empty" data-i18n="dashboard.no_authorized">
                     🔒 No authorized servers found.
                 </div>
 
@@ -377,7 +163,7 @@
                  AVAILABLE SERVERS
             ================================================== -->
 
-            <h2
+            <h2 data-i18n="common.available_servers"
                 class="section-title"
                 style="margin-top:65px;"
             >
@@ -392,7 +178,6 @@
                     {% for guild in available %}
 
                         <div class="card server-card">
-
 
                             <!-- SERVER INFO -->
 
@@ -437,25 +222,25 @@
                                 {% if guild.license_active %}
 
                                     <span class="badge badge-active">
-                                        License 🟢
+                                        <span data-i18n="dashboard.license">License</span> 🟢
                                     </span>
 
                                 {% elif guild.license_status == "expired" %}
 
                                     <span class="badge badge-expired">
-                                        License 🔴
+                                        <span data-i18n="dashboard.license">License</span> 🔴
                                     </span>
 
                                 {% elif guild.license_status == "revoked" %}
 
                                     <span class="badge badge-expired">
-                                        License ⛔
+                                        <span data-i18n="dashboard.license">License</span> ⛔
                                     </span>
 
                                 {% else %}
 
                                     <span class="badge badge-none">
-                                        License ⚪
+                                        <span data-i18n="dashboard.license">License</span> ⚪
                                     </span>
 
                                 {% endif %}
@@ -463,13 +248,13 @@
 
                                 {% if guild.can_add %}
 
-                                    <span class="badge badge-warning">
+                                    <span class="badge badge-warning" data-i18n="dashboard.add_permission">
                                         Add permission ✓
                                     </span>
 
                                 {% else %}
 
-                                    <span class="badge badge-warning">
+                                    <span class="badge badge-warning" data-i18n="dashboard.no_authorization">
                                         ⚠️ No authorization
                                     </span>
 
@@ -485,13 +270,14 @@
                                 <a
                                     href="{{ guild.invite_url }}"
                                     class="button add"
+                                    data-i18n="dashboard.add_misuki"
                                 >
                                     ➕ Add Misuki
                                 </a>
 
                             {% else %}
 
-                                <div class="button blocked">
+                                <div class="button blocked" data-i18n="dashboard.cannot_add">
                                     ⚠️ Cannot Add
                                 </div>
 
@@ -505,7 +291,7 @@
 
             {% else %}
 
-                <div class="empty">
+                <div class="empty" data-i18n="dashboard.no_available">
                     No additional servers available.
                 </div>
 
@@ -526,6 +312,7 @@
                 <a
                     href="/reviews"
                     class="dashboard-button"
+                    data-i18n="dashboard.leave_review"
                 >
                     ⭐ Leave a Review
                 </a>
@@ -538,111 +325,13 @@
 
 </main>
 
-
-<!-- =====================================================
-     FOOTER
-====================================================== -->
-
-<footer>
-
-    {% include "bottom-nav.html" %}
-
-    <div class="footer-copy">
-        © 2026 Misuki. All rights reserved.
-    </div>
-
-</footer>
+{% endblock %}
 
 
-<!-- =====================================================
-     JAVASCRIPT
-====================================================== -->
+{% block extra_js %}
 
 <script src="/js/main.js"></script>
 
 <script src="/static/js/dashboard.js"></script>
 
-<script
-    src="/static/js/mouse-trail.js?v=3"
-    defer
-></script>
-
-<script
-    src="/static/js/menu.js?v=2"
-    defer
-></script>
-
-
-<!-- =====================================================
-     COOKIE BANNER
-====================================================== -->
-
-<div id="misukiCookieBanner">
-
-    <div id="misukiCookieContent">
-
-        <h3>
-            🍪 We use cookies
-        </h3>
-
-        <p>
-            Misuki uses cookies to improve your
-            experience and keep the website working
-            correctly.
-        </p>
-
-        <div id="misukiCookieButtons">
-
-            <button
-                type="button"
-                id="misukiAccept"
-            >
-                Accept All
-            </button>
-
-            <button
-                type="button"
-                id="misukiEssential"
-            >
-                Essential Only
-            </button>
-
-            <button
-                type="button"
-                id="misukiDeny"
-            >
-                Deny
-            </button>
-
-        </div>
-
-        <div id="misukiCookieLegal">
-
-            <a href="/terms">
-                Terms
-            </a>
-
-            <a href="/privacy">
-                Privacy
-            </a>
-
-            <a href="/cookies">
-                Cookie Policy
-            </a>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-<script
-    src="/static/js/cookies.js?v=3"
-    defer
-></script>
-<script src="/static/js/translation.js?v=1" defer></script>
-</body>
-
-</html>
-
+{% endblock %}

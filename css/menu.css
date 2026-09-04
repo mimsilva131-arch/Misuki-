@@ -1,48 +1,79 @@
-/* ========================================================
-   MISUKI — SIDE MENU
-   ======================================================== */
+/* =========================================================
+   MISUKI - MENU
+   ========================================================= */
+
+
+/* =========================================================
+   HAMBURGER BUTTON
+   ========================================================= */
 
 .hamburger {
     width: 44px;
     height: 44px;
-    padding: 0;
-    margin: 0;
 
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    flex-direction: column;
+
     gap: 5px;
 
-    border: 0;
+    padding: 0;
+
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 10px;
 
-    background: rgba(255, 255, 255, 0.04);
-    color: #ffffff;
-
     cursor: pointer;
+
     position: relative;
     z-index: 10002;
 
+    pointer-events: auto;
+
+    appearance: none;
+    -webkit-appearance: none;
+
     transition:
         background 0.2s ease,
+        border-color 0.2s ease,
         transform 0.2s ease;
 }
 
 .hamburger:hover {
-    background: rgba(255, 255, 255, 0.09);
-    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.10);
+    border-color: rgba(255, 255, 255, 0.20);
+}
+
+.hamburger:active {
+    transform: scale(0.97);
+}
+
+.hamburger:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.35);
+    outline-offset: 2px;
 }
 
 .hamburger span {
-    display: block;
-    width: 23px;
+    width: 19px;
     height: 2px;
-    flex-shrink: 0;
 
-    border-radius: 999px;
+    display: block;
+
     background: #ffffff;
+    border-radius: 999px;
+
+    pointer-events: none;
+
+    transition:
+        transform 0.2s ease,
+        opacity 0.2s ease;
 }
+
+
+/* =========================================================
+   HIDE HAMBURGER WHEN MENU IS OPEN
+   ========================================================= */
 
 body.menu-open .hamburger {
     display: none !important;
@@ -55,19 +86,21 @@ body.menu-open .hamburger {
 
 .overlay {
     position: fixed;
+
     inset: 0;
 
     background: rgba(0, 0, 0, 0.60);
 
     opacity: 0;
     visibility: hidden;
+
     pointer-events: none;
+
+    z-index: 9998;
 
     transition:
         opacity 0.3s ease,
         visibility 0.3s ease;
-
-    z-index: 9998;
 }
 
 .overlay.show,
@@ -84,28 +117,26 @@ body.menu-open .hamburger {
 
 .menu {
     position: fixed;
+
     top: 0;
     right: 0;
 
     width: min(360px, 88vw);
+
     height: 100vh;
     height: 100dvh;
 
     display: flex;
     flex-direction: column;
 
-    padding: 28px;
+    padding: 0 20px 25px;
 
-    background: linear-gradient(
-        180deg,
-        #111522 0%,
-        #090c14 100%
-    );
+    background: #0f0f16;
 
     border-left: 1px solid rgba(255, 255, 255, 0.08);
 
     box-shadow:
-        -25px 0 70px rgba(0, 0, 0, 0.5);
+        -20px 0 50px rgba(0, 0, 0, 0.35);
 
     transform: translateX(100%);
 
@@ -118,19 +149,16 @@ body.menu-open .hamburger {
     z-index: 10000;
 
     transition:
-        transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-        visibility 0.35s ease;
+        transform 0.3s ease,
+        visibility 0.3s ease;
 }
 
 .menu.open,
 .menu.active {
     transform: translateX(0);
+
     visibility: visible;
     pointer-events: auto;
-}
-
-body.menu-open {
-    overflow: hidden;
 }
 
 
@@ -139,106 +167,125 @@ body.menu-open {
    ========================================================= */
 
 .menu-header {
+    min-height: 78px;
+
     display: flex;
     align-items: center;
     justify-content: space-between;
 
-    padding-bottom: 20px;
-    margin-bottom: 4px;
+    padding: 10px 0;
 
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.menu-title {
+.menu-header h2,
+.menu-header .menu-title {
+    margin: 0;
+
     color: #ffffff;
 
-    font-size: 22px;
-    line-height: 1.2;
-
-    font-weight: 600;
+    font-size: 20px;
+    font-weight: 700;
 }
 
 
 /* =========================================================
-   CLOSE BUTTON
+   MENU CLOSE BUTTON
    ========================================================= */
 
 .menu-close {
-    width: 40px;
-    height: 40px;
-
-    padding: 0;
-    margin: 0;
+    width: 42px;
+    height: 42px;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    border: 0;
-    border-radius: 10px;
+    padding: 0;
 
     background: rgba(255, 255, 255, 0.06);
+
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+
     color: #ffffff;
 
-    font-size: 27px;
+    font-size: 24px;
     line-height: 1;
-    font-weight: 400;
 
     cursor: pointer;
 
+    appearance: none;
+    -webkit-appearance: none;
+
     transition:
         background 0.2s ease,
+        border-color 0.2s ease,
         transform 0.2s ease;
 }
 
 .menu-close:hover {
-    background: rgba(255, 255, 255, 0.12);
-    transform: rotate(90deg);
+    background: rgba(255, 255, 255, 0.10);
+    border-color: rgba(255, 255, 255, 0.20);
+}
+
+.menu-close:active {
+    transform: scale(0.96);
+}
+
+.menu-close:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.35);
+    outline-offset: 2px;
 }
 
 
 /* =========================================================
-   SECTION TITLES
+   MENU SECTIONS
    ========================================================= */
 
 .menu-section {
-    margin-top: 22px;
-    margin-bottom: 7px;
+    padding: 20px 0 0;
+}
 
-    padding: 0 14px;
+.menu-section + .menu-section {
+    margin-top: 4px;
+}
 
-    color: #727d92;
+.menu-section h3,
+.menu-section-title {
+    margin: 0 0 9px;
+
+    color: rgba(255, 255, 255, 0.45);
 
     font-size: 11px;
-    line-height: 1.4;
-
     font-weight: 700;
 
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.08em;
 }
 
 
 /* =========================================================
-   LINKS
+   MENU LINKS
    ========================================================= */
 
 .menu a {
-    display: block;
+    width: 100%;
+    min-height: 42px;
 
-    margin: 3px 0;
-    padding: 11px 14px;
+    display: flex;
+    align-items: center;
 
-    border-radius: 10px;
+    padding: 9px 12px;
 
-    color: #dce2ef;
-
-    font-size: 15px;
-    line-height: 1.4;
-
-    font-weight: 400;
+    color: rgba(255, 255, 255, 0.88);
 
     text-decoration: none;
+
+    border-radius: 9px;
+
+    font-size: 14px;
+    font-weight: 500;
 
     transition:
         background 0.2s ease,
@@ -247,10 +294,19 @@ body.menu-open {
 }
 
 .menu a:hover {
-    background: rgba(100, 140, 255, 0.10);
+    background: rgba(255, 255, 255, 0.07);
     color: #ffffff;
 
-    transform: translateX(4px);
+    transform: translateX(2px);
+}
+
+.menu a:active {
+    transform: translateX(2px) scale(0.99);
+}
+
+.menu a:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.25);
+    outline-offset: -2px;
 }
 
 
@@ -258,22 +314,64 @@ body.menu-open {
    DISCORD LOGIN
    ========================================================= */
 
-.menu .discord-login {
-    margin-top: 8px;
+.discord-login {
+    width: 100%;
 
-    background: rgba(88, 101, 242, 0.14);
-    color: #aeb8ff;
+    min-height: 44px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 10px 14px;
+
+    margin-top: 10px;
+
+    background: rgba(88, 101, 242, 0.16);
+
+    border: 1px solid rgba(88, 101, 242, 0.30);
+    border-radius: 10px;
+
+    color: #ffffff;
+
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
 }
 
-.menu .discord-login:hover {
+.discord-login:hover {
     background: rgba(88, 101, 242, 0.24);
-    color: #ffffff;
+    border-color: rgba(88, 101, 242, 0.42);
+
+    transform: translateY(-1px);
+}
+
+.discord-login:active {
+    transform: translateY(0);
+}
+
+.discord-login:focus-visible {
+    outline: 2px solid rgba(88, 101, 242, 0.45);
+    outline-offset: 2px;
 }
 
 
 /* =========================================================
-   SCROLLBAR
+   MENU SCROLLBAR
    ========================================================= */
+
+.menu {
+    scrollbar-width: thin;
+    scrollbar-color:
+        rgba(255, 255, 255, 0.18)
+        transparent;
+}
 
 .menu::-webkit-scrollbar {
     width: 6px;
@@ -284,12 +382,12 @@ body.menu-open {
 }
 
 .menu::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.18);
     border-radius: 999px;
 }
 
 .menu::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.20);
+    background: rgba(255, 255, 255, 0.28);
 }
 
 
@@ -298,18 +396,39 @@ body.menu-open {
    ========================================================= */
 
 @media (max-width: 600px) {
+
     .menu {
-        width: min(340px, 90vw);
-        padding: 24px;
+        width: min(360px, 92vw);
+
+        padding-left: 16px;
+        padding-right: 16px;
     }
 
-    .menu-title {
-        font-size: 21px;
+    .menu-header {
+        min-height: 70px;
+    }
+
+}
+
+
+/* =========================================================
+   VERY SMALL SCREENS
+   ========================================================= */
+
+@media (max-width: 380px) {
+
+    .menu {
+        width: 94vw;
     }
 
     .menu a {
-        font-size: 15px;
+        min-height: 40px;
+
+        padding: 8px 10px;
+
+        font-size: 13px;
     }
+
 }
 
 
@@ -318,17 +437,14 @@ body.menu-open {
    ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
+
     .menu,
     .overlay,
     .hamburger,
     .menu-close,
-    .menu a {
+    .menu a,
+    .discord-login {
         transition: none !important;
     }
-}
-    .hamburger,
-    .menu-close,
-    .menu a {
-        transition: none !important;
-    }
+
 }

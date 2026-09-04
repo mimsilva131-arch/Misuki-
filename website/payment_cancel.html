@@ -1,223 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Cancelled — Misuki</title>
+{% block title %}
+Payment Cancelled — Misuki
+{% endblock %}
 
-    <link rel="icon" type="image/png" href="/assets/images/favicon.png?v=3">
-    <link rel="shortcut icon" type="image/png" href="/assets/images/favicon.png?v=3">
-    <link rel="stylesheet" href="/css/stars.css">
-    <link rel="stylesheet" href="/static/css/style.css?v=16">
-    <link rel="stylesheet" href="/static/css/menu.css?v=2">
-    <link rel="stylesheet" href="/static/css/mouse-trail.css?v=3">
-    <link rel="stylesheet" href="/static/css/cookies.css?v=3">
-    <link rel="stylesheet" href="/static/css/bottom-nav.css?v=1">
-    
-</head>
-
-
-<body>
-
-<header class="container">
-    <a class="logo" href="/">Misuki<span>.</span></a>
-
-    <button class="hamburger" id="hamburger" type="button" aria-label="Open menu" aria-controls="menu" aria-expanded="false">
-        <span></span>
-        <span></span>
-        <span></span>
-    </button>
-</header>
-
-<div class="overlay" id="overlay"></div>
-
-
-<nav class="menu" id="menu" aria-hidden="true">
-
-    <div class="menu-header">
-
-        <div class="menu-title">
-            Menu
-        </div>
-
-        <button
-            class="menu-close"
-            id="menuClose"
-            type="button"
-            aria-label="Close menu"
-        >
-            ×
-        </button>
-
-    </div>
-
-    <div class="menu-section">
-        Navigation
-    </div>
-
-    <a href="/">
-        Home
-    </a>
-
-    <a href="/dashboard">
-        Dashboard
-    </a>
-
-    <a href="/reviews">
-        Reviews
-    </a>
-
-    <div class="menu-section">
-        Resources
-    </div>
-
-    <a href="/documentation">
-        Documentation
-    </a>
-
-    <a href="/support">
-        Support
-    </a>
-
-    <a href="/advertise">
-        Advertisement
-    </a>
-
-    {% if is_admin(user) %}
-        <a href="/admin/advertise">
-            Advertisement Admin
-        </a>
-    {% endif %}
-
-    <div class="menu-section">
-        Legal
-    </div>
-
-    <a href="/terms">
-        Terms
-    </a>
-
-    <a href="/privacy">
-        Privacy
-    </a>
-
-    <a href="/data">
-        Data
-    </a>
-
-    <a href="/cookies">
-        Cookies
-    </a>
-
-    <div class="menu-section">
-        Account
-    </div>
-
-    {% if user %}
-
-        <a href="/dashboard">
-            Dashboard
-        </a>
-
-        <a href="/logout">
-            Logout
-        </a>
-
-    {% else %}
-
-        <a
-            href="/login"
-            class="discord-login"
-        >
-            Login with Discord
-        </a>
-
-    {% endif %}
-
-</nav>
-
+{% block content %}
 
 <main>
+
     <section class="section">
+
         <div class="container">
-            <div class="card legal-page" style="text-align:center; max-width:760px; margin: 40px auto;">
-                <h1>Payment Cancelled</h1>
-                <p>The payment was not completed.</p>
-                <a href="/advertise" class="button">Return</a>
+
+            <div
+                class="card legal-page"
+                style="
+                    text-align:center;
+                    max-width:760px;
+                    margin:40px auto;
+                "
+            >
+
+                <h1>
+                    Payment Cancelled
+                </h1>
+
+                <p>
+                    The payment was not completed.
+                </p>
+
+                <a
+                    href="/advertise"
+                    class="button"
+                >
+                    Return
+                </a>
+
             </div>
+
         </div>
+
     </section>
+
 </main>
 
-
-<div id="misukiCookieBanner" role="dialog" aria-label="Cookie consent" aria-live="polite">
-
-    <div id="misukiCookieContent">
-
-        <h3>
-            🍪 We use cookies
-        </h3>
-
-        <p>
-            Misuki uses cookies to improve your experience and keep the website working correctly.
-        </p>
-
-        <div id="misukiCookieButtons">
-
-            <button type="button" id="misukiAccept">
-                Accept All
-            </button>
-
-            <button type="button" id="misukiEssential">
-                Essential Only
-            </button>
-
-            <button type="button" id="misukiDeny">
-                Deny
-            </button>
-
-        </div>
-
-        <div id="misukiCookieLegal">
-
-            <a href="/terms">
-                Terms
-            </a>
-
-            <a href="/privacy">
-                Privacy
-            </a>
-
-            <a href="/cookies">
-                Cookie Policy
-            </a>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-
-<footer>
-
-    {% include "bottom-nav.html" %}
-
-    <div class="footer-copy">
-        © 2026 Misuki. All rights reserved.
-    </div>
-
-</footer>
-
-
-
-<script src="/static/js/stars.js?v=3" defer></script>
-<script src="/static/js/mouse-trail.js?v=3" defer></script>
-<script src="/static/js/menu.js?v=2" defer></script>
-<script src="/static/js/cookies.js?v=3" defer></script>
-
-<script src="/static/js/translation.js?v=1" defer></script>
-</body>
-</html>
+{% endblock %}

@@ -1,264 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
+{% block title %}
+Misuki — Statistics
+{% endblock %}
 
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Misuki — Statistics</title>
-
-    <link
-        rel="icon"
-        href="/static/assets/images/favicon.png"
-    >
-
-    <link
-        rel="stylesheet"
-        href="/css/style.css?v=17"
-    >
-
-    <link
-        rel="stylesheet"
-        href="/css/stars.css?v=1"
-    >
-
-    <link
-        rel="stylesheet"
-        href="/css/mouse-trail.css?v=1"
-    >
-
-    <link
-        rel="stylesheet"
-        href="/css/cookies.css?v=1"
-    >
-
-    <link
-        rel="stylesheet"
-        href="/css/bottom-nav.css?v=1"
-    >
-
-</head>
-
-
-<body>
-
-
-<!-- =====================================================
-     HEADER
-====================================================== -->
-
-<header class="site-header">
-
-    <div class="header-left">
-
-        <a
-            href="/"
-            class="logo"
-        >
-
-            <img
-                src="/static/assets/images/icon.png"
-                alt="Misuki"
-            >
-
-            <span>Misuki</span>
-
-        </a>
-
-    </div>
-
-
-    <div class="header-right">
-
-        <button
-            class="hamburger"
-            id="hamburger"
-            type="button"
-            aria-label="Open menu"
-            aria-expanded="false"
-            aria-controls="menu"
-        >
-
-            <span></span>
-            <span></span>
-            <span></span>
-
-        </button>
-
-    </div>
-
-</header>
-
-
-<!-- =====================================================
-     OVERLAY
-====================================================== -->
-
-<div
-    class="overlay"
-    id="overlay"
-    aria-hidden="true"
-></div>
-
-
-<!-- =====================================================
-     SIDE MENU
-====================================================== -->
-
-<nav
-    class="menu"
-    id="menu"
-    aria-hidden="true"
->
-
-    <div class="menu-header">
-
-        <div class="menu-title">
-            Menu
-        </div>
-
-        <button
-            class="menu-close"
-            id="menuClose"
-            type="button"
-            aria-label="Close menu"
-        >
-            ×
-        </button>
-
-    </div>
-
-
-    <!-- NAVIGATION -->
-
-    <div class="menu-section">
-        Navigation
-    </div>
-
-    <a href="/">
-        Home
-    </a>
-
-    <a href="/dashboard">
-        Dashboard
-    </a>
-
-    <a href="/reviews">
-        Reviews
-    </a>
-
-    <a href="/statistics">
-        Statistics
-    </a>
-
-
-    <!-- RESOURCES -->
-
-    <div class="menu-section">
-        Resources
-    </div>
-
-    <a href="/documentation">
-        Documentation
-    </a>
-
-    <a href="/support">
-        Support
-    </a>
-
-    <a href="/advertise">
-        Advertisement
-    </a>
-
-    {% if is_admin(user) %}
-
-    <a href="/admin/advertise">
-        Advertisement Admin
-    </a>
-
-    {% endif %}
-
-
-    <!-- LEGAL -->
-
-    <div class="menu-section">
-        Legal
-    </div>
-
-    <a href="/terms">
-        Terms
-    </a>
-
-    <a href="/privacy">
-        Privacy
-    </a>
-
-    <a href="/data">
-        Data
-    </a>
-
-    <a href="/cookies">
-        Cookies
-    </a>
-
-
-    <!-- ACCOUNT -->
-
-    <div class="menu-section">
-        Account
-    </div>
-
-    {% if user %}
-
-    <a href="/dashboard">
-        Dashboard
-    </a>
-
-    <a href="/logout">
-        Logout
-    </a>
-
-    {% else %}
-
-    <a
-        href="/login"
-        class="discord-login"
-    >
-        Login with Discord
-    </a>
-
-    {% endif %}
-
-</nav>
-
-
-<!-- =====================================================
-     MAIN
-====================================================== -->
+{% block content %}
 
 <main class="page-container">
 
-
-    <!-- PAGE HEADER -->
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
 
     <section class="page-hero">
 
         <div class="page-card">
 
-            <div class="page-icon">
-                📊
-            </div>
-
-            <h1>
+            <h1 data-i18n="nav.statistics">
                 Statistics
             </h1>
 
-            <p>
+            <p data-i18n="common.hero_description">
                 Overview of the Misuki service and its current statistics.
             </p>
 
@@ -267,815 +29,638 @@
     </section>
 
 
-    <!-- =================================================
-         PUBLIC STATISTICS
-    ================================================== -->
+    <!-- =====================================================
+         SERVICE OVERVIEW
+    ====================================================== -->
 
-    <section class="statistics-section">
+    <section class="section statistics-section">
 
-        <div class="statistics-grid">
+        <div class="container">
 
+            <h2 data-i18n="common.service_overview">
+                Service overview
+            </h2>
 
-            <!-- SERVERS -->
-
-            <div class="statistics-card">
-
-                <div class="statistics-card-icon">
-                    🌐
-                </div>
-
-                <div class="statistics-card-content">
-
-                    <span class="statistics-card-title">
-                        Servers
-                    </span>
-
-                    <strong class="statistics-value">
-                        {{ statistics.servers if statistics is defined and statistics.servers is not none else "—" }}
-                    </strong>
-
-                    <span class="statistics-description">
-                        Servers currently using Misuki.
-                    </span>
-
-                </div>
-
-            </div>
+            <p class="statistics-description">
+                General statistics about the Misuki service.
+            </p>
 
 
-            <!-- USERS -->
+            <!-- =================================================
+                 MAIN STATISTICS
+            ================================================== -->
 
-            <div class="statistics-card">
+            <div class="statistics-grid">
 
-                <div class="statistics-card-icon">
-                    👥
-                </div>
+                <!-- SERVERS -->
 
-                <div class="statistics-card-content">
+                <div class="statistics-card">
 
-                    <span class="statistics-card-title">
-                        Users
-                    </span>
+                    <div class="statistics-card-icon">
+                        🏠
+                    </div>
 
-                    <strong class="statistics-value">
-                        {{ statistics.users if statistics is defined and statistics.users is not none else "—" }}
-                    </strong>
+                    <div class="statistics-card-content">
 
-                    <span class="statistics-description">
-                        Users reached by Misuki.
-                    </span>
+                        <span class="statistics-label">
+                            Servers
+                        </span>
+
+                        <strong class="statistics-value">
+                            {{ statistics.servers if statistics is defined and statistics.servers is defined else "—" }}
+                        </strong>
+
+                    </div>
 
                 </div>
 
-            </div>
 
+                <!-- USERS -->
 
-            <!-- ACTIVE LICENSES -->
+                <div class="statistics-card">
 
-            <div class="statistics-card">
+                    <div class="statistics-card-icon">
+                        👥
+                    </div>
 
-                <div class="statistics-card-icon">
-                    🔐
-                </div>
+                    <div class="statistics-card-content">
 
-                <div class="statistics-card-content">
+                        <span class="statistics-label">
+                            Users
+                        </span>
 
-                    <span class="statistics-card-title">
-                        Active Licenses
-                    </span>
+                        <strong class="statistics-value">
+                            {{ statistics.users if statistics is defined and statistics.users is defined else "—" }}
+                        </strong>
 
-                    <strong class="statistics-value">
-                        {{ statistics.active_licenses if statistics is defined and statistics.active_licenses is not none else "—" }}
-                    </strong>
-
-                    <span class="statistics-description">
-                        Currently active Misuki licenses.
-                    </span>
+                    </div>
 
                 </div>
 
-            </div>
 
+                <!-- CHANNELS -->
 
-            <!-- REVIEWS -->
+                <div class="statistics-card">
 
-            <div class="statistics-card">
+                    <div class="statistics-card-icon">
+                        💬
+                    </div>
 
-                <div class="statistics-card-icon">
-                    ⭐
-                </div>
+                    <div class="statistics-card-content">
 
-                <div class="statistics-card-content">
+                        <span class="statistics-label">
+                            Channels
+                        </span>
 
-                    <span class="statistics-card-title">
-                        Reviews
-                    </span>
+                        <strong class="statistics-value">
+                            {{ statistics.channels if statistics is defined and statistics.channels is defined else "—" }}
+                        </strong>
 
-                    <strong class="statistics-value">
-                        {{ statistics.reviews if statistics is defined and statistics.reviews is not none else "—" }}
-                    </strong>
-
-                    <span class="statistics-description">
-                        Reviews submitted by the community.
-                    </span>
+                    </div>
 
                 </div>
 
-            </div>
 
+                <!-- COMMANDS -->
 
-            <!-- ACTIVE ADVERTISEMENTS -->
+                <div class="statistics-card">
 
-            <div class="statistics-card">
+                    <div class="statistics-card-icon">
+                        ⚡
+                    </div>
 
-                <div class="statistics-card-icon">
-                    📢
-                </div>
+                    <div class="statistics-card-content">
 
-                <div class="statistics-card-content">
+                        <span class="statistics-label">
+                                Commands available
+                        </span>
 
-                    <span class="statistics-card-title">
-                        Active Advertisements
-                    </span>
+                        <strong class="statistics-value">
+                            {{ statistics.commands if statistics is defined and statistics.commands is defined else "—" }}
+                        </strong>
 
-                    <strong class="statistics-value">
-                        {{ statistics.active_advertisements if statistics is defined and statistics.active_advertisements is not none else "—" }}
-                    </strong>
-
-                    <span class="statistics-description">
-                        Advertisements currently active.
-                    </span>
+                    </div>
 
                 </div>
 
-            </div>
 
+                <!-- TICKETS -->
 
-            <!-- COMMANDS -->
+                <div class="statistics-card">
 
-            <div class="statistics-card">
+                    <div class="statistics-card-icon">
+                        🎫
+                    </div>
 
-                <div class="statistics-card-icon">
-                    ⚙️
+                    <div class="statistics-card-content">
+
+                        <span class="statistics-label">
+                            Tickets created
+                        </span>
+
+                        <strong class="statistics-value">
+                            {{ statistics.tickets if statistics is defined and statistics.tickets is defined else "—" }}
+                        </strong>
+
+                    </div>
+
                 </div>
 
-                <div class="statistics-card-content">
 
-                    <span class="statistics-card-title">
-                        Commands
-                    </span>
+                <!-- VERIFICATIONS -->
 
-                    <strong class="statistics-value">
-                        {{ statistics.commands if statistics is defined and statistics.commands is not none else "—" }}
-                    </strong>
+                <div class="statistics-card">
 
-                    <span class="statistics-description">
-                        Commands available through Misuki.
-                    </span>
+                    <div class="statistics-card-icon">
+                        ✅
+                    </div>
+
+                    <div class="statistics-card-content">
+
+                        <span class="statistics-label">
+                            Verifications
+                        </span>
+
+                        <strong class="statistics-value">
+                            {{ statistics.verifications if statistics is defined and statistics.verifications is defined else "—" }}
+                        </strong>
+
+                    </div>
 
                 </div>
 
             </div>
 
+        </div>
 
-            <!-- UPTIME -->
+    </section>
 
-            <div class="statistics-card">
 
-                <div class="statistics-card-icon">
-                    ⏱️
+    <!-- =====================================================
+         SYSTEM STATUS
+    ====================================================== -->
+
+    <section class="section statistics-section">
+
+        <div class="container">
+
+            <h2>
+                System status
+            </h2>
+
+            <p class="statistics-description">
+                Current status of the Misuki service.
+            </p>
+
+
+            <div class="status-grid">
+
+                <!-- BOT -->
+
+                <div class="status-card">
+
+                    <div class="status-indicator"></div>
+
+                    <div>
+                        <strong>Discord Bot</strong>
+                        <span>
+                            {{ statistics.bot_status if statistics is defined and statistics.bot_status is defined else "—" }}
+                        </span>
+                    </div>
+
                 </div>
 
-                <div class="statistics-card-content">
 
-                    <span class="statistics-card-title">
+                <!-- WEBSITE -->
+
+                <div class="status-card">
+
+                    <div class="status-indicator"></div>
+
+                    <div>
+                        <strong>Website</strong>
+                        <span>
+                            Operational
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <!-- DATABASE -->
+
+                <div class="status-card">
+
+                    <div class="status-indicator"></div>
+
+                    <div>
+                        <strong>Database</strong>
+                        <span>
+                            {{ statistics.database_status if statistics is defined and statistics.database_status is defined else "—" }}
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <!-- API -->
+
+                <div class="status-card">
+
+                    <div class="status-indicator"></div>
+
+                    <div>
+                        <strong>API</strong>
+                        <span>
+                            {{ statistics.api_status if statistics is defined and statistics.api_status is defined else "—" }}
+                        </span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         PERFORMANCE
+    ====================================================== -->
+
+    <section class="section statistics-section">
+
+        <div class="container">
+
+            <h2>
+                Performance
+            </h2>
+
+            <p class="statistics-description">
+                Current performance information.
+            </p>
+
+
+            <div class="performance-grid">
+
+                <div class="performance-card">
+
+                    <span class="statistics-label">
+                        Bot latency
+                    </span>
+
+                    <strong class="performance-value">
+                        {% if statistics is defined and statistics.latency is not none %}
+                            {{ statistics.latency }} ms
+                        {% else %}
+                            —
+                        {% endif %}
+                    </strong>
+
+                </div>
+
+
+                <div class="performance-card">
+
+                    <span class="statistics-label">
                         Uptime
                     </span>
 
-                    <strong class="statistics-value">
+                    <strong class="performance-value">
                         {{ statistics.uptime if statistics is defined and statistics.uptime is not none else "—" }}
                     </strong>
 
-                    <span class="statistics-description">
-                        Current Misuki uptime.
+                </div>
+
+
+                <div class="performance-card">
+
+                    <span class="statistics-label">
+                        Version
                     </span>
+
+                    <strong class="performance-value">
+                        {{ statistics.version if statistics is defined and statistics.version is not none else "—" }}
+                    </strong>
 
                 </div>
 
             </div>
 
+        </div>
 
-            <!-- SYSTEM STATUS -->
+    </section>
 
-            <div class="statistics-card">
 
-                <div class="statistics-card-icon">
-                    🟢
+    <!-- =====================================================
+         ADMIN STATISTICS
+         Only visible to Miskui administrators
+    ====================================================== -->
+
+    {% if is_miskui_admin is defined and is_miskui_admin %}
+
+    <section class="section statistics-section admin-statistics">
+
+        <div class="container">
+
+            <div class="admin-section-header">
+
+                <div>
+
+                    <h2>
+                        🔐 Administrator statistics
+                    </h2>
+
+                    <p class="statistics-description">
+                        Detailed information available only to Miskui administrators.
+                    </p>
+
                 </div>
 
-                <div class="statistics-card-content">
+                <span class="admin-badge">
+                    ADMIN
+                </span>
 
-                    <span class="statistics-card-title">
-                        System Status
-                    </span>
+            </div>
 
-                    <strong class="statistics-value">
 
-                        {% if statistics is defined and statistics.system_status %}
+            <!-- =================================================
+                 SERVER INFORMATION
+            ================================================== -->
 
-                            {{ statistics.system_status }}
+            <div class="admin-subsection">
 
+                <h3>
+                    Servers
+                </h3>
+
+                {% if admin_servers is defined and admin_servers %}
+
+                <div class="admin-server-list">
+
+                    {% for server in admin_servers %}
+
+                    <div class="admin-server-card">
+
+                        {% if server.icon %}
+                        <img
+                            src="{{ server.icon }}"
+                            alt=""
+                            class="admin-server-icon"
+                        >
                         {% else %}
-
-                            Operational
-
+                        <div class="admin-server-icon-placeholder">
+                            🏠
+                        </div>
                         {% endif %}
 
-                    </strong>
+                        <div class="admin-server-info">
 
-                    <span class="statistics-description">
-                        Current status of the Misuki service.
-                    </span>
-
-                </div>
-
-            </div>
-
-
-        </div>
-
-    </section>
-
-
-    <!-- =================================================
-         SYSTEM OVERVIEW
-    ================================================== -->
-
-    <section class="statistics-overview">
-
-        <div class="section-header">
-
-            <h2>
-                📈 System Overview
-            </h2>
-
-            <p>
-                More detailed statistics and historical data will be available here in the future.
-            </p>
-
-        </div>
-
-
-        <div class="statistics-overview-grid">
-
-
-            <!-- SERVER GROWTH -->
-
-            <div class="statistics-chart-card">
-
-                <div class="statistics-chart-header">
-
-                    <h3>
-                        Server Growth
-                    </h3>
-
-                    <span>
-                        📊
-                    </span>
-
-                </div>
-
-                <div
-                    class="statistics-chart"
-                    id="serverGrowthChart"
-                >
-
-                    <div class="statistics-chart-empty">
-                        —
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- USER GROWTH -->
-
-            <div class="statistics-chart-card">
-
-                <div class="statistics-chart-header">
-
-                    <h3>
-                        User Growth
-                    </h3>
-
-                    <span>
-                        👥
-                    </span>
-
-                </div>
-
-                <div
-                    class="statistics-chart"
-                    id="userGrowthChart"
-                >
-
-                    <div class="statistics-chart-empty">
-                        —
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- COMMANDS USED -->
-
-            <div class="statistics-chart-card">
-
-                <div class="statistics-chart-header">
-
-                    <h3>
-                        Commands Used
-                    </h3>
-
-                    <span>
-                        ⚙️
-                    </span>
-
-                </div>
-
-                <div
-                    class="statistics-chart"
-                    id="commandsChart"
-                >
-
-                    <div class="statistics-chart-empty">
-                        —
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- SERVICE HEALTH -->
-
-            <div class="statistics-chart-card">
-
-                <div class="statistics-chart-header">
-
-                    <h3>
-                        Service Health
-                    </h3>
-
-                    <span>
-                        ❤️
-                    </span>
-
-                </div>
-
-                <div class="statistics-health">
-
-                    <span class="statistics-health-indicator">
-                        🟢
-                    </span>
-
-                    <strong>
-                        {{ statistics.health if statistics is defined and statistics.health is not none else "Operational" }}
-                    </strong>
-
-                </div>
-
-            </div>
-
-
-        </div>
-
-    </section>
-
-
-    <!-- =================================================
-         ADMIN STATISTICS
-         ONLY VISIBLE TO AUTHORIZED ADMINS
-    ================================================== -->
-
-    {% if is_admin(user) %}
-
-    <section class="statistics-admin">
-
-
-        <div class="section-header">
-
-            <h2>
-                🔐 Admin Statistics
-            </h2>
-
-            <p>
-                Detailed Misuki statistics available only to authorized administrators.
-            </p>
-
-        </div>
-
-
-        <!-- ADMIN SUMMARY -->
-
-        <div class="statistics-admin-grid">
-
-
-            <div class="statistics-admin-card">
-
-                <span>
-                    Total Servers
-                </span>
-
-                <strong>
-                    {{ statistics.admin.total_servers if statistics is defined and statistics.admin is defined and statistics.admin.total_servers is not none else "—" }}
-                </strong>
-
-            </div>
-
-
-            <div class="statistics-admin-card">
-
-                <span>
-                    Total Users
-                </span>
-
-                <strong>
-                    {{ statistics.admin.total_users if statistics is defined and statistics.admin is defined and statistics.admin.total_users is not none else "—" }}
-                </strong>
-
-            </div>
-
-
-            <div class="statistics-admin-card">
-
-                <span>
-                    Active Licenses
-                </span>
-
-                <strong>
-                    {{ statistics.admin.active_licenses if statistics is defined and statistics.admin is defined and statistics.admin.active_licenses is not none else "—" }}
-                </strong>
-
-            </div>
-
-
-            <div class="statistics-admin-card">
-
-                <span>
-                    Total Reviews
-                </span>
-
-                <strong>
-                    {{ statistics.admin.total_reviews if statistics is defined and statistics.admin is defined and statistics.admin.total_reviews is not none else "—" }}
-                </strong>
-
-            </div>
-
-
-        </div>
-
-
-        <!-- =================================================
-             SERVER DETAILS
-        ================================================== -->
-
-        <div class="statistics-admin-panel">
-
-            <div class="statistics-admin-panel-header">
-
-                <h3>
-                    Server Details
-                </h3>
-
-                <span>
-                    🔎
-                </span>
-
-            </div>
-
-
-            <div class="statistics-table-wrapper">
-
-                <table class="statistics-table">
-
-                    <thead>
-
-                        <tr>
-
-                            <th>
-                                Server
-                            </th>
-
-                            <th>
-                                Server ID
-                            </th>
-
-                            <th>
-                                Members
-                            </th>
-
-                            <th>
-                                License
-                            </th>
-
-                            <th>
-                                Expires
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody>
-
-                    {% if statistics is defined
-                          and statistics.admin is defined
-                          and statistics.admin.servers is defined
-                          and statistics.admin.servers %}
-
-
-                        {% for server in statistics.admin.servers %}
-
-                        <tr>
-
-                            <td>
+                            <strong>
                                 {{ server.name }}
-                            </td>
+                            </strong>
 
-                            <td>
-                                {{ server.id }}
-                            </td>
+                            {% if server.id %}
+                            <span>
+                                ID: {{ server.id }}
+                            </span>
+                            {% endif %}
 
-                            <td>
-                                {{ server.members if server.members is not none else "—" }}
-                            </td>
+                        </div>
 
-                            <td>
+                        {% if server.members is defined %}
+                        <div class="admin-server-stat">
 
-                                {% if server.license_status == "active" %}
+                            <span>
+                                Members
+                            </span>
 
-                                    <span class="license-active">
-                                        🟢 Active
-                                    </span>
+                            <strong>
+                                {{ server.members }}
+                            </strong>
 
-                                {% elif server.license_status == "expired" %}
+                        </div>
+                        {% endif %}
 
-                                    <span class="license-expired">
-                                        🔴 Expired
-                                    </span>
+                    </div>
 
-                                {% elif server.license_status == "revoked" %}
+                    {% endfor %}
 
-                                    <span class="license-revoked">
-                                        ⛔ Revoked
-                                    </span>
+                </div>
 
-                                {% else %}
+                {% else %}
 
-                                    <span>
-                                        ⚪ None
-                                    </span>
+                <div class="statistics-empty">
+                    No server information available.
+                </div>
 
-                                {% endif %}
-
-                            </td>
-
-                            <td>
-                                {{ server.expires if server.expires else "Never" }}
-                            </td>
-
-                        </tr>
-
-                        {% endfor %}
-
-
-                    {% else %}
-
-
-                        <tr>
-
-                            <td
-                                colspan="5"
-                                class="statistics-table-empty"
-                            >
-                                No server details available.
-                            </td>
-
-                        </tr>
-
-
-                    {% endif %}
-
-                    </tbody>
-
-                </table>
+                {% endif %}
 
             </div>
 
-        </div>
 
+            <!-- =================================================
+                 USER INFORMATION
+            ================================================== -->
 
-        <!-- =================================================
-             ADMIN DETAILED STATISTICS
-        ================================================== -->
-
-        <div class="statistics-admin-panel">
-
-            <div class="statistics-admin-panel-header">
+            <div class="admin-subsection">
 
                 <h3>
-                    Detailed Statistics
+                    Users
                 </h3>
 
-                <span>
-                    📊
-                </span>
+                {% if admin_users is defined and admin_users %}
+
+                <div class="admin-user-list">
+
+                    {% for user in admin_users %}
+
+                    <div class="admin-user-card">
+
+                        {% if user.avatar %}
+                        <img
+                            src="{{ user.avatar }}"
+                            alt=""
+                            class="admin-user-avatar"
+                        >
+                        {% else %}
+                        <div class="admin-user-avatar-placeholder">
+                            👤
+                        </div>
+                        {% endif %}
+
+                        <div class="admin-user-info">
+
+                            <strong>
+                                {{ user.name }}
+                            </strong>
+
+                            {% if user.id %}
+                            <span>
+                                ID: {{ user.id }}
+                            </span>
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+                {% else %}
+
+                <div class="statistics-empty">
+                    No user information available.
+                </div>
+
+                {% endif %}
 
             </div>
 
 
-            <div class="statistics-detail-grid">
+            <!-- =================================================
+                 ADMIN ACTIVITY
+            ================================================== -->
+
+            <div class="admin-subsection">
+
+                <h3>
+                    Activity
+                </h3>
+
+                <div class="statistics-grid admin-statistics-grid">
+
+                    <div class="statistics-card">
+
+                        <div class="statistics-card-icon">
+                            ⚡
+                        </div>
+
+                        <div class="statistics-card-content">
+
+                            <span class="statistics-label">
+                                Commands
+                            </span>
+
+                            <strong class="statistics-value">
+                                {{ admin_statistics.commands if admin_statistics is defined and admin_statistics.commands is defined else "—" }}
+                            </strong>
+
+                        </div>
+
+                    </div>
 
 
-                <div class="statistics-detail-card">
+                    <div class="statistics-card">
 
-                    <span>
-                        Servers With License
-                    </span>
+                        <div class="statistics-card-icon">
+                            🎫
+                        </div>
 
-                    <strong>
-                        {{ statistics.admin.servers_with_license if statistics is defined and statistics.admin is defined and statistics.admin.servers_with_license is not none else "—" }}
-                    </strong>
+                        <div class="statistics-card-content">
+
+                            <span class="statistics-label">
+                                Tickets
+                            </span>
+
+                            <strong class="statistics-value">
+                                {{ admin_statistics.tickets if admin_statistics is defined and admin_statistics.tickets is defined else "—" }}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="statistics-card">
+
+                        <div class="statistics-card-icon">
+                            🛡️
+                        </div>
+
+                        <div class="statistics-card-content">
+
+                            <span class="statistics-label">
+                                Moderation actions
+                            </span>
+
+                            <strong class="statistics-value">
+                                {{ admin_statistics.moderation if admin_statistics is defined and admin_statistics.moderation is defined else "—" }}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="statistics-card">
+
+                        <div class="statistics-card-icon">
+                            📢
+                        </div>
+
+                        <div class="statistics-card-content">
+
+                            <span class="statistics-label">
+                                Announcements
+                            </span>
+
+                            <strong class="statistics-value">
+                                {{ admin_statistics.announcements if admin_statistics is defined and admin_statistics.announcements is defined else "—" }}
+                            </strong>
+
+                        </div>
+
+                    </div>
 
                 </div>
-
-
-                <div class="statistics-detail-card">
-
-                    <span>
-                        Servers Without License
-                    </span>
-
-                    <strong>
-                        {{ statistics.admin.servers_without_license if statistics is defined and statistics.admin is defined and statistics.admin.servers_without_license is not none else "—" }}
-                    </strong>
-
-                </div>
-
-
-                <div class="statistics-detail-card">
-
-                    <span>
-                        Expired Licenses
-                    </span>
-
-                    <strong>
-                        {{ statistics.admin.expired_licenses if statistics is defined and statistics.admin is defined and statistics.admin.expired_licenses is not none else "—" }}
-                    </strong>
-
-                </div>
-
-
-                <div class="statistics-detail-card">
-
-                    <span>
-                        Pending Advertisements
-                    </span>
-
-                    <strong>
-                        {{ statistics.admin.pending_advertisements if statistics is defined and statistics.admin is defined and statistics.admin.pending_advertisements is not none else "—" }}
-                    </strong>
-
-                </div>
-
 
             </div>
 
         </div>
-
 
     </section>
 
     {% endif %}
 
 
+    <!-- =====================================================
+         PRIVACY NOTE
+    ====================================================== -->
+
+    <section class="section statistics-section">
+
+        <div class="container">
+
+            <div class="statistics-privacy">
+
+                <div class="statistics-privacy-icon">
+                    🔒
+                </div>
+
+                <div>
+
+                    <h3>
+                        Privacy
+                    </h3>
+
+                    <p>
+                        Public statistics are presented in an aggregated form.
+                        Specific server and user information is restricted to
+                        authorized Miskui administrators.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
 </main>
 
-
-<!-- =====================================================
-     FOOTER
-====================================================== -->
-
-{% include "bottom-nav.html" %}
-
-
-<footer class="site-footer">
-
-    <p>
-        © 2026 Misuki. All rights reserved.
-    </p>
-
-</footer>
-
-
-<!-- =====================================================
-     COOKIE BANNER
-====================================================== -->
-
-<div
-    class="cookie-banner"
-    id="cookieBanner"
->
-
-    <div class="cookie-content">
-
-        <div class="cookie-title">
-            Cookie consent
-        </div>
-
-        <div class="cookie-title">
-            🍪 We use cookies
-        </div>
-
-        <p>
-            Misuki uses cookies to improve your experience and keep the website working correctly.
-        </p>
-
-        <div class="cookie-actions">
-
-            <button
-                id="acceptCookies"
-                type="button"
-            >
-                Accept All
-            </button>
-
-            <button
-                id="essentialCookies"
-                type="button"
-            >
-                Essential Only
-            </button>
-
-            <button
-                id="denyCookies"
-                type="button"
-            >
-                Deny
-            </button>
-
-        </div>
-
-        <div class="cookie-links">
-
-            <a href="/terms">
-                Terms
-            </a>
-
-            <a href="/privacy">
-                Privacy
-            </a>
-
-            <a href="/cookies">
-                Cookie Policy
-            </a>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-<!-- =====================================================
-     SCRIPTS
-====================================================== -->
-
-<script
-    src="/static/js/menu.js?v=2"
-></script>
-
-<script
-    src="/static/js/cookies.js?v=1"
-></script>
-
-<script
-    src="/static/js/stars.js?v=1"
-></script>
-
-<script
-    src="/static/js/mouse-trail.js?v=1"
-></script>
-
-<script
-    src="/static/js/translation.js?v=1"
-></script>
-
-
-</body>
-
-</html>
+{% endblock %}

@@ -1,217 +1,10 @@
+{% extends "base.html" %}
 
-<!DOCTYPE html>
+{% block title %}
+Misuki — Terms of Service
+{% endblock %}
 
-<html lang="en">
-
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <link
-        rel="icon"
-        type="image/png"
-        href="/assets/images/favicon.png?v=3"
-    >
-
-    <link
-        rel="shortcut icon"
-        type="image/png"
-        href="/assets/images/favicon.png?v=3"
-    >
-
-    <link
-        rel="stylesheet"
-        href="/static/css/style.css?v=17"
-    >
-
-    <link
-        rel="stylesheet"
-        href="/static/css/cookies.css?v=3"
-    >
-
-    <link
-        rel="stylesheet"
-        href="/static/css/bottom-nav.css?v=1"
-    >
-
-    <title>Misuki — Terms of Service</title>
-
-</head>
-
-
-<body>
-
-
-<header class="container">
-
-    <a
-        class="logo"
-        href="/"
-    >
-        Misuki<span>.</span>
-    </a>
-
-
-    <button
-        class="hamburger"
-        id="menuOpen"
-        type="button"
-        onclick="openMenu()"
-        aria-label="Open menu"
-        aria-controls="menu"
-        aria-expanded="false"
-    >
-
-        <span></span>
-        <span></span>
-        <span></span>
-
-    </button>
-
-</header>
-
-
-<div
-    class="overlay"
-    id="overlay"
-    onclick="closeMenu()"
-></div>
-
-
-<nav
-    class="menu"
-    id="menu"
-    aria-hidden="true"
->
-
-    <div class="menu-header">
-
-        <div class="menu-title">
-            Menu
-        </div>
-
-
-        <button
-            class="menu-close"
-            id="menuClose"
-            type="button"
-            onclick="closeMenu()"
-            aria-label="Close menu"
-        >
-            ×
-        </button>
-
-    </div>
-
-
-    <div class="menu-section">
-        Navigation
-    </div>
-
-
-    <a href="/">
-        Home
-    </a>
-
-
-    <a href="/dashboard">
-        Dashboard
-    </a>
-
-
-    <a href="/reviews">
-        Reviews
-    </a>
-
-
-    <div class="menu-section">
-        Resources
-    </div>
-
-
-    <a href="/documentation">
-        Documentation
-    </a>
-
-
-    <a href="/support">
-        Support
-    </a>
-
-
-    <a href="/advertise">
-        Advertisement
-    </a>
-
-
-    {% if is_admin(user) %}
-
-        <a href="/admin/advertise">
-            Advertisement Admin
-        </a>
-
-    {% endif %}
-
-
-    <div class="menu-section">
-        Legal
-    </div>
-
-
-    <a href="/terms">
-        Terms
-    </a>
-
-
-    <a href="/privacy">
-        Privacy
-    </a>
-
-
-    <a href="/data">
-        Data
-    </a>
-
-
-    <a href="/cookies">
-        Cookies
-    </a>
-
-
-    <div class="menu-section">
-        Account
-    </div>
-
-
-    {% if user %}
-
-        <a href="/dashboard">
-            Dashboard
-        </a>
-
-
-        <a href="/logout">
-            Logout
-        </a>
-
-    {% else %}
-
-        <a
-            href="/login"
-            class="discord-login"
-        >
-            Login with Discord
-        </a>
-
-    {% endif %}
-
-</nav>
-
+{% block content %}
 
 <main>
 
@@ -221,20 +14,17 @@
 
             <div class="card legal-page">
 
-                <h1>
+                <h1 data-i18n="nav.terms">
                     Terms of Service
                 </h1>
-
 
                 <p class="muted">
                     Last updated: August 2026
                 </p>
 
-
                 <h2>
                     1. Acceptance of Terms
                 </h2>
-
 
                 <p>
                     By using Misuki, you agree to
@@ -243,11 +33,9 @@
                     you should not use the service.
                 </p>
 
-
                 <h2>
                     2. Use of the Service
                 </h2>
-
 
                 <p>
                     Misuki provides Discord-related
@@ -256,18 +44,15 @@
                     Discord servers.
                 </p>
 
-
                 <p>
                     You agree to use Misuki responsibly
                     and in accordance with applicable
                     laws and Discord's rules and policies.
                 </p>
 
-
                 <h2>
                     3. Discord
                 </h2>
-
 
                 <p>
                     Misuki is an independent service and
@@ -275,18 +60,15 @@
                     or sponsored by Discord Inc.
                 </p>
 
-
                 <p>
                     Your use of Discord remains subject
                     to Discord's own Terms of Service
                     and Community Guidelines.
                 </p>
 
-
                 <h2>
                     4. Accounts and Authentication
                 </h2>
-
 
                 <p>
                     Some Misuki features may require
@@ -295,17 +77,14 @@
                     the security of your account.
                 </p>
 
-
                 <p>
                     Misuki does not request or store your
                     Discord password.
                 </p>
 
-
                 <h2>
                     5. Server Permissions
                 </h2>
-
 
                 <p>
                     Misuki may require certain permissions
@@ -313,18 +92,15 @@
                     features.
                 </p>
 
-
                 <p>
                     Server owners and administrators are
                     responsible for deciding which
                     permissions are granted to the bot.
                 </p>
 
-
                 <h2>
                     6. Prohibited Use
                 </h2>
-
 
                 <p>
                     You must not use Misuki to abuse,
@@ -332,18 +108,15 @@
                     Discord, other users, or the service.
                 </p>
 
-
                 <p>
                     You must also not attempt to gain
                     unauthorized access to Misuki systems
                     or data.
                 </p>
 
-
                 <h2>
                     7. Availability
                 </h2>
-
 
                 <p>
                     We aim to keep Misuki available and
@@ -351,17 +124,14 @@
                     uninterrupted access to the service.
                 </p>
 
-
                 <p>
                     Features may be changed, suspended,
                     or discontinued when necessary.
                 </p>
 
-
                 <h2>
                     8. Third-Party Services
                 </h2>
-
 
                 <p>
                     Misuki may rely on third-party
@@ -369,17 +139,14 @@
                     infrastructure providers.
                 </p>
 
-
                 <p>
                     Their own terms and policies may
                     apply when you use those services.
                 </p>
 
-
                 <h2>
                     9. Termination
                 </h2>
-
 
                 <p>
                     Access to Misuki may be restricted or
@@ -388,11 +155,9 @@
                     the service and its users.
                 </p>
 
-
                 <h2>
                     10. Changes to These Terms
                 </h2>
-
 
                 <p>
                     These Terms of Service may be updated
@@ -402,11 +167,9 @@
                     terms.
                 </p>
 
-
                 <h2>
                     11. Contact
                 </h2>
-
 
                 <p>
                     If you have questions regarding these
@@ -421,231 +184,4 @@
 
 </main>
 
-
-<footer>
-
-    {% include "bottom-nav.html" %}
-
-    <div class="footer-copy">
-        © 2026 Misuki. All rights reserved.
-    </div>
-
-</footer>
-
-
-<div id="misukiCookieBanner">
-
-    <div id="misukiCookieContent">
-
-        <h3>
-            🍪 We use cookies
-        </h3>
-
-
-        <p>
-            Misuki uses cookies to improve your
-            experience and keep the website working
-            correctly.
-        </p>
-
-
-        <div id="misukiCookieButtons">
-
-            <button
-                type="button"
-                id="misukiAccept"
-            >
-                Accept All
-            </button>
-
-
-            <button
-                type="button"
-                id="misukiEssential"
-            >
-                Essential Only
-            </button>
-
-
-            <button
-                type="button"
-                id="misukiDeny"
-            >
-                Deny
-            </button>
-
-        </div>
-
-
-        <div id="misukiCookieLegal">
-
-            <a href="/terms">
-                Terms
-            </a>
-
-
-            <a href="/privacy">
-                Privacy
-            </a>
-
-
-            <a href="/cookies">
-                Cookie Policy
-            </a>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-<script
-    src="/static/js/stars.js?v=3"
-    defer
-></script>
-
-
-<script
-    src="/static/js/mouse-trail.js?v=3"
-    defer
-></script>
-
-
-<script
-    src="/static/js/cookies.js?v=3"
-    defer
-></script>
-
-
-<script>
-
-    function openMenu() {
-
-        const menu =
-            document.getElementById("menu");
-
-        const overlay =
-            document.getElementById("overlay");
-
-        const hamburger =
-            document.getElementById("menuOpen");
-
-
-        if (!menu || !overlay) {
-            return;
-        }
-
-
-        menu.classList.add("open");
-
-        overlay.classList.add("show");
-
-        document.body.classList.add("menu-open");
-
-        menu.setAttribute(
-            "aria-hidden",
-            "false"
-        );
-
-
-        if (hamburger) {
-
-            hamburger.setAttribute(
-                "aria-expanded",
-                "true"
-            );
-
-        }
-
-    }
-
-
-    function closeMenu() {
-
-        const menu =
-            document.getElementById("menu");
-
-        const overlay =
-            document.getElementById("overlay");
-
-        const hamburger =
-            document.getElementById("menuOpen");
-
-
-        if (!menu || !overlay) {
-            return;
-        }
-
-
-        menu.classList.remove("open");
-
-        overlay.classList.remove("show");
-
-        document.body.classList.remove("menu-open");
-
-        menu.setAttribute(
-            "aria-hidden",
-            "true"
-        );
-
-
-        if (hamburger) {
-
-            hamburger.setAttribute(
-                "aria-expanded",
-                "false"
-            );
-
-        }
-
-    }
-
-
-    document.addEventListener(
-        "keydown",
-        function(event) {
-
-            if (event.key === "Escape") {
-
-                closeMenu();
-
-            }
-
-        }
-    );
-
-
-    document.addEventListener(
-        "DOMContentLoaded",
-        function() {
-
-            const menuLinks =
-                document.querySelectorAll("#menu a");
-
-
-            menuLinks.forEach(
-                function(link) {
-
-                    link.addEventListener(
-                        "click",
-                        function() {
-
-                            closeMenu();
-
-                        }
-                    );
-
-                }
-            );
-
-        }
-    );
-
-</script>
-
-<script src="/static/js/translation.js?v=1" defer></script>
-</body>
-
-</html>
-
+{% endblock %}

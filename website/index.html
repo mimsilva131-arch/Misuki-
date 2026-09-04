@@ -1,735 +1,268 @@
+{% extends "base.html" %}
 
-<!DOCTYPE html>
+{% block title %}
+Misuki — Discord Bot
+{% endblock %}
 
-<html lang="en">
-
-<head>
-
-<meta charset="UTF-8">
-
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
-
-<title>Misuki — Discord Bot</title>
-
-
-<!-- =====================================================
-     FAVICON
-====================================================== -->
-
-<link
-    rel="icon"
-    type="image/png"
-    href="/assets/images/favicon.png?v=3"
->
-
-<link
-    rel="shortcut icon"
-    type="image/png"
-    href="/assets/images/favicon.png?v=3"
->
-
-
-<!-- =====================================================
-     STYLES
-====================================================== -->
-
-<link
-    rel="stylesheet"
-    href="/static/css/style.css?v=16"
->
-
-<link
-    rel="stylesheet"
-    href="/static/css/mouse-trail.css?v=3"
->
-
-<link
-    rel="stylesheet"
-    href="/static/css/menu.css?v=3"
->
-
-<link
-    rel="stylesheet"
-    href="/static/css/cookies.css?v=3"
->
-<link rel="stylesheet" href="/static/css/bottom-nav.css?v=1">
-
-</head>
-
-
-<!-- =====================================================
-     HEADER
-====================================================== -->
-
-<header class="container">
-
-
-<a
-    class="logo"
-    href="/"
->
-    Misuki<span>.</span>
-</a>
-
-
-<button
-    class="hamburger"
-    id="hamburger"
-    type="button"
-    aria-label="Open menu"
-    aria-controls="menu"
-    aria-expanded="false"
->
-
-    <span></span>
-    <span></span>
-    <span></span>
-
-</button>
-
-
-</header>
-
-
-<!-- =====================================================
-     OVERLAY
-====================================================== -->
-
-<div
-    class="overlay"
-    id="overlay"
-></div>
-
-
-<!-- =====================================================
-     SIDE MENU
-====================================================== -->
-
-<nav
-    class="menu"
-    id="menu"
-    aria-hidden="true"
->
-
-
-<!-- =================================================
-     MENU HEADER
-================================================== -->
-
-<div class="menu-header">
-
-    <div class="menu-title">
-        Menu
-    </div>
-
-
-    <button
-        class="menu-close"
-        id="menuClose"
-        type="button"
-        aria-label="Close menu"
-    >
-        ×
-    </button>
-
-</div>
-
-
-<!-- =================================================
-     NAVIGATION
-================================================== -->
-
-<div class="menu-section">
-    Navigation
-</div>
-
-
-<a href="/">
-    Home
-</a>
-
-
-<a href="/dashboard">
-    Dashboard
-</a>
-
-
-<a href="/reviews">
-    Reviews
-</a>
-
-
-<!-- =================================================
-     RESOURCES
-================================================== -->
-
-<div class="menu-section">
-    Resources
-</div>
-
-
-<a href="/documentation">
-    Documentation
-</a>
-
-
-<a href="/support">
-    Support
-</a>
-
-
-<a href="/advertise">
-    Advertisement
-</a>
-
-
-<!-- =================================================
-     ADMIN
-================================================== -->
-
-{% if user and is_admin(user) %}
-
-    <div class="menu-section">
-        Administration
-    </div>
-
-
-    <a href="/admin/advertise">
-        Advertisement Admin
-    </a>
-
-{% endif %}
-
-
-<!-- =================================================
-     LEGAL
-================================================== -->
-
-<div class="menu-section">
-    Legal
-</div>
-
-
-<a href="/terms">
-    Terms
-</a>
-
-
-<a href="/privacy">
-    Privacy
-</a>
-
-
-<a href="/data">
-    Data
-</a>
-
-
-<a href="/cookies">
-    Cookies
-</a>
-
-
-<!-- =================================================
-     ACCOUNT
-================================================== -->
-
-<div class="menu-section">
-    Account
-</div>
-
-
-{% if user %}
-
-    <a href="/dashboard">
-        Dashboard
-    </a>
-
-
-    <a
-        href="/logout"
-        class="logout-link"
-    >
-        Logout
-    </a>
-
-{% else %}
-
-    <a
-        href="/login"
-        class="discord-login"
-    >
-        Login with Discord
-    </a>
-
-{% endif %}
-
-
-</nav>
-
-
-<!-- =====================================================
-     HERO
-====================================================== -->
+{% block content %}
 
 <main>
 
-<section class="hero">
+    <!-- =====================================================
+         HERO
+    ====================================================== -->
 
-    <div class="container">
+    <section class="hero">
 
+        <div class="container">
 
-        <div class="hero-icon">
+            <div class="hero-icon">
 
-            <img
-                src="/assets/images/icon.png?v=3"
-                alt="Misuki"
-            >
-
-        </div>
-
-
-        <h1>
-
-            Meet
-            <span>Misuki.</span>
-
-        </h1>
-
-
-        <p>
-
-            A powerful Discord bot designed to make
-            your server easier to manage, safer and
-            more enjoyable.
-
-        </p>
-
-
-        {% if user %}
-
-            <a
-                href="/dashboard"
-                class="dashboard-button"
-            >
-                🚀 Open Dashboard
-            </a>
-
-        {% else %}
-
-            <a
-                href="/login"
-                class="dashboard-button"
-            >
-                🔐 Login with Discord
-            </a>
-
-        {% endif %}
-
-
-    </div>
-
-</section>
-
-
-<!-- =================================================
-     FEATURES
-================================================== -->
-
-<section class="section">
-
-    <div class="container">
-
-
-        <h2 class="section-title">
-            Why Misuki?
-        </h2>
-
-
-        <div class="server-grid">
-
-
-            <div class="card">
-
-                <h3>
-                    Security
-                </h3>
-
-                <p>
-
-                    Keep your Discord server protected
-                    with reliable moderation and
-                    management tools.
-
-                </p>
-
-            </div>
-
-
-            <div class="card">
-
-                <h3>
-                    Performance
-                </h3>
-
-                <p>
-
-                    Fast and responsive commands designed
-                    to work smoothly on your server.
-
-                </p>
-
-            </div>
-
-
-            <div class="card">
-
-                <h3>
-                    Management
-                </h3>
-
-                <p>
-
-                    Manage your Misuki configuration
-                    directly through the dashboard.
-
-                </p>
-
-            </div>
-
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- =================================================
-     ADVERTISEMENTS
-================================================== -->
-
-{% if advertisements %}
-
-<section class="section">
-
-    <div class="container">
-
-
-        <h2 class="section-title">
-            Advertisement
-        </h2>
-
-
-        <div class="server-grid">
-
-
-            {% for ad in advertisements %}
-
-                <a
-                    href="{{ ad.target_url }}"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="card advertisement-card"
+                <img
+                    src="/assets/images/icon.png?v=3"
+                    alt="Misuki"
                 >
 
+            </div>
 
-                    {% if ad.image_url %}
+            <h1>
+                <span data-i18n="common.meet">Meet</span>
+                <span>Misuki.</span>
+            </h1>
 
-                        <img
-                            src="{{ ad.image_url }}"
-                            alt="{{ ad.title }}"
-                            class="advertisement-image"
-                        >
+            <p data-i18n="common.hero_description">
+                A powerful Discord bot designed to make
+                your server easier to manage, safer and
+                more enjoyable.
+            </p>
 
-                    {% endif %}
+            {% if user %}
 
-
-                    <div class="advertisement-content">
-
-
-                        <h3>
-                            {{ ad.title }}
-                        </h3>
-
-
-                        <p>
-                            {{ ad.description }}
-                        </p>
-
-
-                    </div>
-
-
+                <a
+                    href="/dashboard"
+                    class="dashboard-button"
+                >
+                    <span data-i18n="common.open_dashboard">🚀 Open Dashboard</span>
                 </a>
 
-            {% endfor %}
+            {% else %}
 
+                <a
+                    href="/login"
+                    class="dashboard-button"
+                    data-i18n="nav.login"
+                >
+                    🔐 Login with Discord
+                </a>
+
+            {% endif %}
 
         </div>
 
-    </div>
-
-</section>
-
-{% endif %}
+    </section>
 
 
-<!-- =================================================
-     REVIEWS
-================================================== -->
+    <!-- =================================================
+         FEATURES
+    ================================================== -->
 
-<section class="section">
+    <section class="section">
 
-    <div class="container">
+        <div class="container">
+
+            <h2 class="section-title" data-i18n="common.why_misuki">
+                Why Misuki?
+            </h2>
+
+            <div class="server-grid">
+
+                <div class="card feature-card">
+
+                    <h3 data-i18n="common.security">
+                        Security
+                    </h3>
+
+                    <p data-i18n="common.security_description">
+                        Keep your Discord server protected
+                        with reliable moderation and
+                        management tools.
+                    </p>
+
+                </div>
+
+                <div class="card feature-card">
+
+                    <h3 data-i18n="common.performance">
+                        Performance
+                    </h3>
+
+                    <p data-i18n="common.performance_description">
+                        Fast and responsive commands designed
+                        to work smoothly on your server.
+                    </p>
+
+                </div>
+
+                <div class="card feature-card">
+
+                    <h3 data-i18n="common.management">
+                        Management
+                    </h3>
+
+                    <p data-i18n="common.management_description">
+                        Manage your Misuki configuration
+                        directly through the dashboard.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
 
 
-        <h2 class="section-title">
-            ⭐ What users say
-        </h2>
+    <!-- =================================================
+         ADVERTISEMENTS
+    ================================================== -->
 
+    {% if advertisements %}
 
-        {% if reviews %}
+        <section class="section">
 
-            <div class="review-grid">
+            <div class="container">
 
-                {% for review in reviews %}
+                <h2 class="section-title" data-i18n="common.advertisement">
+                    Advertisement
+                </h2>
 
-                    <div class="card review-card">
+                <div class="server-grid">
 
+                    {% for ad in advertisements %}
 
-                        <div class="review-user">
+                        <a
+                            href="{{ ad.target_url }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="card advertisement-card"
+                        >
 
-
-                            {% if review.avatar %}
+                            {% if ad.image_url %}
 
                                 <img
-                                    class="review-avatar"
-                                    src="{{ review.avatar }}"
-                                    alt=""
+                                    src="{{ ad.image_url }}"
+                                    alt="{{ ad.title }}"
+                                    class="advertisement-image"
                                 >
-
-                            {% else %}
-
-                                <div
-                                    class="server-icon-placeholder"
-                                >
-                                    {{ review.username[0] }}
-                                </div>
 
                             {% endif %}
 
+                            <div class="advertisement-content">
 
-                            <div>
+                                <h3>
+                                    {{ ad.title }}
+                                </h3>
 
-                                <strong>
-                                    {{ review.username }}
-                                </strong>
+                                <p>
+                                    {{ ad.description }}
+                                </p>
+
+                            </div>
+
+                        </a>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+        </section>
+
+    {% endif %}
 
 
-                                <div class="stars">
+    <!-- =================================================
+         REVIEWS
+    ================================================== -->
 
-                                    {% for i in range(review.rating) %}
+    <section class="section">
 
-                                        ★
+        <div class="container">
 
-                                    {% endfor %}
+            <h2 class="section-title" data-i18n="common.what_users_say">
+                ⭐ What users say
+            </h2>
+
+            {% if reviews %}
+
+                <div class="review-grid">
+
+                    {% for review in reviews %}
+
+                        <div class="card review-card">
+
+                            <div class="review-user">
+
+                                {% if review.avatar %}
+
+                                    <img
+                                        class="review-avatar"
+                                        src="{{ review.avatar }}"
+                                        alt=""
+                                    >
+
+                                {% else %}
+
+                                    <div class="server-icon-placeholder">
+                                        {{ review.username[0] }}
+                                    </div>
+
+                                {% endif %}
+
+                                <div>
+
+                                    <strong>
+                                        {{ review.username }}
+                                    </strong>
+
+                                    <div class="stars">
+
+                                        {% for i in range(review.rating) %}
+
+                                            ★
+
+                                        {% endfor %}
+
+                                    </div>
 
                                 </div>
 
                             </div>
 
+                            <div class="review-text">
+                                {{ review.review }}
+                            </div>
 
                         </div>
 
+                    {% endfor %}
 
-                        <div class="review-text">
+                </div>
 
-                            {{ review.review }}
+            {% else %}
 
-                        </div>
+                <div class="empty" data-i18n="reviews.no_reviews">
+                    No reviews yet.
+                </div>
 
+            {% endif %}
 
-                    </div>
+        </div>
 
-                {% endfor %}
-
-            </div>
-
-        {% else %}
-
-            <div class="empty">
-
-                No reviews yet.
-
-            </div>
-
-        {% endif %}
-
-
-    </div>
-
-</section>
-
+    </section>
 
 </main>
 
-
-<!-- =====================================================
-     COOKIE BANNER
-====================================================== -->
-
-<div
-    id="misukiCookieBanner"
-    role="dialog"
-    aria-label="Cookie consent"
-    aria-live="polite"
->
-
-    <div id="misukiCookieContent">
-
-        <h3>
-            🍪 We use cookies
-        </h3>
-
-
-        <p>
-            Misuki uses cookies to improve your experience and keep the website working correctly.
-        </p>
-
-
-        <div id="misukiCookieButtons">
-
-
-            <button
-                type="button"
-                id="misukiAccept"
-            >
-                Accept All
-            </button>
-
-
-            <button
-                type="button"
-                id="misukiEssential"
-            >
-                Essential Only
-            </button>
-
-
-            <button
-                type="button"
-                id="misukiDeny"
-            >
-                Deny
-            </button>
-
-
-        </div>
-
-
-        <div id="misukiCookieLegal">
-
-
-            <a href="/terms">
-                Terms
-            </a>
-
-
-            <a href="/privacy">
-                Privacy
-            </a>
-
-
-            <a href="/cookies">
-                Cookie Policy
-            </a>
-
-
-        </div>
-
-
-    </div>
-
-</div>
-
-
-<!-- =====================================================
-     FOOTER
-====================================================== -->
-
-<footer>
-
-    {% include "bottom-nav.html" %}
-
-    <div class="footer-copy">
-        © 2026 Misuki. All rights reserved.
-    </div>
-
-</footer>
-
-
-<div class="footer-links">
-
-
-    <a href="/terms">
-        Terms
-    </a>
-
-
-    <a href="/privacy">
-        Privacy
-    </a>
-
-
-    <a href="/data">
-        Data
-    </a>
-
-
-    <a href="/cookies">
-        Cookies
-    </a>
-
-
-</div>
-
-
-</footer>
-
-
-<!-- =====================================================
-     JAVASCRIPT
-====================================================== -->
-
-<script
-    src="/static/js/stars.js?v=3"
-    defer
-></script>
-
-
-<script
-    src="/static/js/mouse-trail.js?v=3"
-    defer
-></script>
-
-
-<script
-    src="/static/js/menu.js?v=3"
-    defer
-></script>
-
-
-<script
-    src="/static/js/cookies.js?v=3"
-    defer
-></script>
-
-<script src="/static/js/translation.js?v=1" defer></script>
-</body>
-
-</html>
-
+{% endblock %}
