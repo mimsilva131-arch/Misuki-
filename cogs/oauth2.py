@@ -1785,6 +1785,38 @@ def create_verification_request(
 
 
 # =========================================================
+# LEGACY VERIFICATION URL
+# =========================================================
+
+@app.route(
+    "/verify/guild=<int:guild_id>",
+    methods=["GET"]
+)
+@app.route(
+    "/verification/guild=<int:guild_id>",
+    methods=["GET"]
+)
+@app.route(
+    "/verify/<int:guild_id>",
+    methods=["GET"]
+)
+@app.route(
+    "/verification/<int:guild_id>",
+    methods=["GET"]
+)
+def verification_legacy_url(guild_id):
+
+    return redirect(
+        "/verify?"
+        + urlencode(
+            {
+                "guild_id": guild_id
+            }
+        )
+    )
+
+
+# =========================================================
 # DISCORD VERIFICATION
 # =========================================================
 
