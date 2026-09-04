@@ -1,561 +1,315 @@
-<!DOCTYPE html>
+{% extends "base.html" %}
 
-<html lang="pt-PT">
+{% block title %}
+Verificação — Misuki
+{% endblock %}
 
-<head>
+{% block content %}
 
-    <meta charset="UTF-8">
+<style>
+    .verification-container {
+        min-height: calc(100vh - 80px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+    }
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    .verification-card {
+        width: 100%;
+        max-width: 520px;
+        background: #111118;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 18px;
+        padding: 40px 32px;
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    }
 
-    <title>Verificação — Miskui</title>
+    .verification-icon {
+        width: 72px;
+        height: 72px;
+        margin: 0 auto 22px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(88, 101, 242, 0.12);
+        font-size: 32px;
+    }
 
-    <style>
+    .verification-card.success .verification-icon {
+        background: rgba(46, 204, 113, 0.12);
+    }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+    .verification-card h1 {
+        margin: 0 0 12px;
+        font-size: 30px;
+        font-weight: 700;
+        color: #ffffff;
+    }
+
+    .verification-subtitle {
+        margin: 0 auto 28px;
+        max-width: 420px;
+        color: #a9a9b3;
+        font-size: 15px;
+        line-height: 1.6;
+    }
+
+    .verification-info {
+        background: rgba(255, 255, 255, 0.035);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 22px;
+        text-align: left;
+    }
+
+    .verification-info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        padding: 7px 0;
+    }
+
+    .verification-info-row:not(:last-child) {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .verification-info-label {
+        color: #858591;
+        font-size: 13px;
+    }
+
+    .verification-info-value {
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: 500;
+        text-align: right;
+        word-break: break-word;
+    }
+
+    .verify-button {
+        width: 100%;
+        border: none;
+        border-radius: 10px;
+        padding: 14px 20px;
+        background: #5865f2;
+        color: #ffffff;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition:
+            transform 0.15s ease,
+            background 0.15s ease,
+            box-shadow 0.15s ease;
+    }
+
+    .verify-button:hover {
+        background: #4752c4;
+        transform: translateY(-1px);
+        box-shadow: 0 8px 24px rgba(88, 101, 242, 0.25);
+    }
+
+    .verify-button:active {
+        transform: translateY(0);
+    }
+
+    .verification-note {
+        margin: 20px 0 0;
+        color: #777783;
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .verification-success {
+        margin-top: 22px;
+        padding: 16px;
+        border-radius: 12px;
+        background: rgba(46, 204, 113, 0.08);
+        border: 1px solid rgba(46, 204, 113, 0.18);
+        color: #b9f6ce;
+        font-size: 13px;
+        line-height: 1.6;
+        text-align: left;
+    }
+
+    .verification-success strong {
+        display: block;
+        margin-bottom: 6px;
+        color: #ffffff;
+        font-size: 14px;
+    }
+
+    .verification-footer {
+        margin-top: 28px;
+        color: #5f5f69;
+        font-size: 11px;
+    }
+
+    @media (max-width: 600px) {
+        .verification-container {
+            padding: 25px 15px;
         }
 
-        body {
-
-            min-height: 100vh;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            background:
-                radial-gradient(
-                    circle at top,
-                    #171722 0%,
-                    #0b0b10 55%,
-                    #07070b 100%
-                );
-
-            color: #ffffff;
-
-            font-family:
-                Inter,
-                -apple-system,
-                BlinkMacSystemFont,
-                "Segoe UI",
-                sans-serif;
-
-            padding: 20px;
+        .verification-card {
+            padding: 32px 22px;
+            border-radius: 15px;
         }
 
-        .container {
-
-            width: 100%;
-
-            max-width: 460px;
-
-            background:
-                rgba(18, 18, 27, 0.94);
-
-            border:
-                1px solid rgba(255, 255, 255, 0.08);
-
-            border-radius: 18px;
-
-            padding: 40px 32px;
-
-            text-align: center;
-
-            box-shadow:
-                0 20px 60px rgba(0, 0, 0, 0.45);
-
-            backdrop-filter: blur(12px);
+        .verification-card h1 {
+            font-size: 26px;
         }
 
-        .icon {
-
-            width: 76px;
-
-            height: 76px;
-
-            margin: 0 auto 24px;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            border-radius: 50%;
-
-            background:
-                rgba(88, 101, 242, 0.14);
-
-            border:
-                1px solid rgba(88, 101, 242, 0.3);
-
-            font-size: 34px;
+        .verification-info-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 3px;
         }
 
-        .success-icon {
-
-            background:
-                rgba(67, 181, 129, 0.14);
-
-            border-color:
-                rgba(67, 181, 129, 0.3);
-        }
-
-        h1 {
-
-            font-size: 28px;
-
-            margin-bottom: 12px;
-
-            font-weight: 700;
-        }
-
-        .subtitle {
-
-            color: #a7a7b5;
-
-            line-height: 1.6;
-
-            font-size: 15px;
-
-            margin-bottom: 28px;
-        }
-
-        .user-box {
-
-            display: flex;
-
-            align-items: center;
-
-            gap: 12px;
-
+        .verification-info-value {
             text-align: left;
-
-            padding: 14px 16px;
-
-            margin-bottom: 24px;
-
-            background:
-                rgba(255, 255, 255, 0.04);
-
-            border:
-                1px solid rgba(255, 255, 255, 0.07);
-
-            border-radius: 12px;
         }
+    }
 
-        .user-icon {
-
-            width: 42px;
-
-            height: 42px;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            border-radius: 50%;
-
-            background:
-                rgba(88, 101, 242, 0.18);
-
-            font-size: 20px;
-
-            flex-shrink: 0;
-        }
-
-        .user-info {
-
-            min-width: 0;
-        }
-
-        .user-label {
-
-            font-size: 12px;
-
-            color: #858593;
-
-            margin-bottom: 3px;
-        }
-
-        .username {
-
-            font-size: 15px;
-
-            font-weight: 600;
-
-            overflow: hidden;
-
-            text-overflow: ellipsis;
-
-            white-space: nowrap;
-        }
-
-        .server {
-
-            margin-bottom: 26px;
-
-            color: #b8b8c5;
-
-            font-size: 14px;
-        }
-
-        .server strong {
-
-            color: #ffffff;
-        }
-
+    @media (prefers-reduced-motion: reduce) {
         .verify-button {
-
-            width: 100%;
-
-            display: block;
-
-            padding: 14px 20px;
-
-            border: none;
-
-            border-radius: 10px;
-
-            background: #5865f2;
-
-            color: #ffffff;
-
-            font-size: 15px;
-
-            font-weight: 600;
-
-            text-decoration: none;
-
-            cursor: pointer;
-
-            transition:
-                transform 0.15s ease,
-                background 0.15s ease,
-                box-shadow 0.15s ease;
+            transition: none;
         }
+    }
+</style>
 
-        .verify-button:hover {
-
-            background: #4752c4;
-
-            transform: translateY(-1px);
-
-            box-shadow:
-                0 8px 25px rgba(88, 101, 242, 0.25);
-        }
-
-        .verify-button:active {
-
-            transform: translateY(0);
-        }
-
-        .success-box {
-
-            padding: 18px;
-
-            margin-top: 20px;
-
-            background:
-                rgba(67, 181, 129, 0.08);
-
-            border:
-                1px solid rgba(67, 181, 129, 0.2);
-
-            border-radius: 12px;
-
-            color: #c9f2df;
-
-            font-size: 14px;
-
-            line-height: 1.6;
-        }
-
-        .success-box strong {
-
-            color: #ffffff;
-        }
-
-        .info {
-
-            margin-top: 20px;
-
-            color: #777785;
-
-            font-size: 12px;
-
-            line-height: 1.5;
-        }
-
-        .footer {
-
-            margin-top: 28px;
-
-            padding-top: 20px;
-
-            border-top:
-                1px solid rgba(255, 255, 255, 0.06);
-
-            color: #666673;
-
-            font-size: 12px;
-        }
-
-        .footer strong {
-
-            color: #888895;
-        }
-
-        @media (max-width: 480px) {
-
-            .container {
-
-                padding: 32px 22px;
-            }
-
-            h1 {
-
-                font-size: 24px;
-            }
-        }
-
-    </style>
-
-</head>
-
-
-<body>
-
-    <main class="container">
-
+<main>
+    <div class="verification-container">
 
         {% if verification_submitted %}
 
-            <!-- =====================================================
-                 VERIFICATION SUCCESS
-                 ===================================================== -->
+        <section class="verification-card success">
 
-            <div class="icon success-icon">
-
+            <div class="verification-icon">
                 ✅
-
             </div>
-
 
             <h1 data-i18n="verification.confirmed">
-
                 Verificação confirmada
-
             </h1>
 
-
-            <p
-                class="subtitle"
-                data-i18n="verification.request_sent"
-            >
-
+            <p class="verification-subtitle"
+               data-i18n="verification.request_sent">
                 O seu pedido de verificação foi enviado com sucesso.
-
             </p>
 
+            <div class="verification-info">
 
-            {% if username %}
+                {% if username %}
+                <div class="verification-info-row">
+                    <span class="verification-info-label"
+                          data-i18n="verification.account">
+                        Conta
+                    </span>
 
-            <div class="user-box">
-
-                <div class="user-icon">
-
-                    👤
-
-                </div>
-
-
-                <div class="user-info">
-
-                    <div
-                        class="user-label"
-                        data-i18n="verification.verified_account"
-                    >
-
-                        Conta verificada
-
-                    </div>
-
-
-                    <div class="username">
-
+                    <span class="verification-info-value">
                         {{ username }}
-
-                    </div>
-
+                    </span>
                 </div>
+                {% endif %}
+
+                {% if guild_name %}
+                <div class="verification-info-row">
+                    <span class="verification-info-label"
+                          data-i18n="verification.server">
+                        Servidor
+                    </span>
+
+                    <span class="verification-info-value">
+                        {{ guild_name }}
+                    </span>
+                </div>
+                {% endif %}
 
             </div>
 
-            {% endif %}
+            <div class="verification-success">
 
-
-            {% if guild_name %}
-
-            <div class="server">
-
-                <span data-i18n="verification.server">
-
-                    Servidor
-
-                </span>:
-
-                <strong>
-
-                    {{ guild_name }}
-
+                <strong data-i18n="verification.received">
+                    O Misuki recebeu o seu pedido.
                 </strong>
 
-            </div>
-
-            {% endif %}
-
-
-            <div class="success-box">
-
-                <strong
-                    data-i18n="verification.received"
-                >
-
-                    O Miskui recebeu o seu pedido.
-
-                </strong>
-
-
-                <br>
-
-
-                <span
-                    data-i18n="verification.processing"
-                >
-
-                    O bot irá processar a verificação e atribuir
-                    o cargo correspondente no servidor.
-
+                <span data-i18n="verification.processing">
+                    O bot irá processar a verificação e atribuir o cargo correspondente no servidor.
                 </span>
 
             </div>
 
-
-            <p
-                class="info"
-                data-i18n="verification.return_discord"
-            >
-
-                Pode voltar ao Discord. Se a atribuição do cargo
-                demorar alguns segundos, aguarde enquanto o Miskui
-                processa o pedido.
-
+            <p class="verification-note"
+               data-i18n="verification.return_discord">
+                Pode voltar ao Discord. Se a atribuição do cargo demorar alguns segundos, aguarde enquanto o Misuki processa o pedido.
             </p>
 
+            <div class="verification-footer">
+                Misuki
+            </div>
+
+        </section>
 
         {% else %}
 
-            <!-- =====================================================
-                 VERIFICATION FORM
-                 ===================================================== -->
+        <section class="verification-card">
 
-            <div class="icon">
-
+            <div class="verification-icon">
                 🔐
-
             </div>
-
 
             <h1 data-i18n="verification.title">
-
                 Confirmar verificação
-
             </h1>
 
-
-            <p
-                class="subtitle"
-                data-i18n="verification.subtitle"
-            >
-
-                Confirme a sua conta Discord para obter
-                acesso ao servidor.
-
+            <p class="verification-subtitle"
+               data-i18n="verification.subtitle">
+                Confirme a sua conta Discord para obter acesso ao servidor.
             </p>
 
+            {% if username or guild_name %}
 
-            {% if username %}
+            <div class="verification-info">
 
-            <div class="user-box">
+                {% if username %}
+                <div class="verification-info-row">
 
-                <div class="user-icon">
+                    <span class="verification-info-label"
+                          data-i18n="verification.account">
+                        Conta
+                    </span>
 
-                    👤
-
-                </div>
-
-
-                <div class="user-info">
-
-                    <div
-                        class="user-label"
-                        data-i18n="verification.authenticated_account"
-                    >
-
-                        Conta autenticada
-
-                    </div>
-
-
-                    <div class="username">
-
+                    <span class="verification-info-value">
                         {{ username }}
-
-                    </div>
+                    </span>
 
                 </div>
+                {% endif %}
+
+                {% if guild_name %}
+                <div class="verification-info-row">
+
+                    <span class="verification-info-label"
+                          data-i18n="verification.server">
+                        Servidor
+                    </span>
+
+                    <span class="verification-info-value">
+                        {{ guild_name }}
+                    </span>
+
+                </div>
+                {% endif %}
 
             </div>
 
             {% endif %}
 
-
-            {% if guild_name %}
-
-            <div class="server">
-
-                <span data-i18n="verification.server">
-
-                    Servidor
-
-                </span>:
-
-                <strong>
-
-                    {{ guild_name }}
-
-                </strong>
-
-            </div>
-
-            {% endif %}
-
-
-            <form
-                method="POST"
-                action="/verify"
-            >
+            <form method="POST" action="/verify">
 
                 <input
                     type="hidden"
@@ -563,66 +317,34 @@
                     value="{{ guild_id }}"
                 >
 
-
                 <button
                     type="submit"
                     class="verify-button"
                 >
-
                     🔐
-
                     <span data-i18n="verification.confirm">
-
                         Confirmar verificação
-
                     </span>
-
                 </button>
 
             </form>
 
-
-            <p
-                class="info"
-                data-i18n="verification.info"
-            >
-
-                Ao continuar, o Miskui irá confirmar a sua
-                conta Discord e enviar um pedido ao bot para
-                atribuir o cargo de verificação.
-
+            <p class="verification-note"
+               data-i18n="verification.info">
+                Ao continuar, será enviado um pedido ao Misuki para confirmar a sua verificação e atribuir o cargo configurado no servidor.
             </p>
+
+            <div class="verification-footer">
+                <span data-i18n="verification.protected">
+                    Protegido por Misuki
+                </span>
+            </div>
+
+        </section>
 
         {% endif %}
 
+    </div>
+</main>
 
-        <div class="footer">
-
-            <span data-i18n="verification.footer">
-
-                Protegido por
-
-            </span>
-
-            <strong>
-
-                Miskui
-
-            </strong>
-
-        </div>
-
-
-    </main>
-
-
-    <!-- =========================================================
-         TRANSLATION SYSTEM
-         ========================================================= -->
-
-    <script src="/static/js/translation.js"></script>
-
-
-</body>
-
-</html>
+{% endblock %}
