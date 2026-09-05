@@ -1181,7 +1181,7 @@ class Announcements(commands.Cog):
     async def announce(
         self,
         interaction: discord.Interaction,
-        channel: discord.TextChannel
+        channel: discord.abc.GuildChannel
     ):
 
         if interaction.guild is None:
