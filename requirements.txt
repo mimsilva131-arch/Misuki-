@@ -3,5 +3,4 @@ requests
 psycopg2-binary
 python-dotenv
 gunicorn
-hashlib
-hmac
+discord.py
