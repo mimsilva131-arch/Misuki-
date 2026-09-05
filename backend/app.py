@@ -187,95 +187,6 @@ ADVERTISEMENT_PRICES = {
 # COOKIE CONFIGURATION
 # =========================================================
 
-_env_cookie_secure = os.getenv(
-    "COOKIE_SECURE",
-    ""
-).strip().lower()
-
-if _env_cookie_secure in (
-    "true",
-    "false"
-):
-
-    COOKIE_SECURE = (
-        _env_cookie_secure == "true"
-    )
-
-else:
-
-    COOKIE_SECURE = (
-        str(
-            DISCORD_LOGIN_REDIRECT_URI
-            or ""
-        )
-        .lower()
-        .startswith("https://")
-    )
-
-
-# =========================================================
-# ADMIN CONFIGURATION
-# =========================================================
-
-ADMIN_DISCORD_IDS = {
-    str(user_id).strip()
-    for user_id in os.getenv(
-        "ADMIN_DISCORD_IDS",
-        ""
-    ).split(",")
-    if user_id.strip()
-}
-
-
-# =========================================================
-# SECRET KEY
-# =========================================================
-
-if not SECRET_KEY:
-
-    SECRET_KEY = secrets.token_hex(32)
-
-    print(
-        "⚠️ FLASK_SECRET_KEY is missing."
-    )
-
-    print(
-        "⚠️ A temporary Flask secret was generated."
-    )
-
-    print(
-        "⚠️ Set FLASK_SECRET_KEY permanently in Render."
-    )
-
-
-# =========================================================
-# DATABASE CHECK
-# =========================================================
-
-if not DATABASE_URL:
-
-    print(
-        "⚠️ DATABASE_URL is missing."
-    )
-
-    print(
-        "⚠️ PostgreSQL is required for Misuki."
-    )
-
-
-# =========================================================
-# FLASK
-# =========================================================
-
-app = Flask(
-    __name__,
-    template_folder=WEBSITE_DIR,
-    static_folder=None,
-    static_url_path="/static"
-)
-
-app.secret_key = SECRET_KEY
-
 app.config["PROPAGATE_EXCEPTIONS"] = True
 
 app.config["SESSION_COOKIE_HTTPONLY"] = True
@@ -4101,6 +4012,58 @@ def statistics():
         ] = "Error"
 
 # =====================================================
+# ADMIN SERVER INFORMATION
+# =====================================================
+
+    admin_servers = []
+
+    if user_is_admin:
+        try:
+            admin_servers = bot_snapshot.get(
+                "admin_servers",
+                []
+            )
+        except Exception:
+            admin_servers = []
+
+    # =====================================================
+    # ADMIN USER INFORMATION
+    # =====================================================
+
+    admin_users = []
+
+    if user_is_admin:
+        try:
+            admin_users = get_admin_users(
+                admin_servers
+            )
+        except Exception as error:
+            print(
+                f"⚠️ Could not load administrator user information: {error}"
+            )
+
+            admin_users = []
+
+    admin_statistics = {
+        "commands": statistics_data["commands"],
+        "tickets": statistics_data["tickets"],
+        "moderation": moderation_actions,
+        "announcements": 0,
+    }
+
+    return render_template(
+        "statistics.html",
+        user=current_user,
+        is_admin=is_admin,
+        is_misuki_admin=user_is_admin,
+        statistics=statistics_data,
+        admin_statistics=admin_statistics,
+        admin_servers=admin_servers,
+        admin_users=admin_users
+    )
+
+
+# =====================================================
 # ADMIN USER INFORMATION
 # =====================================================
 
@@ -4242,51 +4205,54 @@ def get_admin_users(admin_servers):
     return list(
         users_by_id.values()
     )
-    # =====================================================
+
+
+# =====================================================
 # ADMIN SERVER INFORMATION
 # =====================================================
 
-admin_servers = []
+    admin_servers = []
 
 
-if user_is_admin:
+    if user_is_admin:
 
-    try:
+        try:
 
-        admin_servers = (
-            bot_snapshot.get(
-                "admin_servers",
-                []
+            admin_servers = (
+                bot_snapshot.get(
+                    "admin_servers",
+                    []
+                )
             )
-        )
 
-    except Exception:
+        except Exception:
 
-        admin_servers = []
-
-
-# =====================================================
-# ADMIN USER INFORMATION
-# =====================================================
-
-admin_users=[]
+            admin_servers = []
 
 
-if user_is_admin:
+    # =====================================================
+    # ADMIN USER INFORMATION
+    # =====================================================
 
-    try:
+    admin_users = []
 
-        admin_users = get_admin_users(
-            admin_servers
-        )
 
-    except Exception as error:
+    if user_is_admin:
 
-        print(
-            f"⚠️ Could not load administrator user information: {error}"
-        )
+        try:
 
-        admin_users = []
+            admin_users = get_admin_users(
+                admin_servers
+            )
+
+        except Exception as error:
+
+            print(
+                f"⚠️ Could not load administrator user information: {error}"
+            )
+
+            admin_users = []
+
 
     # =====================================================
     # ADMIN STATISTICS
@@ -4317,14 +4283,7 @@ if user_is_admin:
 
         user=current_user,
 
-        # IMPORTANTE:
-        # is_admin continua a ser a função.
-        # O base.html usa is_admin(user).
-
         is_admin=is_admin,
-
-        # Resultado True/False para a área
-        # administrativa da Statistics.
 
         is_misuki_admin=user_is_admin,
 
