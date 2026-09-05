@@ -187,6 +187,22 @@ ADVERTISEMENT_PRICES = {
 # COOKIE CONFIGURATION
 # =========================================================
 
+app = Flask(
+    __name__,
+    template_folder=WEBSITE_DIR,
+    static_folder=None
+)
+
+app.secret_key = SECRET_KEY
+
+COOKIE_SECURE = (
+    os.getenv(
+        "COOKIE_SECURE",
+        "false"
+    ).strip().lower()
+    == "true"
+)
+
 app.config["PROPAGATE_EXCEPTIONS"] = True
 
 app.config["SESSION_COOKIE_HTTPONLY"] = True
