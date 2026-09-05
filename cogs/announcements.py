@@ -1,4 +1,3 @@
-
 # =========================================================
 # MISUKI - ANNOUNCEMENTS SYSTEM
 # =========================================================
@@ -429,7 +428,7 @@ class Announcements(commands.Cog):
 
                         custom_timestamp DOUBLE PRECISION,
 
-                        schedule_at DOUBLE PRECISION,
+                        scheduled_at DOUBLE PRECISION,
 
                         buttons JSONB,
 
@@ -453,7 +452,7 @@ class Announcements(commands.Cog):
                     idx_announcements_scheduler
                     ON announcements (
                         status,
-                        schedule_at
+                        scheduled_at
                     )
                     """
                 )
@@ -683,7 +682,7 @@ class Announcements(commands.Cog):
                         timestamp_enabled,
                         custom_timestamp,
 
-                        schedule_at,
+                        scheduled_at,
                         buttons,
 
                         status,
@@ -817,9 +816,9 @@ class Announcements(commands.Cog):
 
                     WHERE status = 'scheduled'
 
-                    AND schedule_at <= %s
+                    AND scheduled_at <= %s
 
-                    ORDER BY schedule_at ASC
+                    ORDER BY scheduled_at ASC
 
                     LIMIT 25
                     """,
@@ -952,7 +951,7 @@ class Announcements(commands.Cog):
             timestamp_enabled,
             custom_timestamp,
 
-            schedule_at,
+            scheduled_at,
             buttons,
 
             status,
@@ -2475,4 +2474,3 @@ async def setup(
     await bot.add_cog(
         cog
     )
-
