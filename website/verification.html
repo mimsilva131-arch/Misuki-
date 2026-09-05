@@ -42,6 +42,10 @@ Verificação — Misuki
         background: rgba(46, 204, 113, 0.12);
     }
 
+    .verification-card.error .verification-icon {
+        background: rgba(237, 66, 69, 0.12);
+    }
+
     .verification-card h1 {
         margin: 0 0 12px;
         font-size: 30px;
@@ -89,6 +93,82 @@ Verificação — Misuki
         font-weight: 500;
         text-align: right;
         word-break: break-word;
+    }
+
+    .captcha-box {
+        margin: 0 0 22px;
+        padding: 20px;
+        background: rgba(88, 101, 242, 0.055);
+        border: 1px solid rgba(88, 101, 242, 0.16);
+        border-radius: 14px;
+        text-align: left;
+    }
+
+    .captcha-title {
+        margin: 0 0 7px;
+        color: #ffffff;
+        font-size: 15px;
+        font-weight: 650;
+    }
+
+    .captcha-description {
+        margin: 0 0 16px;
+        color: #8f8f9a;
+        font-size: 12px;
+        line-height: 1.55;
+    }
+
+    .captcha-question {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 64px;
+        margin-bottom: 14px;
+        padding: 12px 16px;
+        background: rgba(255, 255, 255, 0.045);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 10px;
+        color: #ffffff;
+        font-size: 25px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        user-select: none;
+    }
+
+    .captcha-input {
+        width: 100%;
+        padding: 13px 14px;
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        border-radius: 9px;
+        outline: none;
+        background: #0c0c12;
+        color: #ffffff;
+        font-size: 15px;
+        text-align: center;
+        transition:
+            border-color 0.15s ease,
+            box-shadow 0.15s ease;
+    }
+
+    .captcha-input::placeholder {
+        color: #656571;
+    }
+
+    .captcha-input:focus {
+        border-color: rgba(88, 101, 242, 0.65);
+        box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.10);
+    }
+
+    .captcha-error {
+        margin: 0 0 14px;
+        padding: 12px 14px;
+        border-radius: 9px;
+        background: rgba(237, 66, 69, 0.08);
+        border: 1px solid rgba(237, 66, 69, 0.18);
+        color: #ffb8ba;
+        font-size: 12px;
+        line-height: 1.5;
+        text-align: left;
     }
 
     .verify-button {
@@ -172,10 +252,15 @@ Verificação — Misuki
         .verification-info-value {
             text-align: left;
         }
+
+        .captcha-question {
+            font-size: 22px;
+        }
     }
 
     @media (prefers-reduced-motion: reduce) {
-        .verify-button {
+        .verify-button,
+        .captcha-input {
             transition: none;
         }
     }
@@ -204,7 +289,9 @@ Verificação — Misuki
             <div class="verification-info">
 
                 {% if username %}
+
                 <div class="verification-info-row">
+
                     <span class="verification-info-label"
                           data-i18n="verification.account">
                         Conta
@@ -213,11 +300,15 @@ Verificação — Misuki
                     <span class="verification-info-value">
                         {{ username }}
                     </span>
+
                 </div>
+
                 {% endif %}
 
                 {% if guild_name %}
+
                 <div class="verification-info-row">
+
                     <span class="verification-info-label"
                           data-i18n="verification.server">
                         Servidor
@@ -226,7 +317,9 @@ Verificação — Misuki
                     <span class="verification-info-value">
                         {{ guild_name }}
                     </span>
+
                 </div>
+
                 {% endif %}
 
             </div>
@@ -276,6 +369,7 @@ Verificação — Misuki
             <div class="verification-info">
 
                 {% if username %}
+
                 <div class="verification-info-row">
 
                     <span class="verification-info-label"
@@ -288,9 +382,11 @@ Verificação — Misuki
                     </span>
 
                 </div>
+
                 {% endif %}
 
                 {% if guild_name %}
+
                 <div class="verification-info-row">
 
                     <span class="verification-info-label"
@@ -303,8 +399,20 @@ Verificação — Misuki
                     </span>
 
                 </div>
+
                 {% endif %}
 
+            </div>
+
+            {% endif %}
+
+            {% if captcha_error %}
+
+            <div class="captcha-error">
+                ⚠️
+                <span>
+                    {{ captcha_error }}
+                </span>
             </div>
 
             {% endif %}
@@ -316,6 +424,42 @@ Verificação — Misuki
                     name="guild_id"
                     value="{{ guild_id }}"
                 >
+
+                <input
+                    type="hidden"
+                    name="captcha_token"
+                    value="{{ captcha_token }}"
+                >
+
+                <div class="captcha-box">
+
+                    <h2 class="captcha-title"
+                        data-i18n="verification.captcha_title">
+                        Verificação de segurança
+                    </h2>
+
+                    <p class="captcha-description"
+                       data-i18n="verification.captcha_question">
+                        Resolva a pequena operação abaixo para confirmar que é uma pessoa.
+                    </p>
+
+                    <div class="captcha-question">
+                        {{ captcha_question }}
+                    </div>
+
+                    <input
+                        class="captcha-input"
+                        type="text"
+                        name="captcha_answer"
+                        inputmode="numeric"
+                        autocomplete="off"
+                        maxlength="10"
+                        placeholder="Resposta"
+                        data-i18n-placeholder="verification.captcha_placeholder"
+                        required
+                    >
+
+                </div>
 
                 <button
                     type="submit"
@@ -331,13 +475,15 @@ Verificação — Misuki
 
             <p class="verification-note"
                data-i18n="verification.info">
-                Ao continuar, será enviado um pedido ao Misuki para confirmar a sua verificação e atribuir o cargo configurado no servidor.
+                Ao continuar, o Misuki irá confirmar a sua conta Discord e enviar um pedido de verificação ao bot.
             </p>
 
             <div class="verification-footer">
+
                 <span data-i18n="verification.protected">
                     Protegido por Misuki
                 </span>
+
             </div>
 
         </section>

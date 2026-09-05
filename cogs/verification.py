@@ -98,11 +98,24 @@ class Verification(commands.Cog):
 
                         processed_at DOUBLE PRECISION,
 
+                        failure_reason TEXT,
+
                         UNIQUE (
                             guild_id,
                             user_id
                         )
                     )
+                    """
+                )
+
+                # -------------------------------------------------
+                # Migration for existing databases
+                # -------------------------------------------------
+
+                cursor.execute(
+                    """
+                    ALTER TABLE verification_requests
+                    ADD COLUMN IF NOT EXISTS failure_reason TEXT
                     """
                 )
 
@@ -546,7 +559,8 @@ class Verification(commands.Cog):
     def update_verification_status(
         self,
         request_id,
-        status
+        status,
+        failure_reason=None
     ):
 
         connection = None
@@ -563,13 +577,15 @@ class Verification(commands.Cog):
 
                     SET
                         status = %s,
-                        processed_at = %s
+                        processed_at = %s,
+                        failure_reason = %s
 
                     WHERE id = %s
                     """,
                     (
                         status,
                         time.time(),
+                        failure_reason,
                         request_id
                     )
                 )
@@ -738,7 +754,8 @@ class Verification(commands.Cog):
 
             self.update_verification_status(
                 request_id,
-                "guild_unavailable"
+                "unverified",
+                "Guild unavailable."
             )
 
             return
@@ -759,7 +776,8 @@ class Verification(commands.Cog):
 
                 self.update_verification_status(
                     request_id,
-                    "member_not_found"
+                    "unverified",
+                    "Member not found in the server."
                 )
 
                 return
@@ -769,6 +787,11 @@ class Verification(commands.Cog):
                 print(
                     f"❌ Error fetching member {user_id}: {error}"
                 )
+
+                # -------------------------------------------------
+                # Temporary Discord/API failure.
+                # Keep pending so the worker can retry.
+                # -------------------------------------------------
 
                 return
 
@@ -792,7 +815,8 @@ class Verification(commands.Cog):
 
             self.update_verification_status(
                 request_id,
-                "no_role"
+                "unverified",
+                "No Verified Role is configured."
             )
 
             return
@@ -805,7 +829,7 @@ class Verification(commands.Cog):
 
             self.update_verification_status(
                 request_id,
-                "already_verified"
+                "verified"
             )
 
             return
@@ -818,10 +842,9 @@ class Verification(commands.Cog):
 
         if bot_member is None:
 
-            self.update_verification_status(
-                request_id,
-                "bot_member_unavailable"
-            )
+            # -------------------------------------------------
+            # Temporary state. Retry later.
+            # -------------------------------------------------
 
             return
 
@@ -836,12 +859,15 @@ class Verification(commands.Cog):
                 member,
                 username,
                 success=False,
-                reason="The bot does not have Manage Roles permission."
+                reason=(
+                    "The bot does not have Manage Roles permission."
+                )
             )
 
             self.update_verification_status(
                 request_id,
-                "missing_manage_roles"
+                "unverified",
+                "The bot does not have Manage Roles permission."
             )
 
             return
@@ -866,7 +892,11 @@ class Verification(commands.Cog):
 
             self.update_verification_status(
                 request_id,
-                "role_hierarchy"
+                "unverified",
+                (
+                    "The Verified Role is above or equal to "
+                    "the bot's highest role."
+                )
             )
 
             return
@@ -879,7 +909,7 @@ class Verification(commands.Cog):
 
             await member.add_roles(
                 role,
-                reason="Miskui verification completed."
+                reason="Misuki verification completed."
             )
 
         except discord.Forbidden:
@@ -896,7 +926,8 @@ class Verification(commands.Cog):
 
             self.update_verification_status(
                 request_id,
-                "forbidden"
+                "unverified",
+                "Discord denied the role assignment."
             )
 
             return
@@ -907,10 +938,10 @@ class Verification(commands.Cog):
                 f"❌ Error assigning verification role: {error}"
             )
 
-            self.update_verification_status(
-                request_id,
-                "discord_error"
-            )
+            # -------------------------------------------------
+            # Temporary Discord/API failure.
+            # Keep pending so the worker can retry.
+            # -------------------------------------------------
 
             return
 

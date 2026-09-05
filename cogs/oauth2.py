@@ -1,7 +1,10 @@
+
 import os
 import random
 import secrets
 import time
+import hashlib
+import hmac
 
 from contextlib import contextmanager
 from concurrent.futures import ThreadPoolExecutor
@@ -222,21 +225,17 @@ app.config[
     "SESSION_COOKIE_HTTPONLY"
 ] = True
 
-
 app.config[
     "SESSION_COOKIE_SAMESITE"
 ] = SESSION_SAMESITE
-
 
 app.config[
     "SESSION_COOKIE_SECURE"
 ] = SESSION_SECURE
 
-
 app.config[
     "SESSION_REFRESH_EACH_REQUEST"
 ] = False
-
 
 app.config[
     "PERMANENT_SESSION_LIFETIME"
@@ -349,6 +348,7 @@ def static_files(filename):
     )
 
     if os.path.isfile(root_file):
+
         return send_from_directory(
             BASE_DIR,
             filename
@@ -413,11 +413,9 @@ DISCORD_API = (
     "https://discord.com/api/v10"
 )
 
-
 DISCORD_OAUTH_URL = (
     "https://discord.com/oauth2/authorize"
 )
-
 
 DISCORD_TOKEN_URL = (
     f"{DISCORD_API}/oauth2/token"
@@ -458,7 +456,6 @@ def create_database():
                         expires_at TEXT,
 
                         created_at TEXT NOT NULL
-
                     )
                     """
                 )
@@ -480,7 +477,6 @@ def create_database():
                         rating INTEGER NOT NULL,
 
                         created_at TEXT NOT NULL
-
                     )
                     """
                 )
@@ -495,11 +491,6 @@ def create_database():
                 # -------------------------------------------------
                 # VERIFICATION REQUESTS
                 # -------------------------------------------------
-                #
-                # The verification cog also creates this table.
-                # Keeping IF NOT EXISTS here makes the web side
-                # safe even if Flask starts before the bot.
-                #
 
                 cursor.execute(
                     """
@@ -513,16 +504,71 @@ def create_database():
 
                         username TEXT,
 
-                        status TEXT NOT NULL DEFAULT 'pending',
+                        status TEXT NOT NULL
+                            DEFAULT 'pending',
 
                         created_at DOUBLE PRECISION NOT NULL,
 
                         processed_at DOUBLE PRECISION,
 
+                        failure_reason TEXT,
+
                         UNIQUE (
                             guild_id,
                             user_id
                         )
+                    )
+                    """
+                )
+
+                cursor.execute(
+                    """
+                    ALTER TABLE verification_requests
+                    ADD COLUMN IF NOT EXISTS failure_reason TEXT
+                    """
+                )
+
+                # -------------------------------------------------
+                # VERIFICATION CAPTCHAS
+                # -------------------------------------------------
+
+                cursor.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS verification_captchas (
+
+                        id BIGSERIAL PRIMARY KEY,
+
+                        token TEXT UNIQUE NOT NULL,
+
+                        guild_id BIGINT NOT NULL,
+
+                        user_id BIGINT NOT NULL,
+
+                        question TEXT NOT NULL,
+
+                        answer_hash TEXT NOT NULL,
+
+                        created_at DOUBLE PRECISION NOT NULL,
+
+                        expires_at DOUBLE PRECISION NOT NULL,
+
+                        attempts INTEGER NOT NULL
+                            DEFAULT 0,
+
+                        used BOOLEAN NOT NULL
+                            DEFAULT FALSE
+                    )
+                    """
+                )
+
+                cursor.execute(
+                    """
+                    CREATE INDEX IF NOT EXISTS
+                    verification_captchas_user_idx
+
+                    ON verification_captchas (
+                        guild_id,
+                        user_id
                     )
                     """
                 )
@@ -597,11 +643,9 @@ def safe_next_url(value):
     )
 
     if not value.startswith("/"):
-
         return "/dashboard"
 
     if value.startswith("//"):
-
         return "/dashboard"
 
     return value
@@ -1131,14 +1175,6 @@ def get_user():
 
 def get_user_guilds(access_token=None):
 
-    # When called normally during a Flask request,
-    # keep the existing behaviour and read the token
-    # from the Flask session.
-    #
-    # When called from a background/threaded task,
-    # receive the access token directly so that the
-    # Flask request context is not required.
-
     if access_token is None:
 
         access_token = session.get(
@@ -1210,7 +1246,6 @@ BOT_GUILD_CACHE = {
     "timestamp": 0
 
 }
-
 
 BOT_GUILD_CACHE_TTL = 30
 
@@ -1463,11 +1498,6 @@ def verify_oauth_state(state):
 
     if not state:
 
-        print(
-            "⚠️ OAuth state verification: "
-            "No state received from Discord"
-        )
-
         return False
 
     stored_state = session.get(
@@ -1478,37 +1508,7 @@ def verify_oauth_state(state):
         "oauth_state_expires_at"
     )
 
-    print(
-        "=========================================="
-    )
-
-    print(
-        "📋 OAuth State Verification"
-    )
-
-    print(
-        f"   Received state: {state[:15]}..."
-    )
-
-    print(
-        f"   Stored state: "
-        f"{str(stored_state)[:15] if stored_state else 'NONE'}..."
-    )
-
-    print(
-        f"   Expiration: {expires_at_raw}"
-    )
-
     if not stored_state:
-
-        print(
-            "❌ FAILED: State not in session "
-            "(cookie not sent back from Discord)"
-        )
-
-        print(
-            "=========================================="
-        )
 
         return False
 
@@ -1528,14 +1528,6 @@ def verify_oauth_state(state):
 
             if utc_now() >= expires_at:
 
-                print(
-                    "❌ FAILED: State expired"
-                )
-
-                print(
-                    "=========================================="
-                )
-
                 session.pop(
                     "oauth_state",
                     None
@@ -1550,15 +1542,7 @@ def verify_oauth_state(state):
 
                 return False
 
-        except ValueError as error:
-
-            print(
-                f"❌ FAILED: Date parse error: {error}"
-            )
-
-            print(
-                "=========================================="
-            )
+        except ValueError:
 
             session.pop(
                 "oauth_state",
@@ -1579,15 +1563,6 @@ def verify_oauth_state(state):
         str(state)
     ):
 
-        print(
-            "❌ FAILED: State mismatch "
-            "(stored != received)"
-        )
-
-        print(
-            "=========================================="
-        )
-
         session.pop(
             "oauth_state",
             None
@@ -1601,14 +1576,6 @@ def verify_oauth_state(state):
         session.modified = True
 
         return False
-
-    print(
-        "✅ SUCCESS: State validated"
-    )
-
-    print(
-        "=========================================="
-    )
 
     session.pop(
         "oauth_state",
@@ -1708,6 +1675,328 @@ def bot_is_in_guild(
     )
 
 
+# =========================================================
+# CAPTCHA
+# =========================================================
+
+CAPTCHA_TTL = 300
+
+CAPTCHA_MAX_ATTEMPTS = 5
+
+
+def hash_captcha_answer(answer):
+
+    return hashlib.sha256(
+        str(answer)
+        .strip()
+        .encode("utf-8")
+    ).hexdigest()
+
+
+def generate_captcha():
+
+    first = random.randint(
+        2,
+        20
+    )
+
+    second = random.randint(
+        2,
+        20
+    )
+
+    operation = random.choice(
+        [
+            "+",
+            "-"
+        ]
+    )
+
+    if operation == "+":
+
+        answer = first + second
+
+    else:
+
+        if second > first:
+
+            first, second = (
+                second,
+                first
+            )
+
+        answer = first - second
+
+    question = (
+        f"{first} {operation} {second} = ?"
+    )
+
+    return question, answer
+
+
+def create_captcha(
+    guild_id,
+    user_id
+):
+
+    if not DATABASE_URL or not db_pool:
+
+        return None
+
+    question, answer = generate_captcha()
+
+    token = secrets.token_urlsafe(
+        32
+    )
+
+    now = time.time()
+
+    expires_at = (
+        now + CAPTCHA_TTL
+    )
+
+    answer_hash = hash_captcha_answer(
+        answer
+    )
+
+    try:
+
+        with database_connection() as connection:
+
+            with connection.cursor() as cursor:
+
+                cursor.execute(
+                    """
+                    UPDATE verification_captchas
+                    SET used = TRUE
+                    WHERE guild_id = %s
+                      AND user_id = %s
+                      AND used = FALSE
+                    """,
+                    (
+                        int(guild_id),
+                        int(user_id)
+                    )
+                )
+
+                cursor.execute(
+                    """
+                    INSERT INTO verification_captchas (
+                        token,
+                        guild_id,
+                        user_id,
+                        question,
+                        answer_hash,
+                        created_at,
+                        expires_at,
+                        attempts,
+                        used
+                    )
+
+                    VALUES (
+                        %s,
+                        %s,
+                        %s,
+                        %s,
+                        %s,
+                        %s,
+                        %s,
+                        0,
+                        FALSE
+                    )
+                    """,
+                    (
+                        token,
+                        int(guild_id),
+                        int(user_id),
+                        question,
+                        answer_hash,
+                        now,
+                        expires_at
+                    )
+                )
+
+            connection.commit()
+
+        return {
+            "token": token,
+            "question": question
+        }
+
+    except Exception as error:
+
+        print(
+            f"❌ CAPTCHA creation error: {error}"
+        )
+
+        return None
+
+
+def validate_captcha(
+    token,
+    guild_id,
+    user_id,
+    answer
+):
+
+    if not token:
+
+        return False, "invalid"
+
+    if not answer:
+
+        return False, "incorrect"
+
+    if not DATABASE_URL or not db_pool:
+
+        return False, "database"
+
+
+    try:
+
+        with database_connection() as connection:
+
+            with connection.cursor(
+                cursor_factory=psycopg2.extras.RealDictCursor
+            ) as cursor:
+
+                cursor.execute(
+                    """
+                    SELECT
+                        id,
+                        answer_hash,
+                        expires_at,
+                        attempts,
+                        used
+                    FROM verification_captchas
+                    WHERE token = %s
+                      AND guild_id = %s
+                      AND user_id = %s
+                    LIMIT 1
+                    """,
+                    (
+                        token,
+                        int(guild_id),
+                        int(user_id)
+                    )
+                )
+
+                captcha = cursor.fetchone()
+
+                if not captcha:
+
+                    return False, "invalid"
+
+                if captcha["used"]:
+
+                    return False, "expired"
+
+                if time.time() >= float(
+                    captcha["expires_at"]
+                ):
+
+                    cursor.execute(
+                        """
+                        UPDATE verification_captchas
+                        SET used = TRUE
+                        WHERE id = %s
+                        """,
+                        (
+                            captcha["id"],
+                        )
+                    )
+
+                    connection.commit()
+
+                    return False, "expired"
+
+                attempts = int(
+                    captcha["attempts"]
+                )
+
+                if attempts >= CAPTCHA_MAX_ATTEMPTS:
+
+                    cursor.execute(
+                        """
+                        UPDATE verification_captchas
+                        SET used = TRUE
+                        WHERE id = %s
+                        """,
+                        (
+                            captcha["id"],
+                        )
+                    )
+
+                    connection.commit()
+
+                    return False, "expired"
+
+                answer_hash = hash_captcha_answer(
+                    answer
+                )
+
+                if not hmac.compare_digest(
+                    answer_hash,
+                    captcha["answer_hash"]
+                ):
+
+                    attempts += 1
+
+                    used = (
+                        attempts >= CAPTCHA_MAX_ATTEMPTS
+                    )
+
+                    cursor.execute(
+                        """
+                        UPDATE verification_captchas
+                        SET
+                            attempts = %s,
+                            used = %s
+                        WHERE id = %s
+                        """,
+                        (
+                            attempts,
+                            used,
+                            captcha["id"]
+                        )
+                    )
+
+                    connection.commit()
+
+                    if used:
+
+                        return False, "expired"
+
+                    return False, "incorrect"
+
+                cursor.execute(
+                    """
+                    UPDATE verification_captchas
+                    SET used = TRUE
+                    WHERE id = %s
+                    """,
+                    (
+                        captcha["id"],
+                    )
+                )
+
+            connection.commit()
+
+        return True, "valid"
+
+    except Exception as error:
+
+        print(
+            f"❌ CAPTCHA validation error: {error}"
+        )
+
+        return False, "database"
+
+
+# =========================================================
+# VERIFICATION REQUEST
+# =========================================================
+
 def create_verification_request(
     guild_id,
     user_id,
@@ -1732,7 +2021,8 @@ def create_verification_request(
                         username,
                         status,
                         created_at,
-                        processed_at
+                        processed_at,
+                        failure_reason
                     )
 
                     VALUES (
@@ -1741,6 +2031,7 @@ def create_verification_request(
                         %s,
                         'pending',
                         %s,
+                        NULL,
                         NULL
                     )
 
@@ -1761,6 +2052,9 @@ def create_verification_request(
                             EXCLUDED.created_at,
 
                         processed_at =
+                            NULL,
+
+                        failure_reason =
                             NULL
                     """,
                     (
@@ -1779,6 +2073,90 @@ def create_verification_request(
 
         print(
             f"❌ Verification request error: {error}"
+        )
+
+        return False
+
+
+def mark_verification_unverified(
+    guild_id,
+    user_id,
+    username,
+    reason
+):
+
+    if not DATABASE_URL or not db_pool:
+
+        return False
+
+    try:
+
+        with database_connection() as connection:
+
+            with connection.cursor() as cursor:
+
+                cursor.execute(
+                    """
+                    INSERT INTO verification_requests (
+                        guild_id,
+                        user_id,
+                        username,
+                        status,
+                        created_at,
+                        processed_at,
+                        failure_reason
+                    )
+
+                    VALUES (
+                        %s,
+                        %s,
+                        %s,
+                        'unverified',
+                        %s,
+                        %s,
+                        %s
+                    )
+
+                    ON CONFLICT (
+                        guild_id,
+                        user_id
+                    )
+
+                    DO UPDATE SET
+
+                        username =
+                            EXCLUDED.username,
+
+                        status =
+                            'unverified',
+
+                        created_at =
+                            EXCLUDED.created_at,
+
+                        processed_at =
+                            EXCLUDED.processed_at,
+
+                        failure_reason =
+                            EXCLUDED.failure_reason
+                    """,
+                    (
+                        int(guild_id),
+                        int(user_id),
+                        username,
+                        time.time(),
+                        time.time(),
+                        reason
+                    )
+                )
+
+            connection.commit()
+
+        return True
+
+    except Exception as error:
+
+        print(
+            f"❌ Failed to mark verification unverified: {error}"
         )
 
         return False
@@ -1951,8 +2329,35 @@ def verification():
         )
 
     # -----------------------------------------------------
-    # SHOW VERIFICATION PAGE
+    # CAPTCHA
     # -----------------------------------------------------
+
+    user_id = user.get(
+        "id"
+    )
+
+    if not user_id:
+
+        return error_page(
+            "❌ Verification Error",
+            "Your Discord account could not be identified.",
+            400,
+            user
+        )
+
+    captcha = create_captcha(
+        guild_id_int,
+        user_id
+    )
+
+    if not captcha:
+
+        return error_page(
+            "❌ Verification Error",
+            "The verification challenge could not be created. Please try again.",
+            500,
+            user
+        )
 
     guild_name = guild.get(
         "name"
@@ -1971,7 +2376,11 @@ def verification():
         guild_name=guild_name,
         guild_id=str(
             guild_id_int
-        )
+        ),
+        captcha_token=captcha["token"],
+        captcha_question=captcha["question"],
+        captcha_error=None,
+        verification_submitted=False
     )
 
 
@@ -2145,6 +2554,98 @@ def submit_verification():
     )
 
     # -----------------------------------------------------
+    # CAPTCHA
+    # -----------------------------------------------------
+
+    captcha_token = request.form.get(
+        "captcha_token",
+        ""
+    ).strip()
+
+    captcha_answer = request.form.get(
+        "captcha_answer",
+        ""
+    ).strip()
+
+    captcha_valid, captcha_status = validate_captcha(
+        captcha_token,
+        guild_id_int,
+        user_id,
+        captcha_answer
+    )
+
+    if not captcha_valid:
+
+        if captcha_status == "database":
+
+            return error_page(
+                "❌ Verification Error",
+                "The CAPTCHA could not be verified. Please try again.",
+                500,
+                user
+            )
+
+        # -------------------------------------------------
+        # INTERNAL UNVERIFIED STATE
+        # -------------------------------------------------
+
+        mark_verification_unverified(
+            guild_id_int,
+            user_id,
+            username,
+            "captcha_failed"
+        )
+
+        # -------------------------------------------------
+        # CREATE NEW CAPTCHA
+        # -------------------------------------------------
+
+        captcha = create_captcha(
+            guild_id_int,
+            user_id
+        )
+
+        if not captcha:
+
+            return error_page(
+                "❌ Verification Error",
+                "A new CAPTCHA could not be created. Please try again.",
+                500,
+                user
+            )
+
+        if captcha_status == "expired":
+
+            captcha_error = (
+                "The CAPTCHA expired or the maximum number "
+                "of attempts was reached. A new CAPTCHA has been created."
+            )
+
+        else:
+
+            captcha_error = (
+                "Incorrect CAPTCHA answer. Please try again."
+            )
+
+        return render_template(
+            "verification.html",
+            user=user,
+            username=username,
+            guild_name=(
+                guild.get("name")
+                or
+                "Discord Server"
+            ),
+            guild_id=str(
+                guild_id_int
+            ),
+            captcha_token=captcha["token"],
+            captcha_question=captcha["question"],
+            captcha_error=captcha_error,
+            verification_submitted=False
+        )
+
+    # -----------------------------------------------------
     # CREATE REQUEST
     # -----------------------------------------------------
 
@@ -2185,6 +2686,10 @@ def submit_verification():
 
     print(
         f"🏠 Guild ID: {guild_id_int}"
+    )
+
+    print(
+        "🧩 CAPTCHA: PASSED"
     )
 
     print(
@@ -2239,20 +2744,6 @@ def login():
         session[
             "next_url"
         ] = next_url
-
-        print(
-            "✅ User is already logged in."
-        )
-
-        print(
-            f"👤 User: "
-            f"{existing_user.get('username')}"
-        )
-
-        print(
-            f"➡️ Redirecting to: "
-            f"{next_url}"
-        )
 
         return redirect(
             next_url
@@ -2582,10 +3073,6 @@ def login_callback():
         "global_name"
     )
 
-    # -----------------------------------------------------
-    # AVATAR
-    # -----------------------------------------------------
-
     session[
         "avatar"
     ] = user.get(
@@ -2691,16 +3178,6 @@ def dashboard():
             "/login"
         )
 
-    # -----------------------------------------------------
-    # GET ACCESS TOKEN BEFORE STARTING THREADS
-    # -----------------------------------------------------
-    #
-    # Flask's session is request-context local.
-    # The ThreadPoolExecutor workers cannot access it.
-    # Therefore, capture the token while still inside the
-    # Flask request and pass it explicitly to the worker.
-    #
-
     access_token = session.get(
         "access_token"
     )
@@ -2714,10 +3191,6 @@ def dashboard():
         return redirect(
             "/login"
         )
-
-    # -----------------------------------------------------
-    # PARALLEL EXTERNAL REQUESTS
-    # -----------------------------------------------------
 
     with ThreadPoolExecutor(
         max_workers=3
@@ -2763,10 +3236,6 @@ def dashboard():
         f"{len(licenses)} licenses"
     )
 
-    # -----------------------------------------------------
-    # BOT GUILD IDS
-    # -----------------------------------------------------
-
     bot_guild_ids = {
 
         str(
@@ -2778,10 +3247,6 @@ def dashboard():
         if guild.get("id")
 
     }
-
-    # -----------------------------------------------------
-    # BUILD SERVER LISTS
-    # -----------------------------------------------------
 
     authorized = []
 
@@ -2800,10 +3265,6 @@ def dashboard():
         if not guild_id:
 
             continue
-
-        # -------------------------------------------------
-        # LICENSE
-        # -------------------------------------------------
 
         license_data = licenses.get(
             guild_id
@@ -2833,10 +3294,6 @@ def dashboard():
             status == "active"
         )
 
-        # -------------------------------------------------
-        # AUTHORIZED
-        # -------------------------------------------------
-
         if guild_id in bot_guild_ids:
 
             authorized.append(
@@ -2844,10 +3301,6 @@ def dashboard():
             )
 
             continue
-
-        # -------------------------------------------------
-        # AVAILABLE
-        # -------------------------------------------------
 
         guild[
             "can_add"
@@ -2864,10 +3317,6 @@ def dashboard():
         available.append(
             guild
         )
-
-    # -----------------------------------------------------
-    # SORT
-    # -----------------------------------------------------
 
     authorized.sort(
         key=lambda guild:
@@ -3259,21 +3708,13 @@ def submit_review():
                     """,
 
                     (
-
                         user_id,
-
                         username,
-
                         avatar,
-
                         review,
-
                         rating,
-
                         utc_now().isoformat()
-
                     )
-
                 )
 
             connection.commit()
@@ -3462,3 +3903,4 @@ if __name__ == "__main__":
         debug=False
 
     )
+
