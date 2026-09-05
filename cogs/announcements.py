@@ -1,3 +1,4 @@
+
 # =========================================================
 # MISUKI - ANNOUNCEMENTS SYSTEM
 # =========================================================
@@ -30,6 +31,37 @@ DEFAULT_TIMEZONE = ZoneInfo("Europe/Lisbon")
 
 
 # =========================================================
+# ANNOUNCEMENT COLORS
+# =========================================================
+
+ANNOUNCEMENT_COLORS = {
+    "Blue": 0x5865F2,
+    "Green": 0x57F287,
+    "Red": 0xED4245,
+    "Yellow": 0xFEE75C,
+    "Purple": 0x9B59B6,
+    "Pink": 0xEB459E,
+    "Orange": 0xE67E22,
+    "Cyan": 0x00B0F4,
+    "White": 0xFFFFFF,
+    "Grey": 0x95A5A6,
+}
+
+ANNOUNCEMENT_COLOR_EMOJIS = {
+    "Blue": "🔵",
+    "Green": "🟢",
+    "Red": "🔴",
+    "Yellow": "🟡",
+    "Purple": "🟣",
+    "Pink": "🩷",
+    "Orange": "🟠",
+    "Cyan": "🩵",
+    "White": "⚪",
+    "Grey": "🩶",
+}
+
+
+# =========================================================
 # DATABASE
 # =========================================================
 
@@ -47,34 +79,80 @@ def get_database_connection():
 
 
 # =========================================================
+# STATISTICS
+# =========================================================
+
+def increment_announcement_stat():
+
+    connection = None
+
+    try:
+
+        connection = get_database_connection()
+
+        with connection.cursor() as cursor:
+
+            cursor.execute(
+                """
+                UPDATE bot_statistics
+
+                SET
+
+                    announcements = announcements + 1,
+
+                    updated_at = EXTRACT(
+                        EPOCH FROM NOW()
+                    )
+
+                WHERE id = 1
+                """
+            )
+
+        connection.commit()
+
+    except Exception as error:
+
+        if connection:
+            connection.rollback()
+
+        print(
+            f"❌ Announcement statistics update error: {error}"
+        )
+
+    finally:
+
+        if connection:
+            connection.close()
+
+
+# =========================================================
 # HELPERS
 # =========================================================
 
-def parse_color(value):
+def get_color_name(color):
 
-    if not value:
-        return 0x5865F2
+    for name, value in ANNOUNCEMENT_COLORS.items():
 
-    value = value.strip()
+        if value == color:
+            return name
 
-    if value.startswith("#"):
-        value = value[1:]
+    return "Blue"
 
-    if value.lower().startswith("0x"):
-        value = value[2:]
 
-    if len(value) != 6:
-        raise ValueError(
-            "The color must use the format #5865F2."
-        )
+def get_color_display(color):
 
-    try:
-        return int(value, 16)
+    color_name = get_color_name(
+        color
+    )
 
-    except ValueError:
-        raise ValueError(
-            "The provided color is invalid."
-        )
+    emoji = ANNOUNCEMENT_COLOR_EMOJIS.get(
+        color_name,
+        "🎨"
+    )
+
+    return (
+        f"{emoji} {color_name}"
+    )
 
 
 def parse_datetime(value):
@@ -92,6 +170,7 @@ def parse_datetime(value):
     for date_format in formats:
 
         try:
+
             parsed = datetime.strptime(
                 value,
                 date_format
@@ -1104,6 +1183,14 @@ class Announcements(commands.Cog):
             message_id=message.id
         )
 
+        # -------------------------------------------------
+        # STATISTICS
+        # -------------------------------------------------
+
+        await asyncio.to_thread(
+            increment_announcement_stat
+        )
+
         creator = guild.get_member(
             int(creator_id)
         )
@@ -1278,7 +1365,8 @@ def build_builder_embed(
     embed.add_field(
         name="🎨 Appearance",
         value=(
-            f"**Color:** `#{data.color:06X}`\n"
+            f"**Color:** "
+            f"{get_color_display(data.color)}\n"
             f"**Image:** "
             f"{'✅' if data.image_url else '❌'}\n"
             f"**Thumbnail:** "
@@ -1375,13 +1463,6 @@ class ContentModal(
         required=True
     )
 
-    color_input = discord.ui.TextInput(
-        label="Color",
-        placeholder="#5865F2",
-        max_length=7,
-        required=False
-    )
-
     title_url_input = discord.ui.TextInput(
         label="Title URL",
         placeholder="https://example.com",
@@ -1418,22 +1499,6 @@ class ContentModal(
 
             return
 
-        try:
-
-            color = parse_color(
-                self.color_input.value
-                or "#5865F2"
-            )
-
-        except ValueError as error:
-
-            await interaction.response.send_message(
-                f"❌ {error}",
-                ephemeral=True
-            )
-
-            return
-
         title_url = (
             self.title_url_input.value.strip()
         )
@@ -1455,7 +1520,6 @@ class ContentModal(
             self.description_input.value.strip()
         )
 
-        data.color = color
         data.title_url = title_url
 
         await interaction.response.edit_message(
@@ -1469,6 +1533,116 @@ class ContentModal(
             view=AnnouncementBuilderView(
                 self.cog,
                 self.session_id
+            )
+        )
+
+
+# =========================================================
+# COLOR SELECT
+# =========================================================
+
+class ColorSelect(
+    discord.ui.Select
+):
+
+    def __init__(
+        self,
+        cog,
+        session_id
+    ):
+
+        options = []
+
+        for name, color in ANNOUNCEMENT_COLORS.items():
+
+            options.append(
+                discord.SelectOption(
+                    label=name,
+                    value=str(color),
+                    emoji=(
+                        ANNOUNCEMENT_COLOR_EMOJIS.get(
+                            name,
+                            "🎨"
+                        )
+                    )
+                )
+            )
+
+        super().__init__(
+            placeholder="🎨 Choose a color...",
+            options=options,
+            min_values=1,
+            max_values=1
+        )
+
+        self.cog = cog
+        self.session_id = session_id
+
+    async def callback(
+        self,
+        interaction
+    ):
+
+        data = self.cog.sessions.get(
+            self.session_id
+        )
+
+        if data is None:
+
+            await interaction.response.send_message(
+                "❌ This builder session has expired.",
+                ephemeral=True
+            )
+
+            return
+
+        data.color = int(
+            self.values[0]
+        )
+
+        channel = interaction.guild.get_channel(
+            data.channel_id
+        )
+
+        await interaction.response.edit_message(
+            content=(
+                "🎨 **Color selected:** "
+                f"{get_color_display(data.color)}"
+            ),
+            embed=build_builder_embed(
+                interaction.guild,
+                data,
+                channel
+            ),
+            view=AnnouncementBuilderView(
+                self.cog,
+                self.session_id
+            )
+        )
+
+
+# =========================================================
+# COLOR SELECT VIEW
+# =========================================================
+
+class ColorSelectView(
+    discord.ui.View
+):
+
+    def __init__(
+        self,
+        cog,
+        session_id
+    ):
+
+        super().__init__(
+            timeout=120
+        )
+
+        self.add_item(
+            ColorSelect(
+                cog,
+                session_id
             )
         )
 
@@ -2247,6 +2421,47 @@ class AnnouncementBuilderView(
         )
 
     # =====================================================
+    # COLOR
+    # =====================================================
+
+    @discord.ui.button(
+        label="Color",
+        emoji="🎨",
+        style=discord.ButtonStyle.secondary,
+        row=1
+    )
+    async def color_button(
+        self,
+        interaction,
+        button
+    ):
+
+        data = self.cog.sessions.get(
+            self.session_id
+        )
+
+        if data is None:
+
+            await interaction.response.send_message(
+                "❌ This builder session has expired.",
+                ephemeral=True
+            )
+
+            return
+
+        await interaction.response.send_message(
+            (
+                "🎨 **Choose the announcement color:**\n"
+                "Select a color from the menu below."
+            ),
+            view=ColorSelectView(
+                self.cog,
+                self.session_id
+            ),
+            ephemeral=True
+        )
+
+    # =====================================================
     # PREVIEW
     # =====================================================
 
@@ -2358,6 +2573,14 @@ class AnnouncementBuilderView(
             )
 
             return
+
+        # -------------------------------------------------
+        # STATISTICS
+        # -------------------------------------------------
+
+        await asyncio.to_thread(
+            increment_announcement_stat
+        )
 
         await self.cog.send_log(
             interaction.guild,
