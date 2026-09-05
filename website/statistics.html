@@ -458,31 +458,6 @@ Misuki — Statistics
                 </div>
 
 
-                <!-- HEARTBEAT -->
-
-                <div class="performance-card">
-
-                    <span
-                        class="statistics-label"
-                        data-i18n="statistics.heartbeat"
-                    >
-                        Heartbeat
-                    </span>
-
-                    <strong
-                        class="performance-value"
-                        id="statistics-heartbeat"
-                    >
-                        {% if statistics is defined and statistics.last_seen is not none %}
-                            {{ statistics.last_seen }}
-                        {% else %}
-                            —
-                        {% endif %}
-                    </strong>
-
-                </div>
-
-
                 <!-- LAST UPDATE -->
 
                 <div class="performance-card">
@@ -1219,11 +1194,6 @@ Misuki — Statistics
                 "statistics-version"
             );
 
-        const heartbeat =
-            document.getElementById(
-                "statistics-heartbeat"
-            );
-
         const lastUpdate =
             document.getElementById(
                 "statistics-last-update"
@@ -1305,14 +1275,6 @@ Misuki — Statistics
 
             version.textContent =
                 data.version ?? "—";
-
-        }
-
-
-        if (heartbeat) {
-
-            heartbeat.textContent =
-                data.last_seen ?? "—";
 
         }
 

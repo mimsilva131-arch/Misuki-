@@ -496,7 +496,10 @@ async def update_stats_snapshot():
         # USERS
         # -------------------------------------------------
 
-        users_count = count_statistics_users()
+        users_count = sum(
+            server["members"]
+            for server in detected_servers
+        )
 
 
         # -------------------------------------------------

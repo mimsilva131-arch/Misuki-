@@ -3915,6 +3915,36 @@ def reviews():
 # STATISTICS PAGE
 # =========================================================
 
+def get_human_server_members(servers):
+
+    total_members = 0
+
+    if not isinstance(servers, list):
+
+        return total_members
+
+    for server in servers:
+
+        if not isinstance(server, dict):
+
+            continue
+
+        try:
+
+            total_members += max(
+                0,
+                int(server.get("members") or 0)
+            )
+
+        except (
+            TypeError,
+            ValueError
+        ):
+
+            continue
+
+    return total_members
+
 @app.route("/statistics")
 def statistics():
 
@@ -3999,6 +4029,17 @@ def statistics():
     ):
 
         pass
+
+    server_list = bot_snapshot.get(
+        "admin_servers",
+        []
+    )
+
+    if isinstance(server_list, list) and server_list:
+
+        statistics_data["users"] = get_human_server_members(
+            server_list
+        )
 
 
     # =====================================================
@@ -4384,7 +4425,6 @@ def statistics_api():
                         "admin_servers": result[9] or [],
                     }
 
-
     except (
         OSError,
         psycopg2.Error,
@@ -4395,6 +4435,18 @@ def statistics_api():
 
         print(
             f"❌ Statistics API database error: {error}"
+        )
+
+
+    server_list = bot_snapshot.get(
+        "admin_servers",
+        []
+    )
+
+    if isinstance(server_list, list) and server_list:
+
+        bot_snapshot["users"] = get_human_server_members(
+            server_list
         )
 
 
