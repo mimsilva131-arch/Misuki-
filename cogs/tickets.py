@@ -9,6 +9,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from cogs.activity_statistics import increment_activity_stat
+
 
 # =========================================================
 # DATABASE
@@ -1032,6 +1034,16 @@ class CreateTicket(
             )
 
             return
+
+        # -------------------------------------------------
+        # ACTIVITY STATISTICS
+        # -------------------------------------------------
+        # Só conta depois de o ticket ter sido
+        # completamente criado com sucesso.
+
+        increment_activity_stat(
+            "tickets"
+        )
 
         await interaction.response.send_message(
             (

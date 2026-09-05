@@ -4247,6 +4247,45 @@ def statistics():
 
 
     # =====================================================
+    # ANNOUNCEMENTS DATABASE
+    # =====================================================
+
+    announcements = 0
+
+
+    try:
+
+        with database_connection() as connection:
+
+            with connection.cursor() as cursor:
+
+                cursor.execute(
+                    """
+                    SELECT COUNT(*)
+                    FROM announcements
+                    """
+                )
+
+                result = cursor.fetchone()
+
+
+                announcements = int(
+                    result[0] or 0
+                )
+
+
+    except (
+        OSError,
+        psycopg2.Error,
+        TypeError,
+        ValueError,
+        RuntimeError
+    ):
+
+        announcements = 0
+
+
+    # =====================================================
     # ADMIN SERVER INFORMATION
     # =====================================================
 
@@ -4285,7 +4324,7 @@ def statistics():
 
         "moderation": moderation_actions,
 
-        "announcements": 0,
+        "announcements": announcements,
     }
 
 

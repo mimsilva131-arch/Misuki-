@@ -602,6 +602,15 @@ def create_database():
                         verifications INTEGER NOT NULL
                             DEFAULT 0,
 
+                        tickets BIGINT NOT NULL
+                            DEFAULT 0,
+
+                        moderation_actions BIGINT NOT NULL
+                            DEFAULT 0,
+
+                        announcements BIGINT NOT NULL
+                            DEFAULT 0,
+
                         bot_status TEXT NOT NULL
                             DEFAULT 'Offline',
 
@@ -626,6 +635,30 @@ def create_database():
                     """
                     ALTER TABLE bot_statistics
                     ADD COLUMN IF NOT EXISTS verifications INTEGER
+                    NOT NULL DEFAULT 0
+                    """
+                )
+
+                cursor.execute(
+                    """
+                    ALTER TABLE bot_statistics
+                    ADD COLUMN IF NOT EXISTS tickets BIGINT
+                    NOT NULL DEFAULT 0
+                    """
+                )
+
+                cursor.execute(
+                    """
+                    ALTER TABLE bot_statistics
+                    ADD COLUMN IF NOT EXISTS moderation_actions BIGINT
+                    NOT NULL DEFAULT 0
+                    """
+                )
+
+                cursor.execute(
+                    """
+                    ALTER TABLE bot_statistics
+                    ADD COLUMN IF NOT EXISTS announcements BIGINT
                     NOT NULL DEFAULT 0
                     """
                 )
@@ -663,6 +696,9 @@ def create_database():
                         latency,
                         commands,
                         verifications,
+                        tickets,
+                        moderation_actions,
+                        announcements,
                         bot_status,
                         uptime,
                         version,
@@ -673,6 +709,9 @@ def create_database():
 
                     VALUES (
                         1,
+                        0,
+                        0,
+                        0,
                         0,
                         0,
                         0,
@@ -762,9 +801,11 @@ def safe_next_url(value):
     )
 
     if not value.startswith("/"):
+
         return "/dashboard"
 
     if value.startswith("//"):
+
         return "/dashboard"
 
     return value
@@ -2445,6 +2486,9 @@ def get_statistics_data(user=None):
                         latency,
                         commands,
                         verifications,
+                        tickets,
+                        moderation_actions,
+                        announcements,
                         bot_status,
                         uptime,
                         version,
@@ -2535,6 +2579,49 @@ def get_statistics_data(user=None):
     ):
 
         commands = 0
+
+    # ---------------------------------------------------------
+    # ACTIVITY STATISTICS
+    # ---------------------------------------------------------
+
+    try:
+
+        tickets = int(
+            row.get("tickets") or 0
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        tickets = 0
+
+    try:
+
+        moderation_actions = int(
+            row.get("moderation_actions") or 0
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        moderation_actions = 0
+
+    try:
+
+        announcements = int(
+            row.get("announcements") or 0
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        announcements = 0
 
     # ---------------------------------------------------------
     # VERIFICATIONS
@@ -2745,16 +2832,16 @@ def get_statistics_data(user=None):
     admin_statistics = {
 
         "commands":
-            0,
+            commands,
 
         "tickets":
-            0,
+            tickets,
 
         "moderation":
-            0,
+            moderation_actions,
 
         "announcements":
-            0
+            announcements
 
     }
 
@@ -2773,7 +2860,7 @@ def get_statistics_data(user=None):
             commands,
 
         "tickets":
-            0,
+            tickets,
 
         "verifications":
             verifications,

@@ -259,6 +259,12 @@ def initialize_statistics_database():
 
                     commands INTEGER NOT NULL DEFAULT 0,
 
+                    tickets BIGINT NOT NULL DEFAULT 0,
+
+                    moderation_actions BIGINT NOT NULL DEFAULT 0,
+
+                    announcements BIGINT NOT NULL DEFAULT 0,
+
                     verifications INTEGER NOT NULL DEFAULT 0,
 
                     bot_status TEXT NOT NULL DEFAULT 'Offline',
@@ -286,6 +292,30 @@ def initialize_statistics_database():
                 ALTER TABLE bot_statistics
                 ADD COLUMN IF NOT EXISTS
                 verifications INTEGER NOT NULL DEFAULT 0
+                """
+            )
+
+            cursor.execute(
+                """
+                ALTER TABLE bot_statistics
+                ADD COLUMN IF NOT EXISTS
+                tickets BIGINT NOT NULL DEFAULT 0
+                """
+            )
+
+            cursor.execute(
+                """
+                ALTER TABLE bot_statistics
+                ADD COLUMN IF NOT EXISTS
+                moderation_actions BIGINT NOT NULL DEFAULT 0
+                """
+            )
+
+            cursor.execute(
+                """
+                ALTER TABLE bot_statistics
+                ADD COLUMN IF NOT EXISTS
+                announcements BIGINT NOT NULL DEFAULT 0
                 """
             )
 
@@ -327,6 +357,9 @@ def initialize_statistics_database():
                     channels,
                     latency,
                     commands,
+                    tickets,
+                    moderation_actions,
+                    announcements,
                     verifications,
                     bot_status,
                     uptime,
@@ -340,6 +373,9 @@ def initialize_statistics_database():
                 VALUES (
 
                     1,
+                    0,
+                    0,
+                    0,
                     0,
                     0,
                     0,
@@ -426,7 +462,11 @@ def get_detected_servers():
 
             "icon": icon,
 
-            "members": sum(1 for member in guild.members if not member.bot)
+            "members": sum(
+                1
+                for member in guild.members
+                if not member.bot
+            )
 
         })
 
@@ -723,7 +763,7 @@ async def on_guild_join(guild):
     )
 
     print(
-        f"   Members: {guild.member_count or 0}"
+        f"   Members: {sum(1 for member in guild.members if not member.bot)}"
     )
 
     await update_stats_snapshot()
