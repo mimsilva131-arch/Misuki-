@@ -4100,29 +4100,193 @@ def statistics():
             "database_status"
         ] = "Error"
 
+# =====================================================
+# ADMIN USER INFORMATION
+# =====================================================
 
-    # =====================================================
-    # ADMIN SERVER INFORMATION
-    # =====================================================
+def get_admin_users(admin_servers):
+    """
+    Obtém os utilizadores dos servidores onde o bot está presente.
 
-    admin_servers = []
+    Apenas é chamado para administradores do Misuki.
+    Os utilizadores são deduplicados pelo Discord ID.
+    Bots são ignorados.
+    """
 
+    if not BOT_TOKEN:
+        return []
 
-    if user_is_admin:
+    users_by_id = {}
 
-        try:
+    headers = {
+        "Authorization": f"Bot {BOT_TOKEN}",
+        "Content-Type": "application/json"
+    }
 
-            admin_servers = (
-                bot_snapshot.get(
-                    "admin_servers",
-                    []
+    for server in admin_servers or []:
+
+        guild_id = server.get("id")
+
+        if not guild_id:
+            continue
+
+        after = "0"
+
+        while True:
+
+            try:
+
+                response = requests.get(
+                    f"{DISCORD_API}/guilds/{guild_id}/members",
+                    headers=headers,
+                    params={
+                        "limit": 1000,
+                        "after": after
+                    },
+                    timeout=10
                 )
+
+            except requests.RequestException as error:
+
+                print(
+                    f"⚠️ Could not fetch members for guild {guild_id}: {error}"
+                )
+
+                break
+
+            if response.status_code != 200:
+
+                print(
+                    f"⚠️ Could not fetch members for guild {guild_id}: "
+                    f"HTTP {response.status_code}"
+                )
+
+                break
+
+            try:
+
+                members = response.json()
+
+            except ValueError:
+
+                print(
+                    f"⚠️ Discord returned invalid member data for guild {guild_id}."
+                )
+
+                break
+
+            if not members:
+                break
+
+            for member in members:
+
+                discord_user = member.get(
+                    "user",
+                    {}
+                )
+
+                if discord_user.get(
+                    "bot",
+                    False
+                ):
+                    continue
+
+                user_id = discord_user.get(
+                    "id"
+                )
+
+                if not user_id:
+                    continue
+
+                username = (
+                    discord_user.get("global_name")
+                    or discord_user.get("username")
+                    or "Discord User"
+                )
+
+                avatar_hash = discord_user.get(
+                    "avatar"
+                )
+
+                if avatar_hash:
+
+                    avatar_url = (
+                        f"https://cdn.discordapp.com/avatars/"
+                        f"{user_id}/{avatar_hash}.png?size=128"
+                    )
+
+                else:
+
+                    avatar_url = None
+
+                if user_id not in users_by_id:
+
+                    users_by_id[user_id] = {
+                        "id": user_id,
+                        "name": username,
+                        "avatar": avatar_url
+                    }
+
+            if len(members) < 1000:
+                break
+
+            after = str(
+                members[-1]
+                .get("user", {})
+                .get("id", "")
             )
 
-        except Exception:
+            if not after:
+                break
 
-            admin_servers = []
+    return list(
+        users_by_id.values()
+    )
+    # =====================================================
+# ADMIN SERVER INFORMATION
+# =====================================================
 
+admin_servers = []
+
+
+if user_is_admin:
+
+    try:
+
+        admin_servers = (
+            bot_snapshot.get(
+                "admin_servers",
+                []
+            )
+        )
+
+    except Exception:
+
+        admin_servers = []
+
+
+# =====================================================
+# ADMIN USER INFORMATION
+# =====================================================
+
+admin_users=[]
+
+
+if user_is_admin:
+
+    try:
+
+        admin_users = get_admin_users(
+            admin_servers
+        )
+
+    except Exception as error:
+
+        print(
+            f"⚠️ Could not load administrator user information: {error}"
+        )
+
+        admin_users = []
 
     # =====================================================
     # ADMIN STATISTICS
@@ -4170,7 +4334,7 @@ def statistics():
 
         admin_servers=admin_servers,
 
-        admin_users=[]
+        admin_users=admin_users
     )
 
 # =========================================================
@@ -4592,7 +4756,14 @@ def statistics_api():
             "admin_servers",
             []
         )
-
+        response[
+            "admin_users"
+        ] = get_admin_users(
+            response.get(
+                "admin_servers",
+        []
+    )
+)
         response[
             "admin_statistics"
         ] = {
