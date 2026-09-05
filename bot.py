@@ -278,7 +278,7 @@ def initialize_statistics_database():
             )
 
             # -------------------------------------------------
-            # DATABASE MIGRATION
+            # DATABASE MIGRATIONS
             # -------------------------------------------------
 
             cursor.execute(
@@ -286,6 +286,30 @@ def initialize_statistics_database():
                 ALTER TABLE bot_statistics
                 ADD COLUMN IF NOT EXISTS
                 verifications INTEGER NOT NULL DEFAULT 0
+                """
+            )
+
+            cursor.execute(
+                """
+                ALTER TABLE bot_statistics
+                ADD COLUMN IF NOT EXISTS
+                admin_servers JSONB NOT NULL DEFAULT '[]'::jsonb
+                """
+            )
+
+            cursor.execute(
+                """
+                ALTER TABLE bot_statistics
+                ADD COLUMN IF NOT EXISTS
+                last_seen DOUBLE PRECISION
+                """
+            )
+
+            cursor.execute(
+                """
+                ALTER TABLE bot_statistics
+                ADD COLUMN IF NOT EXISTS
+                updated_at DOUBLE PRECISION NOT NULL DEFAULT 0
                 """
             )
 
@@ -369,6 +393,79 @@ def initialize_statistics_database():
 
 
 # =========================================================
+# GET DETECTED SERVERS
+# =========================================================
+
+def get_detected_servers():
+
+    servers = []
+
+    for guild in bot.guilds:
+
+        icon = None
+
+        try:
+
+            if guild.icon:
+
+                icon = str(
+                    guild.icon.url
+                )
+
+        except Exception:
+
+            icon = None
+
+        servers.append({
+
+            "name": guild.name,
+
+            "id": str(
+                guild.id
+            ),
+
+            "icon": icon,
+
+            "members": (
+                guild.member_count
+                or 0
+            ),
+
+        })
+
+    return servers
+
+
+# =========================================================
+# PRINT DETECTED SERVERS
+# =========================================================
+
+def print_detected_servers():
+
+    detected_servers = get_detected_servers()
+
+    print(
+        "🔎 Discord guilds detected:"
+    )
+
+    if not detected_servers:
+
+        print(
+            "   ⚠️ No guilds detected."
+        )
+
+        return
+
+    for server in detected_servers:
+
+        print(
+            f"   • {server['name']} "
+            f"({server['id']}) "
+            f"— {server['members']} members"
+        )
+
+
+# =========================================================
 # WRITE STATISTICS
 # =========================================================
 
@@ -377,6 +474,17 @@ async def update_stats_snapshot():
     connection = None
 
     try:
+
+        # -------------------------------------------------
+        # CURRENT GUILDS
+        # -------------------------------------------------
+
+        detected_servers = get_detected_servers()
+
+        servers_count = len(
+            detected_servers
+        )
+
 
         # -------------------------------------------------
         # COMMANDS
@@ -399,47 +507,6 @@ async def update_stats_snapshot():
         # -------------------------------------------------
 
         verifications_count = count_verified_users()
-
-
-        # -------------------------------------------------
-        # ADMIN SERVER INFORMATION
-        # -------------------------------------------------
-
-        admin_servers = []
-
-        for guild in bot.guilds:
-
-            icon = None
-
-            try:
-
-                if guild.icon:
-
-                    icon = str(
-                        guild.icon.url
-                    )
-
-            except Exception:
-
-                icon = None
-
-
-            admin_servers.append({
-
-                "name": guild.name,
-
-                "id": str(
-                    guild.id
-                ),
-
-                "icon": icon,
-
-                "members": (
-                    guild.member_count
-                    or 0
-                ),
-
-            })
 
 
         # -------------------------------------------------
@@ -472,6 +539,11 @@ async def update_stats_snapshot():
         version = os.getenv(
             "MISUKI_VERSION",
             "1.0.0"
+        )
+
+        channels_count = sum(
+            len(guild.channels)
+            for guild in bot.guilds
         )
 
 
@@ -518,16 +590,11 @@ async def update_stats_snapshot():
 
                 (
 
-                    len(
-                        bot.guilds
-                    ),
+                    servers_count,
 
                     users_count,
 
-                    sum(
-                        len(guild.channels)
-                        for guild in bot.guilds
-                    ),
+                    channels_count,
 
                     latency,
 
@@ -544,11 +611,11 @@ async def update_stats_snapshot():
                     last_seen,
 
                     json.dumps(
-                        admin_servers,
+                        detected_servers,
                         ensure_ascii=False
                     ),
 
-                    time.time()
+                    last_seen
 
                 )
             )
@@ -565,7 +632,7 @@ async def update_stats_snapshot():
         )
 
         print(
-            f"   Servers: {len(bot.guilds)}"
+            f"   Servers: {servers_count}"
         )
 
         print(
@@ -577,8 +644,7 @@ async def update_stats_snapshot():
         )
 
         print(
-            f"   Channels: "
-            f"{sum(len(guild.channels) for guild in bot.guilds)}"
+            f"   Channels: {channels_count}"
         )
 
         print(
@@ -600,6 +666,8 @@ async def update_stats_snapshot():
         print(
             f"   Heartbeat: {last_seen}"
         )
+
+        print_detected_servers()
 
 
     except Exception as error:
@@ -636,6 +704,54 @@ statistics_task = None
 
 
 # =========================================================
+# GUILD JOIN
+# =========================================================
+
+@bot.event
+async def on_guild_join(guild):
+
+    print(
+        "➕ Bot joined a new server:"
+    )
+
+    print(
+        f"   Name: {guild.name}"
+    )
+
+    print(
+        f"   ID: {guild.id}"
+    )
+
+    print(
+        f"   Members: {guild.member_count or 0}"
+    )
+
+    await update_stats_snapshot()
+
+
+# =========================================================
+# GUILD REMOVE
+# =========================================================
+
+@bot.event
+async def on_guild_remove(guild):
+
+    print(
+        "➖ Bot left a server:"
+    )
+
+    print(
+        f"   Name: {guild.name}"
+    )
+
+    print(
+        f"   ID: {guild.id}"
+    )
+
+    await update_stats_snapshot()
+
+
+# =========================================================
 # READY
 # =========================================================
 
@@ -667,6 +783,12 @@ async def on_ready():
     print(
         f"🟢 Bot status: {bot.status}"
     )
+
+    print(
+        f"🏠 Discord guild count: {len(bot.guilds)}"
+    )
+
+    print_detected_servers()
 
 
     # =====================================================

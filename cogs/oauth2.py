@@ -2402,6 +2402,10 @@ def get_statistics_data(user=None):
             "1.0.0"
         ),
 
+        "last_seen": None,
+
+        "updated_at": 0,
+
         "admin_servers": [],
 
         "admin_users": [],
@@ -2535,12 +2539,6 @@ def get_statistics_data(user=None):
     # ---------------------------------------------------------
     # VERIFICATIONS
     # ---------------------------------------------------------
-    #
-    # The verification_requests table is the source of truth
-    # for completed verifications. The bot also stores this
-    # value in bot_statistics, but reading the database directly
-    # here keeps the website accurate if the snapshot is stale.
-    # ---------------------------------------------------------
 
     verifications = get_verified_users_count()
 
@@ -2636,6 +2634,42 @@ def get_statistics_data(user=None):
     )
 
     # ---------------------------------------------------------
+    # TIMESTAMPS
+    # ---------------------------------------------------------
+
+    try:
+
+        last_seen_value = (
+            float(last_seen)
+            if last_seen is not None
+            else None
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        last_seen_value = None
+
+    try:
+
+        updated_at_value = float(
+            row.get(
+                "updated_at"
+            )
+            or
+            0
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        updated_at_value = 0
+
+    # ---------------------------------------------------------
     # ADMIN SERVERS
     # ---------------------------------------------------------
 
@@ -2655,6 +2689,24 @@ def get_statistics_data(user=None):
         ):
 
             continue
+
+        try:
+
+            members = int(
+                guild.get(
+                    "members",
+                    0
+                )
+                or
+                0
+            )
+
+        except (
+            TypeError,
+            ValueError
+        ):
+
+            members = 0
 
         cleaned_admin_servers.append({
 
@@ -2680,23 +2732,12 @@ def get_statistics_data(user=None):
                 ),
 
             "members":
-                int(
-                    guild.get(
-                        "members",
-                        0
-                    )
-                    or
-                    0
-                )
+                members
 
         })
 
     # ---------------------------------------------------------
     # ADMIN USER DATA
-    # ---------------------------------------------------------
-    #
-    # No separate admin-user activity tracker exists yet.
-    # Therefore we do not fabricate user statistics.
     # ---------------------------------------------------------
 
     admin_users = []
@@ -2757,6 +2798,12 @@ def get_statistics_data(user=None):
 
         "version":
             version,
+
+        "last_seen":
+            last_seen_value,
+
+        "updated_at":
+            updated_at_value,
 
         "admin_servers":
             cleaned_admin_servers,

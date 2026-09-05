@@ -76,6 +76,11 @@ CHANNEL_OPTIONS = [
         "👋"
     ),
     (
+        "Announcements Channel",
+        "announcement_channel_id",
+        "📢"
+    ),
+    (
         "Verification Channel",
         "verification_channel_id",
         "🔐"
@@ -130,6 +135,8 @@ class Config(commands.Cog):
                 moderation_log_channel_id INTEGER,
 
                 welcome_channel_id INTEGER,
+
+                announcement_channel_id INTEGER,
 
                 verification_channel_id INTEGER,
 
@@ -192,6 +199,7 @@ class Config(commands.Cog):
 
         migrations = {
             "transcript_log_channel_id": "INTEGER",
+            "announcement_channel_id": "INTEGER",
             "verified_log_channel_id": "INTEGER",
             "unverified_log_channel_id": "INTEGER",
             "ticket_category_id": "INTEGER",
@@ -2004,7 +2012,7 @@ class SimpleCategoryButton(discord.ui.Button):
                 title="📢 Announcements",
                 description=(
                     "Configure the channel used for "
-                    "announcements and welcome messages."
+                    "announcements."
                 ),
                 color=discord.Color.blurple()
             )
@@ -2015,14 +2023,16 @@ class SimpleCategoryButton(discord.ui.Button):
                     self.config,
                     [
                         (
-                            "Welcome Channel",
-                            "welcome_channel_id",
-                            "👋"
+                            "Announcements Channel",
+                            "announcement_channel_id",
+                            "📢"
                         ),
                     ],
                     []
                 )
             )
+
+            return
 
 
 # =========================================================
