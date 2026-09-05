@@ -1,9 +1,11 @@
+
 # =========================================================
 # MISUKI - ANNOUNCEMENTS SYSTEM
 # =========================================================
 
 import os
 import asyncio
+import json
 
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
@@ -35,9 +37,8 @@ DEFAULT_TIMEZONE = ZoneInfo("Europe/Lisbon")
 def get_database_connection():
 
     if not DATABASE_URL:
-
         raise RuntimeError(
-            "DATABASE_URL não está configurado."
+            "DATABASE_URL is not configured."
         )
 
     return psycopg2.connect(
@@ -53,36 +54,27 @@ def get_database_connection():
 def parse_color(value):
 
     if not value:
-
         return 0x5865F2
 
     value = value.strip()
 
     if value.startswith("#"):
-
         value = value[1:]
 
     if value.lower().startswith("0x"):
-
         value = value[2:]
 
     if len(value) != 6:
-
         raise ValueError(
-            "A cor deve estar no formato #5865F2."
+            "The color must use the format #5865F2."
         )
 
     try:
-
-        return int(
-            value,
-            16
-        )
+        return int(value, 16)
 
     except ValueError:
-
         raise ValueError(
-            "A cor fornecida é inválida."
+            "The provided color is invalid."
         )
 
 
@@ -101,7 +93,6 @@ def parse_datetime(value):
     for date_format in formats:
 
         try:
-
             parsed = datetime.strptime(
                 value,
                 date_format
@@ -110,13 +101,11 @@ def parse_datetime(value):
             break
 
         except ValueError:
-
             pass
 
     if parsed is None:
-
         raise ValueError(
-            "Use o formato DD/MM/AAAA HH:MM."
+            "Use the format DD/MM/YYYY HH:MM."
         )
 
     parsed = parsed.replace(
@@ -131,7 +120,6 @@ def parse_datetime(value):
 def format_datetime(value):
 
     if value is None:
-
         return "—"
 
     return value.astimezone(
@@ -144,7 +132,6 @@ def format_datetime(value):
 def valid_url(value):
 
     if not value:
-
         return True
 
     return (
@@ -168,41 +155,46 @@ class AnnouncementData:
         self.guild_id = guild_id
         self.channel_id = channel_id
 
+        # Content
         self.title = ""
         self.description = ""
 
+        # Appearance
         self.color = 0x5865F2
-
         self.title_url = ""
 
+        # Images
         self.image_url = ""
         self.thumbnail_url = ""
 
+        # Author
         self.author_name = ""
         self.author_url = ""
         self.author_icon_url = ""
 
+        # Server
         self.use_server_name = False
         self.use_server_icon = False
 
+        # Footer
         self.footer_text = ""
         self.footer_icon_url = ""
 
+        # Timestamp
         self.timestamp_enabled = True
         self.custom_timestamp = None
 
+        # Delivery
         self.schedule_at = None
 
+        # Buttons
         self.buttons = []
 
     # =====================================================
-    # EMBED
+    # BUILD EMBED
     # =====================================================
 
-    def build_embed(
-        self,
-        guild
-    ):
+    def build_embed(self, guild):
 
         embed = discord.Embed(
             color=self.color
@@ -217,7 +209,6 @@ class AnnouncementData:
             embed.title = self.title
 
             if self.title_url:
-
                 embed.url = self.title_url
 
         # -------------------------------------------------
@@ -225,7 +216,6 @@ class AnnouncementData:
         # -------------------------------------------------
 
         if self.description:
-
             embed.description = self.description
 
         # -------------------------------------------------
@@ -237,14 +227,11 @@ class AnnouncementData:
         author_url = self.author_url
 
         if self.use_server_name:
-
             author_name = guild.name
 
-        if self.use_server_icon:
+        if self.use_server_icon and guild.icon:
 
-            if guild.icon:
-
-                author_icon = guild.icon.url
+            author_icon = guild.icon.url
 
         if author_name:
 
@@ -336,13 +323,12 @@ class AnnouncementData:
         return embed
 
     # =====================================================
-    # BUTTON VIEW
+    # BUILD BUTTON VIEW
     # =====================================================
 
     def build_button_view(self):
 
         if not self.buttons:
-
             return None
 
         view = discord.ui.View(
@@ -356,7 +342,7 @@ class AnnouncementData:
                     label=button["label"][:80],
                     emoji=(
                         button["emoji"]
-                        if button["emoji"]
+                        if button.get("emoji")
                         else None
                     ),
                     style=discord.ButtonStyle.link,
@@ -379,9 +365,7 @@ class Announcements(commands.Cog):
     ):
 
         self.bot = bot
-
         self.sessions = {}
-
         self.scheduler_task = None
 
         self.initialize_database()
@@ -483,7 +467,6 @@ class Announcements(commands.Cog):
         except Exception as error:
 
             if connection:
-
                 connection.rollback()
 
             print(
@@ -493,11 +476,10 @@ class Announcements(commands.Cog):
         finally:
 
             if connection:
-
                 connection.close()
 
     # =====================================================
-    # CONFIG
+    # CONFIG COG
     # =====================================================
 
     def get_config_cog(self):
@@ -516,13 +498,11 @@ class Announcements(commands.Cog):
     ):
 
         if member.guild_permissions.administrator:
-
             return True
 
         config = self.get_config_cog()
 
         if config is None:
-
             return False
 
         role_ids = config.get_roles(
@@ -531,7 +511,6 @@ class Announcements(commands.Cog):
         )
 
         if not role_ids:
-
             return False
 
         configured_ids = {
@@ -556,7 +535,6 @@ class Announcements(commands.Cog):
         config = self.get_config_cog()
 
         if config is None:
-
             return None
 
         channel_id = config.get_channel_value(
@@ -571,7 +549,6 @@ class Announcements(commands.Cog):
             )
 
             if channel:
-
                 return channel
 
         channel_id = config.get_channel_value(
@@ -580,7 +557,6 @@ class Announcements(commands.Cog):
         )
 
         if channel_id:
-
             return guild.get_channel(
                 int(channel_id)
             )
@@ -605,7 +581,6 @@ class Announcements(commands.Cog):
         )
 
         if log_channel is None:
-
             return
 
         embed = discord.Embed(
@@ -632,7 +607,7 @@ class Announcements(commands.Cog):
         if announcement_id:
 
             embed.add_field(
-                name="ID",
+                name="Announcement ID",
                 value=f"`{announcement_id}`",
                 inline=True
             )
@@ -662,7 +637,7 @@ class Announcements(commands.Cog):
             )
 
     # =====================================================
-    # SAVE
+    # SAVE SCHEDULED ANNOUNCEMENT
     # =====================================================
 
     def save_scheduled(
@@ -674,8 +649,6 @@ class Announcements(commands.Cog):
         connection = None
 
         try:
-
-            import json
 
             connection = get_database_connection()
 
@@ -809,7 +782,6 @@ class Announcements(commands.Cog):
         except Exception as error:
 
             if connection:
-
                 connection.rollback()
 
             print(
@@ -821,11 +793,10 @@ class Announcements(commands.Cog):
         finally:
 
             if connection:
-
                 connection.close()
 
     # =====================================================
-    # GET DUE
+    # GET DUE ANNOUNCEMENTS
     # =====================================================
 
     def get_due_announcements(self):
@@ -872,11 +843,10 @@ class Announcements(commands.Cog):
         finally:
 
             if connection:
-
                 connection.close()
 
     # =====================================================
-    # MARK STATUS
+    # UPDATE STATUS
     # =====================================================
 
     def mark_status(
@@ -935,7 +905,6 @@ class Announcements(commands.Cog):
         except Exception as error:
 
             if connection:
-
                 connection.rollback()
 
             print(
@@ -945,19 +914,16 @@ class Announcements(commands.Cog):
         finally:
 
             if connection:
-
                 connection.close()
 
     # =====================================================
-    # PUBLISH
+    # PUBLISH SCHEDULED ANNOUNCEMENT
     # =====================================================
 
     async def publish_scheduled(
         self,
         row
     ):
-
-        import json
 
         (
             announcement_id,
@@ -1002,7 +968,6 @@ class Announcements(commands.Cog):
         )
 
         if guild is None:
-
             return
 
         channel = guild.get_channel(
@@ -1106,9 +1071,7 @@ class Announcements(commands.Cog):
                 guild
             )
 
-            view = (
-                data.build_button_view()
-            )
+            view = data.build_button_view()
 
             message = await channel.send(
                 embed=embed,
@@ -1184,9 +1147,7 @@ class Announcements(commands.Cog):
                     f"❌ Announcement scheduler error: {error}"
                 )
 
-            await asyncio.sleep(
-                10
-            )
+            await asyncio.sleep(10)
 
     # =====================================================
     # READY
@@ -1287,36 +1248,39 @@ def build_builder_embed(
     embed = discord.Embed(
         title="📢 Announcement Builder",
         description=(
-            "Configure o seu anúncio através das "
-            "opções abaixo.\n\n"
-            "A pré-visualização será atualizada "
-            "à medida que fizer alterações."
+            "Configure your announcement using "
+            "the options below.\n\n"
+            "The preview will update as you make changes."
         ),
         color=discord.Color.blurple()
     )
 
     embed.add_field(
-        name="📍 Canal",
-        value=channel.mention,
+        name="📍 Channel",
+        value=(
+            channel.mention
+            if channel
+            else "Not selected"
+        ),
         inline=False
     )
 
     embed.add_field(
-        name="📝 Conteúdo",
+        name="📝 Content",
         value=(
-            f"**Título:** "
-            f"{data.title or 'Não definido'}\n"
-            f"**Descrição:** "
-            f"{'Configurada' if data.description else 'Não definida'}"
+            f"**Title:** "
+            f"{data.title or 'Not set'}\n"
+            f"**Description:** "
+            f"{'Configured' if data.description else 'Not set'}"
         ),
         inline=True
     )
 
     embed.add_field(
-        name="🎨 Aparência",
+        name="🎨 Appearance",
         value=(
-            f"**Cor:** `#{data.color:06X}`\n"
-            f"**Imagem:** "
+            f"**Color:** `#{data.color:06X}`\n"
+            f"**Image:** "
             f"{'✅' if data.image_url else '❌'}\n"
             f"**Thumbnail:** "
             f"{'✅' if data.thumbnail_url else '❌'}"
@@ -1325,10 +1289,10 @@ def build_builder_embed(
     )
 
     embed.add_field(
-        name="👤 Autor",
+        name="👤 Author",
         value=(
-            f"{data.author_name or 'Não definido'}\n"
-            f"Servidor: "
+            f"{data.author_name or 'Not set'}\n"
+            f"Server: "
             f"{'✅' if data.use_server_name else '❌'}"
         ),
         inline=True
@@ -1337,14 +1301,14 @@ def build_builder_embed(
     embed.add_field(
         name="🕐 Timestamp",
         value=(
-            "Desativado"
+            "Disabled"
             if not data.timestamp_enabled
             else (
                 format_datetime(
                     data.custom_timestamp
                 )
                 if data.custom_timestamp
-                else "Hora de envio"
+                else "Time of sending"
             )
         ),
         inline=True
@@ -1355,28 +1319,28 @@ def build_builder_embed(
         value=(
             data.footer_text
             if data.footer_text
-            else "Não definido"
+            else "Not set"
         ),
         inline=True
     )
 
     embed.add_field(
-        name="🔗 Links / Botões",
+        name="🔗 Links / Buttons",
         value=(
-            f"{len(data.buttons)} botão"
-            f"{'ões' if len(data.buttons) != 1 else ''}"
+            f"{len(data.buttons)} button"
+            f"{'s' if len(data.buttons) != 1 else ''}"
         ),
         inline=True
     )
 
     embed.add_field(
-        name="⏰ Envio",
+        name="⏰ Delivery",
         value=(
             format_datetime(
                 data.schedule_at
             )
             if data.schedule_at
-            else "Enviar agora"
+            else "Send immediately"
         ),
         inline=False
     )
@@ -1394,33 +1358,33 @@ def build_builder_embed(
 
 class ContentModal(
     discord.ui.Modal,
-    title="📝 Conteúdo"
+    title="📝 Content"
 ):
 
     title_input = discord.ui.TextInput(
-        label="Título",
-        placeholder="Título do anúncio",
+        label="Title",
+        placeholder="Announcement title",
         max_length=256,
         required=False
     )
 
     description_input = discord.ui.TextInput(
-        label="Descrição",
-        placeholder="Escreva o conteúdo do anúncio...",
+        label="Description",
+        placeholder="Write the announcement content...",
         style=discord.TextStyle.paragraph,
         max_length=4000,
         required=True
     )
 
     color_input = discord.ui.TextInput(
-        label="Cor",
+        label="Color",
         placeholder="#5865F2",
         max_length=7,
         required=False
     )
 
     title_url_input = discord.ui.TextInput(
-        label="URL do título",
+        label="Title URL",
         placeholder="https://example.com",
         max_length=500,
         required=False
@@ -1449,7 +1413,7 @@ class ContentModal(
         if data is None:
 
             await interaction.response.send_message(
-                "❌ Esta sessão expirou.",
+                "❌ This builder session has expired.",
                 ephemeral=True
             )
 
@@ -1478,7 +1442,7 @@ class ContentModal(
         if not valid_url(title_url):
 
             await interaction.response.send_message(
-                "❌ A URL do título é inválida.",
+                "❌ The title URL is invalid.",
                 ephemeral=True
             )
 
@@ -1493,7 +1457,6 @@ class ContentModal(
         )
 
         data.color = color
-
         data.title_url = title_url
 
         await interaction.response.edit_message(
@@ -1517,12 +1480,12 @@ class ContentModal(
 
 class AuthorModal(
     discord.ui.Modal,
-    title="👤 Autor"
+    title="👤 Author"
 ):
 
     name_input = discord.ui.TextInput(
         label="Author Name",
-        placeholder="Nome do autor",
+        placeholder="Author name",
         max_length=256,
         required=False
     )
@@ -1564,7 +1527,7 @@ class AuthorModal(
         if data is None:
 
             await interaction.response.send_message(
-                "❌ Esta sessão expirou.",
+                "❌ This builder session has expired.",
                 ephemeral=True
             )
 
@@ -1580,7 +1543,7 @@ class AuthorModal(
             ):
 
                 await interaction.response.send_message(
-                    "❌ Uma das URLs fornecidas é inválida.",
+                    "❌ One of the provided URLs is invalid.",
                     ephemeral=True
                 )
 
@@ -1619,7 +1582,7 @@ class AuthorModal(
 
 class ImageModal(
     discord.ui.Modal,
-    title="🖼️ Imagens"
+    title="🖼️ Images"
 ):
 
     image_input = discord.ui.TextInput(
@@ -1659,7 +1622,7 @@ class ImageModal(
         if data is None:
 
             await interaction.response.send_message(
-                "❌ Esta sessão expirou.",
+                "❌ This builder session has expired.",
                 ephemeral=True
             )
 
@@ -1675,7 +1638,7 @@ class ImageModal(
             ):
 
                 await interaction.response.send_message(
-                    "❌ Uma das URLs fornecidas é inválida.",
+                    "❌ One of the provided image URLs is invalid.",
                     ephemeral=True
                 )
 
@@ -1715,7 +1678,7 @@ class FooterModal(
 
     text_input = discord.ui.TextInput(
         label="Footer Text",
-        placeholder="Texto do footer",
+        placeholder="Footer text",
         max_length=2048,
         required=False
     )
@@ -1750,7 +1713,7 @@ class FooterModal(
         if data is None:
 
             await interaction.response.send_message(
-                "❌ Esta sessão expirou.",
+                "❌ This builder session has expired.",
                 ephemeral=True
             )
 
@@ -1765,7 +1728,7 @@ class FooterModal(
         ):
 
             await interaction.response.send_message(
-                "❌ O Footer Icon URL é inválido.",
+                "❌ The footer icon URL is invalid.",
                 ephemeral=True
             )
 
@@ -1793,7 +1756,7 @@ class FooterModal(
 
 
 # =========================================================
-# TIME MODAL
+# TIMESTAMP MODAL
 # =========================================================
 
 class TimeModal(
@@ -1802,8 +1765,8 @@ class TimeModal(
 ):
 
     custom_timestamp = discord.ui.TextInput(
-        label="Timestamp personalizado",
-        placeholder="DD/MM/AAAA HH:MM",
+        label="Custom Timestamp",
+        placeholder="DD/MM/YYYY HH:MM",
         max_length=16,
         required=False
     )
@@ -1831,7 +1794,7 @@ class TimeModal(
         if data is None:
 
             await interaction.response.send_message(
-                "❌ Esta sessão expirou.",
+                "❌ This builder session has expired.",
                 ephemeral=True
             )
 
@@ -1844,7 +1807,6 @@ class TimeModal(
         if not value:
 
             data.custom_timestamp = None
-
             data.timestamp_enabled = True
 
         else:
@@ -1865,7 +1827,6 @@ class TimeModal(
                 return
 
             data.custom_timestamp = parsed
-
             data.timestamp_enabled = True
 
         await interaction.response.edit_message(
@@ -1889,12 +1850,12 @@ class TimeModal(
 
 class ScheduleModal(
     discord.ui.Modal,
-    title="⏰ Agendar anúncio"
+    title="⏰ Schedule Announcement"
 ):
 
     schedule_input = discord.ui.TextInput(
-        label="Data e hora",
-        placeholder="DD/MM/AAAA HH:MM",
+        label="Date and Time",
+        placeholder="DD/MM/YYYY HH:MM",
         max_length=16,
         required=True
     )
@@ -1922,7 +1883,7 @@ class ScheduleModal(
         if data is None:
 
             await interaction.response.send_message(
-                "❌ Esta sessão expirou.",
+                "❌ This builder session has expired.",
                 ephemeral=True
             )
 
@@ -1948,10 +1909,7 @@ class ScheduleModal(
         ):
 
             await interaction.response.send_message(
-                (
-                    "❌ A data/hora tem de estar "
-                    "no futuro."
-                ),
+                "❌ The scheduled time must be in the future.",
                 ephemeral=True
             )
 
@@ -1975,16 +1933,16 @@ class ScheduleModal(
 
 
 # =========================================================
-# BUTTON MODAL
+# ADD BUTTON MODAL
 # =========================================================
 
 class AddButtonModal(
     discord.ui.Modal,
-    title="🔗 Adicionar botão"
+    title="🔗 Add Button"
 ):
 
     label_input = discord.ui.TextInput(
-        label="Nome do botão",
+        label="Button Label",
         placeholder="Website",
         max_length=80,
         required=True
@@ -2027,7 +1985,7 @@ class AddButtonModal(
         if data is None:
 
             await interaction.response.send_message(
-                "❌ Esta sessão expirou.",
+                "❌ This builder session has expired.",
                 ephemeral=True
             )
 
@@ -2040,7 +1998,7 @@ class AddButtonModal(
         if not valid_url(url):
 
             await interaction.response.send_message(
-                "❌ A URL tem de começar por http:// ou https://.",
+                "❌ The URL must start with http:// or https://.",
                 ephemeral=True
             )
 
@@ -2049,10 +2007,7 @@ class AddButtonModal(
         if len(data.buttons) >= 5:
 
             await interaction.response.send_message(
-                (
-                    "❌ Um anúncio pode ter no máximo "
-                    "5 botões."
-                ),
+                "❌ An announcement can have a maximum of 5 buttons.",
                 ephemeral=True
             )
 
@@ -2111,7 +2066,7 @@ class AnnouncementBuilderView(
     # =====================================================
 
     @discord.ui.button(
-        label="Conteúdo",
+        label="Content",
         emoji="📝",
         style=discord.ButtonStyle.secondary,
         row=0
@@ -2134,7 +2089,7 @@ class AnnouncementBuilderView(
     # =====================================================
 
     @discord.ui.button(
-        label="Autor",
+        label="Author",
         emoji="👤",
         style=discord.ButtonStyle.secondary,
         row=0
@@ -2157,7 +2112,7 @@ class AnnouncementBuilderView(
     # =====================================================
 
     @discord.ui.button(
-        label="Imagens",
+        label="Images",
         emoji="🖼️",
         style=discord.ButtonStyle.secondary,
         row=0
@@ -2203,7 +2158,7 @@ class AnnouncementBuilderView(
     # =====================================================
 
     @discord.ui.button(
-        label="Servidor",
+        label="Server",
         emoji="🏠",
         style=discord.ButtonStyle.secondary,
         row=1
@@ -2221,7 +2176,7 @@ class AnnouncementBuilderView(
         if data is None:
 
             await interaction.response.send_message(
-                "❌ Esta sessão expirou.",
+                "❌ This builder session has expired.",
                 ephemeral=True
             )
 
@@ -2270,11 +2225,11 @@ class AnnouncementBuilderView(
         )
 
     # =====================================================
-    # ADD BUTTON
+    # ADD LINK
     # =====================================================
 
     @discord.ui.button(
-        label="Adicionar link",
+        label="Add Link",
         emoji="🔗",
         style=discord.ButtonStyle.secondary,
         row=1
@@ -2315,7 +2270,7 @@ class AnnouncementBuilderView(
         if data is None:
 
             await interaction.response.send_message(
-                "❌ Esta sessão expirou.",
+                "❌ This builder session has expired.",
                 ephemeral=True
             )
 
@@ -2334,7 +2289,7 @@ class AnnouncementBuilderView(
     # =====================================================
 
     @discord.ui.button(
-        label="Enviar agora",
+        label="Send Now",
         emoji="📢",
         style=discord.ButtonStyle.success,
         row=2
@@ -2352,7 +2307,7 @@ class AnnouncementBuilderView(
         if data is None:
 
             await interaction.response.send_message(
-                "❌ Esta sessão expirou.",
+                "❌ This builder session has expired.",
                 ephemeral=True
             )
 
@@ -2365,7 +2320,7 @@ class AnnouncementBuilderView(
         if channel is None:
 
             await interaction.response.send_message(
-                "❌ O canal selecionado já não existe.",
+                "❌ The selected channel no longer exists.",
                 ephemeral=True
             )
 
@@ -2384,8 +2339,8 @@ class AnnouncementBuilderView(
 
             await interaction.response.send_message(
                 (
-                    "❌ Não tenho permissão para "
-                    "enviar mensagens nesse canal."
+                    "❌ I don't have permission "
+                    "to send messages in that channel."
                 ),
                 ephemeral=True
             )
@@ -2399,7 +2354,7 @@ class AnnouncementBuilderView(
             )
 
             await interaction.response.send_message(
-                "❌ O Discord rejeitou o anúncio.",
+                "❌ Discord rejected the announcement.",
                 ephemeral=True
             )
 
@@ -2420,7 +2375,7 @@ class AnnouncementBuilderView(
 
         await interaction.response.edit_message(
             content=(
-                "✅ **Anúncio publicado com sucesso!**\n\n"
+                "✅ **Announcement published successfully!**\n\n"
                 f"📢 {channel.mention}"
             ),
             embed=None,
@@ -2432,7 +2387,7 @@ class AnnouncementBuilderView(
     # =====================================================
 
     @discord.ui.button(
-        label="Agendar",
+        label="Schedule",
         emoji="⏰",
         style=discord.ButtonStyle.primary,
         row=3
@@ -2442,6 +2397,31 @@ class AnnouncementBuilderView(
         interaction,
         button
     ):
+
+        data = self.cog.sessions.get(
+            self.session_id
+        )
+
+        if data is None:
+
+            await interaction.response.send_message(
+                "❌ This builder session has expired.",
+                ephemeral=True
+            )
+
+            return
+
+        if not data.title and not data.description:
+
+            await interaction.response.send_message(
+                (
+                    "❌ You must configure at least "
+                    "a title or description first."
+                ),
+                ephemeral=True
+            )
+
+            return
 
         await interaction.response.send_modal(
             ScheduleModal(
@@ -2455,7 +2435,7 @@ class AnnouncementBuilderView(
     # =====================================================
 
     @discord.ui.button(
-        label="Cancelar",
+        label="Cancel",
         emoji="❌",
         style=discord.ButtonStyle.danger,
         row=3
@@ -2473,7 +2453,7 @@ class AnnouncementBuilderView(
 
         await interaction.response.edit_message(
             content=(
-                "❌ **Criação do anúncio cancelada.**"
+                "❌ **Announcement creation cancelled.**"
             ),
             embed=None,
             view=None
@@ -2495,3 +2475,4 @@ async def setup(
     await bot.add_cog(
         cog
     )
+
