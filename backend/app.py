@@ -4020,6 +4020,11 @@ def statistics():
                     bot_snapshot[key]
                 )
 
+        statistics_data["updated_at"] = bot_snapshot.get(
+            "updated_at",
+            bot_snapshot.get("last_seen")
+        )
+
 
     except (
         OSError,
@@ -4391,7 +4396,8 @@ def statistics_api():
                         uptime,
                         version,
                         last_seen,
-                        admin_servers
+                        admin_servers,
+                        updated_at
                     FROM bot_statistics
                     WHERE id = 1
                     """
@@ -4423,6 +4429,8 @@ def statistics_api():
                         "last_seen": result[8],
 
                         "admin_servers": result[9] or [],
+
+                        "updated_at": result[10],
                     }
 
     except (
@@ -4717,6 +4725,15 @@ def statistics_api():
         "version": statistics_data[
             "version"
         ],
+
+        "updated_at": statistics_data.get(
+            "updated_at"
+        ),
+
+        "admin_servers": bot_snapshot.get(
+            "admin_servers",
+            []
+        ),
 
         "last_seen": statistics_data[
             "last_seen"

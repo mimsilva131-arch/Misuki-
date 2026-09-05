@@ -474,7 +474,7 @@ Misuki — Statistics
                         id="statistics-last-update"
                     >
                         {% if statistics is defined and statistics.updated_at is not none %}
-                            {{ statistics.updated_at }}
+                            {{ statistics.updated_at if statistics.updated_at else "—" }}
                         {% else %}
                             —
                         {% endif %}
@@ -539,7 +539,10 @@ Misuki — Statistics
 
                 {% if admin_servers is defined and admin_servers %}
 
-                <div class="admin-server-list">
+                <div
+                    class="admin-server-list"
+                    id="admin-server-list"
+                >
 
                     {% for server in admin_servers %}
 
@@ -1145,6 +1148,121 @@ Misuki — Statistics
     }
 
 
+    function formatStatisticsDate(value) {
+
+        if (value === null || value === undefined || value === "") {
+
+            return "—";
+
+        }
+
+        const numericValue = Number(value);
+
+        if (!Number.isFinite(numericValue) || numericValue <= 0) {
+
+            return "—";
+
+        }
+
+        return new Date(
+            numericValue * 1000
+        ).toLocaleString();
+
+    }
+
+
+    function renderServerList(servers) {
+
+        const serverList =
+            document.getElementById(
+                "admin-server-list"
+            );
+
+        if (!serverList || !Array.isArray(servers)) {
+
+            return 0;
+
+        }
+
+        serverList.replaceChildren();
+
+        let totalMembers = 0;
+
+        servers.forEach(
+            function (server) {
+
+                const members = Math.max(
+                    0,
+                    Number.parseInt(
+                        server.members,
+                        10
+                    ) || 0
+                );
+
+                totalMembers += members;
+
+                const card = document.createElement("div");
+                card.className = "admin-server-card";
+
+                if (server.icon) {
+
+                    const icon = document.createElement("img");
+                    icon.src = server.icon;
+                    icon.alt = "";
+                    icon.className = "admin-server-icon";
+                    card.appendChild(icon);
+
+                } else {
+
+                    const placeholder = document.createElement("div");
+                    placeholder.className = "admin-server-icon-placeholder";
+                    placeholder.textContent = "🏠";
+                    card.appendChild(placeholder);
+
+                }
+
+                const info = document.createElement("div");
+                info.className = "admin-server-info";
+
+                const name = document.createElement("strong");
+                name.textContent = server.name || "Unknown Server";
+                info.appendChild(name);
+
+                if (server.id) {
+
+                    const id = document.createElement("span");
+                    id.textContent = `ID: ${server.id}`;
+                    info.appendChild(id);
+
+                }
+
+                card.appendChild(info);
+
+                const stat = document.createElement("div");
+                stat.className = "admin-server-stat";
+
+                const label = document.createElement("span");
+                label.textContent = getTranslation(
+                    "statistics.members",
+                    "Members"
+                );
+                stat.appendChild(label);
+
+                const value = document.createElement("strong");
+                value.textContent = members.toLocaleString();
+                stat.appendChild(value);
+
+                card.appendChild(stat);
+                serverList.appendChild(card);
+
+            }
+        );
+
+        return totalMembers;
+
+    }
+
+
     function updateStatistics(data) {
 
         if (!data) {
@@ -1199,6 +1317,11 @@ Misuki — Statistics
                 "statistics-last-update"
             );
 
+        const serverList =
+            document.getElementById(
+                "admin-server-list"
+            );
+
         const botStatus =
             document.getElementById(
                 "bot-status"
@@ -1223,7 +1346,19 @@ Misuki — Statistics
         }
 
 
-        if (users) {
+        if (serverList && Array.isArray(data.admin_servers)) {
+
+            const serverMembersTotal =
+                renderServerList(data.admin_servers);
+
+            if (users) {
+
+                users.textContent =
+                    serverMembersTotal.toLocaleString();
+
+            }
+
+        } else if (users) {
 
             users.textContent =
                 data.users ?? "—";
@@ -1282,7 +1417,9 @@ Misuki — Statistics
         if (lastUpdate) {
 
             lastUpdate.textContent =
-                data.updated_at ?? "—";
+                formatStatisticsDate(
+                    data.updated_at
+                );
 
         }
 
