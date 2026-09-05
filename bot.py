@@ -6,6 +6,7 @@
 import os
 import asyncio
 import json
+import re
 import time
 
 import discord
@@ -19,7 +20,9 @@ from dotenv import load_dotenv
 # ENVIRONMENT
 # =========================================================
 
-load_dotenv()
+load_dotenv(
+    override=True
+)
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL"
@@ -83,6 +86,21 @@ def count_commands(commands_list):
 # USER COUNT
 # =========================================================
 
+def is_human_member(member):
+
+    username = str(
+        getattr(member, "name", "")
+        or ""
+    )
+
+    return (
+        not member.bot
+        and not re.search(
+            r"#\d{4}$",
+            username
+        )
+    )
+
 def count_statistics_users():
 
     total_users = 0
@@ -98,7 +116,7 @@ def count_statistics_users():
             # formato não é uma forma segura de determinar
             # se uma conta é um bot.
 
-            if member.bot:
+            if not is_human_member(member):
                 continue
 
             total_users += 1
@@ -122,7 +140,7 @@ def count_verified_users():
 
             cursor.execute(
                 """
-                SELECT COUNT(*)
+                SELECT COUNT(DISTINCT user_id)
                 FROM verification_requests
                 WHERE status = 'verified'
                 """
@@ -465,7 +483,7 @@ def get_detected_servers():
             "members": sum(
                 1
                 for member in guild.members
-                if not member.bot
+                if is_human_member(member)
             )
 
         })

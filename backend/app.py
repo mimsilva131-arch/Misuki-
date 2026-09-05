@@ -35,7 +35,9 @@ APP_START_TIME = time.time()
 # ENVIRONMENT
 # =========================================================
 
-load_dotenv()
+load_dotenv(
+    override=True
+)
 
 
 # =========================================================
@@ -3847,6 +3849,8 @@ def statistics():
         ),
 
         "uptime": "0s",
+
+        "updated_at": None,
     }
 
 
@@ -3882,6 +3886,8 @@ def statistics():
             "commands",
             "bot_status",
             "uptime",
+            "verifications",
+            "updated_at",
         ):
 
             if key in bot_snapshot:
@@ -4246,7 +4252,8 @@ def statistics_api():
                         uptime,
                         version,
                         last_seen,
-                        admin_servers
+                        admin_servers,
+                        updated_at
                     FROM bot_statistics
                     WHERE id = 1
                     """
@@ -4280,6 +4287,8 @@ def statistics_api():
                         "last_seen": result[9],
 
                         "admin_servers": result[10] or [],
+
+                        "updated_at": result[11],
                     }
 
 
@@ -4309,6 +4318,7 @@ def statistics_api():
         "verifications",
         "uptime",
         "last_seen",
+        "updated_at",
     ):
 
         if key in bot_snapshot:
@@ -4507,15 +4517,6 @@ def statistics_api():
 
 
     # =====================================================
-    # VERIFICATIONS
-    # =====================================================
-
-    statistics_data[
-        "verifications"
-    ] = 0
-
-
-    # =====================================================
     # RESPONSE
     # =====================================================
 
@@ -4571,6 +4572,10 @@ def statistics_api():
 
         "last_seen": statistics_data[
             "last_seen"
+        ],
+
+        "updated_at": statistics_data[
+            "updated_at"
         ],
     }
 
