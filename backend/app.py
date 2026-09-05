@@ -112,6 +112,15 @@ SECRET_KEY = os.getenv(
     "FLASK_SECRET_KEY"
 )
 
+ADMIN_DISCORD_IDS = {
+    str(admin_id).strip()
+    for admin_id in os.getenv(
+        "ADMIN_DISCORD_IDS",
+        ""
+    ).split(",")
+    if admin_id.strip()
+}
+
 try:
     PORT = int(
         os.getenv(
