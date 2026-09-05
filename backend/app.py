@@ -4,8 +4,6 @@ import secrets
 import sqlite3
 import time
 import json
-import hashlib
-import hmac
 
 from decimal import Decimal, InvalidOperation
 from datetime import datetime, timedelta, timezone
@@ -2505,60 +2503,6 @@ def verification_legacy_url(guild_id):
     )
 
 
-CAPTCHA_TTL = 300
-
-
-def create_verification_captcha():
-
-    first = random.randint(2, 20)
-    second = random.randint(2, 20)
-    operation = random.choice(("+", "-"))
-
-    if operation == "-" and second > first:
-
-        first, second = second, first
-
-    answer = (
-        first + second
-        if operation == "+"
-        else first - second
-    )
-
-    token = secrets.token_urlsafe(24)
-
-    session["verification_captcha"] = {
-        "token": token,
-        "answer": hashlib.sha256(
-            str(answer).encode("utf-8")
-        ).hexdigest(),
-        "expires_at": time.time() + CAPTCHA_TTL
-    }
-
-    return token, f"{first} {operation} {second} = ?"
-
-
-def verification_captcha_is_valid(token, answer):
-
-    captcha = session.get("verification_captcha")
-
-    if not captcha or not token or token != captcha.get("token"):
-
-        return False
-
-    if time.time() > captcha.get("expires_at", 0):
-
-        return False
-
-    answer_hash = hashlib.sha256(
-        str(answer).strip().encode("utf-8")
-    ).hexdigest()
-
-    return hmac.compare_digest(
-        answer_hash,
-        captcha.get("answer", "")
-    )
-
-
 @app.route(
     "/verify",
     methods=["GET"]
@@ -2631,8 +2575,6 @@ def verification():
             user
         )
 
-    captcha_token, captcha_question = create_verification_captcha()
-
     return render_template(
         "verification.html",
         user=user,
@@ -2643,9 +2585,6 @@ def verification():
         ),
         guild_name=guild.get("name") or "Discord Server",
         guild_id=str(guild_id_int),
-        captcha_token=captcha_token,
-        captcha_question=captcha_question,
-        captcha_error=None,
         is_admin=is_admin
     )
 
@@ -2703,42 +2642,6 @@ def submit_verification():
             400,
             user
         )
-
-    captcha_token = request.form.get(
-        "captcha_token",
-        ""
-    ).strip()
-
-    captcha_answer = request.form.get(
-        "captcha_answer",
-        ""
-    ).strip()
-
-    if not verification_captcha_is_valid(
-        captcha_token,
-        captcha_answer
-    ):
-
-        captcha_token, captcha_question = create_verification_captcha()
-
-        return render_template(
-            "verification.html",
-            user=user,
-            username=(
-                user.get("global_name")
-                or user.get("username")
-                or "Discord User"
-            ),
-            guild_name=guild.get("name") or "Discord Server",
-            guild_id=str(guild_id_int),
-            captcha_token=captcha_token,
-            captcha_question=captcha_question,
-            captcha_error="A resposta do CAPTCHA está incorreta ou expirou.",
-            verification_submitted=False,
-            is_admin=is_admin
-        )
-
-    session.pop("verification_captcha", None)
 
     try:
 
@@ -2808,8 +2711,6 @@ def submit_verification():
         ),
         guild_name=guild.get("name") or "Discord Server",
         guild_id=str(guild_id_int),
-        captcha_token=None,
-        captcha_question=None,
         verification_submitted=True,
         is_admin=is_admin
     )
@@ -3915,36 +3816,6 @@ def reviews():
 # STATISTICS PAGE
 # =========================================================
 
-def get_human_server_members(servers):
-
-    total_members = 0
-
-    if not isinstance(servers, list):
-
-        return total_members
-
-    for server in servers:
-
-        if not isinstance(server, dict):
-
-            continue
-
-        try:
-
-            total_members += max(
-                0,
-                int(server.get("members") or 0)
-            )
-
-        except (
-            TypeError,
-            ValueError
-        ):
-
-            continue
-
-    return total_members
-
 @app.route("/statistics")
 def statistics():
 
@@ -4020,11 +3891,6 @@ def statistics():
                     bot_snapshot[key]
                 )
 
-        statistics_data["updated_at"] = bot_snapshot.get(
-            "updated_at",
-            bot_snapshot.get("last_seen")
-        )
-
 
     except (
         OSError,
@@ -4034,17 +3900,6 @@ def statistics():
     ):
 
         pass
-
-    server_list = bot_snapshot.get(
-        "admin_servers",
-        []
-    )
-
-    if isinstance(server_list, list) and server_list:
-
-        statistics_data["users"] = get_human_server_members(
-            server_list
-        )
 
 
     # =====================================================
@@ -4247,45 +4102,6 @@ def statistics():
 
 
     # =====================================================
-    # ANNOUNCEMENTS DATABASE
-    # =====================================================
-
-    announcements = 0
-
-
-    try:
-
-        with database_connection() as connection:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    """
-                    SELECT COUNT(*)
-                    FROM announcements
-                    """
-                )
-
-                result = cursor.fetchone()
-
-
-                announcements = int(
-                    result[0] or 0
-                )
-
-
-    except (
-        OSError,
-        psycopg2.Error,
-        TypeError,
-        ValueError,
-        RuntimeError
-    ):
-
-        announcements = 0
-
-
-    # =====================================================
     # ADMIN SERVER INFORMATION
     # =====================================================
 
@@ -4324,7 +4140,7 @@ def statistics():
 
         "moderation": moderation_actions,
 
-        "announcements": announcements,
+        "announcements": 0,
     }
 
 
@@ -4435,8 +4251,7 @@ def statistics_api():
                         uptime,
                         version,
                         last_seen,
-                        admin_servers,
-                        updated_at
+                        admin_servers
                     FROM bot_statistics
                     WHERE id = 1
                     """
@@ -4468,9 +4283,8 @@ def statistics_api():
                         "last_seen": result[8],
 
                         "admin_servers": result[9] or [],
-
-                        "updated_at": result[10],
                     }
+
 
     except (
         OSError,
@@ -4482,18 +4296,6 @@ def statistics_api():
 
         print(
             f"❌ Statistics API database error: {error}"
-        )
-
-
-    server_list = bot_snapshot.get(
-        "admin_servers",
-        []
-    )
-
-    if isinstance(server_list, list) and server_list:
-
-        bot_snapshot["users"] = get_human_server_members(
-            server_list
         )
 
 
@@ -4764,15 +4566,6 @@ def statistics_api():
         "version": statistics_data[
             "version"
         ],
-
-        "updated_at": statistics_data.get(
-            "updated_at"
-        ),
-
-        "admin_servers": bot_snapshot.get(
-            "admin_servers",
-            []
-        ),
 
         "last_seen": statistics_data[
             "last_seen"
