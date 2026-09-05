@@ -1,3 +1,4 @@
+
 import asyncio
 import io
 import os
@@ -9,7 +10,71 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from cogs.activity_statistics import increment_activity_stat
+import psycopg2
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+
+# =========================================================
+# ACTIVITY STATISTICS
+# =========================================================
+
+def increment_activity_stat(stat_name):
+
+    if stat_name != "tickets":
+        return
+
+    if not DATABASE_URL:
+
+        print(
+            "❌ DATABASE_URL não está configurada."
+        )
+
+        return
+
+    connection = None
+
+    try:
+
+        connection = psycopg2.connect(
+            DATABASE_URL,
+            sslmode="require"
+        )
+
+        cursor = connection.cursor()
+
+        cursor.execute(
+            """
+            UPDATE bot_statistics
+            SET tickets = tickets + 1,
+                updated_at = EXTRACT(EPOCH FROM NOW())
+            WHERE id = 1
+            """
+        )
+
+        connection.commit()
+
+        cursor.close()
+
+    except Exception as error:
+
+        if connection:
+
+            connection.rollback()
+
+        print(
+            f"❌ Ticket statistics update error: {error}"
+        )
+
+    finally:
+
+        if connection:
+
+            connection.close()
 
 
 # =========================================================
@@ -1001,6 +1066,7 @@ class CreateTicket(
                 )
 
             except Exception:
+
                 pass
 
             await interaction.response.send_message(
@@ -1022,6 +1088,7 @@ class CreateTicket(
                 )
 
             except Exception:
+
                 pass
 
             print(
@@ -1596,7 +1663,7 @@ async def setup(
     # PERSISTENT VIEWS
     # -----------------------------------------------------
     # Isto permite que os botões continuem a funcionar
-    # depois de o bot reiniciar.
+    # depois do bot reiniciar.
 
     bot.add_view(
         TicketPanel()
@@ -1617,3 +1684,4 @@ async def setup(
     print(
         "🎫 Tickets cog loaded."
     )
+
