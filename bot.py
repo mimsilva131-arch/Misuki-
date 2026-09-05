@@ -88,14 +88,13 @@ def count_commands(commands_list):
 
 def is_human_member(member):
 
-    username = str(
-        getattr(member, "name", "")
-        or ""
-    )
+    if getattr(member, "bot", False):
+        return False
+
+    username = str(member)
 
     return (
-        not member.bot
-        and not re.search(
+        not re.search(
             r"#\d{4}$",
             username
         )
@@ -103,7 +102,7 @@ def is_human_member(member):
 
 def count_statistics_users():
 
-    total_users = 0
+    user_ids = set()
 
     for guild in bot.guilds:
 
@@ -119,9 +118,16 @@ def count_statistics_users():
             if not is_human_member(member):
                 continue
 
-            total_users += 1
+            user_id = getattr(
+                member,
+                "id",
+                None
+            )
 
-    return total_users
+            if user_id is not None:
+                user_ids.add(user_id)
+
+    return len(user_ids)
 
 
 # =========================================================
@@ -554,10 +560,7 @@ async def update_stats_snapshot():
         # USERS
         # -------------------------------------------------
 
-        users_count = sum(
-            server["members"]
-            for server in detected_servers
-        )
+        users_count = count_statistics_users()
 
 
         # -------------------------------------------------
