@@ -3882,7 +3882,6 @@ def statistics():
             "commands",
             "bot_status",
             "uptime",
-            "version",
         ):
 
             if key in bot_snapshot:
@@ -3890,6 +3889,11 @@ def statistics():
                 statistics_data[key] = (
                     bot_snapshot[key]
                 )
+
+        statistics_data["version"] = os.getenv(
+            "MISUKI_VERSION",
+            "1.0.0"
+        )
 
 
     except (
@@ -4092,16 +4096,6 @@ def statistics():
 
 
     # =====================================================
-    # VERIFICATIONS
-    # =====================================================
-    # Ainda não existe sistema de verification.
-
-    statistics_data[
-        "verifications"
-    ] = 0
-
-
-    # =====================================================
     # ADMIN SERVER INFORMATION
     # =====================================================
 
@@ -4247,6 +4241,7 @@ def statistics_api():
                         channels,
                         latency,
                         commands,
+                        verifications,
                         bot_status,
                         uptime,
                         version,
@@ -4274,15 +4269,17 @@ def statistics_api():
 
                         "commands": result[4],
 
-                        "bot_status": result[5],
+                        "verifications": result[5],
 
-                        "uptime": result[6],
+                        "bot_status": result[6],
 
-                        "version": result[7],
+                        "uptime": result[7],
 
-                        "last_seen": result[8],
+                        "version": result[8],
 
-                        "admin_servers": result[9] or [],
+                        "last_seen": result[9],
+
+                        "admin_servers": result[10] or [],
                     }
 
 
@@ -4309,8 +4306,8 @@ def statistics_api():
         "channels",
         "latency",
         "commands",
+        "verifications",
         "uptime",
-        "version",
         "last_seen",
     ):
 
@@ -4319,6 +4316,11 @@ def statistics_api():
             statistics_data[key] = (
                 bot_snapshot[key]
             )
+
+    statistics_data["version"] = os.getenv(
+        "MISUKI_VERSION",
+        "1.0.0"
+    )
 
 
     # =====================================================
