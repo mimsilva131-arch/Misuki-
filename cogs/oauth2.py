@@ -1,10 +1,10 @@
-
 import os
 import random
 import secrets
 import time
 import hashlib
 import hmac
+import json
 
 from contextlib import contextmanager
 from concurrent.futures import ThreadPoolExecutor
@@ -22,7 +22,8 @@ from flask import (
     session,
     request,
     render_template,
-    send_from_directory
+    send_from_directory,
+    jsonify
 )
 
 from dotenv import load_dotenv
@@ -570,6 +571,124 @@ def create_database():
                         guild_id,
                         user_id
                     )
+                    """
+                )
+
+                # -------------------------------------------------
+                # BOT STATISTICS
+                # -------------------------------------------------
+
+                cursor.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS bot_statistics (
+
+                        id INTEGER PRIMARY KEY,
+
+                        servers INTEGER NOT NULL
+                            DEFAULT 0,
+
+                        users INTEGER NOT NULL
+                            DEFAULT 0,
+
+                        channels INTEGER NOT NULL
+                            DEFAULT 0,
+
+                        latency INTEGER NOT NULL
+                            DEFAULT 0,
+
+                        commands INTEGER NOT NULL
+                            DEFAULT 0,
+
+                        verifications INTEGER NOT NULL
+                            DEFAULT 0,
+
+                        bot_status TEXT NOT NULL
+                            DEFAULT 'Offline',
+
+                        uptime TEXT NOT NULL
+                            DEFAULT '0s',
+
+                        version TEXT NOT NULL
+                            DEFAULT '1.0.0',
+
+                        last_seen DOUBLE PRECISION,
+
+                        admin_servers JSONB NOT NULL
+                            DEFAULT '[]'::jsonb,
+
+                        updated_at DOUBLE PRECISION NOT NULL
+                            DEFAULT 0
+                    )
+                    """
+                )
+
+                cursor.execute(
+                    """
+                    ALTER TABLE bot_statistics
+                    ADD COLUMN IF NOT EXISTS verifications INTEGER
+                    NOT NULL DEFAULT 0
+                    """
+                )
+
+                cursor.execute(
+                    """
+                    ALTER TABLE bot_statistics
+                    ADD COLUMN IF NOT EXISTS last_seen DOUBLE PRECISION
+                    """
+                )
+
+                cursor.execute(
+                    """
+                    ALTER TABLE bot_statistics
+                    ADD COLUMN IF NOT EXISTS admin_servers JSONB
+                    NOT NULL DEFAULT '[]'::jsonb
+                    """
+                )
+
+                cursor.execute(
+                    """
+                    ALTER TABLE bot_statistics
+                    ADD COLUMN IF NOT EXISTS updated_at DOUBLE PRECISION
+                    NOT NULL DEFAULT 0
+                    """
+                )
+
+                cursor.execute(
+                    """
+                    INSERT INTO bot_statistics (
+                        id,
+                        servers,
+                        users,
+                        channels,
+                        latency,
+                        commands,
+                        verifications,
+                        bot_status,
+                        uptime,
+                        version,
+                        last_seen,
+                        admin_servers,
+                        updated_at
+                    )
+
+                    VALUES (
+                        1,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        'Offline',
+                        '0s',
+                        '1.0.0',
+                        NULL,
+                        '[]'::jsonb,
+                        0
+                    )
+
+                    ON CONFLICT (id)
+                    DO NOTHING
                     """
                 )
 
@@ -1851,7 +1970,6 @@ def validate_captcha(
 
         return False, "database"
 
-
     try:
 
         with database_connection() as connection:
@@ -2160,6 +2278,595 @@ def mark_verification_unverified(
         )
 
         return False
+
+
+# =========================================================
+# STATISTICS
+# =========================================================
+
+STATISTICS_OFFLINE_TIMEOUT = 30
+
+
+def _safe_json_list(value):
+
+    if value is None:
+
+        return []
+
+    if isinstance(value, list):
+
+        return value
+
+    if isinstance(value, tuple):
+
+        return list(value)
+
+    if isinstance(value, str):
+
+        try:
+
+            decoded = json.loads(
+                value
+            )
+
+            if isinstance(
+                decoded,
+                list
+            ):
+
+                return decoded
+
+        except (
+            ValueError,
+            TypeError
+        ):
+
+            pass
+
+    return []
+
+
+def get_verified_users_count():
+
+    if not DATABASE_URL or not db_pool:
+
+        return 0
+
+    try:
+
+        with database_connection() as connection:
+
+            with connection.cursor() as cursor:
+
+                cursor.execute(
+                    """
+                    SELECT COUNT(*)
+                    FROM verification_requests
+                    WHERE status = 'verified'
+                    """
+                )
+
+                result = cursor.fetchone()
+
+        if not result:
+
+            return 0
+
+        return int(
+            result[0] or 0
+        )
+
+    except Exception as error:
+
+        print(
+            f"❌ Verification statistics error: {error}"
+        )
+
+        return 0
+
+
+def get_statistics_data(user=None):
+
+    default_statistics = {
+
+        "servers": 0,
+
+        "users": 0,
+
+        "channels": 0,
+
+        "commands": 0,
+
+        "tickets": 0,
+
+        "verifications": 0,
+
+        "bot_status": "Offline",
+
+        "website_status": "Operational",
+
+        "database_status": (
+            "Operational"
+            if db_pool
+            else "Error"
+        ),
+
+        "api_status": "Operational",
+
+        "latency": 0,
+
+        "uptime": "0s",
+
+        "version": os.getenv(
+            "MISUKI_VERSION",
+            "1.0.0"
+        ),
+
+        "admin_servers": [],
+
+        "admin_users": [],
+
+        "admin_statistics": {
+
+            "commands": 0,
+
+            "tickets": 0,
+
+            "moderation": 0,
+
+            "announcements": 0
+
+        }
+
+    }
+
+    if not DATABASE_URL or not db_pool:
+
+        return default_statistics
+
+    try:
+
+        with database_connection() as connection:
+
+            with connection.cursor(
+                cursor_factory=psycopg2.extras.RealDictCursor
+            ) as cursor:
+
+                cursor.execute(
+                    """
+                    SELECT
+                        servers,
+                        users,
+                        channels,
+                        latency,
+                        commands,
+                        verifications,
+                        bot_status,
+                        uptime,
+                        version,
+                        last_seen,
+                        admin_servers,
+                        updated_at
+                    FROM bot_statistics
+                    WHERE id = 1
+                    LIMIT 1
+                    """
+                )
+
+                row = cursor.fetchone()
+
+    except Exception as error:
+
+        print(
+            f"❌ Statistics database error: {error}"
+        )
+
+        return default_statistics
+
+    if not row:
+
+        return default_statistics
+
+    try:
+
+        servers = int(
+            row.get("servers") or 0
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        servers = 0
+
+    try:
+
+        users = int(
+            row.get("users") or 0
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        users = 0
+
+    try:
+
+        channels = int(
+            row.get("channels") or 0
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        channels = 0
+
+    try:
+
+        latency = int(
+            row.get("latency") or 0
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        latency = 0
+
+    try:
+
+        commands = int(
+            row.get("commands") or 0
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        commands = 0
+
+    # ---------------------------------------------------------
+    # VERIFICATIONS
+    # ---------------------------------------------------------
+    #
+    # The verification_requests table is the source of truth
+    # for completed verifications. The bot also stores this
+    # value in bot_statistics, but reading the database directly
+    # here keeps the website accurate if the snapshot is stale.
+    # ---------------------------------------------------------
+
+    verifications = get_verified_users_count()
+
+    if verifications == 0:
+
+        try:
+
+            snapshot_verifications = int(
+                row.get("verifications") or 0
+            )
+
+            if snapshot_verifications > 0:
+
+                verifications = snapshot_verifications
+
+        except (
+            TypeError,
+            ValueError
+        ):
+
+            pass
+
+    # ---------------------------------------------------------
+    # BOT STATUS
+    # ---------------------------------------------------------
+
+    last_seen = row.get(
+        "last_seen"
+    )
+
+    bot_status = str(
+        row.get(
+            "bot_status"
+        )
+        or
+        "Offline"
+    )
+
+    try:
+
+        if last_seen is None:
+
+            bot_status = "Offline"
+
+        else:
+
+            seconds_since_heartbeat = (
+                time.time()
+                -
+                float(last_seen)
+            )
+
+            if seconds_since_heartbeat > STATISTICS_OFFLINE_TIMEOUT:
+
+                bot_status = "Offline"
+
+            else:
+
+                bot_status = "Online"
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        bot_status = "Offline"
+
+    # ---------------------------------------------------------
+    # VERSION
+    # ---------------------------------------------------------
+
+    version = str(
+        row.get(
+            "version"
+        )
+        or
+        os.getenv(
+            "MISUKI_VERSION",
+            "1.0.0"
+        )
+    )
+
+    # ---------------------------------------------------------
+    # UPTIME
+    # ---------------------------------------------------------
+
+    uptime = str(
+        row.get(
+            "uptime"
+        )
+        or
+        "0s"
+    )
+
+    # ---------------------------------------------------------
+    # ADMIN SERVERS
+    # ---------------------------------------------------------
+
+    admin_servers = _safe_json_list(
+        row.get(
+            "admin_servers"
+        )
+    )
+
+    cleaned_admin_servers = []
+
+    for guild in admin_servers:
+
+        if not isinstance(
+            guild,
+            dict
+        ):
+
+            continue
+
+        cleaned_admin_servers.append({
+
+            "name":
+                str(
+                    guild.get(
+                        "name",
+                        "Unknown Server"
+                    )
+                ),
+
+            "id":
+                str(
+                    guild.get(
+                        "id",
+                        ""
+                    )
+                ),
+
+            "icon":
+                guild.get(
+                    "icon"
+                ),
+
+            "members":
+                int(
+                    guild.get(
+                        "members",
+                        0
+                    )
+                    or
+                    0
+                )
+
+        })
+
+    # ---------------------------------------------------------
+    # ADMIN USER DATA
+    # ---------------------------------------------------------
+    #
+    # No separate admin-user activity tracker exists yet.
+    # Therefore we do not fabricate user statistics.
+    # ---------------------------------------------------------
+
+    admin_users = []
+
+    admin_statistics = {
+
+        "commands":
+            0,
+
+        "tickets":
+            0,
+
+        "moderation":
+            0,
+
+        "announcements":
+            0
+
+    }
+
+    return {
+
+        "servers":
+            servers,
+
+        "users":
+            users,
+
+        "channels":
+            channels,
+
+        "commands":
+            commands,
+
+        "tickets":
+            0,
+
+        "verifications":
+            verifications,
+
+        "bot_status":
+            bot_status,
+
+        "website_status":
+            "Operational",
+
+        "database_status":
+            "Operational",
+
+        "api_status":
+            "Operational",
+
+        "latency":
+            latency,
+
+        "uptime":
+            uptime,
+
+        "version":
+            version,
+
+        "admin_servers":
+            cleaned_admin_servers,
+
+        "admin_users":
+            admin_users,
+
+        "admin_statistics":
+            admin_statistics
+
+    }
+
+
+# =========================================================
+# STATISTICS PAGE
+# =========================================================
+
+@app.route(
+    "/statistics",
+    methods=["GET"]
+)
+def statistics():
+
+    user = get_user()
+
+    if not user:
+
+        session[
+            "next_url"
+        ] = "/statistics"
+
+        return redirect(
+            "/login"
+        )
+
+    statistics_data = get_statistics_data(
+        user
+    )
+
+    return render_template(
+        "statistics.html",
+        user=user,
+        statistics=statistics_data,
+        admin_servers=statistics_data[
+            "admin_servers"
+        ],
+        admin_users=statistics_data[
+            "admin_users"
+        ],
+        admin_statistics=statistics_data[
+            "admin_statistics"
+        ],
+        is_misuki_admin=is_admin(
+            user
+        )
+    )
+
+
+# =========================================================
+# STATISTICS API
+# =========================================================
+
+@app.route(
+    "/api/statistics",
+    methods=["GET"]
+)
+def statistics_api():
+
+    user = get_user()
+
+    if not user:
+
+        response = jsonify({
+            "error":
+                "Authentication required"
+        })
+
+        response.status_code = 401
+
+        response.headers[
+            "Cache-Control"
+        ] = "no-store, no-cache, must-revalidate, max-age=0"
+
+        response.headers[
+            "Pragma"
+        ] = "no-cache"
+
+        return response
+
+    statistics_data = get_statistics_data(
+        user
+    )
+
+    response = jsonify(
+        statistics_data
+    )
+
+    response.headers[
+        "Cache-Control"
+    ] = "no-store, no-cache, must-revalidate, max-age=0"
+
+    response.headers[
+        "Pragma"
+    ] = "no-cache"
+
+    response.headers[
+        "Expires"
+    ] = "0"
+
+    return response
 
 
 # =========================================================
@@ -3903,4 +4610,3 @@ if __name__ == "__main__":
         debug=False
 
     )
-

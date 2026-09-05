@@ -12,7 +12,6 @@ import discord
 import psycopg2
 
 from discord.ext import commands
-
 from dotenv import load_dotenv
 
 
@@ -21,7 +20,6 @@ from dotenv import load_dotenv
 # =========================================================
 
 load_dotenv()
-
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL"
@@ -79,6 +77,78 @@ def count_commands(commands_list):
             total += 1
 
     return total
+
+
+# =========================================================
+# USER COUNT
+# =========================================================
+
+def count_statistics_users():
+
+    total_users = 0
+
+    for guild in bot.guilds:
+
+        for member in guild.members:
+
+            # Discord identifica diretamente se a conta
+            # pertence a um bot.
+            #
+            # Não usamos o formato "Nome#1234" porque esse
+            # formato não é uma forma segura de determinar
+            # se uma conta é um bot.
+
+            if member.bot:
+                continue
+
+            total_users += 1
+
+    return total_users
+
+
+# =========================================================
+# VERIFICATION COUNT
+# =========================================================
+
+def count_verified_users():
+
+    connection = None
+
+    try:
+
+        connection = get_database_connection()
+
+        with connection.cursor() as cursor:
+
+            cursor.execute(
+                """
+                SELECT COUNT(*)
+                FROM verification_requests
+                WHERE status = 'verified'
+                """
+            )
+
+            result = cursor.fetchone()
+
+            if not result:
+                return 0
+
+            return int(
+                result[0] or 0
+            )
+
+    except Exception as error:
+
+        print(
+            f"⚠️ Could not read verification statistics: {error}"
+        )
+
+        return 0
+
+    finally:
+
+        if connection:
+            connection.close()
 
 
 # =========================================================
@@ -189,6 +259,8 @@ def initialize_statistics_database():
 
                     commands INTEGER NOT NULL DEFAULT 0,
 
+                    verifications INTEGER NOT NULL DEFAULT 0,
+
                     bot_status TEXT NOT NULL DEFAULT 'Offline',
 
                     uptime TEXT NOT NULL DEFAULT '0s',
@@ -200,29 +272,51 @@ def initialize_statistics_database():
                     admin_servers JSONB NOT NULL DEFAULT '[]'::jsonb,
 
                     updated_at DOUBLE PRECISION NOT NULL
+
                 )
                 """
             )
 
+            # -------------------------------------------------
+            # DATABASE MIGRATION
+            # -------------------------------------------------
+
+            cursor.execute(
+                """
+                ALTER TABLE bot_statistics
+                ADD COLUMN IF NOT EXISTS
+                verifications INTEGER NOT NULL DEFAULT 0
+                """
+            )
+
+            # -------------------------------------------------
+            # DEFAULT ROW
+            # -------------------------------------------------
+
             cursor.execute(
                 """
                 INSERT INTO bot_statistics (
+
                     id,
                     servers,
                     users,
                     channels,
                     latency,
                     commands,
+                    verifications,
                     bot_status,
                     uptime,
                     version,
                     last_seen,
                     admin_servers,
                     updated_at
+
                 )
 
                 VALUES (
+
                     1,
+                    0,
                     0,
                     0,
                     0,
@@ -234,16 +328,19 @@ def initialize_statistics_database():
                     NULL,
                     '[]'::jsonb,
                     %s
+
                 )
 
                 ON CONFLICT (id)
                 DO NOTHING
                 """,
+
                 (
                     os.getenv(
                         "MISUKI_VERSION",
                         "1.0.0"
                     ),
+
                     time.time()
                 )
             )
@@ -257,7 +354,6 @@ def initialize_statistics_database():
     except Exception as error:
 
         if connection:
-
             connection.rollback()
 
         print(
@@ -269,7 +365,6 @@ def initialize_statistics_database():
     finally:
 
         if connection:
-
             connection.close()
 
 
@@ -290,6 +385,20 @@ async def update_stats_snapshot():
         commands_count = count_commands(
             bot.tree.get_commands()
         )
+
+
+        # -------------------------------------------------
+        # USERS
+        # -------------------------------------------------
+
+        users_count = count_statistics_users()
+
+
+        # -------------------------------------------------
+        # VERIFICATIONS
+        # -------------------------------------------------
+
+        verifications_count = count_verified_users()
 
 
         # -------------------------------------------------
@@ -329,6 +438,7 @@ async def update_stats_snapshot():
                     guild.member_count
                     or 0
                 ),
+
             })
 
 
@@ -348,9 +458,13 @@ async def update_stats_snapshot():
         )
 
         bot_status = (
+
             "Online"
+
             if bot.is_ready()
+
             else "Offline"
+
         )
 
         uptime = get_uptime()
@@ -374,29 +488,41 @@ async def update_stats_snapshot():
                 UPDATE bot_statistics
 
                 SET
+
                     servers = %s,
+
                     users = %s,
+
                     channels = %s,
+
                     latency = %s,
+
                     commands = %s,
+
+                    verifications = %s,
+
                     bot_status = %s,
+
                     uptime = %s,
+
                     version = %s,
+
                     last_seen = %s,
+
                     admin_servers = %s::jsonb,
+
                     updated_at = %s
 
                 WHERE id = 1
                 """,
+
                 (
+
                     len(
                         bot.guilds
                     ),
 
-                    sum(
-                        guild.member_count or 0
-                        for guild in bot.guilds
-                    ),
+                    users_count,
 
                     sum(
                         len(guild.channels)
@@ -406,6 +532,8 @@ async def update_stats_snapshot():
                     latency,
 
                     commands_count,
+
+                    verifications_count,
 
                     bot_status,
 
@@ -421,6 +549,7 @@ async def update_stats_snapshot():
                     ),
 
                     time.time()
+
                 )
             )
 
@@ -440,11 +569,16 @@ async def update_stats_snapshot():
         )
 
         print(
-            f"   Users: {sum(guild.member_count or 0 for guild in bot.guilds)}"
+            f"   Users: {users_count}"
         )
 
         print(
-            f"   Channels: {sum(len(guild.channels) for guild in bot.guilds)}"
+            f"   Verifications: {verifications_count}"
+        )
+
+        print(
+            f"   Channels: "
+            f"{sum(len(guild.channels) for guild in bot.guilds)}"
         )
 
         print(
@@ -478,7 +612,6 @@ async def update_stats_snapshot():
     finally:
 
         if connection:
-
             connection.close()
 
 
@@ -523,6 +656,7 @@ async def on_ready():
         activity=discord.Game(
             name="Misuki Server"
         )
+
     )
 
 
@@ -620,12 +754,17 @@ async def on_ready():
         # =================================================
 
         if (
+
             statistics_task is None
+
             or statistics_task.done()
+
         ):
 
             statistics_task = asyncio.create_task(
+
                 statistics_loop()
+
             )
 
 
@@ -643,12 +782,17 @@ async def on_ready():
 
 
         if (
+
             statistics_task is None
+
             or statistics_task.done()
+
         ):
 
             statistics_task = asyncio.create_task(
+
                 statistics_loop()
+
             )
 
 
@@ -681,6 +825,7 @@ async def load_extensions():
         "cogs.triggers",
 
         "cogs.impersonate",
+
     ]
 
 
