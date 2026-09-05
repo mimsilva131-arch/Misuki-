@@ -426,7 +426,7 @@ def get_detected_servers():
 
             "icon": icon,
 
-            ""members": sum(1 for member in guild.members if not member.bot)
+            "members": sum(1 for member in guild.members if not member.bot)
 
         })
 
