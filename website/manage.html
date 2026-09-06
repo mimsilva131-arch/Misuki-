@@ -28,38 +28,6 @@ Misuki
                 </div>
             </div>
 
-            <!-- =================================================
-                 LICENSE - TEMPORARILY HIDDEN
-                 The license system/backend is intentionally kept.
-            ================================================== -->
-            <div class="manage-license" style="display:none !important;">
-                {% if license_data %}
-                    {% set status = license_data[2] %}
-                    <p>
-                        <span data-i18n="license.status">Status</span>:
-                        {% if license_active %}
-                            <span class="status-active" data-i18n="license.active">🟢 Active</span>
-                        {% elif status == "expired" %}
-                            <span class="status-expired" data-i18n="license.expired">🔴 Expired</span>
-                        {% elif status == "revoked" %}
-                            <span class="status-revoked" data-i18n="license.revoked">⛔ Revoked</span>
-                        {% else %}
-                            <span>⚪ {{ status }}</span>
-                        {% endif %}
-                    </p>
-                    <p><strong data-i18n="license.key">License Key</strong></p>
-                    <div class="license-key">{{ license_data[1] }}</div>
-                    <p class="manage-expiration"><strong data-i18n="license.expires">Expires</strong></p>
-                    {% if license_data[3] %}
-                        <p>{{ license_data[3] }}</p>
-                    {% else %}
-                        <p data-i18n="license.never">Never</p>
-                    {% endif %}
-                {% else %}
-                    <div class="empty" data-i18n="license.missing">🔒 This server does not have a Misuki license.</div>
-                {% endif %}
-            </div>
-
         </div>
     </div>
 </section>
