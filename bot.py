@@ -39,13 +39,12 @@ def count_commands(commands_list):
 
 
 def is_human_member(member):
-    if getattr(member, "bot", False):
-        return False
-    username = str(member)
-    return not re.search(r"#\d{4}$", username)
+    """Return True only for real Discord users, never bots."""
+    return not bool(getattr(member, "bot", False))
 
 
 def count_statistics_users():
+    """Count unique human users across all guilds, excluding every bot."""
     user_ids = set()
     for guild in bot.guilds:
         for member in guild.members:
@@ -264,7 +263,7 @@ async def on_guild_join(guild):
     print("➕ Bot joined a new server:")
     print(f"   Name: {guild.name}")
     print(f"   ID: {guild.id}")
-    print(f"   Members: {sum(1 for member in guild.members if not member.bot)}")
+    print(f"   Members: {sum(1 for member in guild.members if is_human_member(member))}")
     await update_stats_snapshot()
 
 
