@@ -43,16 +43,27 @@ def is_human_member(member):
     return not bool(getattr(member, "bot", False))
 
 
-def count_statistics_users():
+async def count_statistics_users():
     """Count unique human users across all guilds, excluding every bot."""
     user_ids = set()
+
     for guild in bot.guilds:
+        try:
+            if guild.chunked is False:
+                await guild.chunk(cache=True)
+        except Exception as error:
+            print(
+                f"⚠️ Could not refresh members for {guild.name} ({guild.id}): {error}"
+            )
+
         for member in guild.members:
             if not is_human_member(member):
                 continue
+
             user_id = getattr(member, "id", None)
             if user_id is not None:
                 user_ids.add(user_id)
+
     return len(user_ids)
 
 
@@ -197,7 +208,7 @@ async def update_stats_snapshot():
         detected_servers = get_detected_servers()
         servers_count = len(detected_servers)
         commands_count = count_commands(bot.tree.get_commands())
-        users_count = count_statistics_users()
+        users_count = await count_statistics_users()
         verifications_count = count_verified_users()
         last_seen = time.time()
         latency = round(bot.latency * 1000)
