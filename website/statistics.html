@@ -8,276 +8,2392 @@ Misuki — Statistics
 
 <main class="page-container">
 
-    <section class="page-hero">
-        <div class="page-card">
-            <h1 data-i18n="nav.statistics">Statistics</h1>
-            <p data-i18n="statistics.hero_description">
-                Overview of the Misuki service and its current statistics.
-            </p>
-        </div>
-    </section>
+```
+<!-- =====================================================
+     PAGE HEADER
+====================================================== -->
 
-    <section class="section statistics-section">
-        <div class="container">
-            <h2 data-i18n="common.service_overview">Service overview</h2>
-            <p class="statistics-description" data-i18n="statistics.service_description">
-                General statistics about the Misuki service.
-            </p>
+<section class="page-hero">
 
-            <div class="statistics-grid">
-                <div class="statistics-card"><div class="statistics-card-icon">🏠</div><div class="statistics-card-content"><span class="statistics-label" data-i18n="statistics.servers">Servers</span><strong class="statistics-value" id="statistics-servers">{{ statistics.servers if statistics is defined and statistics.servers is defined else "—" }}</strong></div></div>
-                <div class="statistics-card"><div class="statistics-card-icon">👥</div><div class="statistics-card-content"><span class="statistics-label" data-i18n="statistics.users">Users</span><strong class="statistics-value" id="statistics-users">{{ statistics.users if statistics is defined and statistics.users is defined else "—" }}</strong></div></div>
-                <div class="statistics-card"><div class="statistics-card-icon">💬</div><div class="statistics-card-content"><span class="statistics-label" data-i18n="statistics.channels">Channels</span><strong class="statistics-value" id="statistics-channels">{{ statistics.channels if statistics is defined and statistics.channels is defined else "—" }}</strong></div></div>
-                <div class="statistics-card"><div class="statistics-card-icon">⚡</div><div class="statistics-card-content"><span class="statistics-label" data-i18n="statistics.commands_available">Commands available</span><strong class="statistics-value" id="statistics-commands">{{ statistics.commands if statistics is defined and statistics.commands is defined else "—" }}</strong></div></div>
-                <div class="statistics-card"><div class="statistics-card-icon">🎫</div><div class="statistics-card-content"><span class="statistics-label" data-i18n="statistics.tickets_created">Tickets created</span><strong class="statistics-value" id="statistics-tickets">{{ statistics.tickets if statistics is defined and statistics.tickets is defined else "—" }}</strong></div></div>
-                <div class="statistics-card"><div class="statistics-card-icon">✅</div><div class="statistics-card-content"><span class="statistics-label" data-i18n="statistics.verifications">Verifications</span><strong class="statistics-value" id="statistics-verifications">{{ statistics.verifications if statistics is defined and statistics.verifications is defined else "—" }}</strong></div></div>
+    <div class="page-card">
+
+        <h1 data-i18n="nav.statistics">
+            Statistics
+        </h1>
+
+        <p data-i18n="statistics.hero_description">
+            Overview of the Misuki service and its current statistics.
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     SERVICE OVERVIEW
+====================================================== -->
+
+<section class="section statistics-section">
+
+    <div class="container">
+
+        <h2 data-i18n="common.service_overview">
+            Service overview
+        </h2>
+
+        <p
+            class="statistics-description"
+            data-i18n="statistics.service_description"
+        >
+            General statistics about the Misuki service.
+        </p>
+
+
+        <div class="statistics-grid">
+
+            <div class="statistics-card">
+
+                <div class="statistics-card-icon">
+                    🏠
+                </div>
+
+                <div class="statistics-card-content">
+
+                    <span
+                        class="statistics-label"
+                        data-i18n="statistics.servers"
+                    >
+                        Servers
+                    </span>
+
+                    <strong
+                        class="statistics-value"
+                        id="statistics-servers"
+                    >
+                        {{ statistics.servers if statistics is defined and statistics.servers is defined else "—" }}
+                    </strong>
+
+                </div>
+
             </div>
-        </div>
-    </section>
 
-    <section class="section statistics-section">
-        <div class="container">
-            <h2 data-i18n="statistics.system_status">System status</h2>
-            <p class="statistics-description" data-i18n="statistics.system_description">Current status of the Misuki service.</p>
-            <div class="status-grid">
-                <div class="status-card"><div class="status-indicator" id="bot-status-indicator"></div><div><strong data-i18n="statistics.discord_bot">Discord Bot</strong><span id="bot-status" data-i18n-status="bot">{{ statistics.bot_status if statistics is defined and statistics.bot_status is defined else "—" }}</span></div></div>
-                <div class="status-card"><div class="status-indicator operational"></div><div><strong data-i18n="statistics.website">Website</strong><span data-i18n="statistics.operational">Operational</span></div></div>
-                <div class="status-card"><div class="status-indicator" id="database-status-indicator"></div><div><strong data-i18n="statistics.database">Database</strong><span id="database-status" data-i18n-status="database">{{ statistics.database_status if statistics is defined and statistics.database_status is defined else "—" }}</span></div></div>
-                <div class="status-card"><div class="status-indicator" id="api-status-indicator"></div><div><strong data-i18n="statistics.api">API</strong><span id="api-status" data-i18n-status="api">{{ statistics.api_status if statistics is defined and statistics.api_status is defined else "—" }}</span></div></div>
+
+            <div class="statistics-card">
+
+                <div class="statistics-card-icon">
+                    👥
+                </div>
+
+                <div class="statistics-card-content">
+
+                    <span
+                        class="statistics-label"
+                        data-i18n="statistics.users"
+                    >
+                        Users
+                    </span>
+
+                    <strong
+                        class="statistics-value"
+                        id="statistics-users"
+                    >
+                        {{ statistics.users if statistics is defined and statistics.users is defined else "—" }}
+                    </strong>
+
+                </div>
+
             </div>
-        </div>
-    </section>
 
-    <section class="section statistics-section">
-        <div class="container">
-            <h2 data-i18n="common.performance">Performance</h2>
-            <p class="statistics-description" data-i18n="common.performance_description">Current performance information.</p>
-            <div class="performance-grid">
-                <div class="performance-card"><span class="statistics-label" data-i18n="statistics.bot_latency">Bot latency</span><strong class="performance-value" id="statistics-latency">{% if statistics is defined and statistics.latency is not none %}{{ statistics.latency }} <span data-i18n="statistics.milliseconds">ms</span>{% else %}—{% endif %}</strong></div>
-                <div class="performance-card"><span class="statistics-label" data-i18n="statistics.uptime">Uptime</span><strong class="performance-value" id="statistics-uptime">{{ statistics.uptime if statistics is defined and statistics.uptime is not none else "—" }}</strong></div>
-                <div class="performance-card"><span class="statistics-label" data-i18n="statistics.version">Version</span><strong class="performance-value" id="statistics-version">{{ statistics.version if statistics is defined and statistics.version is not none else "—" }}</strong></div>
-                <div class="performance-card"><span class="statistics-label" data-i18n="statistics.last_update">Last update</span><strong class="performance-value" id="statistics-last-update">{% if statistics is defined and statistics.updated_at is not none %}{{ statistics.updated_at if statistics.updated_at else "—" }}{% else %}—{% endif %}</strong></div>
+
+            <div class="statistics-card">
+
+                <div class="statistics-card-icon">
+                    💬
+                </div>
+
+                <div class="statistics-card-content">
+
+                    <span
+                        class="statistics-label"
+                        data-i18n="statistics.channels"
+                    >
+                        Channels
+                    </span>
+
+                    <strong
+                        class="statistics-value"
+                        id="statistics-channels"
+                    >
+                        {{ statistics.channels if statistics is defined and statistics.channels is defined else "—" }}
+                    </strong>
+
+                </div>
+
             </div>
-        </div>
-    </section>
 
-    {% if is_misuki_admin is defined and is_misuki_admin %}
-    <section class="section statistics-section admin-statistics">
-        <div class="container">
-            <div class="admin-section-header">
+
+            <div class="statistics-card">
+
+                <div class="statistics-card-icon">
+                    ⚡
+                </div>
+
+                <div class="statistics-card-content">
+
+                    <span
+                        class="statistics-label"
+                        data-i18n="statistics.commands_available"
+                    >
+                        Commands available
+                    </span>
+
+                    <strong
+                        class="statistics-value"
+                        id="statistics-commands"
+                    >
+                        {{ statistics.commands if statistics is defined and statistics.commands is defined else "—" }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="statistics-card">
+
+                <div class="statistics-card-icon">
+                    🎫
+                </div>
+
+                <div class="statistics-card-content">
+
+                    <span
+                        class="statistics-label"
+                        data-i18n="statistics.tickets_created"
+                    >
+                        Tickets created
+                    </span>
+
+                    <strong
+                        class="statistics-value"
+                        id="statistics-tickets"
+                    >
+                        {{ statistics.tickets if statistics is defined and statistics.tickets is defined else "—" }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="statistics-card">
+
+                <div class="statistics-card-icon">
+                    ✅
+                </div>
+
+                <div class="statistics-card-content">
+
+                    <span
+                        class="statistics-label"
+                        data-i18n="statistics.verifications"
+                    >
+                        Verifications
+                    </span>
+
+                    <strong
+                        class="statistics-value"
+                        id="statistics-verifications"
+                    >
+                        {{ statistics.verifications if statistics is defined and statistics.verifications is defined else "—" }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     SYSTEM STATUS
+====================================================== -->
+
+<section class="section statistics-section">
+
+    <div class="container">
+
+        <h2 data-i18n="statistics.system_status">
+            System status
+        </h2>
+
+        <p
+            class="statistics-description"
+            data-i18n="statistics.system_description"
+        >
+            Current status of the Misuki service.
+        </p>
+
+
+        <div class="status-grid">
+
+            <div class="status-card">
+
+                <div
+                    class="status-indicator"
+                    id="bot-status-indicator"
+                ></div>
+
                 <div>
-                    <h2 data-i18n="statistics.administrator_statistics">🔐 Administrator statistics</h2>
-                    <p class="statistics-description" data-i18n="statistics.admin_description">Detailed information available only to Misuki administrators.</p>
+
+                    <strong data-i18n="statistics.discord_bot">
+                        Discord Bot
+                    </strong>
+
+                    <span
+                        id="bot-status"
+                        data-i18n-status="bot"
+                    >
+                        {{ statistics.bot_status if statistics is defined and statistics.bot_status is defined else "—" }}
+                    </span>
+
                 </div>
-                <span class="admin-badge" data-i18n="statistics.admin">ADMIN</span>
+
             </div>
 
-            <div class="admin-subsection">
-                <h3 data-i18n="statistics.servers">Servers</h3>
-                {% if admin_servers is defined and admin_servers %}
-                <div class="admin-server-list" id="admin-server-list">
-                    {% for server in admin_servers %}
-                    <div class="admin-server-card">
-                        {% if server.icon %}<img src="{{ server.icon }}" alt="" class="admin-server-icon">{% else %}<div class="admin-server-icon-placeholder">🏠</div>{% endif %}
-                        <div class="admin-server-info"><strong>{{ server.name }}</strong>{% if server.id %}<span>ID: {{ server.id }}</span>{% endif %}</div>
-                        {% if server.members is defined %}<div class="admin-server-stat"><span data-i18n="statistics.members">Members</span><strong>{{ server.members }}</strong></div>{% endif %}
-                    </div>
-                    {% endfor %}
+
+            <div class="status-card">
+
+                <div class="status-indicator operational"></div>
+
+                <div>
+
+                    <strong data-i18n="statistics.website">
+                        Website
+                    </strong>
+
+                    <span data-i18n="statistics.operational">
+                        Operational
+                    </span>
+
                 </div>
-                {% else %}
-                <div class="statistics-empty" data-i18n="statistics.no_server_information">No server information available.</div>
-                {% endif %}
+
             </div>
 
-            <div class="admin-subsection">
-                <div class="admin-user-heading">
-                    <div>
-                        <h3 data-i18n="statistics.users">Users</h3>
-                    </div>
-                    <label class="admin-user-search" for="admin-user-search">
-                        <span aria-hidden="true">⌕</span>
-                        <input id="admin-user-search" type="search" autocomplete="off" placeholder="Search name, @username or ID" aria-label="Search users">
-                    </label>
+
+            <div class="status-card">
+
+                <div
+                    class="status-indicator"
+                    id="database-status-indicator"
+                ></div>
+
+                <div>
+
+                    <strong data-i18n="statistics.database">
+                        Database
+                    </strong>
+
+                    <span
+                        id="database-status"
+                        data-i18n-status="database"
+                    >
+                        {{ statistics.database_status if statistics is defined and statistics.database_status is defined else "—" }}
+                    </span>
+
                 </div>
 
-                {% if admin_users is defined and admin_users %}
-                <div class="admin-user-list" id="admin-user-list">
-                    {% for user in admin_users %}
-                    <div class="admin-user-card"
-                         data-user-name="{{ user.name|default('', true)|e }}"
-                         data-user-username="{{ user.username|default('', true)|e }}"
-                         data-user-id="{{ user.id|default('', true)|e }}"
-                         data-user-search="{{ (user.name|default('', true) ~ ' ' ~ user.username|default('', true) ~ ' ' ~ user.id|default('', true))|lower|e }}">
-                        {% if user.avatar %}<img src="{{ user.avatar }}" alt="" class="admin-user-avatar">{% else %}<div class="admin-user-avatar-placeholder">👤</div>{% endif %}
-                        <div class="admin-user-info">
-                            <div class="admin-user-name-row">
-                                <strong class="admin-user-display-name">{{ user.name|default('Discord User', true) }}</strong>
-                                {% if user.added_bot %}<span class="admin-user-bot-badge" title="Added Misuki to a server" aria-label="Added Misuki to a server">🤖</span>{% endif %}
-                            </div>
-                            <span class="admin-user-username">@{{ user.username|default(user.name, true) }}</span>
-                            <span>ID: {{ user.id }}</span>
-                            <span class="admin-user-meta">Status: <b class="admin-user-status">{{ user.status|default('Unknown', true) }}</b> · Account: <b class="admin-user-created">{{ user.created_at|default('—', true) }}</b></span>
-                            {% if user.servers_count is defined %}<span class="admin-user-meta">Servers: {{ user.servers_count }}</span>{% endif %}
+            </div>
+
+
+            <div class="status-card">
+
+                <div
+                    class="status-indicator"
+                    id="api-status-indicator"
+                ></div>
+
+                <div>
+
+                    <strong data-i18n="statistics.api">
+                        API
+                    </strong>
+
+                    <span
+                        id="api-status"
+                        data-i18n-status="api"
+                    >
+                        {{ statistics.api_status if statistics is defined and statistics.api_status is defined else "—" }}
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     PERFORMANCE
+====================================================== -->
+
+<section class="section statistics-section">
+
+    <div class="container">
+
+        <h2 data-i18n="common.performance">
+            Performance
+        </h2>
+
+        <p
+            class="statistics-description"
+            data-i18n="common.performance_description"
+        >
+            Current performance information.
+        </p>
+
+
+        <div class="performance-grid">
+
+            <div class="performance-card">
+
+                <span
+                    class="statistics-label"
+                    data-i18n="statistics.bot_latency"
+                >
+                    Bot latency
+                </span>
+
+                <strong
+                    class="performance-value"
+                    id="statistics-latency"
+                >
+                    {% if statistics is defined and statistics.latency is not none %}
+                        {{ statistics.latency }}
+                        <span data-i18n="statistics.milliseconds">
+                            ms
+                        </span>
+                    {% else %}
+                        —
+                    {% endif %}
+                </strong>
+
+            </div>
+
+
+            <div class="performance-card">
+
+                <span
+                    class="statistics-label"
+                    data-i18n="statistics.uptime"
+                >
+                    Uptime
+                </span>
+
+                <strong
+                    class="performance-value"
+                    id="statistics-uptime"
+                >
+                    {{ statistics.uptime if statistics is defined and statistics.uptime is not none else "—" }}
+                </strong>
+
+            </div>
+
+
+            <div class="performance-card">
+
+                <span
+                    class="statistics-label"
+                    data-i18n="statistics.version"
+                >
+                    Version
+                </span>
+
+                <strong
+                    class="performance-value"
+                    id="statistics-version"
+                >
+                    {{ statistics.version if statistics is defined and statistics.version is not none else "—" }}
+                </strong>
+
+            </div>
+
+
+            <div class="performance-card">
+
+                <span
+                    class="statistics-label"
+                    data-i18n="statistics.last_update"
+                >
+                    Last update
+                </span>
+
+                <strong
+                    class="performance-value"
+                    id="statistics-last-update"
+                >
+                    {% if statistics is defined and statistics.updated_at is not none %}
+                        {{ statistics.updated_at if statistics.updated_at else "—" }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     ADMIN STATISTICS
+====================================================== -->
+
+{% if is_misuki_admin is defined and is_misuki_admin %}
+
+<section class="section statistics-section admin-statistics">
+
+    <div class="container">
+
+        <div class="admin-section-header">
+
+            <div>
+
+                <h2 data-i18n="statistics.administrator_statistics">
+                    🔐 Administrator statistics
+                </h2>
+
+                <p
+                    class="statistics-description"
+                    data-i18n="statistics.admin_description"
+                >
+                    Detailed information available only to Misuki administrators.
+                </p>
+
+            </div>
+
+            <span
+                class="admin-badge"
+                data-i18n="statistics.admin"
+            >
+                ADMIN
+            </span>
+
+        </div>
+
+
+        <!-- =================================================
+             SERVER INFORMATION
+        ================================================== -->
+
+        <div class="admin-subsection">
+
+            <h3 data-i18n="statistics.servers">
+                Servers
+            </h3>
+
+            {% if admin_servers is defined and admin_servers %}
+
+            <div
+                class="admin-server-list"
+                id="admin-server-list"
+            >
+
+                {% for server in admin_servers %}
+
+                <div class="admin-server-card">
+
+                    {% if server.icon %}
+
+                    <img
+                        src="{{ server.icon }}"
+                        alt=""
+                        class="admin-server-icon"
+                    >
+
+                    {% else %}
+
+                    <div class="admin-server-icon-placeholder">
+                        🏠
+                    </div>
+
+                    {% endif %}
+
+                    <div class="admin-server-info">
+
+                        <strong>
+                            {{ server.name }}
+                        </strong>
+
+                        {% if server.id %}
+
+                        <span>
+                            ID: {{ server.id }}
+                        </span>
+
+                        {% endif %}
+
+                    </div>
+
+                    {% if server.members is defined %}
+
+                    <div class="admin-server-stat">
+
+                        <span data-i18n="statistics.members">
+                            Members
+                        </span>
+
+                        <strong>
+                            {{ server.members }}
+                        </strong>
+
+                    </div>
+
+                    {% endif %}
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            {% else %}
+
+            <div
+                class="statistics-empty"
+                data-i18n="statistics.no_server_information"
+            >
+                No server information available.
+            </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- =================================================
+             USER INFORMATION
+        ================================================== -->
+
+        <div class="admin-subsection">
+
+            <div class="admin-user-heading">
+
+                <div>
+
+                    <h3 data-i18n="statistics.users">
+                        Users
+                    </h3>
+
+                </div>
+
+                <label
+                    class="admin-user-search"
+                    for="admin-user-search"
+                >
+
+                    <span aria-hidden="true">
+                        ⌕
+                    </span>
+
+                    <input
+                        id="admin-user-search"
+                        type="search"
+                        autocomplete="off"
+                        placeholder="Search name, @username or ID"
+                        aria-label="Search users"
+                    >
+
+                </label>
+
+            </div>
+
+
+            {% if admin_users is defined and admin_users %}
+
+            <div
+                class="admin-user-list"
+                id="admin-user-list"
+            >
+
+                {% for user in admin_users %}
+
+                <div
+                    class="admin-user-card"
+                    data-user-name="{{ user.name|default('', true)|e }}"
+                    data-user-username="{{ user.username|default('', true)|e }}"
+                    data-user-id="{{ user.id|default('', true)|e }}"
+                    data-user-search="{{ (user.name|default('', true) ~ ' ' ~ user.username|default('', true) ~ ' ' ~ user.id|default('', true))|lower|e }}"
+                >
+
+                    {% if user.avatar %}
+
+                    <img
+                        src="{{ user.avatar }}"
+                        alt=""
+                        class="admin-user-avatar"
+                    >
+
+                    {% else %}
+
+                    <div class="admin-user-avatar-placeholder">
+                        👤
+                    </div>
+
+                    {% endif %}
+
+
+                    <div class="admin-user-info">
+
+                        <div class="admin-user-name-row">
+
+                            <strong class="admin-user-display-name">
+                                {{ user.name|default('Discord User', true) }}
+                            </strong>
+
+                            {% if user.added_bot %}
+
+                            <span
+                                class="admin-user-bot-badge"
+                                title="Added Misuki to a server"
+                                aria-label="Added Misuki to a server"
+                            >
+                                🤖
+                            </span>
+
+                            {% endif %}
+
                         </div>
+
+
+                        <span class="admin-user-username">
+                            @{{ user.username|default(user.name, true) }}
+                        </span>
+
+
+                        <span>
+                            ID: {{ user.id }}
+                        </span>
+
+
+                        <span class="admin-user-meta">
+                            Account:
+                            <b class="admin-user-created">
+                                {{ user.created_at|default('—', true) }}
+                            </b>
+                        </span>
+
+
+                        {% if user.servers_count is defined %}
+
+                        <span class="admin-user-meta">
+                            Servers: {{ user.servers_count }}
+                        </span>
+
+                        {% endif %}
+
                     </div>
-                    {% endfor %}
+
                 </div>
-                <div class="statistics-empty admin-user-no-results" id="admin-user-no-results" hidden>No users match your search.</div>
-                {% else %}
-                <div class="statistics-empty" data-i18n="statistics.no_user_information">No user information available.</div>
-                {% endif %}
+
+                {% endfor %}
+
             </div>
 
-            <div class="admin-subsection">
-                <h3 data-i18n="statistics.activity">Activity</h3>
-                <div class="statistics-grid admin-statistics-grid">
-                    <div class="statistics-card"><div class="statistics-card-icon">⚡</div><div class="statistics-card-content"><span class="statistics-label" data-i18n="statistics.commands">Commands</span><strong class="statistics-value" id="admin-statistics-commands">{{ admin_statistics.commands if admin_statistics is defined and admin_statistics.commands is defined else "—" }}</strong></div></div>
-                    <div class="statistics-card"><div class="statistics-card-icon">🎫</div><div class="statistics-card-content"><span class="statistics-label" data-i18n="statistics.tickets">Tickets</span><strong class="statistics-value" id="admin-statistics-tickets">{{ admin_statistics.tickets if admin_statistics is defined and admin_statistics.tickets is defined else "—" }}</strong></div></div>
-                    <div class="statistics-card"><div class="statistics-card-icon">🛡️</div><div class="statistics-card-content"><span class="statistics-label" data-i18n="statistics.moderation_actions">Moderation actions</span><strong class="statistics-value" id="admin-statistics-moderation">{{ admin_statistics.moderation if admin_statistics is defined and admin_statistics.moderation is defined else "—" }}</strong></div></div>
-                    <div class="statistics-card"><div class="statistics-card-icon">📢</div><div class="statistics-card-content"><span class="statistics-label" data-i18n="statistics.announcements">Announcements</span><strong class="statistics-value" id="admin-statistics-announcements">{{ admin_statistics.announcements if admin_statistics is defined and admin_statistics.announcements is defined else "—" }}</strong></div></div>
-                </div>
+            <div
+                class="statistics-empty admin-user-no-results"
+                id="admin-user-no-results"
+                hidden
+            >
+                No users match your search.
             </div>
-        </div>
-    </section>
-    {% endif %}
 
-    <section class="section statistics-section">
-        <div class="container">
-            <div class="statistics-privacy">
-                <div class="statistics-privacy-icon">🔒</div>
-                <div>
-                    <h3 data-i18n="statistics.privacy">Privacy</h3>
-                    <p data-i18n="statistics.privacy_description">Public statistics are presented in an aggregated form. Specific server and user information is restricted to authorized Misuki administrators.</p>
-                </div>
+            {% else %}
+
+            <div
+                class="statistics-empty"
+                data-i18n="statistics.no_user_information"
+            >
+                No user information available.
             </div>
+
+            {% endif %}
+
         </div>
-    </section>
+
+
+        <!-- =================================================
+             ADMIN ACTIVITY
+        ================================================== -->
+
+        <div class="admin-subsection">
+
+            <h3 data-i18n="statistics.activity">
+                Activity
+            </h3>
+
+            <div class="statistics-grid admin-statistics-grid">
+
+                <div class="statistics-card">
+
+                    <div class="statistics-card-icon">
+                        ⚡
+                    </div>
+
+                    <div class="statistics-card-content">
+
+                        <span
+                            class="statistics-label"
+                            data-i18n="statistics.commands"
+                        >
+                            Commands
+                        </span>
+
+                        <strong
+                            class="statistics-value"
+                            id="admin-statistics-commands"
+                        >
+                            {{ admin_statistics.commands if admin_statistics is defined and admin_statistics.commands is defined else "—" }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="statistics-card">
+
+                    <div class="statistics-card-icon">
+                        🎫
+                    </div>
+
+                    <div class="statistics-card-content">
+
+                        <span
+                            class="statistics-label"
+                            data-i18n="statistics.tickets"
+                        >
+                            Tickets
+                        </span>
+
+                        <strong
+                            class="statistics-value"
+                            id="admin-statistics-tickets"
+                        >
+                            {{ admin_statistics.tickets if admin_statistics is defined and admin_statistics.tickets is defined else "—" }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="statistics-card">
+
+                    <div class="statistics-card-icon">
+                        🛡️
+                    </div>
+
+                    <div class="statistics-card-content">
+
+                        <span
+                            class="statistics-label"
+                            data-i18n="statistics.moderation_actions"
+                        >
+                            Moderation actions
+                        </span>
+
+                        <strong
+                            class="statistics-value"
+                            id="admin-statistics-moderation"
+                        >
+                            {{ admin_statistics.moderation if admin_statistics is defined and admin_statistics.moderation is defined else "—" }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="statistics-card">
+
+                    <div class="statistics-card-icon">
+                        📢
+                    </div>
+
+                    <div class="statistics-card-content">
+
+                        <span
+                            class="statistics-label"
+                            data-i18n="statistics.announcements"
+                        >
+                            Announcements
+                        </span>
+
+                        <strong
+                            class="statistics-value"
+                            id="admin-statistics-announcements"
+                        >
+                            {{ admin_statistics.announcements if admin_statistics is defined and admin_statistics.announcements is defined else "—" }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endif %}
+
+
+<!-- =====================================================
+     PRIVACY NOTE
+====================================================== -->
+
+<section class="section statistics-section">
+
+    <div class="container">
+
+        <div class="statistics-privacy">
+
+            <div class="statistics-privacy-icon">
+                🔒
+            </div>
+
+            <div>
+
+                <h3 data-i18n="statistics.privacy">
+                    Privacy
+                </h3>
+
+                <p data-i18n="statistics.privacy_description">
+                    Public statistics are presented in an aggregated form.
+                    Specific server and user information is restricted to
+                    authorized Misuki administrators.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+```
+
 </main>
 
+<!-- =========================================================
+     LIVE STATISTICS
+========================================================= -->
+
 <style>
-.admin-user-heading{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:15px}.admin-user-heading h3{margin-bottom:0}.admin-user-search{display:flex;align-items:center;gap:8px;min-width:min(100%,340px);padding:9px 12px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.09);border-radius:11px;color:var(--text-muted)}.admin-user-search span{font-size:18px;line-height:1}.admin-user-search input{width:100%;min-width:0;background:transparent;border:0;outline:0;color:var(--text);font:inherit;font-size:12px}.admin-user-search input::placeholder{color:var(--text-muted)}.admin-user-card{transition:opacity .18s ease,transform .18s ease,border-color .18s ease}.admin-user-card.is-hidden{display:none}.admin-user-name-row{display:flex;align-items:center;gap:7px;min-width:0}.admin-user-bot-badge{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;flex:0 0 22px;border-radius:7px;background:rgba(88,101,242,.13);border:1px solid rgba(88,101,242,.22);font-size:12px}.admin-user-username{font-weight:600}.admin-user-meta{font-size:10px!important;color:var(--text-muted)!important}.admin-user-status{font-weight:700}.admin-user-no-results{margin-top:12px}.admin-user-no-results[hidden]{display:none}@media(max-width:600px){.admin-user-heading{align-items:stretch;flex-direction:column}.admin-user-search{min-width:0;width:100%}}
+
+.admin-user-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 15px;
+}
+
+.admin-user-heading h3 {
+    margin-bottom: 0;
+}
+
+.admin-user-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: min(100%, 340px);
+    padding: 9px 12px;
+    background: rgba(255,255,255,.035);
+    border: 1px solid rgba(255,255,255,.09);
+    border-radius: 11px;
+    color: var(--text-muted);
+}
+
+.admin-user-search span {
+    font-size: 18px;
+    line-height: 1;
+}
+
+.admin-user-search input {
+    width: 100%;
+    min-width: 0;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    color: var(--text);
+    font: inherit;
+    font-size: 12px;
+}
+
+.admin-user-search input::placeholder {
+    color: var(--text-muted);
+}
+
+.admin-user-card {
+    transition:
+        opacity .18s ease,
+        transform .18s ease,
+        border-color .18s ease;
+}
+
+.admin-user-card.is-hidden {
+    display: none;
+}
+
+.admin-user-name-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+}
+
+.admin-user-bot-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+    border-radius: 7px;
+    background: rgba(88,101,242,.13);
+    border: 1px solid rgba(88,101,242,.22);
+    font-size: 12px;
+}
+
+.admin-user-username {
+    font-weight: 600;
+}
+
+.admin-user-meta {
+    font-size: 10px !important;
+    color: var(--text-muted) !important;
+}
+
+.admin-user-no-results {
+    margin-top: 12px;
+}
+
+.admin-user-no-results[hidden] {
+    display: none;
+}
+
+@media (max-width: 600px) {
+
+    .admin-user-heading {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .admin-user-search {
+        min-width: 0;
+        width: 100%;
+    }
+
+}
+
 </style>
 
 <script>
-(function(){
+
+(function () {
+
     "use strict";
-    const STATISTICS_REFRESH_INTERVAL=10000;
 
-    function getTranslation(key,fallback){
-        try{
-            if(window.MisukiTranslation&&typeof window.MisukiTranslation.getTranslation==="function"){
-                const language=window.MisukiTranslation.getLanguage();
-                const translated=window.MisukiTranslation.getTranslation(language,key);
-                if(translated)return translated;
+
+    const STATISTICS_REFRESH_INTERVAL = 10000;
+
+
+    function getTranslation(key, fallback) {
+
+        try {
+
+            if (
+                window.MisukiTranslation &&
+                typeof window.MisukiTranslation.getTranslation === "function"
+            ) {
+
+                const language =
+                    window.MisukiTranslation.getLanguage();
+
+                const translated =
+                    window.MisukiTranslation.getTranslation(
+                        language,
+                        key
+                    );
+
+                if (translated) {
+
+                    return translated;
+
+                }
+
             }
-        }catch(error){console.warn("Statistics translation error:",error)}
+
+        } catch (error) {
+
+            console.warn(
+                "Statistics translation error:",
+                error
+            );
+
+        }
+
         return fallback;
+
     }
 
-    function translateStatus(element,statusType){
-        if(!element)return;
-        const value=element.dataset.rawStatus||element.textContent.trim();
-        const status=value.toLowerCase();
-        const translations={bot:{online:"statistics.online",offline:"statistics.offline"},database:{operational:"statistics.operational",error:"statistics.error"},api:{operational:"statistics.operational",unavailable:"statistics.unavailable",offline:"statistics.offline"}};
-        const key=translations[statusType]?.[status];
-        if(key)element.textContent=getTranslation(key,value);
+
+    function translateStatus(element, statusType) {
+
+        if (!element) {
+
+            return;
+
+        }
+
+
+        const value =
+            element.dataset.rawStatus ||
+            element.textContent.trim();
+
+
+        const status =
+            value.toLowerCase();
+
+
+        const statusTranslations = {
+
+            bot: {
+
+                online: "statistics.online",
+
+                offline: "statistics.offline"
+
+            },
+
+            database: {
+
+                operational: "statistics.operational",
+
+                error: "statistics.error"
+
+            },
+
+            api: {
+
+                operational: "statistics.operational",
+
+                unavailable: "statistics.unavailable",
+
+                offline: "statistics.offline"
+
+            }
+
+        };
+
+
+        const key =
+            statusTranslations[
+                statusType
+            ]?.[
+                status
+            ];
+
+
+        if (key) {
+
+            element.textContent =
+                getTranslation(
+                    key,
+                    value
+                );
+
+        }
+
     }
 
-    function updateIndicator(id,status){
-        const indicator=document.getElementById(id);if(!indicator)return;
-        indicator.classList.remove("online","offline");
-        indicator.classList.add(String(status).toLowerCase()===(id.includes("bot")?"online":"operational")?"online":"offline");
+
+    function updateBotIndicator(status) {
+
+        const indicator =
+            document.getElementById(
+                "bot-status-indicator"
+            );
+
+
+        if (!indicator) {
+
+            return;
+
+        }
+
+
+        indicator.classList.remove(
+            "online",
+            "offline"
+        );
+
+
+        if (
+            String(status).toLowerCase()
+            === "online"
+        ) {
+
+            indicator.classList.add(
+                "online"
+            );
+
+        } else {
+
+            indicator.classList.add(
+                "offline"
+            );
+
+        }
+
     }
 
-    function updateLatency(latency){
-        const element=document.getElementById("statistics-latency");if(!element)return;
-        if(latency===null||latency===undefined){element.textContent="—";return;}
-        element.innerHTML=`${latency} <span data-i18n="statistics.milliseconds">ms</span>`;
-        const unit=element.querySelector("[data-i18n='statistics.milliseconds']");if(unit)unit.textContent=getTranslation("statistics.milliseconds","ms");
+
+    function updateDatabaseIndicator(status) {
+
+        const indicator =
+            document.getElementById(
+                "database-status-indicator"
+            );
+
+
+        if (!indicator) {
+
+            return;
+
+        }
+
+
+        indicator.classList.remove(
+            "online",
+            "offline"
+        );
+
+
+        if (
+            String(status).toLowerCase()
+            === "operational"
+        ) {
+
+            indicator.classList.add(
+                "online"
+            );
+
+        } else {
+
+            indicator.classList.add(
+                "offline"
+            );
+
+        }
+
     }
 
-    function formatStatisticsDate(value){
-        const number=Number(value);if(!Number.isFinite(number)||number<=0)return "—";
-        return new Date(number*1000).toLocaleString();
+
+    function updateApiIndicator(status) {
+
+        const indicator =
+            document.getElementById(
+                "api-status-indicator"
+            );
+
+
+        if (!indicator) {
+
+            return;
+
+        }
+
+
+        indicator.classList.remove(
+            "online",
+            "offline"
+        );
+
+
+        if (
+            String(status).toLowerCase()
+            === "operational"
+        ) {
+
+            indicator.classList.add(
+                "online"
+            );
+
+        } else {
+
+            indicator.classList.add(
+                "offline"
+            );
+
+        }
+
     }
 
-    function renderServerList(servers){
-        const list=document.getElementById("admin-server-list");if(!list||!Array.isArray(servers))return 0;
-        list.replaceChildren();let totalMembers=0;
-        servers.forEach(server=>{
-            const members=Math.max(0,Number.parseInt(server.members,10)||0);totalMembers+=members;
-            const card=document.createElement("div");card.className="admin-server-card";
-            if(server.icon){const img=document.createElement("img");img.src=server.icon;img.alt="";img.className="admin-server-icon";card.appendChild(img)}else{const placeholder=document.createElement("div");placeholder.className="admin-server-icon-placeholder";placeholder.textContent="🏠";card.appendChild(placeholder)}
-            const info=document.createElement("div");info.className="admin-server-info";const name=document.createElement("strong");name.textContent=server.name||"Unknown Server";info.appendChild(name);
-            if(server.id){const id=document.createElement("span");id.textContent=`ID: ${server.id}`;info.appendChild(id)}card.appendChild(info);
-            const stat=document.createElement("div");stat.className="admin-server-stat";const label=document.createElement("span");label.textContent=getTranslation("statistics.members","Members");stat.appendChild(label);const value=document.createElement("strong");value.textContent=members.toLocaleString();stat.appendChild(value);card.appendChild(stat);list.appendChild(card);
-        });
+
+    function updateLatency(latency) {
+
+        const element =
+            document.getElementById(
+                "statistics-latency"
+            );
+
+
+        if (!element) {
+
+            return;
+
+        }
+
+
+        if (
+            latency === null ||
+            latency === undefined
+        ) {
+
+            element.textContent = "—";
+
+            return;
+
+        }
+
+
+        element.innerHTML =
+            `${latency} <span data-i18n="statistics.milliseconds">ms</span>`;
+
+
+        translateMilliseconds();
+
+    }
+
+
+    function translateMilliseconds() {
+
+        const element =
+            document.querySelector(
+                "#statistics-latency [data-i18n='statistics.milliseconds']"
+            );
+
+
+        if (!element) {
+
+            return;
+
+        }
+
+
+        element.textContent =
+            getTranslation(
+                "statistics.milliseconds",
+                "ms"
+            );
+
+    }
+
+
+    function formatStatisticsDate(value) {
+
+        if (
+            value === null ||
+            value === undefined ||
+            value === ""
+        ) {
+
+            return "—";
+
+        }
+
+
+        const numericValue = Number(value);
+
+
+        if (
+            !Number.isFinite(numericValue) ||
+            numericValue <= 0
+        ) {
+
+            return "—";
+
+        }
+
+
+        return new Date(
+            numericValue * 1000
+        ).toLocaleString();
+
+    }
+
+
+    function renderServerList(servers) {
+
+        const serverList =
+            document.getElementById(
+                "admin-server-list"
+            );
+
+
+        if (
+            !serverList ||
+            !Array.isArray(servers)
+        ) {
+
+            return 0;
+
+        }
+
+
+        serverList.replaceChildren();
+
+
+        let totalMembers = 0;
+
+
+        servers.forEach(
+            function (server) {
+
+                const members = Math.max(
+                    0,
+                    Number.parseInt(
+                        server.members,
+                        10
+                    ) || 0
+                );
+
+
+                totalMembers += members;
+
+
+                const card =
+                    document.createElement("div");
+
+
+                card.className =
+                    "admin-server-card";
+
+
+                if (server.icon) {
+
+                    const icon =
+                        document.createElement("img");
+
+                    icon.src =
+                        server.icon;
+
+                    icon.alt =
+                        "";
+
+                    icon.className =
+                        "admin-server-icon";
+
+                    card.appendChild(
+                        icon
+                    );
+
+                } else {
+
+                    const placeholder =
+                        document.createElement("div");
+
+                    placeholder.className =
+                        "admin-server-icon-placeholder";
+
+                    placeholder.textContent =
+                        "🏠";
+
+                    card.appendChild(
+                        placeholder
+                    );
+
+                }
+
+
+                const info =
+                    document.createElement("div");
+
+                info.className =
+                    "admin-server-info";
+
+
+                const name =
+                    document.createElement("strong");
+
+                name.textContent =
+                    server.name ||
+                    "Unknown Server";
+
+                info.appendChild(
+                    name
+                );
+
+
+                if (server.id) {
+
+                    const id =
+                        document.createElement("span");
+
+                    id.textContent =
+                        `ID: ${server.id}`;
+
+                    info.appendChild(
+                        id
+                    );
+
+                }
+
+
+                card.appendChild(
+                    info
+                );
+
+
+                const stat =
+                    document.createElement("div");
+
+                stat.className =
+                    "admin-server-stat";
+
+
+                const label =
+                    document.createElement("span");
+
+                label.textContent =
+                    getTranslation(
+                        "statistics.members",
+                        "Members"
+                    );
+
+                stat.appendChild(
+                    label
+                );
+
+
+                const value =
+                    document.createElement("strong");
+
+                value.textContent =
+                    members.toLocaleString();
+
+                stat.appendChild(
+                    value
+                );
+
+
+                card.appendChild(
+                    stat
+                );
+
+
+                serverList.appendChild(
+                    card
+                );
+
+            }
+        );
+
+
         return totalMembers;
+
     }
 
-    function snowflakeCreatedAt(id){
-        try{const numeric=BigInt(String(id));const ms=Number((numeric>>22n)+1420070400000n);if(!Number.isFinite(ms))return "—";return new Date(ms).toLocaleDateString()}catch(error){return "—"}
+
+    function escapeHtml(value) {
+
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+
     }
 
-    function normalizeUser(user){
-        const normalized={...user};
-        normalized.name=normalized.name||normalized.global_name||normalized.username||"Discord User";
-        normalized.username=normalized.username||normalized.name;
-        normalized.created_at=normalized.created_at||snowflakeCreatedAt(normalized.id);
-        normalized.status=normalized.status||"Unknown";
-        return normalized;
+
+    function getDiscordAccountCreationDate(userId) {
+
+        try {
+
+            const id =
+                BigInt(
+                    String(userId)
+                );
+
+            const discordEpoch =
+                1420070400000n;
+
+            const timestamp =
+                Number(
+                    (id >> 22n) +
+                    discordEpoch
+                );
+
+
+            if (
+                !Number.isFinite(timestamp) ||
+                timestamp <= 0
+            ) {
+
+                return "—";
+
+            }
+
+
+            return new Date(
+                timestamp
+            ).toLocaleDateString();
+
+        } catch (error) {
+
+            return "—";
+
+        }
+
     }
 
-    function renderUserList(users){
-        const list=document.getElementById("admin-user-list");if(!list||!Array.isArray(users))return;
-        list.replaceChildren();
-        users.forEach(raw=>{
-            const user=normalizeUser(raw);const card=document.createElement("div");card.className="admin-user-card";
-            const search=[user.name,user.username,user.id].filter(Boolean).join(" ").toLowerCase();card.dataset.userSearch=search;
-            if(user.avatar){const img=document.createElement("img");img.src=user.avatar;img.alt="";img.className="admin-user-avatar";card.appendChild(img)}else{const placeholder=document.createElement("div");placeholder.className="admin-user-avatar-placeholder";placeholder.textContent="👤";card.appendChild(placeholder)}
-            const info=document.createElement("div");info.className="admin-user-info";
-            const row=document.createElement("div");row.className="admin-user-name-row";const name=document.createElement("strong");name.className="admin-user-display-name";name.textContent=user.name;row.appendChild(name);
-            if(user.added_bot){const badge=document.createElement("span");badge.className="admin-user-bot-badge";badge.title="Added Misuki to a server";badge.textContent="🤖";row.appendChild(badge)}info.appendChild(row);
-            const username=document.createElement("span");username.className="admin-user-username";username.textContent=`@${String(user.username).replace(/^@/,"")}`;info.appendChild(username);
-            const id=document.createElement("span");id.textContent=`ID: ${user.id||"—"}`;info.appendChild(id);
-            const meta=document.createElement("span");meta.className="admin-user-meta";meta.textContent=`Status: ${user.status} · Account: ${user.created_at}`;info.appendChild(meta);
-            if(user.servers_count!==undefined){const serverCount=document.createElement("span");serverCount.className="admin-user-meta";serverCount.textContent=`Servers: ${user.servers_count}`;info.appendChild(serverCount)}
-            card.appendChild(info);list.appendChild(card);
-        });
+
+    function renderAdminUsers(users) {
+
+        const userList =
+            document.getElementById(
+                "admin-user-list"
+            );
+
+
+        const noResults =
+            document.getElementById(
+                "admin-user-no-results"
+            );
+
+
+        if (
+            !userList ||
+            !Array.isArray(users)
+        ) {
+
+            return;
+
+        }
+
+
+        userList.replaceChildren();
+
+
+        users.forEach(
+            function (user) {
+
+                const userId =
+                    String(
+                        user.id ?? ""
+                    );
+
+
+                const username =
+                    String(
+                        user.username ||
+                        ""
+                    );
+
+
+                const displayName =
+                    String(
+                        user.name ||
+                        user.global_name ||
+                        username ||
+                        "Discord User"
+                    );
+
+
+                const createdAt =
+                    user.created_at ||
+                    getDiscordAccountCreationDate(
+                        userId
+                    );
+
+
+                const serversCount =
+                    Number(
+                        user.servers_count
+                    );
+
+
+                const card =
+                    document.createElement("div");
+
+
+                card.className =
+                    "admin-user-card";
+
+
+                card.dataset.userName =
+                    displayName;
+
+                card.dataset.userUsername =
+                    username;
+
+                card.dataset.userId =
+                    userId;
+
+                card.dataset.userSearch =
+                    `${displayName} ${username} ${userId}`
+                        .toLowerCase();
+
+
+                if (user.avatar) {
+
+                    const avatar =
+                        document.createElement("img");
+
+                    avatar.src =
+                        user.avatar;
+
+                    avatar.alt =
+                        "";
+
+                    avatar.className =
+                        "admin-user-avatar";
+
+                    card.appendChild(
+                        avatar
+                    );
+
+                } else {
+
+                    const placeholder =
+                        document.createElement("div");
+
+                    placeholder.className =
+                        "admin-user-avatar-placeholder";
+
+                    placeholder.textContent =
+                        "👤";
+
+                    card.appendChild(
+                        placeholder
+                    );
+
+                }
+
+
+                const info =
+                    document.createElement("div");
+
+                info.className =
+                    "admin-user-info";
+
+
+                const nameRow =
+                    document.createElement("div");
+
+                nameRow.className =
+                    "admin-user-name-row";
+
+
+                const name =
+                    document.createElement("strong");
+
+                name.className =
+                    "admin-user-display-name";
+
+                name.textContent =
+                    displayName;
+
+                nameRow.appendChild(
+                    name
+                );
+
+
+                if (user.added_bot) {
+
+                    const badge =
+                        document.createElement("span");
+
+                    badge.className =
+                        "admin-user-bot-badge";
+
+                    badge.title =
+                        "Added Misuki to a server";
+
+                    badge.setAttribute(
+                        "aria-label",
+                        "Added Misuki to a server"
+                    );
+
+                    badge.textContent =
+                        "🤖";
+
+                    nameRow.appendChild(
+                        badge
+                    );
+
+                }
+
+
+                info.appendChild(
+                    nameRow
+                );
+
+
+                const usernameElement =
+                    document.createElement("span");
+
+                usernameElement.className =
+                    "admin-user-username";
+
+                usernameElement.textContent =
+                    `@${username || displayName}`;
+
+                info.appendChild(
+                    usernameElement
+                );
+
+
+                const idElement =
+                    document.createElement("span");
+
+                idElement.textContent =
+                    `ID: ${userId}`;
+
+                info.appendChild(
+                    idElement
+                );
+
+
+                const accountElement =
+                    document.createElement("span");
+
+                accountElement.className =
+                    "admin-user-meta";
+
+                accountElement.innerHTML =
+                    `Account: <b class="admin-user-created">${escapeHtml(createdAt)}</b>`;
+
+                info.appendChild(
+                    accountElement
+                );
+
+
+                if (
+                    Number.isFinite(
+                        serversCount
+                    )
+                ) {
+
+                    const serversElement =
+                        document.createElement("span");
+
+                    serversElement.className =
+                        "admin-user-meta";
+
+                    serversElement.textContent =
+                        `Servers: ${serversCount}`;
+
+                    info.appendChild(
+                        serversElement
+                    );
+
+                }
+
+
+                card.appendChild(
+                    info
+                );
+
+
+                userList.appendChild(
+                    card
+                );
+
+            }
+        );
+
+
         applyUserSearch();
+
+
     }
 
-    function applyUserSearch(){
-        const input=document.getElementById("admin-user-search"),list=document.getElementById("admin-user-list"),empty=document.getElementById("admin-user-no-results");if(!input||!list)return;
-        const query=input.value.trim().toLowerCase();let visible=0;
-        list.querySelectorAll(".admin-user-card").forEach(card=>{const match=!query||(card.dataset.userSearch||"").includes(query);card.classList.toggle("is-hidden",!match);if(match)visible++});
-        if(empty)empty.hidden=visible!==0;
+
+    function applyUserSearch() {
+
+        const searchInput =
+            document.getElementById(
+                "admin-user-search"
+            );
+
+
+        const userList =
+            document.getElementById(
+                "admin-user-list"
+            );
+
+
+        const noResults =
+            document.getElementById(
+                "admin-user-no-results"
+            );
+
+
+        if (
+            !searchInput ||
+            !userList
+        ) {
+
+            return;
+
+        }
+
+
+        const query =
+            searchInput.value
+                .trim()
+                .toLowerCase()
+                .replace(/^@/, "");
+
+
+        const cards =
+            userList.querySelectorAll(
+                ".admin-user-card"
+            );
+
+
+        let visibleUsers = 0;
+
+
+        cards.forEach(
+            function (card) {
+
+                const searchable =
+                    String(
+                        card.dataset.userSearch ||
+                        ""
+                    ).toLowerCase();
+
+
+                const matches =
+                    !query ||
+                    searchable.includes(
+                        query
+                    );
+
+
+                card.classList.toggle(
+                    "is-hidden",
+                    !matches
+                );
+
+
+                if (matches) {
+
+                    visibleUsers++;
+
+                }
+
+            }
+        );
+
+
+        if (noResults) {
+
+            noResults.hidden =
+                visibleUsers !== 0;
+
+        }
+
     }
 
-    function bindUserSearch(){const input=document.getElementById("admin-user-search");if(input&&!input.dataset.bound){input.dataset.bound="1";input.addEventListener("input",applyUserSearch)}}
 
-    function updateStatistics(data){
-        if(!data)return;
-        const set=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value??"—"};
-        set("statistics-servers",data.servers);set("statistics-channels",data.channels);set("statistics-commands",data.commands);set("statistics-tickets",data.tickets);set("statistics-verifications",data.verifications);set("statistics-uptime",data.uptime);set("statistics-version",data.version);
-        const users=document.getElementById("statistics-users");const serverList=document.getElementById("admin-server-list");
-        if(serverList&&Array.isArray(data.admin_servers))users.textContent=renderServerList(data.admin_servers).toLocaleString();else if(users)users.textContent=data.users??"—";
-        const lastUpdate=document.getElementById("statistics-last-update");if(lastUpdate)lastUpdate.textContent=formatStatisticsDate(data.updated_at);
-        const bot=document.getElementById("bot-status"),db=document.getElementById("database-status"),api=document.getElementById("api-status");
-        if(bot){bot.dataset.rawStatus=data.bot_status||"Offline";translateStatus(bot,"bot")};if(db){db.dataset.rawStatus=data.database_status||"Error";translateStatus(db,"database")};if(api){api.dataset.rawStatus=data.api_status||"Unavailable";translateStatus(api,"api")};
-        updateLatency(data.latency);updateIndicator("bot-status-indicator",data.bot_status);updateIndicator("database-status-indicator",data.database_status);updateIndicator("api-status-indicator",data.api_status);
-        const admin=data.admin_statistics||{};set("admin-statistics-commands",admin.commands);set("admin-statistics-tickets",admin.tickets);set("admin-statistics-moderation",admin.moderation);set("admin-statistics-announcements",admin.announcements);
-        if(Array.isArray(data.admin_users))renderUserList(data.admin_users);bindUserSearch();
+    function setupUserSearch() {
+
+        const searchInput =
+            document.getElementById(
+                "admin-user-search"
+            );
+
+
+        if (!searchInput) {
+
+            return;
+
+        }
+
+
+        searchInput.addEventListener(
+            "input",
+            applyUserSearch
+        );
+
     }
 
-    async function refreshStatistics(){
-        try{const response=await fetch("/api/statistics",{method:"GET",cache:"no-store",headers:{Accept:"application/json"}});if(!response.ok)throw new Error(`HTTP ${response.status}`);updateStatistics(await response.json())}catch(error){console.warn("Unable to refresh statistics:",error)}
+
+    function updateAdminStatistics(data) {
+
+        if (!data) {
+
+            return;
+
+        }
+
+
+        const adminStatistics =
+            data.admin_statistics || {};
+
+
+        const commands =
+            document.getElementById(
+                "admin-statistics-commands"
+            );
+
+
+        const tickets =
+            document.getElementById(
+                "admin-statistics-tickets"
+            );
+
+
+        const moderation =
+            document.getElementById(
+                "admin-statistics-moderation"
+            );
+
+
+        const announcements =
+            document.getElementById(
+                "admin-statistics-announcements"
+            );
+
+
+        if (commands) {
+
+            commands.textContent =
+                adminStatistics.commands ??
+                "—";
+
+        }
+
+
+        if (tickets) {
+
+            tickets.textContent =
+                adminStatistics.tickets ??
+                "—";
+
+        }
+
+
+        if (moderation) {
+
+            moderation.textContent =
+                adminStatistics.moderation ??
+                "—";
+
+        }
+
+
+        if (announcements) {
+
+            announcements.textContent =
+                adminStatistics.announcements ??
+                "—";
+
+        }
+
     }
 
-    window.refreshMisukiStatistics=refreshStatistics;
-    document.addEventListener("DOMContentLoaded",function(){bindUserSearch();setTimeout(refreshStatistics,500);setInterval(refreshStatistics,STATISTICS_REFRESH_INTERVAL)});
-    window.addEventListener("misukiLanguageChanged",function(){refreshStatistics()});
+
+    function updateStatistics(data) {
+
+        if (!data) {
+
+            return;
+
+        }
+
+
+        const servers =
+            document.getElementById(
+                "statistics-servers"
+            );
+
+
+        const users =
+            document.getElementById(
+                "statistics-users"
+            );
+
+
+        const channels =
+            document.getElementById(
+                "statistics-channels"
+            );
+
+
+        const commands =
+            document.getElementById(
+                "statistics-commands"
+            );
+
+
+        const tickets =
+            document.getElementById(
+                "statistics-tickets"
+            );
+
+
+        const verifications =
+            document.getElementById(
+                "statistics-verifications"
+            );
+
+
+        const uptime =
+            document.getElementById(
+                "statistics-uptime"
+            );
+
+
+        const version =
+            document.getElementById(
+                "statistics-version"
+            );
+
+
+        const lastUpdate =
+            document.getElementById(
+                "statistics-last-update"
+            );
+
+
+        const serverList =
+            document.getElementById(
+                "admin-server-list"
+            );
+
+
+        const userList =
+            document.getElementById(
+                "admin-user-list"
+            );
+
+
+        const botStatus =
+            document.getElementById(
+                "bot-status"
+            );
+
+
+        const databaseStatus =
+            document.getElementById(
+                "database-status"
+            );
+
+
+        const apiStatus =
+            document.getElementById(
+                "api-status"
+            );
+
+
+        if (servers) {
+
+            servers.textContent =
+                data.servers ??
+                "—";
+
+        }
+
+
+        /*
+         * IMPORTANT:
+         * The global Users statistic comes directly from
+         * data.users. It must not be replaced by the sum
+         * of members from administrator servers because
+         * those are server memberships, not unique users.
+         */
+
+        if (users) {
+
+            users.textContent =
+                data.users ??
+                "—";
+
+        }
+
+
+        if (
+            serverList &&
+            Array.isArray(
+                data.admin_servers
+            )
+        ) {
+
+            renderServerList(
+                data.admin_servers
+            );
+
+        }
+
+
+        if (
+            userList &&
+            Array.isArray(
+                data.admin_users
+            )
+        ) {
+
+            renderAdminUsers(
+                data.admin_users
+            );
+
+        }
+
+
+        if (channels) {
+
+            channels.textContent =
+                data.channels ??
+                "—";
+
+        }
+
+
+        if (commands) {
+
+            commands.textContent =
+                data.commands ??
+                "—";
+
+        }
+
+
+        if (tickets) {
+
+            tickets.textContent =
+                data.tickets ??
+                "—";
+
+        }
+
+
+        if (verifications) {
+
+            verifications.textContent =
+                data.verifications ??
+                "—";
+
+        }
+
+
+        if (uptime) {
+
+            uptime.textContent =
+                data.uptime ??
+                "—";
+
+        }
+
+
+        if (version) {
+
+            version.textContent =
+                data.version ??
+                "—";
+
+        }
+
+
+        if (lastUpdate) {
+
+            lastUpdate.textContent =
+                formatStatisticsDate(
+                    data.updated_at
+                );
+
+        }
+
+
+        if (botStatus) {
+
+            botStatus.dataset.rawStatus =
+                data.bot_status ||
+                "Offline";
+
+
+            translateStatus(
+                botStatus,
+                "bot"
+            );
+
+        }
+
+
+        if (databaseStatus) {
+
+            databaseStatus.dataset.rawStatus =
+                data.database_status ||
+                "Error";
+
+
+            translateStatus(
+                databaseStatus,
+                "database"
+            );
+
+        }
+
+
+        if (apiStatus) {
+
+            apiStatus.dataset.rawStatus =
+                data.api_status ||
+                "Unavailable";
+
+
+            translateStatus(
+                apiStatus,
+                "api"
+            );
+
+        }
+
+
+        updateAdminStatistics(
+            data
+        );
+
+
+        updateLatency(
+            data.latency
+        );
+
+
+        updateBotIndicator(
+            data.bot_status
+        );
+
+
+        updateDatabaseIndicator(
+            data.database_status
+        );
+
+
+        updateApiIndicator(
+            data.api_status
+        );
+
+    }
+
+
+    async function refreshStatistics() {
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/statistics",
+                    {
+                        method: "GET",
+                        cache: "no-store",
+                        headers: {
+                            "Accept": "application/json"
+                        }
+                    }
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    `HTTP ${response.status}`
+                );
+
+            }
+
+
+            const data =
+                await response.json();
+
+
+            updateStatistics(
+                data
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "Unable to refresh statistics:",
+                error
+            );
+
+        }
+
+    }
+
+
+    window.refreshMisukiStatistics =
+        refreshStatistics;
+
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            setupUserSearch();
+
+
+            setTimeout(
+                refreshStatistics,
+                500
+            );
+
+
+            setInterval(
+                refreshStatistics,
+                STATISTICS_REFRESH_INTERVAL
+            );
+
+        }
+    );
+
+
+    window.addEventListener(
+        "misukiLanguageChanged",
+        function () {
+
+            refreshStatistics();
+
+            translateMilliseconds();
+
+        }
+    );
+
 })();
+
 </script>
 
 {% endblock %}

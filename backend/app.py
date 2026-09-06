@@ -4091,13 +4091,19 @@ def statistics():
 # =====================================================
 # ADMIN USER INFORMATION
 # =====================================================
-
 def get_admin_users(admin_servers):
     """
     Obtém os utilizadores dos servidores onde o bot está presente.
 
-    Apenas é chamado para administradores do Misuki.
-    Os utilizadores são deduplicados pelo Discord ID.
+    Inclui:
+    - Avatar
+    - Display name
+    - Username
+    - Discord ID
+    - Data de criação da conta
+    - Número de servidores em comum
+    - Badge para quem adicionou o Misuki ao servidor
+
     Bots são ignorados.
     """
 
@@ -4109,6 +4115,13 @@ def get_admin_users(admin_servers):
     headers = {
         "Authorization": f"Bot {BOT_TOKEN}",
         "Content-Type": "application/json"
+    }
+
+    # IDs dos donos dos servidores que adicionaram o Misuki
+    bot_installer_ids = {
+        str(server.get("owner_id"))
+        for server in (admin_servers or [])
+        if server.get("owner_id")
     }
 
     for server in admin_servers or []:
@@ -4123,7 +4136,6 @@ def get_admin_users(admin_servers):
         while True:
 
             try:
-
                 response = requests.get(
                     f"{DISCORD_API}/guilds/{guild_id}/members",
                     headers=headers,
@@ -4152,7 +4164,6 @@ def get_admin_users(admin_servers):
                 break
 
             try:
-
                 members = response.json()
 
             except ValueError:
@@ -4168,52 +4179,70 @@ def get_admin_users(admin_servers):
 
             for member in members:
 
-                discord_user = member.get(
-                    "user",
-                    {}
-                )
+                discord_user = member.get("user", {})
 
-                if discord_user.get(
-                    "bot",
-                    False
-                ):
+                # Ignorar bots
+                if discord_user.get("bot", False):
                     continue
 
-                user_id = discord_user.get(
-                    "id"
-                )
+                user_id = discord_user.get("id")
 
                 if not user_id:
                     continue
 
-                username = (
+                username = discord_user.get(
+                    "username",
+                    "Discord User"
+                )
+
+                display_name = (
                     discord_user.get("global_name")
-                    or discord_user.get("username")
+                    or member.get("nick")
+                    or username
                     or "Discord User"
                 )
 
-                avatar_hash = discord_user.get(
-                    "avatar"
-                )
+                avatar_hash = discord_user.get("avatar")
 
                 if avatar_hash:
-
                     avatar_url = (
                         f"https://cdn.discordapp.com/avatars/"
                         f"{user_id}/{avatar_hash}.png?size=128"
                     )
-
                 else:
-
                     avatar_url = None
 
+                # Criar utilizador se ainda não existir
                 if user_id not in users_by_id:
 
                     users_by_id[user_id] = {
                         "id": user_id,
-                        "name": username,
-                        "avatar": avatar_url
+                        "name": display_name,
+                        "username": username,
+                        "avatar": avatar_url,
+                        "servers_count": 0,
+                        "created_at": None,
+                        "added_bot": str(user_id) in bot_installer_ids
                     }
+
+                user = users_by_id[user_id]
+
+                # Atualizar dados caso estejam disponíveis
+                if not user.get("avatar") and avatar_url:
+                    user["avatar"] = avatar_url
+
+                if display_name:
+                    user["name"] = display_name
+
+                if username:
+                    user["username"] = username
+
+                # Contar este servidor apenas uma vez
+                user["servers_count"] += 1
+
+                # Garantir o badge do instalador
+                if str(user_id) in bot_installer_ids:
+                    user["added_bot"] = True
 
             if len(members) < 1000:
                 break
@@ -4227,11 +4256,27 @@ def get_admin_users(admin_servers):
             if not after:
                 break
 
-    return list(
-        users_by_id.values()
-    )
+    # Data de criação da conta através do Discord ID
+    for user in users_by_id.values():
 
+        try:
+            discord_id = int(user["id"])
 
+            timestamp = (
+                (discord_id >> 22) + 1420070400000
+            ) / 1000
+
+            from datetime import datetime, timezone
+
+            user["created_at"] = datetime.fromtimestamp(
+                timestamp,
+                timezone.utc
+            ).strftime("%d/%m/%Y")
+
+        except Exception:
+            user["created_at"] = None
+
+    return list(users_by_id.values())
 # =====================================================
 # ADMIN SERVER INFORMATION
 # =====================================================
