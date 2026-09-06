@@ -39,18 +39,26 @@ def count_commands(commands_list):
 
 
 def is_human_member(member):
-    """Return True only for real Discord users, never bots."""
-    return not bool(getattr(member, "bot", False))
+    """Return True only for real users, excluding bots and legacy name#number accounts."""
+    if bool(getattr(member, "bot", False)):
+        return False
+
+    username = str(getattr(member, "name", "") or "").strip()
+
+    # Exclude legacy Discord discriminator usernames such as Name#1234.
+    # These are the bot-style accounts the statistics must not include.
+    if re.search(r"#\d+$", username):
+        return False
+
+    return True
 
 
 async def count_statistics_users():
-    """Count unique human users across all guilds, fetching complete member lists."""
+    """Count unique real users across all guilds, excluding bots and name#number accounts."""
     user_ids = set()
 
     for guild in bot.guilds:
         try:
-            # Fetch the complete member list directly from Discord instead of
-            # relying only on the gateway member cache.
             async for member in guild.fetch_members(limit=None):
                 if not is_human_member(member):
                     continue
@@ -63,8 +71,6 @@ async def count_statistics_users():
                 f"⚠️ Could not fetch members for {guild.name} ({guild.id}): {error}"
             )
 
-            # Fall back to the cached members if Discord does not allow the
-            # complete member fetch for this guild.
             for member in guild.members:
                 if not is_human_member(member):
                     continue
