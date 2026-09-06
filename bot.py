@@ -44,25 +44,34 @@ def is_human_member(member):
 
 
 async def count_statistics_users():
-    """Count unique human users across all guilds, excluding every bot."""
+    """Count unique human users across all guilds, fetching complete member lists."""
     user_ids = set()
 
     for guild in bot.guilds:
         try:
-            if guild.chunked is False:
-                await guild.chunk(cache=True)
+            # Fetch the complete member list directly from Discord instead of
+            # relying only on the gateway member cache.
+            async for member in guild.fetch_members(limit=None):
+                if not is_human_member(member):
+                    continue
+
+                user_id = getattr(member, "id", None)
+                if user_id is not None:
+                    user_ids.add(user_id)
         except Exception as error:
             print(
-                f"⚠️ Could not refresh members for {guild.name} ({guild.id}): {error}"
+                f"⚠️ Could not fetch members for {guild.name} ({guild.id}): {error}"
             )
 
-        for member in guild.members:
-            if not is_human_member(member):
-                continue
+            # Fall back to the cached members if Discord does not allow the
+            # complete member fetch for this guild.
+            for member in guild.members:
+                if not is_human_member(member):
+                    continue
 
-            user_id = getattr(member, "id", None)
-            if user_id is not None:
-                user_ids.add(user_id)
+                user_id = getattr(member, "id", None)
+                if user_id is not None:
+                    user_ids.add(user_id)
 
     return len(user_ids)
 
