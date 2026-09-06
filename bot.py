@@ -39,16 +39,24 @@ def count_commands(commands_list):
 
 
 def is_human_member(member):
-    """Return True only for real users, excluding bots and legacy name#number accounts."""
+    """Return True only for real users, excluding Discord bots and bot-style name#number accounts."""
+    # Discord's official bot flag is the primary check.
     if bool(getattr(member, "bot", False)):
         return False
 
-    username = str(getattr(member, "name", "") or "").strip()
+    # Some legacy/imported bot accounts can still appear with the old
+    # Name#1234 discriminator format. Check every relevant Discord name
+    # field instead of only member.name.
+    names_to_check = (
+        getattr(member, "name", None),
+        getattr(member, "global_name", None),
+        getattr(member, "display_name", None),
+    )
 
-    # Exclude legacy Discord discriminator usernames such as Name#1234.
-    # These are the bot-style accounts the statistics must not include.
-    if re.search(r"#\d+$", username):
-        return False
+    for value in names_to_check:
+        username = str(value or "").strip()
+        if re.search(r"#\d{1,6}$", username):
+            return False
 
     return True
 
