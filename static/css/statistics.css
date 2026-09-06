@@ -1,0 +1,22 @@
+/* =========================================================
+   MISUKI - STATISTICS TEMPORARY OVERRIDES
+   ========================================================= */
+
+/* The administrator user cards no longer show Discord presence/status. */
+.admin-user-meta:first-of-type {
+    font-size: 0 !important;
+}
+
+.admin-user-meta:first-of-type .admin-user-status {
+    display: none !important;
+}
+
+.admin-user-meta:first-of-type .admin-user-created {
+    display: inline !important;
+    font-size: 10px !important;
+    font-weight: 700;
+}
+
+.admin-user-meta:first-of-type .admin-user-created::before {
+    content: "Account: ";
+}
