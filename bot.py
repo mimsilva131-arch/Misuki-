@@ -16,1102 +16,330 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 
-# =========================================================
-# ENVIRONMENT
-# =========================================================
+load_dotenv(override=True)
 
-load_dotenv(
-    override=True
-)
-
-DATABASE_URL = os.getenv(
-    "DATABASE_URL"
-)
-
-
-# =========================================================
-# UPTIME
-# =========================================================
-
+DATABASE_URL = os.getenv("DATABASE_URL")
 BOT_START_TIME = time.time()
 
-
-# =========================================================
-# INTENTS
-# =========================================================
-
 intents = discord.Intents.default()
-
 intents.members = True
 intents.message_content = True
 
+bot = commands.Bot(command_prefix="!", intents=intents)
 
-# =========================================================
-# BOT
-# =========================================================
-
-bot = commands.Bot(
-    command_prefix="!",
-    intents=intents
-)
-
-
-# =========================================================
-# COMMAND COUNT
-# =========================================================
 
 def count_commands(commands_list):
-
     total = 0
-
     for command in commands_list:
-
-        if isinstance(
-            command,
-            discord.app_commands.Group
-        ):
-
-            total += count_commands(
-                command.commands
-            )
-
+        if isinstance(command, discord.app_commands.Group):
+            total += count_commands(command.commands)
         else:
-
             total += 1
-
     return total
 
 
-# =========================================================
-# USER COUNT
-# =========================================================
-
 def is_human_member(member):
-
     if getattr(member, "bot", False):
         return False
-
     username = str(member)
+    return not re.search(r"#\d{4}$", username)
 
-    return (
-        not re.search(
-            r"#\d{4}$",
-            username
-        )
-    )
 
 def count_statistics_users():
-
     user_ids = set()
-
     for guild in bot.guilds:
-
         for member in guild.members:
-
-            # Discord identifica diretamente se a conta
-            # pertence a um bot.
-            #
-            # Não usamos o formato "Nome#1234" porque esse
-            # formato não é uma forma segura de determinar
-            # se uma conta é um bot.
-
             if not is_human_member(member):
                 continue
-
-            user_id = getattr(
-                member,
-                "id",
-                None
-            )
-
+            user_id = getattr(member, "id", None)
             if user_id is not None:
                 user_ids.add(user_id)
-
     return len(user_ids)
 
 
-# =========================================================
-# VERIFICATION COUNT
-# =========================================================
-
 def count_verified_users():
-
     connection = None
-
     try:
-
         connection = get_database_connection()
-
         with connection.cursor() as cursor:
-
-            cursor.execute(
-                """
+            cursor.execute("""
                 SELECT COUNT(DISTINCT user_id)
                 FROM verification_requests
                 WHERE status = 'verified'
-                """
-            )
-
+            """)
             result = cursor.fetchone()
-
-            if not result:
-                return 0
-
-            return int(
-                result[0] or 0
-            )
-
+            return int(result[0] or 0) if result else 0
     except Exception as error:
-
-        print(
-            f"⚠️ Could not read verification statistics: {error}"
-        )
-
+        print(f"⚠️ Could not read verification statistics: {error}")
         return 0
-
     finally:
-
         if connection:
             connection.close()
 
-
-# =========================================================
-# UPTIME FORMAT
-# =========================================================
 
 def get_uptime():
-
-    elapsed = max(
-        0,
-        int(
-            time.time()
-            - BOT_START_TIME
-        )
-    )
-
-    days, remainder = divmod(
-        elapsed,
-        86400
-    )
-
-    hours, remainder = divmod(
-        remainder,
-        3600
-    )
-
-    minutes, seconds = divmod(
-        remainder,
-        60
-    )
-
+    elapsed = max(0, int(time.time() - BOT_START_TIME))
+    days, remainder = divmod(elapsed, 86400)
+    hours, remainder = divmod(remainder, 3600)
+    minutes, seconds = divmod(remainder, 60)
     parts = []
-
     if days:
-
-        parts.append(
-            f"{days}d"
-        )
-
+        parts.append(f"{days}d")
     if hours:
-
-        parts.append(
-            f"{hours}h"
-        )
-
+        parts.append(f"{hours}h")
     if minutes:
-
-        parts.append(
-            f"{minutes}m"
-        )
-
+        parts.append(f"{minutes}m")
     if not parts:
+        parts.append(f"{seconds}s")
+    return " ".join(parts)
 
-        parts.append(
-            f"{seconds}s"
-        )
-
-    return " ".join(
-        parts
-    )
-
-
-# =========================================================
-# DATABASE CONNECTION
-# =========================================================
 
 def get_database_connection():
-
     if not DATABASE_URL:
+        raise RuntimeError("DATABASE_URL não está configurado.")
+    return psycopg2.connect(DATABASE_URL, connect_timeout=10)
 
-        raise RuntimeError(
-            "DATABASE_URL não está configurado."
-        )
-
-    return psycopg2.connect(
-        DATABASE_URL,
-        connect_timeout=10
-    )
-
-
-# =========================================================
-# CREATE STATISTICS TABLE
-# =========================================================
 
 def initialize_statistics_database():
-
     connection = None
-
     try:
-
         connection = get_database_connection()
-
         with connection.cursor() as cursor:
-
-            cursor.execute(
-                """
+            cursor.execute("""
                 CREATE TABLE IF NOT EXISTS bot_statistics (
-
                     id INTEGER PRIMARY KEY,
-
                     servers INTEGER NOT NULL DEFAULT 0,
-
                     users INTEGER NOT NULL DEFAULT 0,
-
                     channels INTEGER NOT NULL DEFAULT 0,
-
                     latency INTEGER NOT NULL DEFAULT 0,
-
                     commands INTEGER NOT NULL DEFAULT 0,
-
                     tickets BIGINT NOT NULL DEFAULT 0,
-
                     moderation_actions BIGINT NOT NULL DEFAULT 0,
-
                     announcements BIGINT NOT NULL DEFAULT 0,
-
                     verifications INTEGER NOT NULL DEFAULT 0,
-
                     bot_status TEXT NOT NULL DEFAULT 'Offline',
-
                     uptime TEXT NOT NULL DEFAULT '0s',
-
                     version TEXT NOT NULL DEFAULT '1.0.0',
-
                     last_seen DOUBLE PRECISION,
-
                     admin_servers JSONB NOT NULL DEFAULT '[]'::jsonb,
-
                     updated_at DOUBLE PRECISION NOT NULL
-
                 )
-                """
-            )
-
-            # -------------------------------------------------
-            # DATABASE MIGRATIONS
-            # -------------------------------------------------
-
-            cursor.execute(
-                """
-                ALTER TABLE bot_statistics
-                ADD COLUMN IF NOT EXISTS
-                verifications INTEGER NOT NULL DEFAULT 0
-                """
-            )
-
-            cursor.execute(
-                """
-                ALTER TABLE bot_statistics
-                ADD COLUMN IF NOT EXISTS
-                tickets BIGINT NOT NULL DEFAULT 0
-                """
-            )
-
-            cursor.execute(
-                """
-                ALTER TABLE bot_statistics
-                ADD COLUMN IF NOT EXISTS
-                moderation_actions BIGINT NOT NULL DEFAULT 0
-                """
-            )
-
-            cursor.execute(
-                """
-                ALTER TABLE bot_statistics
-                ADD COLUMN IF NOT EXISTS
-                announcements BIGINT NOT NULL DEFAULT 0
-                """
-            )
-
-            cursor.execute(
-                """
-                ALTER TABLE bot_statistics
-                ADD COLUMN IF NOT EXISTS
-                admin_servers JSONB NOT NULL DEFAULT '[]'::jsonb
-                """
-            )
-
-            cursor.execute(
-                """
-                ALTER TABLE bot_statistics
-                ADD COLUMN IF NOT EXISTS
-                last_seen DOUBLE PRECISION
-                """
-            )
-
-            cursor.execute(
-                """
-                ALTER TABLE bot_statistics
-                ADD COLUMN IF NOT EXISTS
-                updated_at DOUBLE PRECISION NOT NULL DEFAULT 0
-                """
-            )
-
-            # -------------------------------------------------
-            # DEFAULT ROW
-            # -------------------------------------------------
-
-            cursor.execute(
-                """
+            """)
+            migrations = [
+                "ALTER TABLE bot_statistics ADD COLUMN IF NOT EXISTS verifications INTEGER NOT NULL DEFAULT 0",
+                "ALTER TABLE bot_statistics ADD COLUMN IF NOT EXISTS tickets BIGINT NOT NULL DEFAULT 0",
+                "ALTER TABLE bot_statistics ADD COLUMN IF NOT EXISTS moderation_actions BIGINT NOT NULL DEFAULT 0",
+                "ALTER TABLE bot_statistics ADD COLUMN IF NOT EXISTS announcements BIGINT NOT NULL DEFAULT 0",
+                "ALTER TABLE bot_statistics ADD COLUMN IF NOT EXISTS admin_servers JSONB NOT NULL DEFAULT '[]'::jsonb",
+                "ALTER TABLE bot_statistics ADD COLUMN IF NOT EXISTS last_seen DOUBLE PRECISION",
+                "ALTER TABLE bot_statistics ADD COLUMN IF NOT EXISTS updated_at DOUBLE PRECISION NOT NULL DEFAULT 0",
+            ]
+            for migration in migrations:
+                cursor.execute(migration)
+            cursor.execute("""
                 INSERT INTO bot_statistics (
-
-                    id,
-                    servers,
-                    users,
-                    channels,
-                    latency,
-                    commands,
-                    tickets,
-                    moderation_actions,
-                    announcements,
-                    verifications,
-                    bot_status,
-                    uptime,
-                    version,
-                    last_seen,
-                    admin_servers,
-                    updated_at
-
-                )
-
-                VALUES (
-
-                    1,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    'Offline',
-                    '0s',
-                    %s,
-                    NULL,
-                    '[]'::jsonb,
-                    %s
-
-                )
-
-                ON CONFLICT (id)
-                DO NOTHING
-                """,
-
-                (
-                    os.getenv(
-                        "MISUKI_VERSION",
-                        "1.0.0"
-                    ),
-
-                    time.time()
-                )
-            )
-
+                    id, servers, users, channels, latency, commands, tickets,
+                    moderation_actions, announcements, verifications, bot_status,
+                    uptime, version, last_seen, admin_servers, updated_at
+                ) VALUES (
+                    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Offline', '0s', %s,
+                    NULL, '[]'::jsonb, %s
+                ) ON CONFLICT (id) DO NOTHING
+            """, (os.getenv("MISUKI_VERSION", "1.0.0"), time.time()))
         connection.commit()
-
-        print(
-            "🗄️ Statistics database initialized."
-        )
-
+        print("🗄️ Statistics database initialized.")
     except Exception as error:
-
         if connection:
             connection.rollback()
-
-        print(
-            f"❌ Error initializing statistics database: {error}"
-        )
-
+        print(f"❌ Error initializing statistics database: {error}")
         raise
-
     finally:
-
         if connection:
             connection.close()
 
 
-# =========================================================
-# GET DETECTED SERVERS
-# =========================================================
-
 def get_detected_servers():
-
     servers = []
-
     for guild in bot.guilds:
-
         icon = None
-
         try:
-
             if guild.icon:
-
-                icon = str(
-                    guild.icon.url
-                )
-
+                icon = str(guild.icon.url)
         except Exception:
-
             icon = None
-
         servers.append({
-
             "name": guild.name,
-
-            "id": str(
-                guild.id
-            ),
-
+            "id": str(guild.id),
             "icon": icon,
-
+            "owner_id": str(guild.owner_id) if guild.owner_id else None,
             "members": sum(
-                1
-                for member in guild.members
-                if is_human_member(member)
+                1 for member in guild.members if is_human_member(member)
             )
-
         })
-
     return servers
 
 
-# =========================================================
-# PRINT DETECTED SERVERS
-# =========================================================
-
 def print_detected_servers():
-
     detected_servers = get_detected_servers()
-
-    print(
-        "🔎 Discord guilds detected:"
-    )
-
+    print("🔎 Discord guilds detected:")
     if not detected_servers:
-
-        print(
-            "   ⚠️ No guilds detected."
-        )
-
+        print("   ⚠️ No guilds detected.")
         return
-
     for server in detected_servers:
-
         print(
-            f"   • {server['name']} "
-            f"({server['id']}) "
+            f"   • {server['name']} ({server['id']}) "
             f"— {server['members']} members"
         )
 
 
-# =========================================================
-# WRITE STATISTICS
-# =========================================================
-
 async def update_stats_snapshot():
-
     connection = None
-
     try:
-
-        # -------------------------------------------------
-        # CURRENT GUILDS
-        # -------------------------------------------------
-
         detected_servers = get_detected_servers()
-
-        servers_count = len(
-            detected_servers
-        )
-
-
-        # -------------------------------------------------
-        # COMMANDS
-        # -------------------------------------------------
-
-        commands_count = count_commands(
-            bot.tree.get_commands()
-        )
-
-
-        # -------------------------------------------------
-        # USERS
-        # -------------------------------------------------
-
+        servers_count = len(detected_servers)
+        commands_count = count_commands(bot.tree.get_commands())
         users_count = count_statistics_users()
-
-
-        # -------------------------------------------------
-        # VERIFICATIONS
-        # -------------------------------------------------
-
         verifications_count = count_verified_users()
-
-
-        # -------------------------------------------------
-        # HEARTBEAT
-        # -------------------------------------------------
-
         last_seen = time.time()
-
-
-        # -------------------------------------------------
-        # SNAPSHOT VALUES
-        # -------------------------------------------------
-
-        latency = round(
-            bot.latency * 1000
-        )
-
-        bot_status = (
-
-            "Online"
-
-            if bot.is_ready()
-
-            else "Offline"
-
-        )
-
+        latency = round(bot.latency * 1000)
+        bot_status = "Online" if bot.is_ready() else "Offline"
         uptime = get_uptime()
-
-        version = os.getenv(
-            "MISUKI_VERSION",
-            "1.0.0"
-        )
-
-        channels_count = sum(
-            len(guild.channels)
-            for guild in bot.guilds
-        )
-
-
-        # -------------------------------------------------
-        # DATABASE
-        # -------------------------------------------------
-
+        version = os.getenv("MISUKI_VERSION", "1.0.0")
+        channels_count = sum(len(guild.channels) for guild in bot.guilds)
         connection = get_database_connection()
-
         with connection.cursor() as cursor:
-
-            cursor.execute(
-                """
+            cursor.execute("""
                 UPDATE bot_statistics
-
                 SET
-
                     servers = %s,
-
                     users = %s,
-
                     channels = %s,
-
                     latency = %s,
-
                     commands = %s,
-
                     verifications = %s,
-
                     bot_status = %s,
-
                     uptime = %s,
-
                     version = %s,
-
                     last_seen = %s,
-
                     admin_servers = %s::jsonb,
-
                     updated_at = %s
-
                 WHERE id = 1
-                """,
-
-                (
-
-                    servers_count,
-
-                    users_count,
-
-                    channels_count,
-
-                    latency,
-
-                    commands_count,
-
-                    verifications_count,
-
-                    bot_status,
-
-                    uptime,
-
-                    version,
-
-                    last_seen,
-
-                    json.dumps(
-                        detected_servers,
-                        ensure_ascii=False
-                    ),
-
-                    last_seen
-
-                )
-            )
-
+            """, (
+                servers_count, users_count, channels_count, latency,
+                commands_count, verifications_count, bot_status, uptime,
+                version, last_seen, json.dumps(detected_servers, ensure_ascii=False),
+                last_seen
+            ))
         connection.commit()
-
-
-        # -------------------------------------------------
-        # LOG
-        # -------------------------------------------------
-
-        print(
-            "📊 Bot statistics updated:"
-        )
-
-        print(
-            f"   Servers: {servers_count}"
-        )
-
-        print(
-            f"   Users: {users_count}"
-        )
-
-        print(
-            f"   Verifications: {verifications_count}"
-        )
-
-        print(
-            f"   Channels: {channels_count}"
-        )
-
-        print(
-            f"   Commands: {commands_count}"
-        )
-
-        print(
-            f"   Latency: {latency}ms"
-        )
-
-        print(
-            f"   Uptime: {uptime}"
-        )
-
-        print(
-            f"   Status: {bot_status}"
-        )
-
-        print(
-            f"   Heartbeat: {last_seen}"
-        )
-
+        print("📊 Bot statistics updated:")
+        print(f"   Servers: {servers_count}")
+        print(f"   Users: {users_count}")
+        print(f"   Verifications: {verifications_count}")
+        print(f"   Channels: {channels_count}")
+        print(f"   Commands: {commands_count}")
+        print(f"   Latency: {latency}ms")
+        print(f"   Uptime: {uptime}")
+        print(f"   Status: {bot_status}")
+        print(f"   Heartbeat: {last_seen}")
         print_detected_servers()
-
-
     except Exception as error:
-
-        print(
-            f"❌ Error updating bot statistics: {error}"
-        )
-
-
+        print(f"❌ Error updating bot statistics: {error}")
     finally:
-
         if connection:
             connection.close()
 
 
-# =========================================================
-# STATISTICS LOOP
-# =========================================================
-
 async def statistics_loop():
-
     await bot.wait_until_ready()
-
     while not bot.is_closed():
-
         await update_stats_snapshot()
-
-        await asyncio.sleep(
-            10
-        )
+        await asyncio.sleep(10)
 
 
 statistics_task = None
 
 
-# =========================================================
-# GUILD JOIN
-# =========================================================
-
 @bot.event
 async def on_guild_join(guild):
-
-    print(
-        "➕ Bot joined a new server:"
-    )
-
-    print(
-        f"   Name: {guild.name}"
-    )
-
-    print(
-        f"   ID: {guild.id}"
-    )
-
-    print(
-        f"   Members: {sum(1 for member in guild.members if not member.bot)}"
-    )
-
+    print("➕ Bot joined a new server:")
+    print(f"   Name: {guild.name}")
+    print(f"   ID: {guild.id}")
+    print(f"   Members: {sum(1 for member in guild.members if not member.bot)}")
     await update_stats_snapshot()
 
-
-# =========================================================
-# GUILD REMOVE
-# =========================================================
 
 @bot.event
 async def on_guild_remove(guild):
-
-    print(
-        "➖ Bot left a server:"
-    )
-
-    print(
-        f"   Name: {guild.name}"
-    )
-
-    print(
-        f"   ID: {guild.id}"
-    )
-
+    print("➖ Bot left a server:")
+    print(f"   Name: {guild.name}")
+    print(f"   ID: {guild.id}")
     await update_stats_snapshot()
 
-
-# =========================================================
-# READY
-# =========================================================
 
 @bot.event
 async def on_ready():
-
     global statistics_task
-
-
-    # =====================================================
-    # PRESENCE
-    # =====================================================
-
-    await bot.change_presence(
-
-        status=discord.Status.online,
-
-        activity=discord.Game(
-            name="Misuki Server"
-        )
-
-    )
-
-
-    print(
-        f"🤖 Bot connected as {bot.user}"
-    )
-
-    print(
-        f"🟢 Bot status: {bot.status}"
-    )
-
-    print(
-        f"🏠 Discord guild count: {len(bot.guilds)}"
-    )
-
+    await bot.change_presence(status=discord.Status.online, activity=discord.Game(name="Misuki Server"))
+    print(f"🤖 Bot connected as {bot.user}")
+    print(f"🟢 Bot status: {bot.status}")
+    print(f"🏠 Discord guild count: {len(bot.guilds)}")
     print_detected_servers()
-
-
-    # =====================================================
-    # REGISTERED COMMANDS
-    # =====================================================
-
-    print(
-        "📋 Comandos registados:"
-    )
-
-
+    print("📋 Comandos registados:")
     for command in bot.tree.get_commands():
-
-        print(
-            f"   /{command.name}"
-        )
-
-
-        if isinstance(
-            command,
-            discord.app_commands.Group
-        ):
-
+        print(f"   /{command.name}")
+        if isinstance(command, discord.app_commands.Group):
             for subcommand in command.commands:
-
-                print(
-                    f"      /{command.name} "
-                    f"{subcommand.name}"
-                )
-
-
-    # =====================================================
-    # INITIAL STATISTICS
-    # =====================================================
-
+                print(f"      /{command.name} {subcommand.name}")
     await update_stats_snapshot()
-
-
-    # =====================================================
-    # SYNC
-    # =====================================================
-
     try:
-
         synced = await bot.tree.sync()
-
-
-        print(
-            f"⚡ {len(synced)} command(s) synced"
-        )
-
-
-        print(
-            "📋 Comandos sincronizados:"
-        )
-
-
+        print(f"⚡ {len(synced)} command(s) synced")
+        print("📋 Comandos sincronizados:")
         for command in synced:
-
-            print(
-                f"   /{command.name}"
-            )
-
-
-            if isinstance(
-                command,
-                discord.app_commands.Group
-            ):
-
-                for subcommand in command.commands:
-
-                    print(
-                        f"      /{command.name} "
-                        f"{subcommand.name}"
-                    )
-
-
-        # Atualizar depois do sync.
-
-        await update_stats_snapshot()
-
-
-        # =================================================
-        # START STATISTICS LOOP
-        # =================================================
-
-        if (
-
-            statistics_task is None
-
-            or statistics_task.done()
-
-        ):
-
-            statistics_task = asyncio.create_task(
-
-                statistics_loop()
-
-            )
-
-
+            print(f"   /{command.name}")
     except Exception as error:
-
-        print(
-            f"❌ Error syncing commands: {error}"
-        )
-
-
-        # Mesmo que o sync falhe,
-        # continuar com o heartbeat.
-
-        await update_stats_snapshot()
+        print(f"❌ Command sync error: {error}")
+    if statistics_task is None or statistics_task.done():
+        statistics_task = asyncio.create_task(statistics_loop())
 
 
-        if (
+EXTENSIONS = [
+    "cogs.config",
+    "cogs.tickets",
+    "cogs.stats",
+    "cogs.verification",
+    "cogs.jail",
+    "cogs.moderation",
+    "cogs.announcements",
+    "cogs.utility",
+    "cogs.licenses",
+    "cogs.triggers",
+    "cogs.impersonate",
+]
 
-            statistics_task is None
-
-            or statistics_task.done()
-
-        ):
-
-            statistics_task = asyncio.create_task(
-
-                statistics_loop()
-
-            )
-
-
-# =========================================================
-# LOAD EXTENSIONS
-# =========================================================
 
 async def load_extensions():
-
-    extensions = [
-
-        "cogs.config",
-
-        "cogs.tickets",
-
-        "cogs.stats",
-
-        "cogs.verification",
-
-        "cogs.jail",
-
-        "cogs.moderation",
-
-        "cogs.announcements",
-
-        "cogs.utility",
-
-        "cogs.licenses",
-
-        "cogs.triggers",
-
-        "cogs.impersonate",
-
-    ]
-
-
-    for extension in extensions:
-
+    for extension in EXTENSIONS:
         try:
-
-            await bot.load_extension(
-                extension
-            )
-
-
-            print(
-                f"Loaded: {extension}"
-            )
-
-
+            await bot.load_extension(extension)
+            print(f"🧩 Loaded extension: {extension}")
         except Exception as error:
+            print(f"❌ Failed to load extension {extension}: {error}")
 
-            print(
-                f"❌ Failed to load "
-                f"{extension}: {error}"
-            )
-
-
-# =========================================================
-# MAIN
-# =========================================================
 
 async def main():
-
-    token = os.getenv(
-        "DISCORD_BOT_TOKEN"
-    )
-
-    database_url = os.getenv(
-        "DATABASE_URL"
-    )
-
-
+    token = os.getenv("DISCORD_BOT_TOKEN")
     if not token:
-
-        print(
-            "❌ DISCORD_BOT_TOKEN não está configurado."
-        )
-
-        return
-
-
-    if not database_url:
-
-        print(
-            "❌ DATABASE_URL não está configurado."
-        )
-
-        return
-
-
-    print(
-        "🗄️ DATABASE_URL encontrada."
-    )
-
-
-    # =====================================================
-    # INITIALIZE STATISTICS DATABASE
-    # =====================================================
-
+        raise RuntimeError("DISCORD_BOT_TOKEN não está configurado.")
+    if not DATABASE_URL:
+        raise RuntimeError("DATABASE_URL não está configurado.")
     initialize_statistics_database()
-
-
-    # =====================================================
-    # LOAD EXTENSIONS
-    # =====================================================
-
     await load_extensions()
+    await bot.start(token)
 
-
-    # =====================================================
-    # START BOT
-    # =====================================================
-
-    print(
-        "🚀 Starting Discord bot..."
-    )
-
-
-    print(
-        f"🧪 Message Content Intent: "
-        f"{bot.intents.message_content}"
-    )
-
-
-    await bot.start(
-        token
-    )
-
-
-# =========================================================
-# START
-# =========================================================
 
 if __name__ == "__main__":
-
-    asyncio.run(
-        main()
-    )
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("🛑 Bot stopped.")
