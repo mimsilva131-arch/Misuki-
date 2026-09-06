@@ -6,191 +6,62 @@ Misuki
 
 {% block content %}
 
-<!-- =====================================================
-     SERVER MANAGEMENT
-====================================================== -->
-
 <section class="section">
-
     <div class="container">
 
-        <!-- =================================================
-             BACK TO DASHBOARD
-        ================================================== -->
-
-        <a
-            class="manage-back"
-            href="/dashboard"
-            data-i18n="license.back_to_dashboard"
-        >
+        <a class="manage-back" href="/dashboard" data-i18n="license.back_to_dashboard">
             ← Back to Dashboard
         </a>
 
-
-        <!-- =================================================
-             SERVER CARD
-        ================================================== -->
-
         <div class="card manage-card">
 
-            <!-- =================================================
-                 SERVER HEADER
-            ================================================== -->
-
             <div class="manage-server-header">
-
                 {% if guild.icon %}
-
-                    <img
-                        class="server-icon"
-                        src="https://cdn.discordapp.com/icons/{{ guild.id }}/{{ guild.icon }}.png?size=128"
-                        alt=""
-                    >
-
+                    <img class="server-icon" src="https://cdn.discordapp.com/icons/{{ guild.id }}/{{ guild.icon }}.png?size=128" alt="">
                 {% else %}
-
-                    <div class="server-icon-placeholder">
-                        {{ guild.name[0] }}
-                    </div>
-
+                    <div class="server-icon-placeholder">{{ guild.name[0] }}</div>
                 {% endif %}
-
 
                 <div class="manage-server-info">
-
-                    <h1>
-                        {{ guild.name }}
-                    </h1>
-
-                    <div class="server-id">
-                        {{ guild.id }}
-                    </div>
-
+                    <h1>{{ guild.name }}</h1>
+                    <div class="server-id">{{ guild.id }}</div>
                 </div>
-
             </div>
 
-
             <!-- =================================================
-                 LICENSE
+                 LICENSE - TEMPORARILY HIDDEN
+                 The license system/backend is intentionally kept.
             ================================================== -->
-
-            <div class="manage-license">
-
-                <h2 data-i18n="license.title">
-                    🔐 License
-                </h2>
-
-
+            <div class="manage-license" style="display:none !important;">
                 {% if license_data %}
-
                     {% set status = license_data[2] %}
-
-
-                    <!-- =================================================
-                         STATUS
-                    ================================================== -->
-
                     <p>
-
                         <span data-i18n="license.status">Status</span>:
-
                         {% if license_active %}
-
-                            <span class="status-active" data-i18n="license.active">
-                                🟢 Active
-                            </span>
-
+                            <span class="status-active" data-i18n="license.active">🟢 Active</span>
                         {% elif status == "expired" %}
-
-                            <span class="status-expired" data-i18n="license.expired">
-                                🔴 Expired
-                            </span>
-
+                            <span class="status-expired" data-i18n="license.expired">🔴 Expired</span>
                         {% elif status == "revoked" %}
-
-                            <span class="status-revoked" data-i18n="license.revoked">
-                                ⛔ Revoked
-                            </span>
-
+                            <span class="status-revoked" data-i18n="license.revoked">⛔ Revoked</span>
                         {% else %}
-
-                            <span>
-                                ⚪ {{ status }}
-                            </span>
-
+                            <span>⚪ {{ status }}</span>
                         {% endif %}
-
                     </p>
-
-
-                    <!-- =================================================
-                         LICENSE KEY
-                    ================================================== -->
-
-                    <p>
-
-                        <strong data-i18n="license.key">
-                            License Key
-                        </strong>
-
-                    </p>
-
-
-                    <div class="license-key">
-                        {{ license_data[1] }}
-                    </div>
-
-
-                    <!-- =================================================
-                         EXPIRATION
-                    ================================================== -->
-
-                    <p class="manage-expiration">
-
-                        <strong data-i18n="license.expires">
-                            Expires
-                        </strong>
-
-                    </p>
-
-
+                    <p><strong data-i18n="license.key">License Key</strong></p>
+                    <div class="license-key">{{ license_data[1] }}</div>
+                    <p class="manage-expiration"><strong data-i18n="license.expires">Expires</strong></p>
                     {% if license_data[3] %}
-
-                        <p>
-                            {{ license_data[3] }}
-                        </p>
-
+                        <p>{{ license_data[3] }}</p>
                     {% else %}
-
-                        <p data-i18n="license.never">
-                            Never
-                        </p>
-
+                        <p data-i18n="license.never">Never</p>
                     {% endif %}
-
-
                 {% else %}
-
-                    <!-- =================================================
-                         NO LICENSE
-                    ================================================== -->
-
-                    <div class="empty" data-i18n="license.missing">
-
-                        🔒 This server does not
-                        have a Misuki license.
-
-                    </div>
-
+                    <div class="empty" data-i18n="license.missing">🔒 This server does not have a Misuki license.</div>
                 {% endif %}
-
             </div>
 
         </div>
-
     </div>
-
 </section>
 
 {% endblock %}
