@@ -19,10 +19,6 @@ Misuki — Dashboard
 
         <div class="container">
 
-            <!-- =================================================
-                 PAGE HEADER
-            ================================================== -->
-
             <div class="dashboard-header">
 
                 <div>
@@ -45,18 +41,12 @@ Misuki — Dashboard
 
             </div>
 
-
-            <!-- =================================================
-                 AUTHORIZED SERVERS
-            ================================================== -->
-
             <h2 data-i18n="common.authorized_servers"
                 class="section-title"
                 style="margin-top:50px;"
             >
                 🔐 Authorized Servers
             </h2>
-
 
             {% if authorized %}
 
@@ -65,8 +55,6 @@ Misuki — Dashboard
                     {% for guild in authorized %}
 
                         <div class="card server-card">
-
-                            <!-- SERVER INFO -->
 
                             <div class="server-top">
 
@@ -86,7 +74,6 @@ Misuki — Dashboard
 
                                 {% endif %}
 
-
                                 <div style="min-width:0;">
 
                                     <div class="server-name">
@@ -100,42 +87,6 @@ Misuki — Dashboard
                                 </div>
 
                             </div>
-
-
-                            <!-- LICENSE -->
-
-                            <div class="badges">
-
-                                {% if guild.license_active %}
-
-                                    <span class="badge badge-active">
-                                        <span data-i18n="dashboard.license">License</span> 🟢
-                                    </span>
-
-                                {% elif guild.license_status == "expired" %}
-
-                                    <span class="badge badge-expired">
-                                        <span data-i18n="dashboard.license">License</span> 🔴
-                                    </span>
-
-                                {% elif guild.license_status == "revoked" %}
-
-                                    <span class="badge badge-expired">
-                                        <span data-i18n="dashboard.license">License</span> ⛔
-                                    </span>
-
-                                {% else %}
-
-                                    <span class="badge badge-none">
-                                        <span data-i18n="dashboard.license">License</span> ⚪
-                                    </span>
-
-                                {% endif %}
-
-                            </div>
-
-
-                            <!-- MANAGE -->
 
                             <a
                                 class="button manage"
@@ -158,18 +109,12 @@ Misuki — Dashboard
 
             {% endif %}
 
-
-            <!-- =================================================
-                 AVAILABLE SERVERS
-            ================================================== -->
-
             <h2 data-i18n="common.available_servers"
                 class="section-title"
                 style="margin-top:65px;"
             >
                 ➕ Available Servers
             </h2>
-
 
             {% if available %}
 
@@ -178,8 +123,6 @@ Misuki — Dashboard
                     {% for guild in available %}
 
                         <div class="card server-card">
-
-                            <!-- SERVER INFO -->
 
                             <div class="server-top">
 
@@ -199,7 +142,6 @@ Misuki — Dashboard
 
                                 {% endif %}
 
-
                                 <div style="min-width:0;">
 
                                     <div class="server-name">
@@ -214,37 +156,7 @@ Misuki — Dashboard
 
                             </div>
 
-
-                            <!-- BADGES -->
-
                             <div class="badges">
-
-                                {% if guild.license_active %}
-
-                                    <span class="badge badge-active">
-                                        <span data-i18n="dashboard.license">License</span> 🟢
-                                    </span>
-
-                                {% elif guild.license_status == "expired" %}
-
-                                    <span class="badge badge-expired">
-                                        <span data-i18n="dashboard.license">License</span> 🔴
-                                    </span>
-
-                                {% elif guild.license_status == "revoked" %}
-
-                                    <span class="badge badge-expired">
-                                        <span data-i18n="dashboard.license">License</span> ⛔
-                                    </span>
-
-                                {% else %}
-
-                                    <span class="badge badge-none">
-                                        <span data-i18n="dashboard.license">License</span> ⚪
-                                    </span>
-
-                                {% endif %}
-
 
                                 {% if guild.can_add %}
 
@@ -261,9 +173,6 @@ Misuki — Dashboard
                                 {% endif %}
 
                             </div>
-
-
-                            <!-- ADD BOT -->
 
                             {% if guild.can_add %}
 
@@ -297,11 +206,6 @@ Misuki — Dashboard
 
             {% endif %}
 
-
-            <!-- =================================================
-                 REVIEW BUTTON
-            ================================================== -->
-
             <div
                 style="
                     margin-top:60px;
@@ -326,7 +230,6 @@ Misuki — Dashboard
 </main>
 
 {% endblock %}
-
 
 {% block extra_js %}
 
