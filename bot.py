@@ -6,7 +6,6 @@
 import os
 import asyncio
 import json
-import re
 import time
 
 import discord
@@ -39,42 +38,23 @@ def count_commands(commands_list):
 
 
 def is_human_member(member):
-    """Return True only for real users, excluding Discord bots and legacy name#number accounts."""
-    # Discord's official bot flag is the primary check.
-    if bool(getattr(member, "bot", False)):
-        return False
-
-    # Legacy Discord accounts expose the old #1234 discriminator
-    # separately through member.discriminator, rather than including it
-    # in member.name. Exclude those accounts from the statistics count.
-    discriminator = str(getattr(member, "discriminator", "") or "").strip()
-    if discriminator.isdigit() and discriminator != "0":
-        return False
-
-    # Also keep the explicit Name#1234 check for imported/legacy data
-    # where the discriminator may already be part of a displayed name.
-    names_to_check = (
-        getattr(member, "name", None),
-        getattr(member, "global_name", None),
-        getattr(member, "display_name", None),
-    )
-
-    for value in names_to_check:
-        username = str(value or "").strip()
-        if re.search(r"#\d{1,6}$", username):
-            return False
-
-    return True
+    """Return True for real Discord users and False for Discord bot accounts."""
+    return not bool(getattr(member, "bot", False))
 
 
 async def count_statistics_users():
-    """Count unique real users across all guilds, excluding bots and name#number accounts."""
+    """Count unique real Discord users across all guilds, excluding bot accounts."""
     user_ids = set()
+    total_seen = 0
+    bots_excluded = 0
 
     for guild in bot.guilds:
         try:
             async for member in guild.fetch_members(limit=None):
+                total_seen += 1
+
                 if not is_human_member(member):
+                    bots_excluded += 1
                     continue
 
                 user_id = getattr(member, "id", None)
@@ -86,12 +66,19 @@ async def count_statistics_users():
             )
 
             for member in guild.members:
+                total_seen += 1
+
                 if not is_human_member(member):
+                    bots_excluded += 1
                     continue
 
                 user_id = getattr(member, "id", None)
                 if user_id is not None:
                     user_ids.add(user_id)
+
+    print(f"   Members scanned: {total_seen}")
+    print(f"   Bots excluded: {bots_excluded}")
+    print(f"   Unique human users: {len(user_ids)}")
 
     return len(user_ids)
 
