@@ -3278,6 +3278,44 @@ def get_all_advertisements():
 
 
 # =========================================================
+# =========================================================
+# TEMPORARY REVIEW AUTHORIZATION
+# =========================================================
+def user_can_review():
+    """Allow reviews temporarily for users who manage a server where Misuki is installed."""
+    user = get_user()
+    if not user:
+        return False
+
+    access_token = session.get("access_token")
+    if not access_token:
+        return False
+
+    try:
+        user_guilds = get_user_guilds()
+        bot_guild_ids = {
+            str(guild.get("id"))
+            for guild in get_bot_guilds()
+            if guild.get("id")
+        }
+
+        for guild in user_guilds:
+            guild_id = str(guild.get("id"))
+            if guild_id not in bot_guild_ids:
+                continue
+
+            if str(guild.get("owner", False)).lower() == "true":
+                return True
+
+            if can_manage_guild(guild):
+                return True
+
+    except Exception as error:
+        print(f"⚠️ Review authorization check error: {error}")
+
+    return False
+
+
 # USER HAS ACTIVE LICENSE — OPTIMIZED
 # =========================================================
 
@@ -3738,7 +3776,7 @@ def reviews():
     if user:
 
         can_review = (
-            user_has_license()
+            user_can_review()
         )
 
     return render_template(
@@ -4069,11 +4107,31 @@ def statistics():
 
             admin_users = []
 
+    # Always read activity counters from bot_statistics after any legacy calculations.
+    # The bot cogs maintain these counters directly in PostgreSQL.
+    try:
+        with database_connection() as stats_connection:
+            with stats_connection.cursor() as stats_cursor:
+                stats_cursor.execute(
+                    """
+                    SELECT tickets, moderation_actions, announcements
+                    FROM bot_statistics
+                    WHERE id = 1
+                    """
+                )
+                activity_row = stats_cursor.fetchone()
+                if activity_row:
+                    statistics_data["tickets"] = int(activity_row[0] or 0)
+                    statistics_data["moderation_actions"] = int(activity_row[1] or 0)
+                    statistics_data["announcements"] = int(activity_row[2] or 0)
+    except Exception as error:
+        print(f"⚠️ Could not refresh activity statistics: {error}")
+
     admin_statistics = {
         "commands": statistics_data["commands"],
         "tickets": statistics_data["tickets"],
-        "moderation": moderation_actions,
-        "announcements": 0,
+        "moderation": statistics_data["moderation_actions"],
+        "announcements": statistics_data["announcements"],
     }
 
     return render_template(
@@ -4338,9 +4396,9 @@ def get_admin_users(admin_servers):
             "tickets"
         ],
 
-        "moderation": moderation_actions,
+        "moderation": statistics_data["moderation_actions"],
 
-        "announcements": 0,
+        "announcements": statistics_data["announcements"],
     }
 
 
@@ -4805,9 +4863,9 @@ def statistics_api():
                 "tickets"
             ],
 
-            "moderation": moderation_actions,
+            "moderation": statistics_data["moderation_actions"],
 
-            "announcements": 0,
+            "announcements": statistics_data["announcements"],
         }
 
 

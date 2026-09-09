@@ -864,6 +864,44 @@ def license_is_active(guild_id):
 
 
 # =========================================================
+# =========================================================
+# TEMPORARY REVIEW AUTHORIZATION
+# =========================================================
+def user_can_review():
+    """Allow reviews temporarily for users who manage a server where Misuki is installed."""
+    user = get_user()
+    if not user:
+        return False
+
+    access_token = session.get("access_token")
+    if not access_token:
+        return False
+
+    try:
+        user_guilds = get_user_guilds()
+        bot_guild_ids = {
+            str(guild.get("id"))
+            for guild in get_bot_guilds()
+            if guild.get("id")
+        }
+
+        for guild in user_guilds:
+            guild_id = str(guild.get("id"))
+            if guild_id not in bot_guild_ids:
+                continue
+
+            if str(guild.get("owner", False)).lower() == "true":
+                return True
+
+            if can_manage_guild(guild):
+                return True
+
+    except Exception as error:
+        print(f"⚠️ Review authorization check error: {error}")
+
+    return False
+
+
 # USER HAS ACTIVE LICENSE
 # =========================================================
 
@@ -3096,7 +3134,7 @@ def reviews():
 
     if user:
 
-        can_review = user_has_license()
+        can_review = user_can_review()
 
     return render_template(
         "reviews.html",
