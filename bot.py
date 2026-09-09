@@ -38,46 +38,56 @@ def count_commands(commands_list):
 
 
 def is_human_member(member):
-    """Return True for real Discord users and False for Discord bot accounts."""
+    """Discord's authoritative bot flag: human accounts only."""
     return not bool(getattr(member, "bot", False))
 
 
 async def count_statistics_users():
-    """Count unique real Discord users across all guilds, excluding bot accounts."""
+    """Count unique human Discord users across all guilds."""
     user_ids = set()
-    total_seen = 0
-    bots_excluded = 0
+    scanned = 0
+    excluded_bots = 0
 
     for guild in bot.guilds:
+        guild_seen = set()
         try:
-            async for member in guild.fetch_members(limit=None):
-                total_seen += 1
-
-                if not is_human_member(member):
-                    bots_excluded += 1
+            async for member in guild.fetch_members(limit=None, cache=False):
+                member_id = getattr(member, "id", None)
+                if member_id is None or member_id in guild_seen:
                     continue
 
-                user_id = getattr(member, "id", None)
-                if user_id is not None:
-                    user_ids.add(user_id)
+                guild_seen.add(member_id)
+                scanned += 1
+
+                if not is_human_member(member):
+                    excluded_bots += 1
+                    continue
+
+                user_ids.add(member_id)
+
         except Exception as error:
             print(
                 f"⚠️ Could not fetch members for {guild.name} ({guild.id}): {error}"
             )
 
+            # Use the cache only as a fallback. Never classify bots by username,
+            # discriminator or display name: those are not reliable identifiers.
             for member in guild.members:
-                total_seen += 1
-
-                if not is_human_member(member):
-                    bots_excluded += 1
+                member_id = getattr(member, "id", None)
+                if member_id is None or member_id in guild_seen:
                     continue
 
-                user_id = getattr(member, "id", None)
-                if user_id is not None:
-                    user_ids.add(user_id)
+                guild_seen.add(member_id)
+                scanned += 1
 
-    print(f"   Members scanned: {total_seen}")
-    print(f"   Bots excluded: {bots_excluded}")
+                if not is_human_member(member):
+                    excluded_bots += 1
+                    continue
+
+                user_ids.add(member_id)
+
+    print(f"   Members scanned: {scanned}")
+    print(f"   Bots excluded: {excluded_bots}")
     print(f"   Unique human users: {len(user_ids)}")
 
     return len(user_ids)
@@ -234,6 +244,8 @@ async def update_stats_snapshot():
         channels_count = sum(len(guild.channels) for guild in bot.guilds)
         connection = get_database_connection()
         with connection.cursor() as cursor:
+            # IMPORTANT: activity counters are maintained by their cogs.
+            # Do not overwrite tickets/moderation/announcements here.
             cursor.execute("""
                 UPDATE bot_statistics
                 SET
