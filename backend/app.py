@@ -4894,11 +4894,11 @@ def submit_review():
             "/login"
         )
 
-    if not user_has_license():
+    if not user_can_review():
 
         return error_page(
             "🔒 License required",
-            "Only users with an active Misuki license can submit reviews.",
+            "Only users who have added Misuki to a server can submit reviews.",
             403,
             user
         )
