@@ -18,32 +18,31 @@ jobs:
           python - <<'PY'
           from pathlib import Path
 
-          for filename in ('cogs/oauth2.py', 'backend/app.py'):
-              p = Path(filename)
-              text = p.read_text(encoding='utf-8')
-              marker = '@app.route("/reviews", methods=["POST"])'
-              start = text.find(marker)
-              if start < 0:
-                  raise RuntimeError(f'{filename}: POST review route not found')
-              end = text.find('\n@app.route(', start + len(marker))
-              if end < 0:
-                  end = len(text)
-              block = text[start:end]
-              if 'if not user_has_license():' not in block:
-                  raise RuntimeError(f'{filename}: expected license review guard not found')
-              block = block.replace('if not user_has_license():', 'if not user_can_review():', 1)
-              block = block.replace(
-                  'Only users with an active Misuki license can submit reviews.',
-                  'Only users who have added Misuki to a server can submit reviews.'
-              )
-              text = text[:start] + block + text[end:]
-              p.write_text(text, encoding='utf-8')
+          p = Path('backend/app.py')
+          text = p.read_text(encoding='utf-8')
+          marker = 'def submit_review():'
+          start = text.find(marker)
+          if start < 0:
+              raise RuntimeError('backend/app.py: submit_review not found')
+          end = text.find('\n@app.route(', start + len(marker))
+          if end < 0:
+              end = len(text)
+          block = text[start:end]
+          if 'if not user_has_license():' not in block:
+              raise RuntimeError('backend/app.py: expected review license guard not found')
+          block = block.replace('if not user_has_license():', 'if not user_can_review():', 1)
+          block = block.replace(
+              'Only users with an active Misuki license can submit reviews.',
+              'Only users who have added Misuki to a server can submit reviews.'
+          )
+          text = text[:start] + block + text[end:]
+          p.write_text(text, encoding='utf-8')
           PY
       - name: Commit and remove workflow
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add cogs/oauth2.py backend/app.py .github/workflows/finalize-misuki-fixes.yml
+          git add backend/app.py .github/workflows/finalize-misuki-fixes.yml
           git rm .github/workflows/finalize-misuki-fixes.yml
           git commit -m 'Finalize Misuki fixes'
           git push
