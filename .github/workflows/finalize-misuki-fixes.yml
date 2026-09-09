@@ -47,3 +47,5 @@ jobs:
           git rm .github/workflows/finalize-misuki-fixes.yml
           git commit -m 'Finalize Misuki fixes'
           git push
+
+# Trigger execution after workflow installation.
