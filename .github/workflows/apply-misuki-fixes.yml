@@ -1,0 +1,140 @@
+name: Apply Misuki fixes
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: ${{ !contains(github.event.head_commit.message, 'Apply Misuki fixes') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Patch application
+        env:
+          PYTHONUNBUFFERED: '1'
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          REVIEW_HELPER = '''# =========================================================
+          # TEMPORARY REVIEW AUTHORIZATION
+          # =========================================================
+          def user_can_review():
+              """Allow reviews temporarily for users who manage a server where Misuki is installed."""
+              user = get_user()
+              if not user:
+                  return False
+
+              access_token = session.get("access_token")
+              if not access_token:
+                  return False
+
+              try:
+                  user_guilds = get_user_guilds()
+                  bot_guild_ids = {
+                      str(guild.get("id"))
+                      for guild in get_bot_guilds()
+                      if guild.get("id")
+                  }
+
+                  for guild in user_guilds:
+                      guild_id = str(guild.get("id"))
+                      if guild_id not in bot_guild_ids:
+                          continue
+
+                      if str(guild.get("owner", False)).lower() == "true":
+                          return True
+
+                      if can_manage_guild(guild):
+                          return True
+
+              except Exception as error:
+                  print(f"⚠️ Review authorization check error: {error}")
+
+              return False
+
+          '''
+
+          def patch_reviews(path: Path):
+              text = path.read_text(encoding='utf-8')
+
+              if 'def user_can_review()' not in text:
+                  marker = '# USER HAS ACTIVE LICENSE'
+                  if marker not in text:
+                      raise RuntimeError(f'{path}: review insertion marker not found')
+                  text = text.replace(marker, REVIEW_HELPER + '\n' + marker, 1)
+
+              pattern = re.compile(r'(@app\.route\("/reviews"[^\n]*\).*?)(?=\n@app\.route\(|\Z)', re.S)
+              matches = list(pattern.finditer(text))
+              if not matches:
+                  raise RuntimeError(f'{path}: review routes not found')
+
+              pieces = []
+              last = 0
+              for m in matches:
+                  block = m.group(1)
+                  if 'user_has_license()' in block:
+                      block = block.replace('user_has_license()', 'user_can_review()')
+                      block = block.replace(
+                          'Only users with an active Misuki license can submit reviews.',
+                          'Only users who have added Misuki to a server can submit reviews.'
+                      )
+                  pieces.append(text[last:m.start(1)])
+                  pieces.append(block)
+                  last = m.end(1)
+              pieces.append(text[last:])
+              text = ''.join(pieces)
+
+              path.write_text(text, encoding='utf-8')
+
+          def patch_stats(path: Path):
+              text = path.read_text(encoding='utf-8')
+
+              marker = '    admin_statistics = {\n'
+              if marker not in text:
+                  raise RuntimeError(f'{path}: admin_statistics marker not found')
+
+              refresh = '''    # Always read activity counters from bot_statistics after any legacy calculations.\n    # The bot cogs maintain these counters directly in PostgreSQL.\n    try:\n        with database_connection() as stats_connection:\n            with stats_connection.cursor() as stats_cursor:\n                stats_cursor.execute(\n                    """\n                    SELECT tickets, moderation_actions, announcements\n                    FROM bot_statistics\n                    WHERE id = 1\n                    """\n                )\n                activity_row = stats_cursor.fetchone()\n                if activity_row:\n                    statistics_data["tickets"] = int(activity_row[0] or 0)\n                    statistics_data["moderation_actions"] = int(activity_row[1] or 0)\n                    statistics_data["announcements"] = int(activity_row[2] or 0)\n    except Exception as error:\n        print(f"⚠️ Could not refresh activity statistics: {error}")\n\n'''
+
+              if 'Always read activity counters from bot_statistics' not in text:
+                  text = text.replace(marker, refresh + marker, 1)
+
+              text = text.replace(
+                  '        "moderation": moderation_actions,\n',
+                  '        "moderation": statistics_data["moderation_actions"],\n'
+              )
+              text = text.replace(
+                  '        "announcements": 0,\n',
+                  '        "announcements": statistics_data["announcements"],\n'
+              )
+
+              path.write_text(text, encoding='utf-8')
+
+          for name in ('cogs/oauth2.py', 'backend/app.py'):
+              patch_reviews(Path(name))
+
+          patch_stats(Path('backend/app.py'))
+          print('All Misuki fixes applied.')
+          PY
+
+      - name: Commit changes and remove temporary workflow
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add cogs/oauth2.py backend/app.py .github/workflows/apply-misuki-fixes.yml
+          git rm .github/workflows/apply-misuki-fixes.yml
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Apply Misuki fixes'
+          git push
