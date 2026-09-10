@@ -1,0 +1,51 @@
+name: Fix statistics KeyError
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fix statistics response fallback
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("backend/app.py")
+          text = path.read_text(encoding="utf-8")
+
+          old = '"moderation": statistics_data["moderation_actions"],'
+          new = '"moderation": int(statistics_data.get("moderation_actions", 0) or 0),'
+
+          if old not in text:
+              raise SystemExit("Expected statistics moderation line was not found.")
+
+          text = text.replace(old, new, 1)
+          path.write_text(text, encoding="utf-8")
+          PY
+
+      - name: Commit fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add backend/app.py
+          git diff --cached --quiet && exit 0
+          git commit -m "Fix statistics moderation KeyError"
+          git push
+
+      - name: Remove temporary workflow
+        if: always()
+        run: |
+          git rm .github/workflows/fix-statistics-keyerror.yml || true
+          git diff --cached --quiet && exit 0
+          git commit -m "Remove temporary statistics fix workflow"
+          git push
