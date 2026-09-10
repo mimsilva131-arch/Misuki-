@@ -4130,7 +4130,7 @@ def statistics():
     admin_statistics = {
         "commands": statistics_data["commands"],
         "tickets": statistics_data["tickets"],
-        "moderation": statistics_data["moderation_actions"],
+        "moderation": int(statistics_data.get("moderation_actions", 0) or 0),
         "announcements": statistics_data["announcements"],
     }
 
