@@ -43,6 +43,7 @@ def is_human_member(member):
 
 
 BOT_INSTALLERS = {}
+BOT_GUILD_HUMAN_COUNTS = {}
 
 
 async def refresh_bot_installers():
@@ -70,6 +71,7 @@ async def refresh_bot_installers():
 
 async def count_statistics_users():
     """Count unique human Discord users across all guilds."""
+    BOT_GUILD_HUMAN_COUNTS.clear()
     user_ids = set()
     scanned = 0
     excluded_bots = 0
@@ -91,6 +93,11 @@ async def count_statistics_users():
 
                 user_ids.add(member_id)
 
+            BOT_GUILD_HUMAN_COUNTS[str(guild.id)] = len(
+                [member_id for member_id in guild_seen
+                 if member_id in user_ids]
+            )
+
         except Exception as error:
             print(
                 f"⚠️ Could not fetch members for {guild.name} ({guild.id}): {error}"
@@ -109,6 +116,11 @@ async def count_statistics_users():
                     continue
 
                 user_ids.add(member_id)
+
+            BOT_GUILD_HUMAN_COUNTS[str(guild.id)] = len(
+                [member_id for member_id in guild_seen
+                 if member_id in user_ids]
+            )
 
     print(f"   Members scanned: {scanned}")
     print(f"   Bots excluded: {excluded_bots}")
@@ -237,8 +249,9 @@ def get_detected_servers():
             "owner_id": installer_id,
             "installer_id": installer_id,
             "server_owner_id": str(guild.owner_id) if guild.owner_id else None,
-            "members": sum(
-                1 for member in guild.members if is_human_member(member)
+            "members": BOT_GUILD_HUMAN_COUNTS.get(
+                str(guild.id),
+                sum(1 for member in guild.members if is_human_member(member))
             )
         })
     return servers

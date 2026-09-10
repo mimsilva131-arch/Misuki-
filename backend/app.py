@@ -4128,10 +4128,10 @@ def statistics():
         print(f"⚠️ Could not refresh activity statistics: {error}")
 
     admin_statistics = {
-        "commands": statistics_data["commands"],
-        "tickets": statistics_data["tickets"],
+        "commands": int(statistics_data.get("commands", 0) or 0),
+        "tickets": int(statistics_data.get("tickets", 0) or 0),
         "moderation": int(statistics_data.get("moderation_actions", 0) or 0),
-        "announcements": statistics_data["announcements"],
+        "announcements": int(statistics_data.get("announcements", 0) or 0),
     }
 
     return render_template(
@@ -4864,7 +4864,7 @@ def statistics_api():
                 "tickets"
             ],
 
-            "moderation": statistics_data["moderation_actions"],
+            "moderation": int(statistics_data.get("moderation_actions", 0) or 0),
 
             "announcements": statistics_data["announcements"],
         }
