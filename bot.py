@@ -42,6 +42,32 @@ def is_human_member(member):
     return not bool(getattr(member, "bot", False))
 
 
+BOT_INSTALLERS = {}
+
+
+async def refresh_bot_installers():
+    """Find who actually added Misuki in each guild using Discord's audit log."""
+    if not bot.user:
+        return
+
+    for guild in bot.guilds:
+        try:
+            async for entry in guild.audit_logs(
+                limit=50,
+                action=discord.AuditLogAction.bot_add
+            ):
+                target = getattr(entry, "target", None)
+                target_id = getattr(target, "id", None)
+                if target_id == bot.user.id:
+                    actor = getattr(entry, "user", None)
+                    actor_id = getattr(actor, "id", None)
+                    if actor_id:
+                        BOT_INSTALLERS[str(guild.id)] = str(actor_id)
+                    break
+        except Exception as error:
+            print(f"⚠️ Could not read installer audit log for {guild.name} ({guild.id}): {error}")
+
+
 async def count_statistics_users():
     """Count unique human Discord users across all guilds."""
     user_ids = set()
@@ -51,7 +77,7 @@ async def count_statistics_users():
     for guild in bot.guilds:
         guild_seen = set()
         try:
-            async for member in guild.fetch_members(limit=None, cache=False):
+            async for member in guild.fetch_members(limit=None, cache=True):
                 member_id = getattr(member, "id", None)
                 if member_id is None or member_id in guild_seen:
                     continue
@@ -208,6 +234,7 @@ def get_detected_servers():
             "id": str(guild.id),
             "icon": icon,
             "owner_id": str(guild.owner_id) if guild.owner_id else None,
+            "installer_id": BOT_INSTALLERS.get(str(guild.id)),
             "members": sum(
                 1 for member in guild.members if is_human_member(member)
             )
@@ -231,10 +258,11 @@ def print_detected_servers():
 async def update_stats_snapshot():
     connection = None
     try:
+        await refresh_bot_installers()
+        users_count = await count_statistics_users()
         detected_servers = get_detected_servers()
         servers_count = len(detected_servers)
         commands_count = count_commands(bot.tree.get_commands())
-        users_count = await count_statistics_users()
         verifications_count = count_verified_users()
         last_seen = time.time()
         latency = round(bot.latency * 1000)

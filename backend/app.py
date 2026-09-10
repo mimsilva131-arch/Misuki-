@@ -4175,11 +4175,12 @@ def get_admin_users(admin_servers):
         "Content-Type": "application/json"
     }
 
-    # IDs dos donos dos servidores que adicionaram o Misuki
+    # IDs reais de quem adicionou o Misuki, obtidos pelo bot
+    # através do Audit Log do Discord.
     bot_installer_ids = {
-        str(server.get("owner_id"))
+        str(server.get("installer_id"))
         for server in (admin_servers or [])
-        if server.get("owner_id")
+        if server.get("installer_id")
     }
 
     for server in admin_servers or []:
