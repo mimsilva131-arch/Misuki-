@@ -4397,7 +4397,7 @@ def get_admin_users(admin_servers):
             "tickets"
         ],
 
-        "moderation": statistics_data["moderation_actions"],
+        "moderation": int(statistics_data.get("moderation_actions", 0) or 0),
 
         "announcements": statistics_data["announcements"],
     }
