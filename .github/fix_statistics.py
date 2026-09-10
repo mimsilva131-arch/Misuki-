@@ -6,19 +6,8 @@ b = backend.read_text(encoding="utf-8")
 s = stats.read_text(encoding="utf-8")
 
 route = b.index('@app.route("/statistics")')
-start = b.index(
-    '    # =====================================================\n'
-    '    # BOT SNAPSHOT\n'
-    '    # =====================================================\n\n'
-    '    bot_snapshot = {}',
-    route,
-)
-end = b.index(
-    '    # =====================================================\n'
-    '    # HEARTBEAT\n'
-    '    # =====================================================',
-    start,
-)
+start = b.index('    # =====================================================\n    # BOT SNAPSHOT\n    # =====================================================\n\n    bot_snapshot = {}', route)
+end = b.index('    # =====================================================\n    # HEARTBEAT\n    # =====================================================', start)
 
 replacement = '''    # =====================================================
     # BOT SNAPSHOT — POSTGRESQL
@@ -60,9 +49,7 @@ replacement = '''    # =====================================================
                     ):
                         if key in bot_snapshot:
                             statistics_data[key] = bot_snapshot[key]
-                    statistics_data["version"] = os.getenv(
-                        "MISUKI_VERSION", "1.0.0"
-                    )
+                    statistics_data["version"] = os.getenv("MISUKI_VERSION", "1.0.0")
     except Exception as error:
         print(f"⚠️ Could not load live bot statistics: {error}")
 
@@ -70,11 +57,7 @@ replacement = '''    # =====================================================
 b = b[:start] + replacement + b[end:]
 
 api_route = b.index('@app.route("/api/statistics")')
-response_marker = (
-    '    # =====================================================\n'
-    '    # RESPONSE\n'
-    '    # =====================================================\n'
-)
+response_marker = '    # =====================================================\n    # RESPONSE\n    # =====================================================\n'
 response_pos = b.index(response_marker, api_route)
 activity = '''    # =====================================================
     # ACTIVITY COUNTERS — POSTGRESQL
@@ -106,13 +89,7 @@ init_start = b.index('    statistics_data = {', api_start)
 init_end = b.index('    }', init_start) + len('    }')
 init = b[init_start:init_end]
 if '"moderation_actions": 0' not in init:
-    init = init.replace(
-        '        "verifications": 0,',
-        '        "verifications": 0,\n\n'
-        '        "moderation_actions": 0,\n\n'
-        '        "announcements": 0,',
-        1,
-    )
+    init = init.replace('        "verifications": 0,', '        "verifications": 0,\n\n        "moderation_actions": 0,\n\n        "announcements": 0,', 1)
     b = b[:init_start] + init + b[init_end:]
 
 old = '''        return new Date(\n            numericValue * 1000\n        ).toLocaleString();'''
@@ -130,9 +107,8 @@ new = '''        const formatted = new Intl.DateTimeFormat(
         ).format(new Date(numericValue * 1000));
 
         return formatted.replace(", ", " ");'''
-if old not in s:
-    raise SystemExit("Expected statistics date formatter was not found")
-s = s.replace(old, new, 1)
+if old in s:
+    s = s.replace(old, new, 1)
 
 backend.write_text(b, encoding="utf-8")
 stats.write_text(s, encoding="utf-8")
