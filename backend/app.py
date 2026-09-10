@@ -3829,62 +3829,48 @@ def statistics():
 
 
     # =====================================================
-    # BOT SNAPSHOT
+    # BOT SNAPSHOT — POSTGRESQL
     # =====================================================
 
     bot_snapshot = {}
 
     try:
-
-        bot_stats_file = os.path.join(
-            BASE_DIR,
-            "data",
-            "bot_stats.json"
-        )
-
-        with open(
-            bot_stats_file,
-            encoding="utf-8"
-        ) as file:
-
-            bot_snapshot = json.load(
-                file
-            )
-
-
-        for key in (
-            "servers",
-            "users",
-            "channels",
-            "latency",
-            "commands",
-            "bot_status",
-            "uptime",
-            "verifications",
-            "updated_at",
-        ):
-
-            if key in bot_snapshot:
-
-                statistics_data[key] = (
-                    bot_snapshot[key]
-                )
-
-        statistics_data["version"] = os.getenv(
-            "MISUKI_VERSION",
-            "1.0.0"
-        )
-
-
-    except (
-        OSError,
-        json.JSONDecodeError,
-        TypeError,
-        ValueError
-    ):
-
-        pass
-
+        with database_connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT
+                        servers, users, channels, latency, commands,
+                        tickets, moderation_actions, announcements,
+                        verifications, bot_status, uptime, version,
+                        last_seen, admin_servers, updated_at
+                    FROM bot_statistics
+                    WHERE id = 1
+                """)
+                result = cursor.fetchone()
+                if result:
+                    bot_snapshot = {
+                        "servers": result[0], "users": result[1],
+                        "channels": result[2], "latency": result[3],
+                        "commands": result[4], "tickets": result[5],
+                        "moderation_actions": result[6],
+                        "announcements": result[7],
+                        "verifications": result[8],
+                        "bot_status": result[9], "uptime": result[10],
+                        "version": result[11], "last_seen": result[12],
+                        "admin_servers": result[13] or [],
+                        "updated_at": result[14],
+                    }
+                    for key in (
+                        "servers", "users", "channels", "latency",
+                        "commands", "tickets", "moderation_actions",
+                        "announcements", "verifications", "bot_status",
+                        "uptime", "updated_at"
+                    ):
+                        if key in bot_snapshot:
+                            statistics_data[key] = bot_snapshot[key]
+                    statistics_data["version"] = os.getenv("MISUKI_VERSION", "1.0.0")
+    except Exception as error:
+        print(f"⚠️ Could not load live bot statistics: {error}")
 
     # =====================================================
     # HEARTBEAT
@@ -4448,6 +4434,10 @@ def statistics_api():
         "tickets": 0,
         "verifications": 0,
 
+        "moderation_actions": 0,
+
+        "announcements": 0,
+
         "bot_status": "Offline",
 
         "database_status": "Operational",
@@ -4767,6 +4757,26 @@ def statistics_api():
             "database_status"
         ] = "Error"
 
+
+    # =====================================================
+    # ACTIVITY COUNTERS — POSTGRESQL
+    # =====================================================
+
+    try:
+        with database_connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT tickets, moderation_actions, announcements
+                    FROM bot_statistics
+                    WHERE id = 1
+                """)
+                row = cursor.fetchone()
+                if row:
+                    statistics_data["tickets"] = int(row[0] or 0)
+                    statistics_data["moderation_actions"] = int(row[1] or 0)
+                    statistics_data["announcements"] = int(row[2] or 0)
+    except Exception as error:
+        print(f"⚠️ Could not load activity counters: {error}")
 
     # =====================================================
     # RESPONSE
