@@ -96,8 +96,6 @@ async def count_statistics_users():
                 f"⚠️ Could not fetch members for {guild.name} ({guild.id}): {error}"
             )
 
-            # Use the cache only as a fallback. Never classify bots by username,
-            # discriminator or display name: those are not reliable identifiers.
             for member in guild.members:
                 member_id = getattr(member, "id", None)
                 if member_id is None or member_id in guild_seen:
@@ -229,12 +227,16 @@ def get_detected_servers():
                 icon = str(guild.icon.url)
         except Exception:
             icon = None
+        installer_id = BOT_INSTALLERS.get(str(guild.id))
         servers.append({
             "name": guild.name,
             "id": str(guild.id),
             "icon": icon,
-            "owner_id": str(guild.owner_id) if guild.owner_id else None,
-            "installer_id": BOT_INSTALLERS.get(str(guild.id)),
+            # Kept for compatibility with the existing dashboard backend.
+            # This is the actual installer, never the current guild owner.
+            "owner_id": installer_id,
+            "installer_id": installer_id,
+            "server_owner_id": str(guild.owner_id) if guild.owner_id else None,
             "members": sum(
                 1 for member in guild.members if is_human_member(member)
             )
@@ -331,11 +333,14 @@ async def on_guild_join(guild):
     print(f"   Name: {guild.name}")
     print(f"   ID: {guild.id}")
     print(f"   Members: {sum(1 for member in guild.members if is_human_member(member))}")
+    await asyncio.sleep(2)
+    await refresh_bot_installers()
     await update_stats_snapshot()
 
 
 @bot.event
 async def on_guild_remove(guild):
+    BOT_INSTALLERS.pop(str(guild.id), None)
     print("➖ Bot left a server:")
     print(f"   Name: {guild.name}")
     print(f"   ID: {guild.id}")
@@ -349,6 +354,7 @@ async def on_ready():
     print(f"🤖 Bot connected as {bot.user}")
     print(f"🟢 Bot status: {bot.status}")
     print(f"🏠 Discord guild count: {len(bot.guilds)}")
+    await refresh_bot_installers()
     print_detected_servers()
     print("📋 Comandos registados:")
     for command in bot.tree.get_commands():
