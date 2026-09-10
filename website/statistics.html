@@ -441,8 +441,10 @@ Misuki — Statistics
                     class="performance-value"
                     id="statistics-last-update"
                 >
-                    {% if statistics is defined and statistics.updated_at is not none %}
-                        {{ statistics.updated_at if statistics.updated_at else "—" }}
+                    {% if statistics is defined and statistics.updated_at is not none and statistics.updated_at %}
+                        <span data-statistics-timestamp="{{ statistics.updated_at }}">
+                            {{ statistics.updated_at }}
+                        </span>
                     {% else %}
                         —
                     {% endif %}
@@ -1320,19 +1322,7 @@ Misuki — Statistics
 
     function formatStatisticsDate(value) {
 
-        if (
-            value === null ||
-            value === undefined ||
-            value === ""
-        ) {
-
-            return "—";
-
-        }
-
-
         const numericValue = Number(value);
-
 
         if (
             !Number.isFinite(numericValue) ||
@@ -1343,12 +1333,60 @@ Misuki — Statistics
 
         }
 
-
-        return new Date(
+        const date = new Date(
             numericValue * 1000
-        ).toLocaleString();
+        );
+
+        if (Number.isNaN(date.getTime())) {
+
+            return "—";
+
+        }
+
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = date.getFullYear();
+        const hours = String(date.getHours()).padStart(2, "0");
+        const minutes = String(date.getMinutes()).padStart(2, "0");
+
+        return `${day}/${month}/${year} ${hours}:${minutes}`;
 
     }
+
+
+    function formatInitialStatisticsDate() {
+
+        const lastUpdate =
+            document.getElementById(
+                "statistics-last-update"
+            );
+
+        if (!lastUpdate) {
+
+            return;
+
+        }
+
+        const timestamp =
+            lastUpdate.querySelector(
+                "[data-statistics-timestamp]"
+            );
+
+        if (!timestamp) {
+
+            return;
+
+        }
+
+        timestamp.textContent =
+            formatStatisticsDate(
+                timestamp.dataset.statisticsTimestamp
+            );
+
+    }
+
+
+    formatInitialStatisticsDate();
 
 
     function renderServerList(servers) {
