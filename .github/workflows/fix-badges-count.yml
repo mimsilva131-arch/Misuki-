@@ -1,0 +1,76 @@
+name: Fix Misuki badges and counts
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-badges-count.yml'
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply fixes
+        env:
+          PYTHONUNBUFFERED: '1'
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p = Path('bot.py')
+          s = p.read_text(encoding='utf-8')
+
+          old = '''async def count_statistics_users():\n    """Count unique human Discord users across all guilds."""'''
+          new = '''BOT_INSTALLERS = {}\n\n\nasync def refresh_bot_installers():\n    """Find who actually added Misuki in each guild using Discord's audit log."""\n    if not bot.user:\n        return\n\n    for guild in bot.guilds:\n        try:\n            async for entry in guild.audit_logs(\n                limit=50,\n                action=discord.AuditLogAction.bot_add\n            ):\n                target = getattr(entry, "target", None)\n                target_id = getattr(target, "id", None)\n                if target_id == bot.user.id:\n                    actor = getattr(entry, "user", None)\n                    actor_id = getattr(actor, "id", None)\n                    if actor_id:\n                        BOT_INSTALLERS[str(guild.id)] = str(actor_id)\n                    break\n        except Exception as error:\n            print(f"⚠️ Could not read installer audit log for {guild.name} ({guild.id}): {error}")\n\n\nasync def count_statistics_users():\n    """Count unique human Discord users across all guilds."""'''
+          if old not in s:
+              raise SystemExit('count function anchor not found')
+          s = s.replace(old, new, 1)
+          s = s.replace('guild.fetch_members(limit=None, cache=False)', 'guild.fetch_members(limit=None, cache=True)', 1)
+
+          old = '''def get_detected_servers():\n    servers = []\n    for guild in bot.guilds:'''
+          new = '''def get_detected_servers():\n    servers = []\n    for guild in bot.guilds:'''
+          if old not in s:
+              raise SystemExit('server function anchor not found')
+
+          old = '''            "owner_id": str(guild.owner_id) if guild.owner_id else None,\n            "members": sum('''
+          new = '''            "owner_id": str(guild.owner_id) if guild.owner_id else None,\n            "installer_id": BOT_INSTALLERS.get(str(guild.id)),\n            "members": sum('''
+          if old not in s:
+              raise SystemExit('server dict anchor not found')
+          s = s.replace(old, new, 1)
+
+          old = '''async def update_stats_snapshot():\n    connection = None\n    try:\n        detected_servers = get_detected_servers()\n        servers_count = len(detected_servers)\n        commands_count = count_commands(bot.tree.get_commands())\n        users_count = await count_statistics_users()'''
+          new = '''async def update_stats_snapshot():\n    connection = None\n    try:\n        await refresh_bot_installers()\n        users_count = await count_statistics_users()\n        detected_servers = get_detected_servers()\n        servers_count = len(detected_servers)\n        commands_count = count_commands(bot.tree.get_commands())'''
+          if old not in s:
+              raise SystemExit('snapshot anchor not found')
+          s = s.replace(old, new, 1)
+
+          p.write_text(s, encoding='utf-8')
+
+          p = Path('backend/app.py')
+          s = p.read_text(encoding='utf-8')
+          old = '''    # IDs dos donos dos servidores que adicionaram o Misuki\n    bot_installer_ids = {\n        str(server.get("owner_id"))\n        for server in (admin_servers or [])\n        if server.get("owner_id")\n    }'''
+          new = '''    # IDs reais de quem adicionou o Misuki, obtidos pelo bot\n    # através do Audit Log do Discord.\n    bot_installer_ids = {\n        str(server.get("installer_id"))\n        for server in (admin_servers or [])\n        if server.get("installer_id")\n    }'''
+          if old not in s:
+              raise SystemExit('backend installer block not found')
+          s = s.replace(old, new, 1)
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Commit fixes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add bot.py backend/app.py
+          git commit -m 'Fix installer badges and member statistics'
+          git push
+
+      - name: Remove temporary workflow
+        run: |
+          git rm .github/workflows/fix-badges-count.yml
+          git commit -m 'Remove temporary fix workflow'
+          git push
