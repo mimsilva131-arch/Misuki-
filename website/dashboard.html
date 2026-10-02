@@ -88,6 +88,36 @@ Misuki — Dashboard
 
                             </div>
 
+                            <div class="badges">
+
+                                {% if guild.license_status == "active" %}
+
+                                    <span class="badge badge-active">
+                                        🟢 License Active
+                                    </span>
+
+                                {% elif guild.license_status == "expired" %}
+
+                                    <span class="badge badge-expired">
+                                        🔴 License Expired
+                                    </span>
+
+                                {% elif guild.license_status == "revoked" %}
+
+                                    <span class="badge badge-expired">
+                                        ⛔ License Revoked
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge badge-none">
+                                        🔒 No License
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
                             <a
                                 class="button manage"
                                 href="/manage/{{ guild.id }}"
