@@ -792,7 +792,7 @@ def get_all_licenses():
         return {}
 
 
-LICENSE_SYSTEM_ENABLED = False
+LICENSE_SYSTEM_ENABLED = True
 
 
 # =========================================================
