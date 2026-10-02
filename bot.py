@@ -79,7 +79,7 @@ async def count_statistics_users():
     for guild in bot.guilds:
         guild_seen = set()
         try:
-            async for member in guild.fetch_members(limit=None, cache=True):
+            async for member in guild.fetch_members(limit=None):
                 member_id = getattr(member, "id", None)
                 if member_id is None or member_id in guild_seen:
                     continue
