@@ -3574,26 +3574,23 @@ def dashboard():
         )
 
         # -------------------------------------------------
-        # BOT ALREADY INSTALLED
+        # AUTHORIZED = ACTIVE LICENSE
+        # -------------------------------------------------
+        #
+        # A server with an active license belongs in
+        # Authorized, regardless of bot installation.
         # -------------------------------------------------
 
-        if guild_id in bot_guild_ids:
+        if guild_id in active_license_ids:
 
-            # Only servers with an active license belong
-            # to the Authorized category.
-            if guild_id in active_license_ids:
+            authorized.append(
+                guild
+            )
 
-                authorized.append(
-                    guild
-                )
-
-            # Already-installed servers without an
-            # active license are not authorized and are
-            # not installation candidates.
             continue
 
         # -------------------------------------------------
-        # BOT NOT INSTALLED
+        # NOT AUTHORIZED
         # -------------------------------------------------
 
         guild["can_add"] = (
