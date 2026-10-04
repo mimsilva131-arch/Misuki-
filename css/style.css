@@ -1342,6 +1342,7 @@ body.menu-open .hamburger {
     z-index: 10005;
 
     pointer-events: auto;
+    isolation: isolate;
 }
 
 .language-selector.open .language-dropdown,
@@ -1351,6 +1352,9 @@ body.menu-open .hamburger {
 }
 
 .language-dropdown button {
+    position: relative;
+    z-index: 10006;
+
     width: 100%;
     min-height: 40px;
 
