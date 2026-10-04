@@ -1,88 +1,95 @@
 {% extends "base.html" %}
 
 {% block title %}
-Misuki — Your Data
+Misuki — <span data-i18n="data.title">Your Data</span>
 {% endblock %}
 
 {% block content %}
 
 <main>
-    <section class="section">
+    <section class="section legal-section">
         <div class="container">
             <div class="card legal-page">
 
-                <h1 data-i18n="nav.data">Your Data</h1>
+                <div class="legal-header">
+                    <span class="legal-eyebrow">Misuki</span>
 
-                <p class="muted">
-                    Manage your Misuki data
-                </p>
+                    <h1 data-i18n="data.title">Your Data</h1>
 
-                <p>
-                    Misuki stores certain information required to provide its features.
-                    This page explains the types of information that may be associated
-                    with your account or Discord server.
-                </p>
+                    <p class="muted" data-i18n="data.subtitle">
+                        Manage your Misuki data
+                    </p>
+                </div>
 
-                <h2>What Data May Be Stored?</h2>
+                <div class="legal-content">
 
-                <ul>
-                    <li>Discord user ID</li>
-                    <li>Discord server IDs</li>
-                    <li>Server configuration</li>
-                    <li>Misuki feature settings</li>
-                    <li>Information required for licenses and subscriptions</li>
-                    <li>Support or review information that you voluntarily provide</li>
-                </ul>
+                    <p data-i18n="data.intro">
+                        Misuki stores certain information required to provide its features.
+                        This page explains the types of information that may be associated
+                        with your account or Discord server.
+                    </p>
 
-                <h2>Why Is It Stored?</h2>
+                    <h2 data-i18n="data.stored_title">What Data May Be Stored?</h2>
 
-                <p>
-                    This information allows Misuki to provide its functionality,
-                    remember server settings, authenticate users and maintain the service.
-                </p>
+                    <ul>
+                        <li data-i18n="data.stored_1">Discord user ID</li>
+                        <li data-i18n="data.stored_2">Discord server IDs</li>
+                        <li data-i18n="data.stored_3">Server configuration</li>
+                        <li data-i18n="data.stored_4">Misuki feature settings</li>
+                        <li data-i18n="data.stored_5">Information required for licenses and subscriptions</li>
+                        <li data-i18n="data.stored_6">Support or review information that you voluntarily provide</li>
+                    </ul>
 
-                <h2>Requesting Your Data</h2>
+                    <h2 data-i18n="data.why_title">Why Is It Stored?</h2>
 
-                <p>
-                    You may contact Misuki support if you would like to request information
-                    about the data associated with your account.
-                </p>
+                    <p data-i18n="data.why_text">
+                        This information allows Misuki to provide its functionality,
+                        remember server settings, authenticate users and maintain the service.
+                    </p>
 
-                <a href="/support" class="button">
-                    Contact Support
-                </a>
+                    <h2 data-i18n="data.request_title">Requesting Your Data</h2>
 
-                <h2 style="margin-top:40px;">
-                    Requesting Deletion
-                </h2>
+                    <p data-i18n="data.request_text">
+                        You may contact Misuki support if you would like to request information
+                        about the data associated with your account.
+                    </p>
 
-                <p>
-                    If you would like your data to be deleted, contact Misuki support
-                    and provide enough information for us to identify the relevant account
-                    or server.
-                </p>
+                    <a href="/support" class="button" data-i18n="data.contact_support">
+                        Contact Support
+                    </a>
 
-                <p>
-                    Some information may need to be retained where required by law or
-                    where necessary for security, fraud prevention or legitimate technical purposes.
-                </p>
+                    <h2 style="margin-top:40px;" data-i18n="data.deletion_title">
+                        Requesting Deletion
+                    </h2>
 
-                <h2>Discord Data</h2>
+                    <p data-i18n="data.deletion_text">
+                        If you would like your data to be deleted, contact Misuki support
+                        and provide enough information for us to identify the relevant account
+                        or server.
+                    </p>
 
-                <p>
-                    Misuki uses Discord authentication where applicable.
-                    Misuki does not store your Discord password.
-                </p>
+                    <p data-i18n="data.deletion_note">
+                        Some information may need to be retained where required by law or
+                        where necessary for security, fraud prevention or legitimate technical purposes.
+                    </p>
 
-                <p>
-                    Information received through Discord is handled according to the
-                    Misuki Privacy Policy and the permissions requested during authentication.
-                </p>
+                    <h2 data-i18n="data.discord_title">Discord Data</h2>
 
-                <a href="/privacy" class="button">
-                    Read Privacy Policy
-                </a>
+                    <p data-i18n="data.discord_text">
+                        Misuki uses Discord authentication where applicable.
+                        Misuki does not store your Discord password.
+                    </p>
 
+                    <p data-i18n="data.discord_policy">
+                        Information received through Discord is handled according to the
+                        Misuki Privacy Policy and the permissions requested during authentication.
+                    </p>
+
+                    <a href="/privacy" class="button" data-i18n="data.privacy_button">
+                        Read Privacy Policy
+                    </a>
+
+                </div>
             </div>
         </div>
     </section>
