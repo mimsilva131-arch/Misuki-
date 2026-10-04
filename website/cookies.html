@@ -1,56 +1,35 @@
 {% extends "base.html" %}
 
-{% block title %}
-Misuki — Cookies
-{% endblock %}
+{% block title %}Misuki — Cookies{% endblock %}
 
 {% block content %}
-
 <main>
-    <section class="section">
+    <section class="section legal-section">
         <div class="container">
-            <div class="card legal-page">
+            <article class="card legal-page">
+                <div class="legal-header">
+                    <span class="legal-eyebrow">Misuki</span>
+                    <h1 data-i18n="legal.cookies_title">Cookie Policy</h1>
+                    <p class="muted" data-i18n="legal.policy_updated">Last updated: August 2026</p>
+                </div>
 
-                <h1 data-i18n="cookies.policy">Cookie Policy</h1>
+                <div class="legal-content">
+                    <p data-i18n="legal.cookies_intro">Misuki may use cookies and similar technologies to provide and maintain the website and its features.</p>
 
-                <p class="muted">
-                    Last updated: August 2026
-                </p>
+                    <h2 data-i18n="legal.cookies_1_title">1. What Are Cookies?</h2>
+                    <p data-i18n="legal.cookies_1_p1">Cookies are small pieces of data stored by your browser when you visit a website. They can be used to remember information between requests and maintain sessions.</p>
 
-                <p>
-                    Misuki may use cookies and similar technologies to provide and maintain the website and its features.
-                </p>
+                    <h2 data-i18n="legal.cookies_2_title">2. How Misuki Uses Cookies</h2>
+                    <p data-i18n="legal.cookies_2_p1">Misuki may use cookies for purposes such as keeping sessions active, remembering user preferences, and improving the overall service.</p>
 
-                <h2>1. What Are Cookies?</h2>
+                    <h2 data-i18n="legal.cookies_3_title">3. Your Choices</h2>
+                    <p data-i18n="legal.cookies_3_p1">You can choose to accept all cookies, allow only essential cookies, or deny cookies. Your choice is stored in your browser and may be reviewed again when you reload the site.</p>
 
-                <p>
-                    Cookies are small pieces of data stored by your browser when you visit a website.
-                    They can be used to remember information between requests and maintain sessions.
-                </p>
-
-                <h2>2. How Misuki Uses Cookies</h2>
-
-                <p>
-                    Misuki may use cookies for purposes such as keeping sessions active,
-                    remembering user preferences, and improving the overall service.
-                </p>
-
-                <h2>3. Your Choices</h2>
-
-                <p>
-                    You can choose to accept all cookies, allow only essential cookies, or deny cookies.
-                    Your choice is stored in your browser and may be reviewed again when you reload the site.
-                </p>
-
-                <h2>4. Contact</h2>
-
-                <p>
-                    If you have questions about this policy, please contact Misuki support.
-                </p>
-
-            </div>
+                    <h2 data-i18n="legal.cookies_4_title">4. Contact</h2>
+                    <p data-i18n="legal.cookies_4_p1">If you have questions about this policy, please contact Misuki support.</p>
+                </div>
+            </article>
         </div>
     </section>
 </main>
-
 {% endblock %}
