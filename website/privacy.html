@@ -1,231 +1,74 @@
 {% extends "base.html" %}
 
-{% block title %}
-Misuki — Privacy Policy
-{% endblock %}
+{% block title %}Misuki — Privacy Policy{% endblock %}
 
 {% block content %}
-
 <main>
-
-    <section class="section">
-
+    <section class="section legal-section">
         <div class="container">
+            <article class="card legal-page">
+                <div class="legal-header">
+                    <span class="legal-eyebrow">Misuki</span>
+                    <h1 data-i18n="legal.privacy_title">Privacy Policy</h1>
+                    <p class="muted" data-i18n="legal.policy_updated">Last updated: August 2026</p>
+                </div>
 
-            <div class="card legal-page">
+                <div class="legal-content">
+                    <p data-i18n="legal.privacy_intro">This Privacy Policy explains how Misuki collects, uses, stores and protects information when you use our services.</p>
 
-                <h1 data-i18n="nav.privacy">
-                    Privacy Policy
-                </h1>
+                    <h2 data-i18n="legal.privacy_1_title">1. Information We Collect</h2>
+                    <p data-i18n="legal.privacy_1_p1">Depending on the features you use, Misuki may process information provided by Discord or generated through your interaction with the service.</p>
+                    <p data-i18n="legal.privacy_1_p2">This may include information such as your Discord user ID, username, server information and configuration data required for Misuki to operate.</p>
 
-                <p class="muted">
-                    Last updated: August 2026
-                </p>
+                    <h2 data-i18n="legal.privacy_2_title">2. Discord Authentication</h2>
+                    <p data-i18n="legal.privacy_2_p1">Misuki may use Discord OAuth2 to authenticate users.</p>
+                    <p data-i18n="legal.privacy_2_p2">When you sign in with Discord, Discord may provide information permitted by the OAuth2 scopes requested by Misuki.</p>
+                    <p data-i18n="legal.privacy_2_p3">Misuki does not receive or store your Discord password.</p>
 
-                <p>
-                    This Privacy Policy explains how
-                    Misuki collects, uses, stores and
-                    protects information when you use
-                    our services.
-                </p>
+                    <h2 data-i18n="legal.privacy_3_title">3. How We Use Information</h2>
+                    <p data-i18n="legal.privacy_3_intro">Information may be used to:</p>
+                    <ul>
+                        <li data-i18n="legal.privacy_3_li1">Provide and operate Misuki features.</li>
+                        <li data-i18n="legal.privacy_3_li2">Authenticate users.</li>
+                        <li data-i18n="legal.privacy_3_li3">Maintain server configurations.</li>
+                        <li data-i18n="legal.privacy_3_li4">Improve reliability and security.</li>
+                        <li data-i18n="legal.privacy_3_li5">Respond to support requests.</li>
+                    </ul>
 
-                <h2>
-                    1. Information We Collect
-                </h2>
+                    <h2 data-i18n="legal.privacy_4_title">4. Data Storage</h2>
+                    <p data-i18n="legal.privacy_4_p1">Some information may be stored in databases required for the operation of Misuki.</p>
+                    <p data-i18n="legal.privacy_4_p2">We aim to retain only information that is necessary for providing the service.</p>
 
-                <p>
-                    Depending on the features you use,
-                    Misuki may process information provided
-                    by Discord or generated through your
-                    interaction with the service.
-                </p>
+                    <h2 data-i18n="legal.privacy_5_title">5. Data Sharing</h2>
+                    <p data-i18n="legal.privacy_5_p1">Misuki does not sell personal information.</p>
+                    <p data-i18n="legal.privacy_5_p2">Information may be processed by infrastructure or service providers when necessary to operate Misuki.</p>
 
-                <p>
-                    This may include information such as
-                    your Discord user ID, username,
-                    server information and configuration
-                    data required for Misuki to operate.
-                </p>
+                    <h2 data-i18n="legal.privacy_6_title">6. Security</h2>
+                    <p data-i18n="legal.privacy_6_p1">Reasonable technical measures are used to protect stored information against unauthorized access, alteration or disclosure.</p>
+                    <p data-i18n="legal.privacy_6_p2">However, no online service can guarantee absolute security.</p>
 
-                <h2>
-                    2. Discord Authentication
-                </h2>
+                    <h2 data-i18n="legal.privacy_7_title">7. Data Retention</h2>
+                    <p data-i18n="legal.privacy_7_p1">Information is retained only for as long as reasonably necessary for the purposes described in this policy, unless a longer retention period is required by law.</p>
 
-                <p>
-                    Misuki may use Discord OAuth2 to
-                    authenticate users.
-                </p>
+                    <h2 data-i18n="legal.privacy_8_title">8. Your Rights</h2>
+                    <p data-i18n="legal.privacy_8_p1">Depending on applicable law, you may have rights regarding your personal information, including rights to access, correct or request deletion of your data.</p>
+                    <p data-i18n="legal.privacy_8_p2">For data-related requests, please contact Misuki support.</p>
 
-                <p>
-                    When you sign in with Discord, Discord
-                    may provide information permitted by
-                    the OAuth2 scopes requested by Misuki.
-                </p>
+                    <h2 data-i18n="legal.privacy_9_title">9. Children's Privacy</h2>
+                    <p data-i18n="legal.privacy_9_p1">Misuki is not intended to knowingly collect personal information from children in violation of applicable laws.</p>
 
-                <p>
-                    Misuki does not receive or store your
-                    Discord password.
-                </p>
+                    <h2 data-i18n="legal.privacy_10_title">10. Third-Party Services</h2>
+                    <p data-i18n="legal.privacy_10_p1">Misuki may interact with third-party services, including Discord.</p>
+                    <p data-i18n="legal.privacy_10_p2">Those services have their own privacy policies and terms that may apply to your use of them.</p>
 
-                <h2>
-                    3. How We Use Information
-                </h2>
+                    <h2 data-i18n="legal.privacy_11_title">11. Changes to This Policy</h2>
+                    <p data-i18n="legal.privacy_11_p1">This Privacy Policy may be updated when necessary. Changes will be reflected on this page.</p>
 
-                <p>
-                    Information may be used to:
-                </p>
-
-                <ul>
-
-                    <li>
-                        Provide and operate Misuki features.
-                    </li>
-
-                    <li>
-                        Authenticate users.
-                    </li>
-
-                    <li>
-                        Maintain server configurations.
-                    </li>
-
-                    <li>
-                        Improve reliability and security.
-                    </li>
-
-                    <li>
-                        Respond to support requests.
-                    </li>
-
-                </ul>
-
-                <h2>
-                    4. Data Storage
-                </h2>
-
-                <p>
-                    Some information may be stored in
-                    databases required for the operation
-                    of Misuki.
-                </p>
-
-                <p>
-                    We aim to retain only information that
-                    is necessary for providing the service.
-                </p>
-
-                <h2>
-                    5. Data Sharing
-                </h2>
-
-                <p>
-                    Misuki does not sell personal
-                    information.
-                </p>
-
-                <p>
-                    Information may be processed by
-                    infrastructure or service providers
-                    when necessary to operate Misuki.
-                </p>
-
-                <h2>
-                    6. Security
-                </h2>
-
-                <p>
-                    Reasonable technical measures are used
-                    to protect stored information against
-                    unauthorized access, alteration or
-                    disclosure.
-                </p>
-
-                <p>
-                    However, no online service can
-                    guarantee absolute security.
-                </p>
-
-                <h2>
-                    7. Data Retention
-                </h2>
-
-                <p>
-                    Information is retained only for as
-                    long as reasonably necessary for the
-                    purposes described in this policy,
-                    unless a longer retention period is
-                    required by law.
-                </p>
-
-                <h2>
-                    8. Your Rights
-                </h2>
-
-                <p>
-                    Depending on applicable law, you may
-                    have rights regarding your personal
-                    information, including rights to
-                    access, correct or request deletion
-                    of your data.
-                </p>
-
-                <p>
-                    For data-related requests, please
-                    contact Misuki support.
-                </p>
-
-                <h2>
-                    9. Children's Privacy
-                </h2>
-
-                <p>
-                    Misuki is not intended to knowingly
-                    collect personal information from
-                    children in violation of applicable
-                    laws.
-                </p>
-
-                <h2>
-                    10. Third-Party Services
-                </h2>
-
-                <p>
-                    Misuki may interact with third-party
-                    services, including Discord.
-                </p>
-
-                <p>
-                    Those services have their own privacy
-                    policies and terms that may apply to
-                    your use of them.
-                </p>
-
-                <h2>
-                    11. Changes to This Policy
-                </h2>
-
-                <p>
-                    This Privacy Policy may be updated
-                    when necessary. Changes will be
-                    reflected on this page.
-                </p>
-
-                <h2>
-                    12. Contact
-                </h2>
-
-                <p>
-                    If you have questions about this
-                    Privacy Policy or your data, please
-                    contact Misuki support.
-                </p>
-
-            </div>
-
+                    <h2 data-i18n="legal.privacy_12_title">12. Contact</h2>
+                    <p data-i18n="legal.privacy_12_p1">If you have questions about this Privacy Policy or your data, please contact Misuki support.</p>
+                </div>
+            </article>
         </div>
-
     </section>
-
 </main>
-
 {% endblock %}
