@@ -370,18 +370,69 @@ async def on_ready():
     await refresh_bot_installers()
     print_detected_servers()
     print("📋 Comandos registados:")
+    registered_count = 0
+
     for command in bot.tree.get_commands():
-        print(f"   /{command.name}")
-        if isinstance(command, discord.app_commands.Group):
+        if isinstance(
+            command,
+            discord.app_commands.Group
+        ):
+            print(f"   /{command.name}")
+
             for subcommand in command.commands:
-                print(f"      /{command.name} {subcommand.name}")
+                registered_count += 1
+                print(
+                    f"      /{command.name} "
+                    f"{subcommand.name}"
+                )
+        else:
+            registered_count += 1
+            print(f"   /{command.name}")
+
+    print(
+        f"📊 Total de comandos registados: "
+        f"{registered_count}"
+    )
+
     await update_stats_snapshot()
+
     try:
         synced = await bot.tree.sync()
-        print(f"⚡ {len(synced)} command(s) synced")
+
+        synced_count = count_commands(synced)
+
+        print(
+            f"⚡ {synced_count} command(s) synced"
+        )
+
         print("📋 Comandos sincronizados:")
+
         for command in synced:
-            print(f"   /{command.name}")
+            if isinstance(
+                command,
+                discord.app_commands.Group
+            ):
+                print(f"   /{command.name}")
+
+                for subcommand in command.commands:
+                    print(
+                        f"      /{command.name} "
+                        f"{subcommand.name}"
+                    )
+            else:
+                print(f"   /{command.name}")
+
+        if synced_count != registered_count:
+            raise RuntimeError(
+                "Discord command sync mismatch: "
+                f"registered={registered_count}, "
+                f"synced={synced_count}"
+            )
+
+        print(
+            "✅ All registered commands were "
+            "successfully synchronised with Discord."
+        )
     except Exception as error:
         print(f"❌ Command sync error: {error}")
     if statistics_task is None or statistics_task.done():
@@ -404,12 +455,46 @@ EXTENSIONS = [
 
 
 async def load_extensions():
+    failed_extensions = []
+
     for extension in EXTENSIONS:
         try:
             await bot.load_extension(extension)
             print(f"🧩 Loaded extension: {extension}")
         except Exception as error:
-            print(f"❌ Failed to load extension {extension}: {error}")
+            failed_extensions.append(
+                (extension, error)
+            )
+
+            print(
+                f"❌ Failed to load extension "
+                f"{extension}: {error}"
+            )
+
+    # Do not start a partially loaded bot.
+    # A missing cog means its commands would not be
+    # registered/synchronised with Discord.
+    if failed_extensions:
+        print(
+            "❌ Bot startup aborted: "
+            f"{len(failed_extensions)} extension(s) failed."
+        )
+
+        for extension, error in failed_extensions:
+            print(
+                f"   • {extension}: {error}"
+            )
+
+        raise RuntimeError(
+            "One or more Discord extensions failed to load."
+        )
+
+    loaded_count = len(EXTENSIONS)
+
+    print(
+        f"🧩 All Discord extensions loaded "
+        f"successfully ({loaded_count}/{len(EXTENSIONS)})."
+    )
 
 
 async def main():
