@@ -93,7 +93,7 @@ Misuki — Dashboard
                             <div class="badges">
 
                                 <span class="badge badge-active">
-                                    🟢 License Active
+                                    data-i18n="dashboard.license_active">🟢 License Active
                                 </span>
 
                             </div>
@@ -171,25 +171,25 @@ Misuki — Dashboard
                                 {% if guild.license_status == "active" %}
 
                                     <span class="badge badge-active">
-                                        🟢 License Active
+                                        data-i18n="dashboard.license_active">🟢 License Active
                                     </span>
 
                                 {% elif guild.license_status == "expired" %}
 
                                     <span class="badge badge-expired">
-                                        🔴 License Expired
+                                        data-i18n="dashboard.license_expired">🔴 License Expired
                                     </span>
 
                                 {% elif guild.license_status == "revoked" %}
 
                                     <span class="badge badge-expired">
-                                        ⛔ License Revoked
+                                        data-i18n="dashboard.license_revoked">⛔ License Revoked
                                     </span>
 
                                 {% else %}
 
                                     <span class="badge badge-none">
-                                        🔒 No License
+                                        data-i18n="dashboard.no_license">🔒 No License
                                     </span>
 
                                 {% endif %}
