@@ -3552,9 +3552,20 @@ def dashboard():
 
         if license_data:
 
-            status = license_data[2]
+            status = str(
+                license_data[2]
+                or "none"
+            ).strip().lower()
 
         else:
+
+            status = "none"
+
+        if status not in (
+            "active",
+            "expired",
+            "revoked"
+        ):
 
             status = "none"
 
