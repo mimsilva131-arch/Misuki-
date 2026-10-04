@@ -134,7 +134,15 @@
 
                 createTrail(
                     trailX,
-                    trailY
+                    trailY,
+                    Math.atan2(dy, dx) * 180 / Math.PI,
+                    Math.max(
+                        5,
+                        Math.min(
+                            18,
+                            distance / steps
+                        )
+                    )
                 );
             }
 
@@ -151,7 +159,12 @@
     );
 
 
-    function createTrail(x, y) {
+    function createTrail(
+        x,
+        y,
+        angle,
+        length
+    ) {
 
         if (!isHome()) {
             return;
@@ -173,6 +186,14 @@
 
         element.style.top =
             y + "px";
+
+        element.style.width =
+            length + "px";
+
+        element.style.setProperty(
+            "--trail-angle",
+            angle + "deg"
+        );
 
 
         document.body.appendChild(
