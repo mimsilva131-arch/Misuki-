@@ -48,11 +48,13 @@ Misuki — Dashboard
                 🔐 Authorized Servers
             </h2>
 
-            {% if authorized %}
+            {% set active_authorized = authorized | selectattr("license_status", "equalto", "active") | list %}
+
+            {% if active_authorized %}
 
                 <div class="server-grid">
 
-                    {% for guild in authorized %}
+                    {% for guild in active_authorized %}
 
                         <div class="card server-card">
 
@@ -90,31 +92,9 @@ Misuki — Dashboard
 
                             <div class="badges">
 
-                                {% if guild.license_status == "active" %}
-
-                                    <span class="badge badge-active">
-                                        🟢 License Active
-                                    </span>
-
-                                {% elif guild.license_status == "expired" %}
-
-                                    <span class="badge badge-expired">
-                                        🔴 License Expired
-                                    </span>
-
-                                {% elif guild.license_status == "revoked" %}
-
-                                    <span class="badge badge-expired">
-                                        ⛔ License Revoked
-                                    </span>
-
-                                {% else %}
-
-                                    <span class="badge badge-none">
-                                        🔒 No License
-                                    </span>
-
-                                {% endif %}
+                                <span class="badge badge-active">
+                                    🟢 License Active
+                                </span>
 
                             </div>
 
