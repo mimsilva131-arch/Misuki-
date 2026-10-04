@@ -3579,10 +3579,17 @@ def dashboard():
 
         if guild_id in bot_guild_ids:
 
-            authorized.append(
-                guild
-            )
+            # Only servers with an active license belong
+            # to the Authorized category.
+            if guild_id in active_license_ids:
 
+                authorized.append(
+                    guild
+                )
+
+            # Already-installed servers without an
+            # active license are not authorized and are
+            # not installation candidates.
             continue
 
         # -------------------------------------------------
