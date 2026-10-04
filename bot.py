@@ -399,10 +399,14 @@ async def on_ready():
     try:
         synced = await bot.tree.sync()
 
-        synced_count = count_commands(synced)
+        # Discord returns top-level commands/groups from sync().
+        # Group subcommands are contained inside their parent group,
+        # so they must not be counted recursively for sync verification.
+        registered_top_level_count = len(bot.tree.get_commands())
+        synced_top_level_count = len(synced)
 
         print(
-            f"⚡ {synced_count} command(s) synced"
+            f"⚡ {synced_top_level_count} top-level command(s)/group(s) synced"
         )
 
         print("📋 Comandos sincronizados:")
@@ -422,15 +426,15 @@ async def on_ready():
             else:
                 print(f"   /{command.name}")
 
-        if synced_count != registered_count:
+        if synced_top_level_count != registered_top_level_count:
             raise RuntimeError(
                 "Discord command sync mismatch: "
-                f"registered={registered_count}, "
-                f"synced={synced_count}"
+                f"top_level_registered={registered_top_level_count}, "
+                f"top_level_synced={synced_top_level_count}"
             )
 
         print(
-            "✅ All registered commands were "
+            "✅ All registered commands/groups were "
             "successfully synchronised with Discord."
         )
     except Exception as error:
