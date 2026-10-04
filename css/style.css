@@ -1452,6 +1452,145 @@ body.menu-open .language-selector {
 }
 
 /* =========================================================
+   LEGAL + GLOBAL RESPONSIVE IMPROVEMENTS
+   ========================================================= */
+
+html,
+body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+img,
+video,
+svg,
+canvas {
+    max-width: 100%;
+}
+
+button,
+input,
+textarea,
+select {
+    max-width: 100%;
+}
+
+.legal-section {
+    padding-top: clamp(28px, 5vw, 70px);
+    padding-bottom: clamp(45px, 7vw, 100px);
+}
+
+.legal-page {
+    width: 100%;
+    box-sizing: border-box;
+    padding: clamp(28px, 5vw, 58px) clamp(20px, 5vw, 58px) clamp(38px, 6vw, 72px);
+    border-radius: clamp(16px, 2vw, 24px);
+    overflow-wrap: anywhere;
+}
+
+.legal-header {
+    padding-bottom: 26px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.legal-eyebrow {
+    display: inline-flex;
+    margin-bottom: 14px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(88, 101, 242, 0.10);
+    border: 1px solid rgba(88, 101, 242, 0.18);
+    color: #bfc8ff;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+}
+
+.legal-content {
+    max-width: 760px;
+}
+
+.legal-content h2 {
+    scroll-margin-top: 30px;
+}
+
+.legal-content p,
+.legal-content li {
+    overflow-wrap: anywhere;
+}
+
+.legal-content li + li {
+    margin-top: 8px;
+}
+
+@media (max-width: 700px) {
+    .legal-section {
+        padding-top: 22px;
+    }
+
+    .legal-page {
+        padding: 26px 18px 38px;
+        border-radius: 16px;
+    }
+
+    .legal-header {
+        padding-bottom: 20px;
+    }
+
+    .legal-page h1 {
+        font-size: clamp(30px, 10vw, 44px);
+        line-height: 1.08;
+        letter-spacing: -1.4px;
+    }
+
+    .legal-page h2 {
+        margin-top: 29px;
+        font-size: clamp(19px, 5vw, 23px);
+        line-height: 1.25;
+    }
+
+    .legal-page p,
+    .legal-page li {
+        font-size: 15px;
+        line-height: 1.72;
+    }
+
+    .legal-page ul {
+        padding-left: 20px;
+    }
+}
+
+@media (max-width: 420px) {
+    .legal-section {
+        padding-top: 14px;
+    }
+
+    .legal-page {
+        padding: 22px 15px 32px;
+    }
+
+    .legal-header {
+        padding-bottom: 17px;
+    }
+
+    .legal-page h1 {
+        font-size: 31px;
+    }
+
+    .legal-page h2 {
+        font-size: 18px;
+    }
+
+    .legal-page p,
+    .legal-page li {
+        font-size: 14px;
+        line-height: 1.68;
+    }
+}
+
+/* =========================================================
    RESPONSIVE
    ========================================================= */
 
