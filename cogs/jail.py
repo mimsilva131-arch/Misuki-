@@ -28,11 +28,11 @@ class Jail(commands.Cog):
 
         self.create_database()
 
-        self.jail_expiration_worker.start()
 
     def cog_unload(self):
 
-        self.jail_expiration_worker.cancel()
+        if self.jail_expiration_worker.is_running():
+            self.jail_expiration_worker.cancel()
 
     # =====================================================
     # DATABASE
@@ -1280,8 +1280,6 @@ class Jail(commands.Cog):
         self
     ):
 
-        await self.bot.wait_until_ready()
-
         connection = sqlite3.connect(
             DATABASE
         )
@@ -1399,12 +1397,11 @@ class Jail(commands.Cog):
                 "Automatic Unjail"
             )
 
-    @jail_expiration_worker.before_loop
-    async def before_jail_expiration_worker(
-        self
-    ):
+    @commands.Cog.listener()
+    async def on_ready(self):
 
-        await self.bot.wait_until_ready()
+        if not self.jail_expiration_worker.is_running():
+            self.jail_expiration_worker.start()
 
 
 # =========================================================
