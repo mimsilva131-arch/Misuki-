@@ -36,7 +36,7 @@ APP_START_TIME = time.time()
 # =========================================================
 
 load_dotenv(
-    override=True
+    override=False
 )
 
 
@@ -139,13 +139,19 @@ except (
 # PAYPAL CONFIGURATION
 # =========================================================
 
-PAYPAL_CLIENT_ID = os.getenv(
-    "PAYPAL_CLIENT_ID"
-)
+PAYPAL_CLIENT_ID = (
+    os.getenv(
+        "PAYPAL_CLIENT_ID"
+    )
+    or ""
+).strip()
 
-PAYPAL_CLIENT_SECRET = os.getenv(
-    "PAYPAL_CLIENT_SECRET"
-)
+PAYPAL_CLIENT_SECRET = (
+    os.getenv(
+        "PAYPAL_CLIENT_SECRET"
+    )
+    or ""
+).strip()
 
 PAYPAL_MODE = os.getenv(
     "PAYPAL_MODE",
