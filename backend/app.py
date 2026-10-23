@@ -149,7 +149,7 @@ PAYPAL_CLIENT_SECRET = os.getenv(
 
 PAYPAL_MODE = os.getenv(
     "PAYPAL_MODE",
-    "live"
+    "sandbox"
 ).strip().lower()
 
 if PAYPAL_MODE not in (
