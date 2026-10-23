@@ -5855,7 +5855,7 @@ def paypal_success():
         session.modified = True
 
         return render_template(
-            "advertise_success.html",
+            "payment_success.html",
             user=user,
             is_admin=is_admin
         )
@@ -6079,7 +6079,7 @@ def paypal_success():
     # -----------------------------------------------------
 
     return render_template(
-        "advertise_success.html",
+        "payment_success.html",
         user=user,
         is_admin=is_admin
     )
@@ -6169,11 +6169,10 @@ def paypal_cancel():
             "/"
         )
 
-    return error_page(
-        "Payment cancelled",
-        "The PayPal payment was cancelled. The advertisement was not submitted.",
-        400,
-        user
+    return render_template(
+        "payment_cancel.html",
+        user=user,
+        is_admin=is_admin
     )
 
 
