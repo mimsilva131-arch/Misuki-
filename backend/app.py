@@ -901,12 +901,52 @@ def paypal_create_order(
     ):
 
         print(
-            "❌ PayPal create order failed:"
+            "❌ PayPal create order failed."
         )
 
         print(
-            response.text
+            f"   HTTP status: {response.status_code}"
         )
+
+        try:
+
+            error_data = response.json()
+
+            print(
+                f"   Name: {error_data.get('name')}"
+            )
+
+            print(
+                f"   Message: {error_data.get('message')}"
+            )
+
+            print(
+                f"   Debug ID: {error_data.get('debug_id')}"
+            )
+
+            details = error_data.get(
+                "details",
+                []
+            )
+
+            if details:
+
+                for detail in details:
+
+                    print(
+                        "   Detail: "
+                        f"{detail.get('issue')} | "
+                        f"{detail.get('description')} | "
+                        f"field={detail.get('field')} | "
+                        f"value={detail.get('value')}"
+                    )
+
+        except ValueError:
+
+            print(
+                "   Response: "
+                f"{response.text[:2000]}"
+            )
 
         raise RuntimeError(
             "PayPal could not create the payment."
