@@ -197,7 +197,23 @@
                 report_problem: "🐛 Report a Problem",
                 documentation_help: "Check the documentation for information about configuring and using Misuki.",
                 report_problem_text: "Found a bug or something that isn't working correctly? Contact the Misuki support team through Discord."
-            },
+            
+                advertisement_title: "Advertisement title",
+                description: "Description",
+                image_url: "Image URL",
+                destination_url: "Destination URL",
+                advertisement_duration: "Advertisement duration",
+                server_name_placeholder: "Your server name",
+                description_placeholder: "Tell people what makes your server special...",
+                special_offer: "SPECIAL OFFER",
+                promotional_prices: "Promotional prices",
+                save_more: "SAVE MORE",
+                popular: "POPULAR",
+                save: "Save",
+                secure_payment: "Secure payment with PayPal",
+                payment_secure: "Your payment will be securely processed through PayPal.",
+                continue_paypal: "Continue to PayPal",
+                advertisement_note: "Your advertisement will be reviewed and activated after successful payment.",},
 
             statistics: {
                 hero_description: "Overview of the Misuki service and its current statistics.",
@@ -493,7 +509,23 @@
                 report_problem: "🐛 Reportar um problema",
                 documentation_help: "Consulte a documentação para obter informações sobre como configurar e utilizar o Misuki.",
                 report_problem_text: "Encontrou um erro ou algo que não está a funcionar corretamente? Contacte a equipa de suporte do Misuki através do Discord."
-            },
+            
+                advertisement_title: "Título da publicidade",
+                description: "Descrição",
+                image_url: "URL da imagem",
+                destination_url: "URL de destino",
+                advertisement_duration: "Duração da publicidade",
+                server_name_placeholder: "Nome do seu servidor",
+                description_placeholder: "Diga às pessoas o que torna o seu servidor especial...",
+                special_offer: "OFERTA ESPECIAL",
+                promotional_prices: "Preços promocionais",
+                save_more: "POUPE MAIS",
+                popular: "POPULAR",
+                save: "Poupe",
+                secure_payment: "Pagamento seguro com PayPal",
+                payment_secure: "O seu pagamento será processado de forma segura através do PayPal.",
+                continue_paypal: "Continuar para o PayPal",
+                advertisement_note: "A sua publicidade será analisada e ativada após o pagamento ser concluído.",},
 
             statistics: {
                 hero_description: "Visão geral do serviço Misuki e das suas estatísticas atuais.",
@@ -789,7 +821,23 @@
                 report_problem: "🐛 Problem melden",
                 documentation_help: "Prüfe die Dokumentation für Informationen zur Konfiguration und Nutzung von Misuki.",
                 report_problem_text: "Hast du einen Fehler gefunden oder funktioniert etwas nicht korrekt? Kontaktiere das Misuki-Supportteam über Discord."
-            },
+            
+                advertisement_title: "Werbeanzeigentitel",
+                description: "Beschreibung",
+                image_url: "Bild-URL",
+                destination_url: "Ziel-URL",
+                advertisement_duration: "Anzeigendauer",
+                server_name_placeholder: "Name Ihres Servers",
+                description_placeholder: "Sagen Sie anderen, was Ihren Server besonders macht...",
+                special_offer: "SONDERANGEBOT",
+                promotional_prices: "Aktionspreise",
+                save_more: "MEHR SPAREN",
+                popular: "BELIEBT",
+                save: "Sparen",
+                secure_payment: "Sichere Zahlung mit PayPal",
+                payment_secure: "Ihre Zahlung wird sicher über PayPal verarbeitet.",
+                continue_paypal: "Weiter zu PayPal",
+                advertisement_note: "Ihre Werbung wird nach erfolgreicher Zahlung geprüft und aktiviert.",},
 
             statistics: {
                 hero_description: "Übersicht über den Misuki-Dienst und seine aktuellen Statistiken.",
@@ -1085,7 +1133,23 @@
                 report_problem: "🐛 Informar de un problema",
                 documentation_help: "Consulta la documentación para obtener información sobre cómo configurar y utilizar Misuki.",
                 report_problem_text: "¿Has encontrado un error o algo no funciona correctamente? Contacta con el equipo de soporte de Misuki a través de Discord."
-            },
+            
+                advertisement_title: "Título del anuncio",
+                description: "Descripción",
+                image_url: "URL de la imagen",
+                destination_url: "URL de destino",
+                advertisement_duration: "Duración del anuncio",
+                server_name_placeholder: "Nombre de tu servidor",
+                description_placeholder: "Cuéntale a la gente qué hace especial a tu servidor...",
+                special_offer: "OFERTA ESPECIAL",
+                promotional_prices: "Precios promocionales",
+                save_more: "AHORRA MÁS",
+                popular: "POPULAR",
+                save: "Ahorra",
+                secure_payment: "Pago seguro con PayPal",
+                payment_secure: "Tu pago se procesará de forma segura mediante PayPal.",
+                continue_paypal: "Continuar a PayPal",
+                advertisement_note: "Tu anuncio será revisado y activado después de realizar el pago correctamente.",},
 
             statistics: {
                 hero_description: "Descripción general del servicio Misuki y sus estadísticas actuales.",
@@ -1381,7 +1445,23 @@
                 report_problem: "🐛 Signaler un problème",
                 documentation_help: "Consultez la documentation pour savoir comment configurer et utiliser Misuki.",
                 report_problem_text: "Vous avez trouvé un bug ou quelque chose ne fonctionne pas correctement ? Contactez l'équipe support de Misuki via Discord."
-            },
+            
+                advertisement_title: "Titre de la publicité",
+                description: "Description",
+                image_url: "URL de l’image",
+                destination_url: "URL de destination",
+                advertisement_duration: "Durée de la publicité",
+                server_name_placeholder: "Nom de votre serveur",
+                description_placeholder: "Dites aux utilisateurs ce qui rend votre serveur spécial...",
+                special_offer: "OFFRE SPÉCIALE",
+                promotional_prices: "Prix promotionnels",
+                save_more: "ÉCONOMISEZ PLUS",
+                popular: "POPULAIRE",
+                save: "Économisez",
+                secure_payment: "Paiement sécurisé avec PayPal",
+                payment_secure: "Votre paiement sera traité en toute sécurité via PayPal.",
+                continue_paypal: "Continuer vers PayPal",
+                advertisement_note: "Votre publicité sera examinée et activée après le paiement.",},
 
             statistics: {
                 hero_description: "Vue d’ensemble du service Misuki et de ses statistiques actuelles.",
