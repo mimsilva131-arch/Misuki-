@@ -2130,29 +2130,8 @@
             return;
         }
 
-        const menu =
-            document.getElementById(
-                "menu"
-            );
-
-        if (
-            document.body.classList.contains(
-                "menu-open"
-            ) ||
-            (
-                menu &&
-                (
-                    menu.classList.contains(
-                        "open"
-                    ) ||
-                    menu.classList.contains(
-                        "active"
-                    )
-                )
-            )
-        ) {
-            return;
-        }
+        // The selector remains openable even when the main menu is open.
+        // The main menu is layered above it by CSS.
 
         selector.classList.add(
             "open"
@@ -2340,87 +2319,10 @@
 
     function setupMenuIntegration() {
 
-        const hamburger =
-            document.getElementById(
-                "hamburger"
-            );
+        // Intentionally empty.
+        // The language selector remains available independently of the
+        // side menu, while CSS keeps the side menu above it.
 
-        if (hamburger) {
-
-            hamburger.addEventListener(
-                "click",
-                function () {
-
-                    closeLanguageDropdown();
-
-                }
-            );
-        }
-
-        const menu =
-            document.getElementById(
-                "menu"
-            );
-
-        if (!menu) {
-            return;
-        }
-
-        const observer =
-            new MutationObserver(
-                function () {
-
-                    if (
-                        menu.classList.contains(
-                            "open"
-                        ) ||
-                        menu.classList.contains(
-                            "active"
-                        ) ||
-                        document.body.classList.contains(
-                            "menu-open"
-                        )
-                    ) {
-
-                        closeLanguageDropdown();
-                    }
-                }
-            );
-
-        observer.observe(
-            menu,
-            {
-                attributes: true,
-                attributeFilter: [
-                    "class"
-                ]
-            }
-        );
-
-        const bodyObserver =
-            new MutationObserver(
-                function () {
-
-                    if (
-                        document.body.classList.contains(
-                            "menu-open"
-                        )
-                    ) {
-
-                        closeLanguageDropdown();
-                    }
-                }
-            );
-
-        bodyObserver.observe(
-            document.body,
-            {
-                attributes: true,
-                attributeFilter: [
-                    "class"
-                ]
-            }
-        );
     }
 
 
