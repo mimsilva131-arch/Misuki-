@@ -456,25 +456,41 @@ body.menu-open .hamburger {
    The side menu remains above the language selector.
 ========================================================= */
 
+/* Keep the header above the cookie banner so the language
+   selector is always clickable. The side menu remains above
+   both the header and the language selector. */
 header {
     position: relative;
-    z-index: 9999 !important;
+    z-index: 2147483002 !important;
+    pointer-events: auto !important;
 }
 
 .overlay {
-    z-index: 9998 !important;
+    z-index: 2147483003 !important;
 }
 
 .menu {
-    z-index: 10000 !important;
+    z-index: 2147483004 !important;
 }
 
 .language-selector {
     position: relative;
-    z-index: 10001 !important;
+    z-index: 2147483005 !important;
+    pointer-events: auto !important;
+}
+
+.language-button {
+    position: relative;
+    z-index: 2147483006 !important;
+    pointer-events: auto !important;
 }
 
 .language-dropdown {
-    z-index: 10003 !important;
+    z-index: 2147483007 !important;
+    pointer-events: auto !important;
+}
+
+.language-dropdown button {
+    pointer-events: auto !important;
 }
 
