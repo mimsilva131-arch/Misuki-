@@ -28,7 +28,7 @@ My Advertisements — Misuki
                             {% if ad.status == "pending" %}
                                 <span class="badge badge-warning">🟡 Pending review</span>
                             {% elif ad.status == "approved_pending_payment" %}
-                                <span class="badge badge-info">🔵 Approved — payment pending</span>
+                                <span class="badge badge-warning">🔵 Approved — payment pending</span>
                             {% elif ad.status == "active" %}
                                 <span class="badge badge-active">🟢 Active</span>
                             {% elif ad.status == "rejected" %}
