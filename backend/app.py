@@ -755,12 +755,44 @@ def paypal_get_access_token():
     if response.status_code != 200:
 
         print(
-            "❌ PayPal authentication failed:"
+            "❌ PayPal authentication failed."
         )
 
         print(
-            response.text
+            f"   HTTP status: {response.status_code}"
         )
+
+        try:
+
+            error_data = response.json()
+
+            print(
+                f"   Name: {error_data.get('name')}"
+            )
+
+            print(
+                f"   Message: {error_data.get('message')}"
+            )
+
+            print(
+                f"   Debug ID: {error_data.get('debug_id')}"
+            )
+
+            for detail in error_data.get("details", []):
+
+                print(
+                    "   Detail: "
+                    f"{detail.get('issue')} | "
+                    f"{detail.get('description')} | "
+                    f"field={detail.get('field')} | "
+                    f"value={detail.get('value')}"
+                )
+
+        except ValueError:
+
+            print(
+                f"   Response: {response.text[:2000]}"
+            )
 
         raise RuntimeError(
             "PayPal authentication failed."
@@ -883,6 +915,34 @@ def paypal_create_order(
             secrets.token_urlsafe(24)
     }
 
+    print(
+        "💳 PayPal order creation started."
+    )
+
+    print(
+        f"   Mode: {PAYPAL_MODE}"
+    )
+
+    print(
+        f"   API: {PAYPAL_API_BASE}"
+    )
+
+    print(
+        f"   Currency: {PAYPAL_CURRENCY}"
+    )
+
+    print(
+        f"   Amount: {amount:.2f}"
+    )
+
+    print(
+        f"   Client ID configured: {bool(PAYPAL_CLIENT_ID)}"
+    )
+
+    print(
+        f"   Client Secret configured: {bool(PAYPAL_CLIENT_SECRET)}"
+    )
+
     try:
 
         response = requests.post(
@@ -956,7 +1016,11 @@ def paypal_create_order(
             )
 
         raise RuntimeError(
-            "PayPal could not create the payment."
+            "PayPal could not create the payment. "
+            f"HTTP {response.status_code}: "
+            f"{error_data.get('name', 'Unknown')} - "
+            f"{error_data.get('message', 'Unknown error')} "
+            f"(debug_id={error_data.get('debug_id', 'none')})"
         )
 
     try:
