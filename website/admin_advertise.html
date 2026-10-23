@@ -99,7 +99,7 @@ Advertisement Admin — Misuki
                         <div class="badges">
 
 
-                            {% if ad.status == "pending" %}
+                            {% if ad.status == "pending" or ad.status == "approved_pending_payment" %}
 
                                 <span class="badge badge-warning">
 
@@ -107,6 +107,12 @@ Advertisement Admin — Misuki
 
                                 </span>
 
+
+                            {% elif ad.status == "approved_pending_payment" %}
+
+                                <span class="badge badge-info">
+                                    🔵 Awaiting payment
+                                </span>
 
                             {% elif ad.status == "active" %}
 
@@ -229,23 +235,18 @@ Advertisement Admin — Misuki
                             {% if ad.status == "pending" %}
 
 
-                                <!-- APPROVE -->
+                                {% if ad.status == "pending" %}
 
-                                <form
-                                    method="POST"
-                                    action="/admin/advertise/{{ ad.id }}/approve"
-                                >
-
-                                    <button
-                                        type="submit"
-                                        class="button add"
+                                    <form
+                                        method="POST"
+                                        action="/admin/advertise/{{ ad.id }}/approve"
                                     >
+                                        <button type="submit" class="button add">
+                                            ✅ Approve
+                                        </button>
+                                    </form>
 
-                                        ✅ Approve
-
-                                    </button>
-
-                                </form>
+                                {% endif %}
 
 
                                 <!-- REJECT -->
@@ -255,13 +256,13 @@ Advertisement Admin — Misuki
                                     action="/admin/advertise/{{ ad.id }}/reject"
                                 >
 
-                                    <input
-                                        type="text"
+                                    <textarea
                                         name="reason"
-                                        placeholder="Reason for rejection (optional)"
+                                        placeholder="Justification for rejection"
                                         maxlength="500"
-                                        autocomplete="off"
-                                    >
+                                        rows="3"
+                                        required
+                                    ></textarea>
 
                                     <button
                                         type="submit"
