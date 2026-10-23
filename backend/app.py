@@ -207,7 +207,7 @@ app.secret_key = SECRET_KEY
 COOKIE_SECURE = (
     os.getenv(
         "COOKIE_SECURE",
-        "false"
+        "true" if os.getenv("RENDER") else "false"
     ).strip().lower()
     == "true"
 )
@@ -233,7 +233,7 @@ app.config["SESSION_COOKIE_NAME"] = (
 )
 
 app.config["PERMANENT_SESSION_LIFETIME"] = (
-    timedelta(days=1)
+    timedelta(days=30)
 )
 
 app.wsgi_app = ProxyFix(
