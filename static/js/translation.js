@@ -517,8 +517,7 @@
                 what_users_say: "⭐ O que dizem os utilizadores",
                 report_problem: "🐛 Reportar um problema",
                 documentation_help: "Consulte a documentação para obter informações sobre como configurar e utilizar o Misuki.",
-                report_problem_text: "Encontrou um erro ou algo que não está a funcionar corretamente? Contacte a equipa de suporte do Misuki através do Discord."
-            
+                report_problem_text: "Encontrou um erro ou algo que não está a funcionar corretamente? Contacte a equipa de suporte do Misuki através do Discord.",
                 advertisement_title: "Título da publicidade",
                 description: "Descrição",
                 image_url: "URL da imagem",
@@ -837,8 +836,7 @@
                 what_users_say: "⭐ Was Benutzer sagen",
                 report_problem: "🐛 Problem melden",
                 documentation_help: "Prüfe die Dokumentation für Informationen zur Konfiguration und Nutzung von Misuki.",
-                report_problem_text: "Hast du einen Fehler gefunden oder funktioniert etwas nicht korrekt? Kontaktiere das Misuki-Supportteam über Discord."
-            
+                report_problem_text: "Hast du einen Fehler gefunden oder funktioniert etwas nicht korrekt? Kontaktiere das Misuki-Supportteam über Discord.",
                 advertisement_title: "Werbeanzeigentitel",
                 description: "Beschreibung",
                 image_url: "Bild-URL",
@@ -1157,8 +1155,7 @@
                 what_users_say: "⭐ Lo que dicen los usuarios",
                 report_problem: "🐛 Informar de un problema",
                 documentation_help: "Consulta la documentación para obtener información sobre cómo configurar y utilizar Misuki.",
-                report_problem_text: "¿Has encontrado un error o algo no funciona correctamente? Contacta con el equipo de soporte de Misuki a través de Discord."
-            
+                report_problem_text: "¿Has encontrado un error o algo no funciona correctamente? Contacta con el equipo de soporte de Misuki a través de Discord.",
                 advertisement_title: "Título del anuncio",
                 description: "Descripción",
                 image_url: "URL de la imagen",
@@ -1477,8 +1474,7 @@
                 what_users_say: "⭐ Ce qu'en disent les utilisateurs",
                 report_problem: "🐛 Signaler un problème",
                 documentation_help: "Consultez la documentation pour savoir comment configurer et utiliser Misuki.",
-                report_problem_text: "Vous avez trouvé un bug ou quelque chose ne fonctionne pas correctement ? Contactez l'équipe support de Misuki via Discord."
-            
+                report_problem_text: "Vous avez trouvé un bug ou quelque chose ne fonctionne pas correctement ? Contactez l'équipe support de Misuki via Discord.",
                 advertisement_title: "Titre de la publicité",
                 description: "Description",
                 image_url: "URL de l’image",
