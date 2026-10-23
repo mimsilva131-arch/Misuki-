@@ -125,7 +125,7 @@ img {
 
 header {
     position: relative;
-    z-index: 20;
+    z-index: 20000;
 }
 
 main,
@@ -1223,7 +1223,7 @@ body.menu-open .hamburger {
     position: relative;
     display: flex;
     align-items: center;
-    z-index: 10003;
+    z-index: 20001;
     pointer-events: auto;
 }
 
@@ -1339,7 +1339,7 @@ body.menu-open .hamburger {
     box-shadow:
         0 15px 40px rgba(0, 0, 0, 0.45);
 
-    z-index: 10005;
+    z-index: 20003;
 
     pointer-events: auto;
     isolation: isolate;
@@ -1353,7 +1353,7 @@ body.menu-open .hamburger {
 
 .language-dropdown button {
     position: relative;
-    z-index: 10006;
+    z-index: 20004;
 
     width: 100%;
     min-height: 40px;
