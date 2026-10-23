@@ -197,8 +197,9 @@
                 report_problem: "🐛 Report a Problem",
                 documentation_help: "Check the documentation for information about configuring and using Misuki.",
                 report_problem_text: "Found a bug or something that isn't working correctly? Contact the Misuki support team through Discord."
-            
-                advertisement_title: "Advertisement title",
+            ,
+
+                                 advertisement_title: "Advertisement title",
                 description: "Description",
                 image_url: "Image URL",
                 destination_url: "Destination URL",
