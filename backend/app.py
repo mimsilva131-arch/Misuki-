@@ -876,6 +876,9 @@ def paypal_create_order(
         "Accept":
             "application/json",
 
+        "Prefer":
+            "return=representation",
+
         "PayPal-Request-Id":
             secrets.token_urlsafe(24)
     }
@@ -977,30 +980,60 @@ def paypal_create_order(
         )
 
     approval_url = None
+    payer_action_url = None
+    approve_url = None
 
     for link in data.get(
         "links",
         []
     ):
 
-        if link.get(
-            "rel"
-        ) in (
-            "approve",
-            "payer-action"
-        ):
-
-            approval_url = link.get(
-                "href"
+        rel = str(
+            link.get(
+                "rel"
             )
+            or
+            ""
+        ).lower()
 
-            if approval_url:
-                break
+        href = link.get(
+            "href"
+        )
+
+        if rel == "payer-action" and href:
+            payer_action_url = href
+
+        elif rel == "approve" and href:
+            approve_url = href
+
+    # PayPal's current Checkout flow may return a payer-action
+    # link instead of the legacy approve link.
+    approval_url = (
+        payer_action_url
+        or
+        approve_url
+    )
 
     if not approval_url:
 
+        print(
+            "❌ PayPal order was created without a checkout link."
+        )
+
+        print(
+            f"   Order ID: {order_id}"
+        )
+
+        print(
+            f"   Order status: {data.get('status')}"
+        )
+
+        print(
+            f"   HATEOAS links: {data.get('links', [])}"
+        )
+
         raise RuntimeError(
-            "PayPal did not return an approval URL."
+            "PayPal did not return a checkout URL."
         )
 
     return {
@@ -5538,6 +5571,37 @@ def create_advertisement():
             "failed"
         )
 
+        # The advertisement must never remain pending when
+        # its PayPal order could not be created.
+        try:
+
+            with database_connection() as connection:
+
+                with connection.cursor() as cursor:
+
+                    cursor.execute(
+                        """
+                        UPDATE advertisements
+                        SET
+                            status = 'payment_failed',
+                            updated_at = %s
+                        WHERE id = %s
+                        AND status = 'pending'
+                        """,
+                        (
+                            utc_now().isoformat(),
+                            advertisement_id
+                        )
+                    )
+
+                connection.commit()
+
+        except Exception as cleanup_error:
+
+            print(
+                f"⚠️ Could not mark failed advertisement: {cleanup_error}"
+            )
+
         return error_page(
             "❌ Payment Error",
             "The PayPal payment could not be created. Please try again.",
@@ -5596,8 +5660,44 @@ def create_advertisement():
     # REDIRECT TO PAYPAL
     # =====================================================
 
+    approval_url = (
+        paypal_order.get(
+            "approval_url"
+        )
+        if isinstance(
+            paypal_order,
+            dict
+        )
+        else None
+    )
+
+    if not approval_url or not valid_http_url(
+        approval_url
+    ):
+
+        print(
+            "❌ PayPal returned an invalid checkout URL."
+        )
+
+        print(
+            f"   Order: {paypal_order}"
+        )
+
+        update_payment_record(
+            payment_id,
+            "failed"
+        )
+
+        return error_page(
+            "❌ Payment Error",
+            "PayPal returned an invalid checkout link. Please try again.",
+            502,
+            user
+        )
+
     return redirect(
-        paypal_order["approval_url"]
+        approval_url,
+        code=303
     )
 
 
