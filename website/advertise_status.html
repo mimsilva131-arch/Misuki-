@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}
+My Advertisements — Misuki
+{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1>My Advertisements</h1>
+
+        {% if advertisements %}
+            <div class="server-grid">
+                {% for ad in advertisements %}
+                    <div class="card server-card">
+
+                        {% if ad.image_url %}
+                            <img class="server-icon" src="{{ ad.image_url }}" alt="{{ ad.title }}">
+                        {% endif %}
+
+                        <div class="server-name">{{ ad.title }}</div>
+                        <div class="server-id">ID: {{ ad.id }}</div>
+                        <div class="server-id">{{ ad.duration_days }} days · €{{ "%.2f"|format(ad.amount or 0) }}</div>
+
+                        <p>{{ ad.description }}</p>
+
+                        <div class="badges">
+                            {% if ad.status == "pending" %}
+                                <span class="badge badge-warning">🟡 Pending review</span>
+                            {% elif ad.status == "approved_pending_payment" %}
+                                <span class="badge badge-info">🔵 Approved — payment pending</span>
+                            {% elif ad.status == "active" %}
+                                <span class="badge badge-active">🟢 Active</span>
+                            {% elif ad.status == "rejected" %}
+                                <span class="badge badge-expired">🔴 Rejected</span>
+                            {% elif ad.status == "expired" %}
+                                <span class="badge badge-none">⚪ Expired</span>
+                            {% elif ad.status == "disabled" %}
+                                <span class="badge badge-none">⚫ Disabled</span>
+                            {% else %}
+                                <span class="badge badge-none">⚪ {{ ad.status }}</span>
+                            {% endif %}
+
+                            {% if ad.payment_status == "paid" %}
+                                <span class="badge badge-active">💳 Paid</span>
+                            {% elif ad.payment_status in ("awaiting_payment", "pending") %}
+                                <span class="badge badge-warning">💳 Payment pending</span>
+                            {% endif %}
+                        </div>
+
+                        {% if ad.rejection_reason %}
+                            <p>
+                                <strong>Reason:</strong>
+                                {{ ad.rejection_reason }}
+                            </p>
+                        {% endif %}
+
+                        {% if ad.status == "approved_pending_payment" %}
+                            <a href="/advertise/{{ ad.id }}/pay" class="button add">
+                                💳 Pay with PayPal
+                            </a>
+                        {% elif ad.status == "active" and ad.target_url %}
+                            <a href="{{ ad.target_url }}" target="_blank" rel="noopener noreferrer" class="button manage">
+                                🔗 Open
+                            </a>
+                        {% endif %}
+
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty">
+                You have no advertisements yet.
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
