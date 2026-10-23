@@ -844,21 +844,25 @@ def paypal_create_order(
             }
         ],
 
-        "application_context": {
-            "brand_name":
-                "Misuki",
+        "payment_source": {
+            "paypal": {
+                "experience_context": {
+                    "brand_name":
+                        "Miskui",
 
-            "user_action":
-                "PAY_NOW",
+                    "user_action":
+                        "PAY_NOW",
 
-            "shipping_preference":
-                "NO_SHIPPING",
+                    "shipping_preference":
+                        "NO_SHIPPING",
 
-            "return_url":
-                return_url,
+                    "return_url":
+                        return_url,
 
-            "cancel_url":
-                cancel_url
+                    "cancel_url":
+                        cancel_url
+                }
+            }
         }
     }
 
