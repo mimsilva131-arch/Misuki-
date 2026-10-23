@@ -590,3 +590,53 @@
     font-size: 9px;
     line-height: 1.4;
 }
+
+
+/* ---------------------------------------------------------
+   SELECTABLE PRICE CARDS
+   --------------------------------------------------------- */
+
+.advertise-field-label {
+    display: block;
+    margin-bottom: 8px;
+    color: #dfe5f3;
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.advertise-price-card {
+    display: block;
+    cursor: pointer;
+    user-select: none;
+}
+
+.advertise-price-radio {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.advertise-price-card:has(.advertise-price-radio:checked) {
+    border-color: rgba(120, 167, 255, .75);
+    background: rgba(88, 101, 242, .14);
+    box-shadow: 0 0 0 2px rgba(88, 101, 242, .12);
+    transform: translateY(-2px);
+}
+
+.advertise-price-card:has(.advertise-price-radio:focus-visible) {
+    border-color: rgba(120, 167, 255, .85);
+    box-shadow: 0 0 0 3px rgba(88, 101, 242, .20);
+}
+
+@media (max-width: 700px) {
+    .advertise-price-card:has(.advertise-price-radio:checked) {
+        transform: none;
+    }
+}
