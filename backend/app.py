@@ -6038,9 +6038,65 @@ def paypal_success():
     # ACTIVATE ONLY AFTER STAFF APPROVAL + PAYMENT
     # -----------------------------------------------------
 
-    now = utc_now().isoformat()
+    # Re-check the advertisement state from the database so a payment
+    # callback can never activate an unapproved advertisement.
+    try:
+        with database_connection() as connection:
+            with connection.cursor(
+                cursor_factory=psycopg2.extras.RealDictCursor
+            ) as cursor:
+                cursor.execute(
+                    """
+                    SELECT
+                        duration_days,
+                        status,
+                        user_id
+                    FROM advertisements
+                    WHERE id = %s
+                    LIMIT 1
+                    """,
+                    (advertisement_id,)
+                )
+                current_advertisement = cursor.fetchone()
+
+        if not current_advertisement:
+            return error_page(
+                "❌ Payment Error",
+                "The advertisement could not be found.",
+                404,
+                user
+            )
+
+        if str(current_advertisement["user_id"]) != str(user.get("id")):
+            return error_page(
+                "❌ Payment Error",
+                "This advertisement does not belong to your account.",
+                403,
+                user
+            )
+
+        if str(current_advertisement["status"]).lower() != "approved_pending_payment":
+            return error_page(
+                "❌ Payment Error",
+                "The advertisement was not approved by staff before payment.",
+                409,
+                user
+            )
+
+        duration_days = int(current_advertisement["duration_days"])
+
+    except Exception as error:
+        print(f"❌ Advertisement approval-state verification error: {error}")
+        return error_page(
+            "❌ Payment Error",
+            "The advertisement approval could not be verified.",
+            500,
+            user
+        )
+
     start_at = utc_now()
-    end_at = start_at + timedelta(days=int(payment["duration_days"])) if payment.get("duration_days") else None
+    end_at = start_at + timedelta(days=duration_days)
+    now = utc_now().isoformat()
 
     try:
         with database_connection() as connection:
