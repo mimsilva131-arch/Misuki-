@@ -755,11 +755,13 @@ def paypal_get_access_token():
     if response.status_code != 200:
 
         print(
-            "❌ PayPal authentication failed."
+            "❌ PayPal authentication failed.",
+            flush=True
         )
 
         print(
-            f"   HTTP status: {response.status_code}"
+            f"   HTTP status: {response.status_code}",
+            flush=True
         )
 
         try:
@@ -834,7 +836,47 @@ def paypal_create_order(
             "PayPal is not configured."
         )
 
+    print(
+        "💳 PayPal order creation started.",
+        flush=True
+    )
+
+    print(
+        f"   Mode: {PAYPAL_MODE}",
+        flush=True
+    )
+
+    print(
+        f"   API: {PAYPAL_API_BASE}",
+        flush=True
+    )
+
+    print(
+        f"   Currency: {PAYPAL_CURRENCY}",
+        flush=True
+    )
+
+    print(
+        f"   Client ID configured: {bool(PAYPAL_CLIENT_ID)}",
+        flush=True
+    )
+
+    print(
+        f"   Client Secret configured: {bool(PAYPAL_CLIENT_SECRET)}",
+        flush=True
+    )
+
+    print(
+        "💳 Requesting PayPal OAuth access token...",
+        flush=True
+    )
+
     access_token = paypal_get_access_token()
+
+    print(
+        "✅ PayPal OAuth access token obtained.",
+        flush=True
+    )
 
     amount = Decimal(
         amount
@@ -916,31 +958,8 @@ def paypal_create_order(
     }
 
     print(
-        "💳 PayPal order creation started."
-    )
-
-    print(
-        f"   Mode: {PAYPAL_MODE}"
-    )
-
-    print(
-        f"   API: {PAYPAL_API_BASE}"
-    )
-
-    print(
-        f"   Currency: {PAYPAL_CURRENCY}"
-    )
-
-    print(
-        f"   Amount: {amount:.2f}"
-    )
-
-    print(
-        f"   Client ID configured: {bool(PAYPAL_CLIENT_ID)}"
-    )
-
-    print(
-        f"   Client Secret configured: {bool(PAYPAL_CLIENT_SECRET)}"
+        f"   Amount: {amount:.2f}",
+        flush=True
     )
 
     try:
@@ -968,11 +987,13 @@ def paypal_create_order(
     ):
 
         print(
-            "❌ PayPal create order failed."
+            "❌ PayPal create order failed.",
+            flush=True
         )
 
         print(
-            f"   HTTP status: {response.status_code}"
+            f"   HTTP status: {response.status_code}",
+            flush=True
         )
 
         try:
@@ -5627,7 +5648,13 @@ def create_advertisement():
     except Exception as error:
 
         print(
-            f"❌ PayPal order creation error: {error}"
+            f"❌ PayPal order creation error: {error}",
+            flush=True
+        )
+
+        print(
+            f"   Exception type: {type(error).__name__}",
+            flush=True
         )
 
         update_payment_record(
