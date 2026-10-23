@@ -147,26 +147,9 @@ Advertisement — Misuki
 
             <div class="advertise-field">
 
-                <label for="duration" data-i18n="common.advertisement_duration">
+                <span class="advertise-field-label" data-i18n="common.advertisement_duration">
                     Advertisement duration
-                </label>
-
-
-                <select
-                    id="duration"
-                    name="duration"
-                    required
-                >
-
-                    <option value="7" data-i18n="common.option_7">7 days — €0.99</option>
-
-
-                    <option value="14" data-i18n="common.option_14">14 days — €1.50</option>
-
-
-                    <option value="30" data-i18n="common.option_30">30 days — €2.50</option>
-
-                </select>
+                </span>
 
             </div>
 
@@ -200,75 +183,83 @@ Advertisement — Misuki
 
                     <!-- 7 DAYS -->
 
-                    <div class="advertise-price-card">
+                    <label class="advertise-price-card">
+
+                        <input
+                            class="advertise-price-radio"
+                            type="radio"
+                            name="duration"
+                            value="7"
+                            checked
+                        >
 
                         <span class="advertise-price-days" data-i18n="common.days_7">7 DAYS</span>
-
 
                         <div class="advertise-price-old">
                             €1.00
                         </div>
 
-
                         <div class="advertise-price-current">
                             €0.99
                         </div>
 
-
                         <span class="advertise-price-save" data-i18n="common.save_001">Save €0.01</span>
 
-                    </div>
+                    </label>
 
 
                     <!-- 14 DAYS -->
 
-                    <div
-                        class="advertise-price-card advertise-price-featured"
-                    >
+                    <label class="advertise-price-card advertise-price-featured">
+
+                        <input
+                            class="advertise-price-radio"
+                            type="radio"
+                            name="duration"
+                            value="14"
+                        >
 
                         <span class="advertise-price-popular" data-i18n="common.popular">POPULAR</span>
 
-
                         <span class="advertise-price-days" data-i18n="common.days_14">14 DAYS</span>
-
 
                         <div class="advertise-price-old">
                             €2.00
                         </div>
 
-
                         <div class="advertise-price-current">
                             €1.50
                         </div>
 
-
                         <span class="advertise-price-save" data-i18n="common.save_050">Save €0.50</span>
 
-                    </div>
+                    </label>
 
 
                     <!-- 30 DAYS -->
 
-                    <div class="advertise-price-card">
+                    <label class="advertise-price-card">
+
+                        <input
+                            class="advertise-price-radio"
+                            type="radio"
+                            name="duration"
+                            value="30"
+                        >
 
                         <span class="advertise-price-days" data-i18n="common.days_30">30 DAYS</span>
-
 
                         <div class="advertise-price-old">
                             €3.00
                         </div>
 
-
                         <div class="advertise-price-current">
                             €2.50
                         </div>
 
+                        <span class="advertise-price-save" data-i18n="common.save_050">Save €0.50</span>
 
-                        <span class="advertise-price-save">
-                            Save €0.50
-                        </span>
-
-                    </div>
+                    </label>
 
                 </div>
 
@@ -310,9 +301,7 @@ Advertisement — Misuki
             <button
                 class="advertise-submit"
                 type="submit"
-            >
-                Continue to PayPal
-            </button>
+            ><span data-i18n="common.continue_paypal">Continue to PayPal</span></button>
 
 
             <p class="advertise-note" data-i18n="common.advertisement_note">Your advertisement will be reviewed and activated after successful payment.</p>
