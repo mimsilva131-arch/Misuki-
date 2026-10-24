@@ -1,13 +1,14 @@
 {% extends "base.html" %}
 
 {% block title %}
-My Advertisements — Misuki
+As minhas publicidades — Misuki
 {% endblock %}
 
 {% block content %}
 <section class="section">
     <div class="container">
-        <h1>My Advertisements</h1>
+        <h1>As minhas publicidades</h1>
+        <p class="advertisement-status-intro">Aqui pode acompanhar cada proposta, verificar se foi aprovada, consultar o pagamento e confirmar quando a publicidade está ativa.</p>
 
         {% if advertisements %}
             <div class="server-grid">
@@ -26,42 +27,42 @@ My Advertisements — Misuki
 
                         <div class="badges">
                             {% if ad.status == "pending" %}
-                                <span class="badge badge-warning">🟡 Pending review</span>
+                                <span class="badge badge-warning">Pendente de análise</span>
                             {% elif ad.status == "approved_pending_payment" %}
-                                <span class="badge badge-warning">🔵 Approved — payment pending</span>
+                                <span class="badge badge-warning">Aprovada — pagamento pendente</span>
                             {% elif ad.status == "active" %}
-                                <span class="badge badge-active">🟢 Active</span>
+                                <span class="badge badge-active">Ativa</span>
                             {% elif ad.status == "rejected" %}
-                                <span class="badge badge-expired">🔴 Rejected</span>
+                                <span class="badge badge-expired">Rejeitada</span>
                             {% elif ad.status == "expired" %}
-                                <span class="badge badge-none">⚪ Expired</span>
+                                <span class="badge badge-none">Expirada</span>
                             {% elif ad.status == "disabled" %}
-                                <span class="badge badge-none">⚫ Disabled</span>
+                                <span class="badge badge-none">Desativada</span>
                             {% else %}
-                                <span class="badge badge-none">⚪ {{ ad.status }}</span>
+                                <span class="badge badge-none">{{ ad.status }}</span>
                             {% endif %}
 
                             {% if ad.payment_status == "paid" %}
-                                <span class="badge badge-active">💳 Paid</span>
+                                <span class="badge badge-active">Pagamento concluído</span>
                             {% elif ad.payment_status in ("awaiting_payment", "pending") %}
-                                <span class="badge badge-warning">💳 Payment pending</span>
+                                <span class="badge badge-warning">Pagamento pendente</span>
                             {% endif %}
                         </div>
 
                         {% if ad.rejection_reason %}
                             <p>
-                                <strong>Reason:</strong>
+                                <strong>Motivo da rejeição:</strong>
                                 {{ ad.rejection_reason }}
                             </p>
                         {% endif %}
 
                         {% if ad.status == "approved_pending_payment" %}
                             <a href="/advertise/{{ ad.id }}/pay" class="button add">
-                                💳 Pay with PayPal
+                                Efetuar pagamento com PayPal
                             </a>
                         {% elif ad.status == "active" and ad.target_url %}
                             <a href="{{ ad.target_url }}" target="_blank" rel="noopener noreferrer" class="button manage">
-                                🔗 Open
+                                Abrir publicidade
                             </a>
                         {% endif %}
 
@@ -70,7 +71,7 @@ My Advertisements — Misuki
             </div>
         {% else %}
             <div class="empty">
-                You have no advertisements yet.
+                Ainda não tem propostas de publicidade.
             </div>
         {% endif %}
     </div>
