@@ -522,6 +522,8 @@ def create_database():
 
                         rejection_reason TEXT,
 
+                        approval_reason TEXT,
+
                         duration_days INTEGER NOT NULL
                             DEFAULT 7,
 
@@ -542,6 +544,13 @@ def create_database():
                     ALTER TABLE advertisements
                     ADD COLUMN IF NOT EXISTS duration_days
                     INTEGER NOT NULL DEFAULT 7
+                    """
+                )
+
+                cursor.execute(
+                    """
+                    ALTER TABLE advertisements
+                    ADD COLUMN IF NOT EXISTS approval_reason TEXT
                     """
                 )
 
@@ -3424,6 +3433,7 @@ def get_all_advertisements():
                         target_url,
                         status,
                         rejection_reason,
+                        approval_reason,
                         duration_days,
                         start_at,
                         end_at,
@@ -5336,6 +5346,7 @@ def create_advertisement():
                         target_url,
                         status,
                         rejection_reason,
+                        approval_reason,
                         duration_days,
                         start_at,
                         end_at,
@@ -5346,6 +5357,7 @@ def create_advertisement():
                     (
                         %s, %s, %s, %s, %s, %s,
                         'pending',
+                        NULL,
                         NULL,
                         %s,
                         NULL,
@@ -5617,6 +5629,7 @@ def advertisement_status():
                         a.target_url,
                         a.status,
                         a.rejection_reason,
+                        a.approval_reason,
                         a.duration_days,
                         a.start_at,
                         a.end_at,
@@ -6276,6 +6289,56 @@ def admin_advertisements():
     )
 
 
+def notify_advertisement_user(user_id, title, approved=False, reason=""):
+
+    if not BOT_TOKEN or not user_id:
+        return False
+
+    try:
+        headers = {
+            "Authorization": f"Bot {BOT_TOKEN}",
+            "Content-Type": "application/json"
+        }
+        dm_response = requests.post(
+            "https://discord.com/api/v10/users/@me/channels",
+            json={"recipient_id": str(user_id)},
+            headers=headers,
+            timeout=10
+        )
+        if dm_response.status_code not in (200, 201):
+            print(f"⚠️ Could not create Discord DM channel: HTTP {dm_response.status_code}")
+            return False
+        channel_id = dm_response.json().get("id")
+        if not channel_id:
+            return False
+        if approved:
+            content = (
+                f"📢 **Publicidade aprovada**\\n\\n"
+                f"A sua publicidade **{title}** foi aprovada pela equipa.\\n"
+                f"**Motivo:** {reason}\\n\\n"
+                f"Pode agora efetuar o pagamento para a publicidade ficar ativa."
+            )
+        else:
+            content = (
+                f"📢 **Publicidade rejeitada**\\n\\n"
+                f"A sua publicidade **{title}** foi rejeitada pela equipa.\\n"
+                f"**Motivo:** {reason}"
+            )
+        message_response = requests.post(
+            f"https://discord.com/api/v10/channels/{channel_id}/messages",
+            json={"content": content},
+            headers=headers,
+            timeout=10
+        )
+        if message_response.status_code not in (200, 201):
+            print(f"⚠️ Could not send advertisement Discord notification: HTTP {message_response.status_code}")
+            return False
+        return True
+    except requests.RequestException as error:
+        print(f"⚠️ Advertisement Discord notification error: {error}")
+        return False
+
+
 # =========================================================
 # ADMIN APPROVE ADVERTISEMENT
 # =========================================================
@@ -6303,11 +6366,23 @@ def approve_advertisement(advertisement_id):
     if not DATABASE_URL:
         return error_page("❌ Database error", "The database is not configured.", 500, user)
 
+    reason = request.form.get("reason", "").strip()[:500]
+
+    if not reason:
+        return error_page(
+            "❌ Motivo obrigatório",
+            "Indique a justificação da aprovação antes de aprovar a publicidade.",
+            400,
+            user
+        )
+
     now = utc_now().isoformat()
+    approved_title = None
+    approved_user_id = None
 
     try:
         with database_connection() as connection:
-            with connection.cursor() as cursor:
+            with connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
 
                 cursor.execute(
                     """
@@ -6315,14 +6390,19 @@ def approve_advertisement(advertisement_id):
                     SET
                         status = 'approved_pending_payment',
                         rejection_reason = NULL,
+                        approval_reason = %s,
                         updated_at = %s
                     WHERE id = %s
                     AND status = 'pending'
-                    RETURNING id
+                    RETURNING id, title, user_id
                     """,
-                    (now, advertisement_id)
+                    (reason, now, advertisement_id)
                 )
                 result = cursor.fetchone()
+
+                if result:
+                    approved_title = result["title"]
+                    approved_user_id = result["user_id"]
 
                 if not result:
                     connection.rollback()
@@ -6347,6 +6427,13 @@ def approve_advertisement(advertisement_id):
                 )
 
             connection.commit()
+
+        notify_advertisement_user(
+            approved_user_id,
+            approved_title or "Publicidade",
+            approved=True,
+            reason=reason
+        )
 
     except Exception as error:
         print(f"❌ Advertisement approval error: {error}")
@@ -6391,10 +6478,12 @@ def reject_advertisement(advertisement_id):
         )
 
     now = utc_now().isoformat()
+    rejected_title = None
+    rejected_user_id = None
 
     try:
         with database_connection() as connection:
-            with connection.cursor() as cursor:
+            with connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
 
                 cursor.execute(
                     """
@@ -6402,14 +6491,19 @@ def reject_advertisement(advertisement_id):
                     SET
                         status = 'rejected',
                         rejection_reason = %s,
+                        approval_reason = NULL,
                         updated_at = %s
                     WHERE id = %s
                     AND status IN ('pending', 'approved_pending_payment')
-                    RETURNING id
+                    RETURNING id, title, user_id
                     """,
                     (reason, now, advertisement_id)
                 )
                 result = cursor.fetchone()
+
+                if result:
+                    rejected_title = result["title"]
+                    rejected_user_id = result["user_id"]
 
                 if not result:
                     connection.rollback()
@@ -6434,6 +6528,13 @@ def reject_advertisement(advertisement_id):
                 )
 
             connection.commit()
+
+        notify_advertisement_user(
+            rejected_user_id,
+            rejected_title or "Publicidade",
+            approved=False,
+            reason=reason
+        )
 
     except Exception as error:
         print(f"❌ Advertisement rejection error: {error}")
