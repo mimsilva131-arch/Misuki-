@@ -112,6 +112,8 @@ SECRET_KEY = os.getenv(
     "FLASK_SECRET_KEY"
 )
 
+MISUKI_VERSION = (os.getenv("MISUKI_VERSION") or "1.0.0").strip() or "1.0.0"
+
 ADMIN_DISCORD_IDS = {
     str(admin_id).strip()
     for admin_id in os.getenv(
@@ -4061,7 +4063,7 @@ def statistics():
                     ):
                         if key in bot_snapshot:
                             statistics_data[key] = bot_snapshot[key]
-                    statistics_data["version"] = os.getenv("MISUKI_VERSION", "1.0.0")
+                    statistics_data["version"] = MISUKI_VERSION
     except Exception as error:
         print(f"⚠️ Could not load live bot statistics: {error}")
 
@@ -4762,10 +4764,7 @@ def statistics_api():
                 bot_snapshot[key]
             )
 
-    statistics_data["version"] = os.getenv(
-        "MISUKI_VERSION",
-        "1.0.0"
-    )
+    statistics_data["version"] = MISUKI_VERSION
 
 
     # =====================================================
