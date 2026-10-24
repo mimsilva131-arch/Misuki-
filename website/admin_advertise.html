@@ -99,21 +99,10 @@ Advertisement Admin — Misuki
                         <div class="badges">
 
 
-                            {% if ad.status == "pending" or ad.status == "approved_pending_payment" %}
-
-                                <span class="badge badge-warning">
-
-                                    🟡 Pending
-
-                                </span>
-
-
+                            {% if ad.status == "pending" %}
+                                <span class="badge badge-warning">🟡 Pendente de análise</span>
                             {% elif ad.status == "approved_pending_payment" %}
-
-                                <span class="badge badge-info">
-                                    🔵 Awaiting payment
-                                </span>
-
+                                <span class="badge badge-info">🔵 Aprovada — pagamento pendente</span>
                             {% elif ad.status == "active" %}
 
                                 <span class="badge badge-active">
@@ -164,7 +153,7 @@ Advertisement Admin — Misuki
 
                             <p class="server-id">
 
-                                Start:
+                                Início:
                                 {{ ad.start_at }}
 
                             </p>
@@ -180,7 +169,7 @@ Advertisement Admin — Misuki
 
                             <p class="server-id">
 
-                                End:
+                                Fim:
                                 {{ ad.end_at }}
 
                             </p>
@@ -197,7 +186,7 @@ Advertisement Admin — Misuki
                             <p>
 
                                 <strong>
-                                    Rejection reason:
+                                    Motivo da rejeição:
                                 </strong>
 
                                 {{ ad.rejection_reason }}
@@ -223,7 +212,7 @@ Advertisement Admin — Misuki
                                 class="button manage"
                             >
 
-                                🔗 Open
+                                🔗 Abrir
 
                             </a>
 
@@ -234,19 +223,18 @@ Advertisement Admin — Misuki
 
                             {% if ad.status == "pending" %}
 
-
-                                {% if ad.status == "pending" %}
-
-                                    <form
-                                        method="POST"
-                                        action="/admin/advertise/{{ ad.id }}/approve"
-                                    >
-                                        <button type="submit" class="button add">
-                                            ✅ Approve
-                                        </button>
-                                    </form>
-
-                                {% endif %}
+                                <form method="POST" action="/admin/advertise/{{ ad.id }}/approve">
+                                    <textarea
+                                        name="reason"
+                                        placeholder="Justificação da aprovação"
+                                        maxlength="500"
+                                        rows="3"
+                                        required
+                                    ></textarea>
+                                    <button type="submit" class="button add">
+                                        ✅ Aprovar
+                                    </button>
+                                </form>
 
 
                                 <!-- REJECT -->
@@ -258,7 +246,7 @@ Advertisement Admin — Misuki
 
                                     <textarea
                                         name="reason"
-                                        placeholder="Justification for rejection"
+                                        placeholder="Justificação da rejeição"
                                         maxlength="500"
                                         rows="3"
                                         required
@@ -269,7 +257,7 @@ Advertisement Admin — Misuki
                                         class="button manage"
                                     >
 
-                                        ❌ Reject
+                                        ❌ Rejeitar
 
                                     </button>
 
@@ -295,7 +283,7 @@ Advertisement Admin — Misuki
                                         class="button manage"
                                     >
 
-                                        ⛔ Disable
+                                        ⛔ Desativar
 
                                     </button>
 
@@ -326,7 +314,7 @@ Advertisement Admin — Misuki
 
             <div class="empty">
 
-                No advertisements yet.
+                Ainda não existem publicidades.
 
             </div>
 
