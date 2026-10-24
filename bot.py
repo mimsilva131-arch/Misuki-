@@ -278,11 +278,7 @@ def initialize_statistics_database():
                     1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Offline', '0s', %s,
                     NULL, '[]'::jsonb, '[]'::jsonb, %s
                 ) ON CONFLICT (id) DO NOTHING
-<<<<<<< HEAD
             """, (MISUKI_VERSION, time.time()))
-=======
-            """, (os.getenv("MISUKI_VERSION", "").strip(), time.time()))
->>>>>>> 02d41aa86cf58118e2ebee4076df89145b5ce0a8
         connection.commit()
         print("🗄️ Statistics database initialized.")
     except Exception as error:
@@ -348,11 +344,7 @@ async def update_stats_snapshot():
         latency = round(bot.latency * 1000)
         bot_status = "Online" if bot.is_ready() else "Offline"
         uptime = get_uptime()
-<<<<<<< HEAD
         version = MISUKI_VERSION
-=======
-        version = os.getenv("MISUKI_VERSION", "").strip()
->>>>>>> 02d41aa86cf58118e2ebee4076df89145b5ce0a8
         channels_count = sum(len(guild.channels) for guild in bot.guilds)
         connection = get_database_connection()
         with connection.cursor() as cursor:
