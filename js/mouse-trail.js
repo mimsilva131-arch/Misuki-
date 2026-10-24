@@ -29,16 +29,10 @@
 
     let lastX = 0;
     let lastY = 0;
-    let targetX = 0;
-    let targetY = 0;
-
     let mouseReady = false;
-    let animationFrame = null;
     let lastTrailTime = 0;
 
-    const TRAIL_INTERVAL = 16;
-    const TRAIL_SPACING = 5;
-    const FOLLOW_SPEED = 0.34;
+    const TRAIL_INTERVAL = 22;
 
     document.addEventListener(
         "mousemove",
@@ -48,65 +42,63 @@
                 return;
             }
 
-            targetX = event.clientX;
-            targetY = event.clientY;
+            const x = event.clientX;
+            const y = event.clientY;
 
             if (!mouseReady) {
-                lastX = targetX;
-                lastY = targetY;
+                lastX = x;
+                lastY = y;
                 mouseReady = true;
+                return;
             }
 
-            if (animationFrame === null) {
-                animationFrame = requestAnimationFrame(updateTrail);
+            const dx = x - lastX;
+            const dy = y - lastY;
+            const distance = Math.hypot(dx, dy);
+
+            if (
+                distance < 1 ||
+                performance.now() - lastTrailTime < TRAIL_INTERVAL
+            ) {
+                return;
             }
-        },
-        { passive: true }
-    );
 
-    function updateTrail(now) {
+            const angle =
+                Math.atan2(dy, dx) * 180 / Math.PI;
 
-        animationFrame = null;
-
-        if (!mouseReady || !isHome()) {
-            return;
-        }
-
-        lastX += (targetX - lastX) * FOLLOW_SPEED;
-        lastY += (targetY - lastY) * FOLLOW_SPEED;
-
-        const dx = targetX - lastX;
-        const dy = targetY - lastY;
-        const distance = Math.hypot(dx, dy);
-
-        if (
-            now - lastTrailTime >= TRAIL_INTERVAL &&
-            distance > 1.2
-        ) {
-            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-            const steps = Math.max(1, Math.ceil(distance / TRAIL_SPACING));
+            const steps =
+                Math.max(
+                    1,
+                    Math.ceil(distance / 7)
+                );
 
             for (let i = 1; i <= steps; i++) {
-                const progress = i / steps;
+
+                const progress =
+                    i / steps;
 
                 createTrail(
                     lastX + dx * progress,
                     lastY + dy * progress,
                     angle,
-                    Math.max(5, Math.min(18, distance / steps))
+                    Math.max(
+                        5,
+                        Math.min(
+                            18,
+                            distance / steps
+                        )
+                    )
                 );
+
             }
 
-            lastTrailTime = now;
-        }
+            lastX = x;
+            lastY = y;
+            lastTrailTime = performance.now();
 
-        if (
-            Math.abs(targetX - lastX) > 0.5 ||
-            Math.abs(targetY - lastY) > 0.5
-        ) {
-            animationFrame = requestAnimationFrame(updateTrail);
-        }
-    }
+        },
+        { passive: true }
+    );
 
 
     function createTrail(
@@ -170,7 +162,6 @@
             500
         );
     }
-
 
     /* =====================================================
        PAGE TRANSITION
