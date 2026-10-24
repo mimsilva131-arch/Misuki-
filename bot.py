@@ -453,6 +453,7 @@ EXTENSIONS = [
     "cogs.announcements",
     "cogs.utility",
     "cogs.licenses",
+    "cogs.onboarding",
     "cogs.triggers",
     "cogs.impersonate",
 ]
