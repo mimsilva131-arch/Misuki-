@@ -4,6 +4,9 @@ import secrets
 import sqlite3
 import time
 import json
+import subprocess
+import atexit
+import sys
   
 from decimal import Decimal, InvalidOperation
 from datetime import datetime, timedelta, timezone
@@ -7115,6 +7118,37 @@ def health():
 # START
 # =========================================================
 
+bot_process = None
+
+
+def start_discord_bot():
+    global bot_process
+
+    if not BOT_TOKEN:
+        print("⚠️ Discord bot not started: DISCORD_BOT_TOKEN is not configured.")
+        return
+
+    try:
+        bot_path = os.path.join(BASE_DIR, "bot.py")
+        bot_process = subprocess.Popen(
+            [sys.executable, bot_path],
+            cwd=BASE_DIR
+        )
+        print(f"🤖 Discord bot process started (PID {bot_process.pid}).")
+    except Exception as error:
+        print(f"❌ Could not start Discord bot: {error}")
+
+
+def stop_discord_bot():
+    global bot_process
+
+    if bot_process and bot_process.poll() is None:
+        try:
+            bot_process.terminate()
+        except Exception:
+            pass
+
+
 if __name__ == "__main__":
 
     print(
@@ -7203,6 +7237,9 @@ if __name__ == "__main__":
     print(
         "=========================================="
     )
+
+    start_discord_bot()
+    atexit.register(stop_discord_bot)
 
     app.run(
         host="0.0.0.0",
