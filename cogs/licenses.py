@@ -5,6 +5,7 @@
 
 import os
 import secrets
+import asyncio
 
 from datetime import datetime, timedelta, timezone
 
@@ -39,6 +40,7 @@ class LicenseManager(commands.Cog):
 
         self.bot = bot
         self.pool = None
+        self.expiration_task = None
 
     # =====================================================
     # DATABASE
@@ -168,17 +170,65 @@ class LicenseManager(commands.Cog):
 
             raise
 
+        if self.expiration_task is None:
+            self.expiration_task = asyncio.create_task(
+                self.license_expiration_worker()
+            )
+
     # =====================================================
     # COG UNLOAD
     # =====================================================
 
     async def cog_unload(self):
 
+        if self.expiration_task is not None:
+            self.expiration_task.cancel()
+            try:
+                await self.expiration_task
+            except asyncio.CancelledError:
+                pass
+            self.expiration_task = None
+
         if self.pool is not None:
 
             await self.pool.close()
 
             self.pool = None
+
+
+    async def sync_verification_panel(self, guild_id, active):
+        verification = self.bot.get_cog("Verification")
+        if verification is None:
+            return
+        try:
+            if active:
+                await verification.ensure_active_panel(int(guild_id))
+            else:
+                await verification.remove_verification_panel(int(guild_id))
+        except Exception as error:
+            print(f"⚠️ Could not sync verification panel for {guild_id}: {error}")
+
+    async def license_expiration_worker(self):
+        await self.bot.wait_until_ready()
+        while not self.bot.is_closed():
+            try:
+                async with self.pool.acquire() as connection:
+                    rows = await connection.fetch("""
+                        DELETE FROM licenses
+                        WHERE status = 'active'
+                          AND expires_at IS NOT NULL
+                          AND expires_at <= NOW()
+                        RETURNING guild_id
+                    """)
+                for row in rows:
+                    await self.sync_verification_panel(int(row["guild_id"]), False)
+                if rows:
+                    print(f"🗑️ Removed {len(rows)} expired license(s).")
+            except asyncio.CancelledError:
+                raise
+            except Exception as error:
+                print(f"❌ License expiration worker error: {error}")
+            await asyncio.sleep(30)
 
     # =====================================================
     # DATABASE CHECK
@@ -318,7 +368,7 @@ class LicenseManager(commands.Cog):
 
         if now >= expires_at:
 
-            await self.set_expired(
+            await self.delete_expired_license(
                 guild_id
             )
 
@@ -343,7 +393,7 @@ class LicenseManager(commands.Cog):
     # EXPIRE
     # =====================================================
 
-    async def set_expired(
+    async def delete_expired_license(
         self,
         guild_id
     ):
@@ -356,12 +406,16 @@ class LicenseManager(commands.Cog):
 
             await connection.execute(
                 """
-                UPDATE licenses
-                SET status = 'expired'
+                DELETE FROM licenses
                 WHERE guild_id = $1
+                  AND status = 'active'
+                  AND expires_at IS NOT NULL
+                  AND expires_at <= NOW()
                 """,
                 int(guild_id)
             )
+
+        await self.sync_verification_panel(int(guild_id), False)
 
     # =====================================================
     # CREATE
@@ -487,6 +541,8 @@ class LicenseManager(commands.Cog):
                 now
             )
 
+        await self.sync_verification_panel(guild_id, True)
+
         return license_key
 
     # =====================================================
@@ -510,12 +566,13 @@ class LicenseManager(commands.Cog):
 
             await connection.execute(
                 """
-                UPDATE licenses
-                SET status = 'revoked'
+                DELETE FROM licenses
                 WHERE guild_id = $1
                 """,
                 int(guild_id)
             )
+
+        await self.sync_verification_panel(int(guild_id), False)
 
         return True
 
@@ -605,35 +662,6 @@ class LicenseManager(commands.Cog):
                 """,
                 new_expiration,
                 guild_id
-            )
-
-        return True
-
-    # =====================================================
-    # DELETE
-    # =====================================================
-
-    async def delete_license(
-        self,
-        guild_id
-    ):
-
-        existing = await self.get_license(
-            guild_id
-        )
-
-        if existing is None:
-
-            return False
-
-        async with self.pool.acquire() as connection:
-
-            await connection.execute(
-                """
-                DELETE FROM licenses
-                WHERE guild_id = $1
-                """,
-                int(guild_id)
             )
 
         return True
@@ -1251,74 +1279,6 @@ class LicenseManager(commands.Cog):
             ephemeral=True
         )
 
-    # =====================================================
-    # /DELETELICENSE
-    # =====================================================
-
-    @app_commands.command(
-        name="deletelicense",
-        description="Delete a server license completely."
-    )
-    @app_commands.describe(
-        server_id="ID of the server."
-    )
-    async def deletelicense(
-        self,
-        interaction: discord.Interaction,
-        server_id: str
-    ):
-
-        if not self.is_owner(
-            interaction
-        ):
-
-            await interaction.response.send_message(
-                "❌ You are not authorized to delete licenses.",
-                ephemeral=True
-            )
-
-            return
-
-        try:
-
-            guild_id = int(
-                server_id
-            )
-
-        except (
-            ValueError,
-            TypeError
-        ):
-
-            await interaction.response.send_message(
-                "❌ Invalid Server ID.",
-                ephemeral=True
-            )
-
-            return
-
-        success = await self.delete_license(
-            guild_id
-        )
-
-        if not success:
-
-            await interaction.response.send_message(
-                "❌ This server does not have a license.",
-                ephemeral=True
-            )
-
-            return
-
-        await interaction.response.send_message(
-            (
-                "🗑️ **License deleted.**\n\n"
-                f"Server ID: `{guild_id}`\n\n"
-                "A completely new license can now "
-                "be created for this server."
-            ),
-            ephemeral=True
-        )
 
 
 # =========================================================
