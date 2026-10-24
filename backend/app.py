@@ -5038,9 +5038,13 @@ def statistics_api():
         ] = get_admin_users(
             response.get(
                 "admin_servers",
-        []
-    )
-)
+                []
+            ),
+            bot_snapshot.get(
+                "admin_users",
+                []
+            )
+        )
         response[
             "admin_statistics"
         ] = {
