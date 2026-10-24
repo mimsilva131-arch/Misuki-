@@ -5362,9 +5362,11 @@ def statistics_api():
             "last_seen"
         ],
 
-        "updated_at": statistics_data[
+        "updated_at": statistics_data.get(
             "updated_at"
-        ],
+        ) or statistics_data.get(
+            "last_seen"
+        ),
     }
 
 
