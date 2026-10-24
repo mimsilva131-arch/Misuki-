@@ -15,7 +15,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 
-load_dotenv(override=True)
+load_dotenv(override=False)
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 BOT_START_TIME = time.time()
