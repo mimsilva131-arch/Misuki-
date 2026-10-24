@@ -2310,6 +2310,16 @@
 
             "/advertise": "nav.advertisement",
 
+            "/advertise/status": "nav.my_advertisements",
+
+            "/advertise/success": "advertisements.proposal_submitted",
+
+            "/payment/success": "advertisements.payment_completed",
+
+            "/payment/cancel": "advertisements.payment_cancelled",
+
+            "/admin/advertise": "advertisements.advertisement_management",
+
             "/terms": "nav.terms",
 
             "/privacy": "nav.privacy",
