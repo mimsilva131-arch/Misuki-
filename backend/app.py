@@ -4012,10 +4012,7 @@ def statistics():
 
         "api_status": "Offline",
 
-        "version": os.getenv(
-            "MISUKI_VERSION",
-            "1.0.0"
-        ),
+        "version": MISUKI_VERSION,
 
         "uptime": "0s",
 
@@ -4639,10 +4636,7 @@ def statistics_api():
 
         "api_status": "Unavailable",
 
-        "version": os.getenv(
-            "MISUKI_VERSION",
-            "1.0.0"
-        ),
+        "version": MISUKI_VERSION,
 
         "uptime": "0s",
 
