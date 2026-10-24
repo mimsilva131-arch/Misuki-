@@ -4129,7 +4129,11 @@ def statistics():
                     ):
                         if key in bot_snapshot:
                             statistics_data[key] = bot_snapshot[key]
-                    statistics_data["version"] = MISUKI_VERSION
+                    statistics_data["version"] = (
+        MISUKI_VERSION
+        or bot_snapshot.get("version")
+        or ""
+    )
     except Exception as error:
         print(f"⚠️ Could not load live bot statistics: {error}")
 
@@ -4390,7 +4394,8 @@ def statistics():
         statistics=statistics_data,
         admin_statistics=admin_statistics,
         admin_servers=admin_servers,
-        admin_users=admin_users
+        admin_users=admin_users,
+        can_view_user_search=user_is_admin
     )
 
 
@@ -4609,7 +4614,8 @@ def get_admin_users(admin_servers, snapshot_users=None):
         try:
 
             admin_users = get_admin_users(
-                admin_servers
+                admin_servers,
+                bot_snapshot.get("admin_users", [])
             )
 
         except Exception as error:
