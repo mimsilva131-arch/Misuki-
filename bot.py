@@ -72,158 +72,80 @@ async def refresh_bot_installers():
 BOT_ADMIN_USERS = []
 
 async def count_statistics_users():
-    """Count unique human Discord users and build the administrator search index."""
+    """Count unique human Discord users from the bot's populated member cache."""
     global BOT_ADMIN_USERS
 
     BOT_GUILD_HUMAN_COUNTS.clear()
-    BOT_ADMIN_USERS = []
 
     users_by_id = {}
-    scanned = 0
-    excluded_bots = 0
 
     for guild in bot.guilds:
-        guild_seen = set()
+        guild_humans = set()
 
-        try:
-            members = guild.fetch_members(limit=None)
+        for member in guild.members:
+            member_id = getattr(member, "id", None)
 
-            async for member in members:
-                member_id = getattr(member, "id", None)
+            if member_id is None:
+                continue
 
-                if member_id is None or member_id in guild_seen:
-                    continue
+            if not is_human_member(member):
+                continue
 
-                guild_seen.add(member_id)
-                scanned += 1
+            member_id = str(member_id)
+            guild_humans.add(member_id)
 
-                if not is_human_member(member):
-                    excluded_bots += 1
-                    continue
+            username = str(
+                getattr(member, "name", "")
+                or ""
+            )
 
-                username = str(
-                    getattr(member, "name", "")
-                    or ""
-                )
+            display_name = str(
+                getattr(member, "display_name", "")
+                or username
+                or "Discord User"
+            )
 
-                display_name = str(
-                    getattr(member, "display_name", "")
-                    or username
-                    or "Discord User"
-                )
+            avatar_url = None
 
+            try:
+                avatar = getattr(member, "display_avatar", None)
+                if avatar:
+                    avatar_url = str(avatar.url)
+            except Exception:
                 avatar_url = None
 
-                try:
-                    avatar = getattr(member, "display_avatar", None)
+            user = users_by_id.get(member_id)
 
-                    if avatar:
-                        avatar_url = str(avatar.url)
+            if user is None:
+                user = {
+                    "id": member_id,
+                    "name": display_name,
+                    "username": username,
+                    "avatar": avatar_url,
+                    "servers_count": 0,
+                    "created_at": None,
+                    "added_bot": False
+                }
+                users_by_id[member_id] = user
 
-                except Exception:
-                    avatar_url = None
+            user["servers_count"] += 1
 
-                user = users_by_id.get(member_id)
+            if avatar_url:
+                user["avatar"] = avatar_url
 
-                if user is None:
-                    user = {
-                        "id": str(member_id),
-                        "name": display_name,
-                        "username": username,
-                        "avatar": avatar_url,
-                        "servers_count": 0,
-                        "created_at": None,
-                        "added_bot": False
-                    }
-                    users_by_id[member_id] = user
+            if display_name:
+                user["name"] = display_name
 
-                user["servers_count"] += 1
+            if username:
+                user["username"] = username
 
-                if avatar_url:
-                    user["avatar"] = avatar_url
+        BOT_GUILD_HUMAN_COUNTS[str(guild.id)] = len(guild_humans)
 
-                if display_name:
-                    user["name"] = display_name
-
-                if username:
-                    user["username"] = username
-
-            BOT_GUILD_HUMAN_COUNTS[str(guild.id)] = sum(
-                1
-                for member_id in guild_seen
-                if member_id in users_by_id
-            )
-
-        except Exception as error:
-            print(
-                f"⚠️ Could not fetch members for {guild.name} ({guild.id}): {error}"
-            )
-
-            for member in guild.members:
-                member_id = getattr(member, "id", None)
-
-                if member_id is None or member_id in guild_seen:
-                    continue
-
-                guild_seen.add(member_id)
-                scanned += 1
-
-                if not is_human_member(member):
-                    excluded_bots += 1
-                    continue
-
-                username = str(
-                    getattr(member, "name", "")
-                    or ""
-                )
-
-                display_name = str(
-                    getattr(member, "display_name", "")
-                    or username
-                    or "Discord User"
-                )
-
-                avatar_url = None
-
-                try:
-                    avatar = getattr(member, "display_avatar", None)
-
-                    if avatar:
-                        avatar_url = str(avatar.url)
-
-                except Exception:
-                    avatar_url = None
-
-                user = users_by_id.get(member_id)
-
-                if user is None:
-                    user = {
-                        "id": str(member_id),
-                        "name": display_name,
-                        "username": username,
-                        "avatar": avatar_url,
-                        "servers_count": 0,
-                        "created_at": None,
-                        "added_bot": False
-                    }
-                    users_by_id[member_id] = user
-
-                user["servers_count"] += 1
-
-                if avatar_url:
-                    user["avatar"] = avatar_url
-
-                if display_name:
-                    user["name"] = display_name
-
-                if username:
-                    user["username"] = username
-
-            BOT_GUILD_HUMAN_COUNTS[str(guild.id)] = sum(
-                1
-                for member_id in guild_seen
-                if member_id in users_by_id
-            )
+    installer_ids = {
+        str(value)
+        for value in BOT_INSTALLERS.values()
+        if value
+    }
 
     for user in users_by_id.values():
         try:
@@ -236,22 +158,19 @@ async def count_statistics_users():
                 "%d/%m/%Y",
                 time.gmtime(timestamp)
             )
-
         except Exception:
             user["created_at"] = None
 
-        if user["id"] in {
-            str(value)
-            for value in BOT_INSTALLERS.values()
-        }:
-            user["added_bot"] = True
+        user["added_bot"] = user["id"] in installer_ids
 
-    BOT_ADMIN_USERS = list(
-        users_by_id.values()
+    BOT_ADMIN_USERS = sorted(
+        users_by_id.values(),
+        key=lambda user: (
+            str(user.get("name") or "").lower(),
+            str(user.get("id") or "")
+        )
     )
 
-    print(f"   Members scanned: {scanned}")
-    print(f"   Bots excluded: {excluded_bots}")
     print(f"   Unique human users: {len(BOT_ADMIN_USERS)}")
 
     return len(BOT_ADMIN_USERS)
