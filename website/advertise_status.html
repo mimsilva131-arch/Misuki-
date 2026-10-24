@@ -44,11 +44,6 @@ As minhas publicidades — Misuki
 
                             {% if ad.payment_status == "paid" %}
                                 <span class="badge badge-active" data-i18n="advertisements.payment_completed">Pagamento concluído</span>
-                            {% elif ad.payment_status in ("awaiting_payment", "pending") %}
-                                <span class="badge badge-warning" data-i18n="advertisements.payment_pending">Pagamento pendente</span>
-                            {% elif ad.payment_status in ("failed", "cancelled") %}
-                                <span class="badge badge-expired" data-i18n="advertisements.payment_failed">Pagamento não concluído</span>
-                            {% endif %}
                         </div>
 
                         {% if ad.approval_reason %}
