@@ -4052,6 +4052,276 @@ def reviews():
 
 
 # =========================================================
+# ADMIN LICENSE MANAGEMENT
+# =========================================================
+
+@app.route("/admin/licenses", methods=["GET", "POST"])
+def admin_licenses():
+
+    user = get_user()
+
+    if not user:
+        session["next_url"] = "/admin/licenses"
+        return redirect("/login")
+
+    if not is_admin(user):
+        return error_page(
+            "Access denied",
+            "Only authorized Misuki administrators can manage licenses.",
+            403,
+            user
+        )
+
+    action = request.form.get("action", "").strip().lower()
+
+    if request.method == "POST":
+        guild_id_raw = request.form.get("guild_id", "").strip()
+        days_raw = request.form.get("days", "").strip()
+
+        try:
+            guild_id = int(guild_id_raw)
+        except (TypeError, ValueError):
+            return error_page(
+                "Invalid server ID",
+                "The server ID must be a valid Discord server ID.",
+                400,
+                user
+            )
+
+        if action not in ("create", "extend", "revoke"):
+            return error_page(
+                "Invalid action",
+                "The requested license action is invalid.",
+                400,
+                user
+            )
+
+        if action in ("create", "extend"):
+            try:
+                days = int(days_raw)
+            except (TypeError, ValueError):
+                return error_page(
+                    "Invalid duration",
+                    "The license duration must be a whole number of days.",
+                    400,
+                    user
+                )
+
+            if days < 1 or days > 3650:
+                return error_page(
+                    "Invalid duration",
+                    "License duration must be between 1 and 3650 days.",
+                    400,
+                    user
+                )
+
+        try:
+            with database_connection() as connection:
+                with connection.cursor(
+                    cursor_factory=psycopg2.extras.RealDictCursor
+                ) as cursor:
+
+                    cursor.execute(
+                        """
+                        SELECT
+                            guild_id,
+                            license_key,
+                            status,
+                            expires_at,
+                            created_at
+                        FROM licenses
+                        WHERE guild_id = %s
+                        LIMIT 1
+                        """,
+                        (guild_id,)
+                    )
+                    existing = cursor.fetchone()
+
+                    if action == "create":
+                        if existing:
+                            return error_page(
+                                "License already exists",
+                                "This server already has a license record. Revoke it first if you need to create a new license.",
+                                409,
+                                user
+                            )
+
+                        now = utc_now()
+                        expires_at = now + timedelta(days=days)
+
+                        while True:
+                            license_key = (
+                                "MISUKI-"
+                                + "-"
+                                .join(
+                                    secrets.token_hex(4).upper()
+                                    for _ in range(4)
+                                )
+                            )
+                            cursor.execute(
+                                "SELECT 1 FROM licenses WHERE license_key = %s",
+                                (license_key,)
+                            )
+                            if cursor.fetchone() is None:
+                                break
+
+                        cursor.execute(
+                            """
+                            INSERT INTO licenses
+                            (
+                                guild_id,
+                                license_key,
+                                status,
+                                expires_at,
+                                created_at
+                            )
+                            VALUES
+                            (
+                                %s, %s, 'active', %s, %s
+                            )
+                            """,
+                            (
+                                guild_id,
+                                license_key,
+                                expires_at,
+                                now
+                            )
+                        )
+
+                    elif action == "extend":
+                        if not existing or str(existing["status"]).lower() != "active":
+                            return error_page(
+                                "License unavailable",
+                                "This server does not have an active license that can be extended.",
+                                409,
+                                user
+                            )
+
+                        expiration = parse_datetime(existing["expires_at"])
+                        if not expiration or utc_now() >= expiration:
+                            return error_page(
+                                "License expired",
+                                "This license has already expired and cannot be extended.",
+                                409,
+                                user
+                            )
+
+                        cursor.execute(
+                            """
+                            UPDATE licenses
+                            SET expires_at = %s
+                            WHERE guild_id = %s
+                            """,
+                            (
+                                expiration + timedelta(days=days),
+                                guild_id
+                            )
+                        )
+
+                    else:
+                        if not existing:
+                            return error_page(
+                                "License not found",
+                                "This server does not have a license.",
+                                404,
+                                user
+                            )
+
+                        cursor.execute(
+                            """
+                            DELETE FROM licenses
+                            WHERE guild_id = %s
+                            """,
+                            (guild_id,)
+                        )
+
+                connection.commit()
+
+            g.license_cache = None
+            g.active_license_ids = None
+
+            return redirect("/admin/licenses")
+
+        except Exception as error:
+            print(f"❌ Admin license management error: {error}")
+            return error_page(
+                "License management error",
+                "The license change could not be completed.",
+                500,
+                user
+            )
+
+    licenses = []
+
+    try:
+        with database_connection() as connection:
+            with connection.cursor(
+                cursor_factory=psycopg2.extras.RealDictCursor
+            ) as cursor:
+                cursor.execute(
+                    """
+                    SELECT
+                        guild_id,
+                        license_key,
+                        status,
+                        expires_at,
+                        created_at
+                    FROM licenses
+                    ORDER BY created_at DESC
+                    """
+                )
+                rows = cursor.fetchall()
+
+        guilds_by_id = {
+            str(guild.get("id")): guild
+            for guild in get_bot_guilds()
+            if guild.get("id")
+        }
+
+        now = utc_now()
+
+        for row in rows:
+            item = dict(row)
+            guild = guilds_by_id.get(str(item["guild_id"]))
+            item["server_name"] = (
+                guild.get("name")
+                if guild
+                else "Server not currently visible to the bot"
+            )
+            item["server_icon"] = (
+                guild.get("icon")
+                if guild
+                else None
+            )
+
+            if (
+                str(item.get("status") or "").lower() == "active"
+                and item.get("expires_at")
+            ):
+                expiration = parse_datetime(item["expires_at"])
+                if expiration and now >= expiration:
+                    item["status"] = "expired"
+
+            licenses.append(item)
+
+    except Exception as error:
+        print(f"❌ Could not load admin licenses: {error}")
+        return error_page(
+            "License management error",
+            "The licenses could not be loaded.",
+            500,
+            user
+        )
+
+    return render_template(
+        "admin_licenses.html",
+        user=user,
+        licenses=licenses,
+        is_admin=is_admin
+    )
+
+
+# =========================================================
 # STATISTICS PAGE
 # =========================================================
 
