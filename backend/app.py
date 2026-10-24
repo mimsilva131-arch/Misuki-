@@ -4319,7 +4319,7 @@ def statistics():
         "statistics.html",
         user=current_user,
         is_admin=is_admin,
-        is_misuki_admin=user_is_admin,
+        can_view_user_search=user_is_admin,
         statistics=statistics_data,
         admin_statistics=admin_statistics,
         admin_servers=admin_servers,
