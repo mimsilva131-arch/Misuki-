@@ -804,6 +804,15 @@ class Verification(commands.Cog):
             int(guild_id)
         )
 
+        license_manager = self.bot.get_cog("LicenseManager")
+        if license_manager is None or not await license_manager.has_active_license(guild_id):
+            self.update_verification_status(
+                request_id,
+                "unverified",
+                "No active Misuki license is available."
+            )
+            return
+
         if guild is None:
 
             self.update_verification_status(
