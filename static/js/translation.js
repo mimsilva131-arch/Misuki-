@@ -1981,7 +1981,6 @@
     }
 
     function translateStaticText(language) {
-        if (language === "en") return;
 
         const walker = document.createTreeWalker(
             document.body,
@@ -2001,21 +2000,42 @@
             if (isProtectedStaticElement(parent)) return;
             if (!textNode.nodeValue || !textNode.nodeValue.trim()) return;
 
-            const raw = textNode.nodeValue;
+            if (
+                !textNode.__misukiOriginalText &&
+                !textNode.nodeValue.includes("{{") &&
+                !textNode.nodeValue.includes("{%")
+            ) {
+                textNode.__misukiOriginalText = textNode.nodeValue;
+            }
 
-            if (raw.includes("{{") || raw.includes("{%")) return;
+            const original =
+                textNode.__misukiOriginalText ||
+                textNode.nodeValue;
 
-            const normalized = normalizeStaticText(raw);
+            if (original.includes("{{") || original.includes("{%")) return;
+
+            if (language === "en") {
+                textNode.nodeValue = original;
+                return;
+            }
+
+            const normalized = normalizeStaticText(original);
             const key = englishPhraseKeys[normalized];
 
-            if (!key) return;
+            if (!key) {
+                textNode.nodeValue = original;
+                return;
+            }
 
             const translated = getTranslation(language, key);
 
-            if (translated === null || translated === normalized) return;
+            if (translated === null || translated === normalized) {
+                textNode.nodeValue = original;
+                return;
+            }
 
-            const leading = raw.match(/^\s*/)?.[0] || "";
-            const trailing = raw.match(/\s*$/)?.[0] || "";
+            const leading = original.match(/^\s*/)?.[0] || "";
+            const trailing = original.match(/\s*$/)?.[0] || "";
 
             textNode.nodeValue = leading + translated + trailing;
         });
