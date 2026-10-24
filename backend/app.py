@@ -4357,11 +4357,8 @@ def statistics():
 
         "api_status": "Offline",
 
-<<<<<<< HEAD
         "misuki_version": MISUKI_VERSION,
 
-=======
->>>>>>> 02d41aa86cf58118e2ebee4076df89145b5ce0a8
         "version": MISUKI_VERSION,
 
         "uptime": "0s",
