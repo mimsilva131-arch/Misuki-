@@ -5,7 +5,7 @@ As minhas publicidades — Misuki
 {% endblock %}
 
 {% block content %}
-<section class="section">
+<section class="section advertisement-status-page">
     <div class="container">
         <h1>As minhas publicidades</h1>
         <p class="advertisement-status-intro">Aqui pode acompanhar cada proposta, verificar se foi aprovada, consultar o pagamento e confirmar quando a publicidade está ativa.</p>
@@ -49,11 +49,24 @@ As minhas publicidades — Misuki
                             {% endif %}
                         </div>
 
+                        {% if ad.approval_reason %}
+                            <div class="advertisement-status-note">
+                                <strong>Proposta aprovada</strong>
+                                <span>{{ ad.approval_reason }}</span>
+                            </div>
+                        {% endif %}
+
                         {% if ad.rejection_reason %}
-                            <p>
-                                <strong>Motivo da rejeição:</strong>
-                                {{ ad.rejection_reason }}
-                            </p>
+                            <div class="advertisement-status-note advertisement-status-rejected">
+                                <strong>Motivo da rejeição</strong>
+                                <span>{{ ad.rejection_reason }}</span>
+                            </div>
+                        {% endif %}
+
+                        {% if ad.start_at and ad.end_at %}
+                            <div class="advertisement-status-dates">
+                                Período: {{ ad.start_at }} — {{ ad.end_at }}
+                            </div>
                         {% endif %}
 
                         {% if ad.status == "approved_pending_payment" %}
