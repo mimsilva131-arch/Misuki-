@@ -939,7 +939,7 @@ def paypal_create_order(
             "paypal": {
                 "experience_context": {
                     "brand_name":
-                        "Miskui",
+                        "Misuki",
 
                     "user_action":
                         "PAY_NOW",
