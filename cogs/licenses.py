@@ -686,7 +686,7 @@ class LicenseManager(commands.Cog):
                 title="🔐 Misuki License",
                 description=(
                     "This server does not have "
-                    "a Misuki license."
+                    "a license for Misuki."
                 ),
                 color=discord.Color.red()
             )
