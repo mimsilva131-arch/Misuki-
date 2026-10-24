@@ -65,7 +65,7 @@ As minhas publicidades — Misuki
 
                         {% if ad.start_at and ad.end_at %}
                             <div class="advertisement-status-dates">
-                                Período: {{ ad.start_at }} — {{ ad.end_at }}
+                                <span data-i18n="advertisements.period">Período:</span> {{ ad.start_at }} — {{ ad.end_at }}
                             </div>
                         {% endif %}
 
@@ -84,7 +84,7 @@ As minhas publicidades — Misuki
             </div>
         {% else %}
             <div class="empty">
-                Ainda não tem propostas de publicidade.
+                <span data-i18n="advertisements.no_proposals">Ainda não tem propostas de publicidade.</span>
             </div>
         {% endif %}
     </div>
