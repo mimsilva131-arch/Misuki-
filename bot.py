@@ -191,9 +191,10 @@ def initialize_statistics_database():
                     verifications INTEGER NOT NULL DEFAULT 0,
                     bot_status TEXT NOT NULL DEFAULT 'Offline',
                     uptime TEXT NOT NULL DEFAULT '0s',
-                    version TEXT NOT NULL DEFAULT '1.0.0',
+                    version TEXT NOT NULL DEFAULT '',
                     last_seen DOUBLE PRECISION,
                     admin_servers JSONB NOT NULL DEFAULT '[]'::jsonb,
+                    admin_users JSONB NOT NULL DEFAULT '[]'::jsonb,
                     updated_at DOUBLE PRECISION NOT NULL
                 )
             """)
@@ -203,6 +204,7 @@ def initialize_statistics_database():
                 "ALTER TABLE bot_statistics ADD COLUMN IF NOT EXISTS moderation_actions BIGINT NOT NULL DEFAULT 0",
                 "ALTER TABLE bot_statistics ADD COLUMN IF NOT EXISTS announcements BIGINT NOT NULL DEFAULT 0",
                 "ALTER TABLE bot_statistics ADD COLUMN IF NOT EXISTS admin_servers JSONB NOT NULL DEFAULT '[]'::jsonb",
+                "ALTER TABLE bot_statistics ADD COLUMN IF NOT EXISTS admin_users JSONB NOT NULL DEFAULT '[]'::jsonb",
                 "ALTER TABLE bot_statistics ADD COLUMN IF NOT EXISTS last_seen DOUBLE PRECISION",
                 "ALTER TABLE bot_statistics ADD COLUMN IF NOT EXISTS updated_at DOUBLE PRECISION NOT NULL DEFAULT 0",
             ]
@@ -212,7 +214,7 @@ def initialize_statistics_database():
                 INSERT INTO bot_statistics (
                     id, servers, users, channels, latency, commands, tickets,
                     moderation_actions, announcements, verifications, bot_status,
-                    uptime, version, last_seen, admin_servers, updated_at
+                    uptime, version, last_seen, admin_servers, admin_users, updated_at
                 ) VALUES (
                     1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Offline', '0s', %s,
                     NULL, '[]'::jsonb, %s
@@ -283,7 +285,7 @@ async def update_stats_snapshot():
         latency = round(bot.latency * 1000)
         bot_status = "Online" if bot.is_ready() else "Offline"
         uptime = get_uptime()
-        version = os.getenv("MISUKI_VERSION", "1.0.0")
+        version = os.getenv("MISUKI_VERSION", "").strip()
         channels_count = sum(len(guild.channels) for guild in bot.guilds)
         connection = get_database_connection()
         with connection.cursor() as cursor:
@@ -303,13 +305,14 @@ async def update_stats_snapshot():
                     version = %s,
                     last_seen = %s,
                     admin_servers = %s::jsonb,
+                    admin_users = %s::jsonb,
                     updated_at = %s
                 WHERE id = 1
             """, (
                 servers_count, users_count, channels_count, latency,
                 commands_count, verifications_count, bot_status, uptime,
                 version, last_seen, json.dumps(detected_servers, ensure_ascii=False),
-                last_seen
+                json.dumps([], ensure_ascii=False), last_seen
             ))
         connection.commit()
         print("📊 Bot statistics updated:")
