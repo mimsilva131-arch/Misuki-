@@ -100,9 +100,9 @@ Advertisement Admin — Misuki
 
 
                             {% if ad.status == "pending" %}
-                                <span class="badge badge-warning">🟡 Pendente de análise</span>
+                                <span class="badge badge-warning" data-i18n="advertisements.pending_review">Pendente de análise</span>
                             {% elif ad.status == "approved_pending_payment" %}
-                                <span class="badge badge-info">🔵 Aprovada — pagamento pendente</span>
+                                <span class="badge badge-info" data-i18n="advertisements.approved_payment_pending">Aprovada — pagamento pendente</span>
                             {% elif ad.status == "active" %}
 
                                 <span class="badge badge-active">
@@ -232,7 +232,7 @@ Advertisement Admin — Misuki
                                         required
                                     ></textarea>
                                     <button type="submit" class="button add">
-                                        ✅ Aprovar
+                                        <span data-i18n="advertisements.approve">Aprovar</span>
                                     </button>
                                 </form>
 
@@ -257,7 +257,7 @@ Advertisement Admin — Misuki
                                         class="button manage"
                                     >
 
-                                        ❌ Rejeitar
+                                        <span data-i18n="advertisements.reject">Rejeitar</span>
 
                                     </button>
 
@@ -283,7 +283,7 @@ Advertisement Admin — Misuki
                                         class="button manage"
                                     >
 
-                                        ⛔ Desativar
+                                        <span data-i18n="advertisements.disable">Desativar</span>
 
                                     </button>
 
