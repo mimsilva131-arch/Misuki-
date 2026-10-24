@@ -29,6 +29,63 @@ Misuki
             </div>
 
         </div>
+
+        <div class="card manage-license">
+            <div class="manage-license-header">
+                <div>
+                    <span class="manage-license-label" data-i18n="license.title">
+                        Licença
+                    </span>
+                    <h2 data-i18n="license.information">
+                        Informação da licença
+                    </h2>
+                </div>
+
+                {% if license_active %}
+                    <span class="badge badge-active" data-i18n="dashboard.license_active">
+                        🟢 Licença ativa
+                    </span>
+                {% else %}
+                    <span class="badge badge-expired" data-i18n="dashboard.license_expired">
+                        🔴 Licença inativa
+                    </span>
+                {% endif %}
+            </div>
+
+            {% if license_data %}
+                <div class="license-details">
+                    <div class="license-detail">
+                        <span data-i18n="license.status">Estado</span>
+                        <strong>{{ license_data[2] }}</strong>
+                    </div>
+
+                    <div class="license-detail">
+                        <span data-i18n="license.key">Chave da licença</span>
+                        <strong class="license-key">{{ license_data[1] }}</strong>
+                    </div>
+
+                    <div class="license-detail">
+                        <span data-i18n="license.expires">Expira em</span>
+                        <strong>
+                            {% if license_data[3] %}
+                                {{ license_data[3] }}
+                            {% else %}
+                                <span data-i18n="license.never">Sem data de expiração</span>
+                            {% endif %}
+                        </strong>
+                    </div>
+
+                    <div class="license-detail">
+                        <span data-i18n="license.created">Criada em</span>
+                        <strong>{{ license_data[4] }}</strong>
+                    </div>
+                </div>
+            {% else %}
+                <div class="empty" data-i18n="license.no_license">
+                    🔒 Este servidor não tem uma licença registada.
+                </div>
+            {% endif %}
+        </div>
     </div>
 </section>
 
