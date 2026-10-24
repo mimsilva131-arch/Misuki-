@@ -222,6 +222,12 @@ class LicenseManager(commands.Cog):
                     """)
                 for row in rows:
                     await self.sync_verification_panel(int(row["guild_id"]), False)
+                async with self.pool.acquire() as connection:
+                    active_rows = await connection.fetch(
+                        "SELECT guild_id FROM licenses WHERE status = 'active'"
+                    )
+                for row in active_rows:
+                    await self.sync_verification_panel(int(row["guild_id"]), True)
                 if rows:
                     print(f"🗑️ Removed {len(rows)} expired license(s).")
             except asyncio.CancelledError:
