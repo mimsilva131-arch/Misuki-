@@ -4034,7 +4034,7 @@ def statistics():
                         servers, users, channels, latency, commands,
                         tickets, moderation_actions, announcements,
                         verifications, bot_status, uptime, version,
-                        last_seen, admin_servers, updated_at
+                        last_seen, admin_servers, admin_users, updated_at
                     FROM bot_statistics
                     WHERE id = 1
                 """)
