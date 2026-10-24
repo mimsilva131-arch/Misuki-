@@ -69,18 +69,28 @@ async def refresh_bot_installers():
             print(f"⚠️ Could not read installer audit log for {guild.name} ({guild.id}): {error}")
 
 
+BOT_ADMIN_USERS = []
+
 async def count_statistics_users():
-    """Count unique human Discord users across all guilds."""
+    """Count unique human Discord users and build the administrator search index."""
+    global BOT_ADMIN_USERS
+
     BOT_GUILD_HUMAN_COUNTS.clear()
-    user_ids = set()
+    BOT_ADMIN_USERS = []
+
+    users_by_id = {}
     scanned = 0
     excluded_bots = 0
 
     for guild in bot.guilds:
         guild_seen = set()
+
         try:
-            async for member in guild.fetch_members(limit=None):
+            members = guild.fetch_members(limit=None)
+
+            async for member in members:
                 member_id = getattr(member, "id", None)
+
                 if member_id is None or member_id in guild_seen:
                     continue
 
@@ -91,11 +101,57 @@ async def count_statistics_users():
                     excluded_bots += 1
                     continue
 
-                user_ids.add(member_id)
+                username = str(
+                    getattr(member, "name", "")
+                    or ""
+                )
 
-            BOT_GUILD_HUMAN_COUNTS[str(guild.id)] = len(
-                [member_id for member_id in guild_seen
-                 if member_id in user_ids]
+                display_name = str(
+                    getattr(member, "display_name", "")
+                    or username
+                    or "Discord User"
+                )
+
+                avatar_url = None
+
+                try:
+                    avatar = getattr(member, "display_avatar", None)
+
+                    if avatar:
+                        avatar_url = str(avatar.url)
+
+                except Exception:
+                    avatar_url = None
+
+                user = users_by_id.get(member_id)
+
+                if user is None:
+                    user = {
+                        "id": str(member_id),
+                        "name": display_name,
+                        "username": username,
+                        "avatar": avatar_url,
+                        "servers_count": 0,
+                        "created_at": None,
+                        "added_bot": False
+                    }
+                    users_by_id[member_id] = user
+
+                user["servers_count"] += 1
+
+                if avatar_url:
+                    user["avatar"] = avatar_url
+
+                if display_name:
+                    user["name"] = display_name
+
+                if username:
+                    user["username"] = username
+
+            BOT_GUILD_HUMAN_COUNTS[str(guild.id)] = sum(
+                1
+                for member_id in guild_seen
+                if member_id in users_by_id
             )
 
         except Exception as error:
@@ -105,6 +161,7 @@ async def count_statistics_users():
 
             for member in guild.members:
                 member_id = getattr(member, "id", None)
+
                 if member_id is None or member_id in guild_seen:
                     continue
 
@@ -115,19 +172,89 @@ async def count_statistics_users():
                     excluded_bots += 1
                     continue
 
-                user_ids.add(member_id)
+                username = str(
+                    getattr(member, "name", "")
+                    or ""
+                )
 
-            BOT_GUILD_HUMAN_COUNTS[str(guild.id)] = len(
-                [member_id for member_id in guild_seen
-                 if member_id in user_ids]
+                display_name = str(
+                    getattr(member, "display_name", "")
+                    or username
+                    or "Discord User"
+                )
+
+                avatar_url = None
+
+                try:
+                    avatar = getattr(member, "display_avatar", None)
+
+                    if avatar:
+                        avatar_url = str(avatar.url)
+
+                except Exception:
+                    avatar_url = None
+
+                user = users_by_id.get(member_id)
+
+                if user is None:
+                    user = {
+                        "id": str(member_id),
+                        "name": display_name,
+                        "username": username,
+                        "avatar": avatar_url,
+                        "servers_count": 0,
+                        "created_at": None,
+                        "added_bot": False
+                    }
+                    users_by_id[member_id] = user
+
+                user["servers_count"] += 1
+
+                if avatar_url:
+                    user["avatar"] = avatar_url
+
+                if display_name:
+                    user["name"] = display_name
+
+                if username:
+                    user["username"] = username
+
+            BOT_GUILD_HUMAN_COUNTS[str(guild.id)] = sum(
+                1
+                for member_id in guild_seen
+                if member_id in users_by_id
             )
+
+    for user in users_by_id.values():
+        try:
+            discord_id = int(user["id"])
+            timestamp = (
+                (discord_id >> 22) + 1420070400000
+            ) / 1000
+
+            user["created_at"] = time.strftime(
+                "%d/%m/%Y",
+                time.gmtime(timestamp)
+            )
+
+        except Exception:
+            user["created_at"] = None
+
+        if user["id"] in {
+            str(value)
+            for value in BOT_INSTALLERS.values()
+        }:
+            user["added_bot"] = True
+
+    BOT_ADMIN_USERS = list(
+        users_by_id.values()
+    )
 
     print(f"   Members scanned: {scanned}")
     print(f"   Bots excluded: {excluded_bots}")
-    print(f"   Unique human users: {len(user_ids)}")
+    print(f"   Unique human users: {len(BOT_ADMIN_USERS)}")
 
-    return len(user_ids)
-
+    return len(BOT_ADMIN_USERS)
 
 def count_verified_users():
     connection = None
@@ -312,7 +439,7 @@ async def update_stats_snapshot():
                 servers_count, users_count, channels_count, latency,
                 commands_count, verifications_count, bot_status, uptime,
                 version, last_seen, json.dumps(detected_servers, ensure_ascii=False),
-                json.dumps([], ensure_ascii=False), last_seen
+                json.dumps(BOT_ADMIN_USERS, ensure_ascii=False), last_seen
             ))
         connection.commit()
         print("📊 Bot statistics updated:")
