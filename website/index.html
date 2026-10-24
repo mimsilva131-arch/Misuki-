@@ -128,31 +128,103 @@ Misuki — Discord Bot
     ================================================== -->
 
     <section class="section" id="publicidades">
+
         <div class="container">
-            <div class="advertisements-heading">\n                <div>\n                    <span class="section-kicker">Publicidade</span>\n                    <h2 class="section-title">Descubra novos servidores</h2>\n                    <p class="advertisements-subtitle">Servidores da comunidade em destaque no Misuki.</p>\n                </div>\n                <a href="/advertise" class="advertisements-link">Publicitar o seu servidor</a>\n            </div>
+
+            <div class="advertisements-heading">
+
+                <div>
+                    <span class="section-kicker">Publicidade</span>
+
+                    <h2 class="section-title">
+                        Servidores em destaque
+                    </h2>
+
+                    <p class="advertisements-subtitle">
+                        Descubra servidores da comunidade no Misuki.
+                    </p>
+                </div>
+
+                <a
+                    href="/advertise"
+                    class="advertisements-link"
+                >
+                    Publicitar o seu servidor
+                </a>
+
+            </div>
 
             {% if advertisements %}
-                <div class="server-grid">
+
+                <div class="advertisement-grid">
+
                     {% for ad in advertisements %}
-                        <a href="{{ ad.target_url }}" target="_blank" rel="noopener noreferrer" class="card advertisement-card">\n                            <div class="advertisement-media">
-                            {% if ad.image_url %}
-                                <img src="{{ ad.image_url }}" alt="{{ ad.title }}" class="advertisement-image">
-                            {% endif %}
-                            <div class="advertisement-content">
-                                <h3>{{ ad.title }}</h3>
-                                <p>{{ ad.description }}</p>
+
+                        <a
+                            href="{{ ad.target_url }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="card advertisement-card"
+                        >
+
+                            <div class="advertisement-media">
+
+                                {% if ad.image_url %}
+
+                                    <img
+                                        src="{{ ad.image_url }}"
+                                        alt="{{ ad.title }}"
+                                        class="advertisement-image"
+                                    >
+
+                                {% else %}
+
+                                    <div class="advertisement-image advertisement-image-placeholder"></div>
+
+                                {% endif %}
+
                             </div>
+
+                            <div class="advertisement-content">
+
+                                <h3>{{ ad.title }}</h3>
+
+                                <p>{{ ad.description }}</p>
+
+                            </div>
+
                         </a>
+
                     {% endfor %}
+
                 </div>
+
             {% else %}
-                <div class="card" style="text-align:center; max-width:760px; margin:0 auto;">
-                    <h3>Espaço publicitário</h3>
-                    <p>Ainda não existem publicidades ativas.</p>
-                    <a href="/advertise" class="button">📢 Publicitar o seu servidor</a>
+
+                <div class="card advertisements-empty">
+
+                    <div>
+                        <h3>Espaço publicitário disponível</h3>
+
+                        <p>
+                            O seu servidor pode aparecer aqui.
+                            Seja um dos primeiros a publicitar no Misuki.
+                        </p>
+                    </div>
+
+                    <a
+                        href="/advertise"
+                        class="button"
+                    >
+                        Publicitar o seu servidor
+                    </a>
+
                 </div>
+
             {% endif %}
+
         </div>
+
     </section>
 
 
