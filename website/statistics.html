@@ -422,7 +422,7 @@ Misuki — Statistics
                     class="performance-value"
                     id="statistics-version"
                 >
-                    {{ statistics.version if statistics is defined and statistics.version is not none else "—" }}
+                    {{ statistics.misuki_version if statistics is defined and statistics.misuki_version is not none else statistics.version if statistics is defined and statistics.version is not none else "—" }}
                 </strong>
 
             </div>

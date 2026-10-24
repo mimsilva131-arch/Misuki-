@@ -18,6 +18,7 @@ from dotenv import load_dotenv
 load_dotenv(override=True)
 
 DATABASE_URL = os.getenv("DATABASE_URL")
+MISUKI_VERSION = os.getenv("MISUKI_VERSION", "1.0.0")
 BOT_START_TIME = time.time()
 
 intents = discord.Intents.default()
@@ -217,7 +218,7 @@ def initialize_statistics_database():
                     1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Offline', '0s', %s,
                     NULL, '[]'::jsonb, %s
                 ) ON CONFLICT (id) DO NOTHING
-            """, (os.getenv("MISUKI_VERSION", "1.0.0"), time.time()))
+            """, (MISUKI_VERSION, time.time()))
         connection.commit()
         print("🗄️ Statistics database initialized.")
     except Exception as error:
@@ -283,7 +284,7 @@ async def update_stats_snapshot():
         latency = round(bot.latency * 1000)
         bot_status = "Online" if bot.is_ready() else "Offline"
         uptime = get_uptime()
-        version = os.getenv("MISUKI_VERSION", "1.0.0")
+        version = MISUKI_VERSION
         channels_count = sum(len(guild.channels) for guild in bot.guilds)
         connection = get_database_connection()
         with connection.cursor() as cursor:

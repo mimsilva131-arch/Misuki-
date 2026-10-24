@@ -367,11 +367,11 @@
                 confirm: "Confirm verification",
                 confirmed: "Verification confirmed",
                 request_sent: "Your verification request was sent successfully.",
-                received: "Miskui received your request.",
+                received: "Misuki received your request.",
                 processing: "The bot will process your verification and assign the appropriate role on the server.",
-                return_discord: "You can return to Discord. If the role takes a few seconds to be assigned, please wait while Miskui processes your request.",
-                info: "By continuing, Miskui will confirm your Discord account and send a verification request to the bot to assign your verification role.",
-                footer: "Protected by Miskui"
+                return_discord: "You can return to Discord. If the role takes a few seconds to be assigned, please wait while Misuki processes your request.",
+                info: "By continuing, Misuki will confirm your Discord account and send a verification request to the bot to assign your verification role.",
+                footer: "Protected by Misuki"
             }
         },
 
@@ -686,11 +686,11 @@
                 confirm: "Confirmar verificação",
                 confirmed: "Verificação confirmada",
                 request_sent: "O seu pedido de verificação foi enviado com sucesso.",
-                received: "O Miskui recebeu o seu pedido.",
+                received: "O Misuki recebeu o seu pedido.",
                 processing: "O bot irá processar a sua verificação e atribuir o cargo correspondente no servidor.",
-                return_discord: "Pode voltar ao Discord. Se a atribuição do cargo demorar alguns segundos, aguarde enquanto o Miskui processa o seu pedido.",
-                info: "Ao continuar, o Miskui irá confirmar a sua conta Discord e enviar um pedido de verificação ao bot para atribuir o seu cargo de verificação.",
-                footer: "Protegido por Miskui"
+                return_discord: "Pode voltar ao Discord. Se a atribuição do cargo demorar alguns segundos, aguarde enquanto o Misuki processa o seu pedido.",
+                info: "Ao continuar, o Misuki irá confirmar a sua conta Discord e enviar um pedido de verificação ao bot para atribuir o seu cargo de verificação.",
+                footer: "Protegido por Misuki"
             }
         },
 
@@ -1005,11 +1005,11 @@
                 confirm: "Verifizierung bestätigen",
                 confirmed: "Verifizierung bestätigt",
                 request_sent: "Ihre Verifizierungsanfrage wurde erfolgreich gesendet.",
-                received: "Miskui hat Ihre Anfrage erhalten.",
+                received: "Misuki hat Ihre Anfrage erhalten.",
                 processing: "Der Bot wird Ihre Verifizierung bearbeiten und die entsprechende Rolle auf dem Server vergeben.",
-                return_discord: "Sie können zu Discord zurückkehren. Wenn die Vergabe der Rolle einige Sekunden dauert, warten Sie bitte, während Miskui Ihre Anfrage verarbeitet.",
-                info: "Wenn Sie fortfahren, bestätigt Miskui Ihr Discord-Konto und sendet eine Verifizierungsanfrage an den Bot, damit Ihre Verifizierungsrolle vergeben werden kann.",
-                footer: "Geschützt durch Miskui"
+                return_discord: "Sie können zu Discord zurückkehren. Wenn die Vergabe der Rolle einige Sekunden dauert, warten Sie bitte, während Misuki Ihre Anfrage verarbeitet.",
+                info: "Wenn Sie fortfahren, bestätigt Misuki Ihr Discord-Konto und sendet eine Verifizierungsanfrage an den Bot, damit Ihre Verifizierungsrolle vergeben werden kann.",
+                footer: "Geschützt durch Misuki"
             }
         },
 
@@ -1324,11 +1324,11 @@
                 confirm: "Confirmar verificación",
                 confirmed: "Verificación confirmada",
                 request_sent: "Tu solicitud de verificación se ha enviado correctamente.",
-                received: "Miskui ha recibido tu solicitud.",
+                received: "Misuki ha recibido tu solicitud.",
                 processing: "El bot procesará tu verificación y asignará el rol correspondiente en el servidor.",
-                return_discord: "Puedes volver a Discord. Si el rol tarda unos segundos en asignarse, espera mientras Miskui procesa tu solicitud.",
-                info: "Al continuar, Miskui confirmará tu cuenta de Discord y enviará una solicitud de verificación al bot para asignar tu rol de verificación.",
-                footer: "Protegido por Miskui"
+                return_discord: "Puedes volver a Discord. Si el rol tarda unos segundos en asignarse, espera mientras Misuki procesa tu solicitud.",
+                info: "Al continuar, Misuki confirmará tu cuenta de Discord y enviará una solicitud de verificación al bot para asignar tu rol de verificación.",
+                footer: "Protegido por Misuki"
             }
         },
 
@@ -1643,11 +1643,11 @@
                 confirm: "Confirmer la vérification",
                 confirmed: "Vérification confirmée",
                 request_sent: "Votre demande de vérification a été envoyée avec succès.",
-                received: "Miskui a reçu votre demande.",
+                received: "Misuki a reçu votre demande.",
                 processing: "Le bot traitera votre vérification et attribuera le rôle correspondant sur le serveur.",
-                return_discord: "Vous pouvez retourner sur Discord. Si l'attribution du rôle prend quelques secondes, veuillez patienter pendant que Miskui traite votre demande.",
-                info: "En continuant, Miskui confirmera votre compte Discord et enverra une demande de vérification au bot afin d'attribuer votre rôle de vérification.",
-                footer: "Protégé par Miskui"
+                return_discord: "Vous pouvez retourner sur Discord. Si l'attribution du rôle prend quelques secondes, veuillez patienter pendant que Misuki traite votre demande.",
+                info: "En continuant, Misuki confirmera votre compte Discord et enverra une demande de vérification au bot afin d'attribuer votre rôle de vérification.",
+                footer: "Protégé par Misuki"
             }
         }
     };

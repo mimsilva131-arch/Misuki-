@@ -39,6 +39,10 @@ load_dotenv(
     override=True
 )
 
+MISUKI_VERSION = os.getenv(
+    "MISUKI_VERSION",
+    "1.0.0"
+)
 
 # =========================================================
 # PATHS
@@ -848,7 +852,7 @@ def paypal_create_order(
             "paypal": {
                 "experience_context": {
                     "brand_name":
-                        "Miskui",
+                        "Misuki",
 
                     "user_action":
                         "PAY_NOW",
@@ -3909,10 +3913,9 @@ def statistics():
 
         "api_status": "Offline",
 
-        "version": os.getenv(
-            "MISUKI_VERSION",
-            "1.0.0"
-        ),
+        "misuki_version": MISUKI_VERSION,
+
+        "version": MISUKI_VERSION,
 
         "uptime": "0s",
 
@@ -3960,7 +3963,8 @@ def statistics():
                     ):
                         if key in bot_snapshot:
                             statistics_data[key] = bot_snapshot[key]
-                    statistics_data["version"] = os.getenv("MISUKI_VERSION", "1.0.0")
+                    statistics_data["misuki_version"] = MISUKI_VERSION
+                    statistics_data["version"] = MISUKI_VERSION
     except Exception as error:
         print(f"⚠️ Could not load live bot statistics: {error}")
 
@@ -4536,10 +4540,9 @@ def statistics_api():
 
         "api_status": "Unavailable",
 
-        "version": os.getenv(
-            "MISUKI_VERSION",
-            "1.0.0"
-        ),
+        "misuki_version": MISUKI_VERSION,
+
+        "version": MISUKI_VERSION,
 
         "uptime": "0s",
 
@@ -4661,10 +4664,8 @@ def statistics_api():
                 bot_snapshot[key]
             )
 
-    statistics_data["version"] = os.getenv(
-        "MISUKI_VERSION",
-        "1.0.0"
-    )
+    statistics_data["misuki_version"] = MISUKI_VERSION
+    statistics_data["version"] = MISUKI_VERSION
 
 
     # =====================================================
