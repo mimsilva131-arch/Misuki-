@@ -99,94 +99,6 @@
 
             licenses: {
                 admin_eyebrow: "ADMINISTRATION",
-                title: "License management",
-                description: "Create, extend and revoke server licenses directly from the Misuki website.",
-                back_statistics: "Back to statistics",
-                create_title: "Create a license",
-                create_description: "A new license becomes active immediately after creation.",
-                server_id: "Server ID",
-                days: "Duration (days)",
-                create: "Create license",
-                existing: "Existing licenses",
-                created: "Created",
-                expires: "Expires",
-                extend: "Extend",
-                revoke: "Revoke",
-                status_active: "Active",
-                status_expired: "Expired",
-                status_revoked: "Revoked",
-                status_none: "Unknown",
-                none: "There are no license records."
-            },
-
-            licenses: {
-                admin_eyebrow: "ADMINISTRAÇÃO",
-                title: "Gestão de licenças",
-                description: "Crie, prolongue e revogue licenças de servidores diretamente no site do Misuki.",
-                back_statistics: "Voltar às estatísticas",
-                create_title: "Criar uma licença",
-                create_description: "Uma nova licença fica ativa imediatamente após a criação.",
-                server_id: "ID do servidor",
-                days: "Duração (dias)",
-                create: "Criar licença",
-                existing: "Licenças existentes",
-                created: "Criada",
-                expires: "Expira",
-                extend: "Prolongar",
-                revoke: "Revogar",
-                status_active: "Ativa",
-                status_expired: "Expirada",
-                status_revoked: "Revogada",
-                status_none: "Desconhecida",
-                none: "Não existem registos de licenças."
-            },
-
-            licenses: {
-                admin_eyebrow: "ADMINISTRATION",
-                title: "Lizenzverwaltung",
-                description: "Erstellen, verlängern und widerrufen Sie Serverlizenzen direkt auf der Misuki-Website.",
-                back_statistics: "Zurück zu den Statistiken",
-                create_title: "Lizenz erstellen",
-                create_description: "Eine neue Lizenz wird sofort nach der Erstellung aktiv.",
-                server_id: "Server-ID",
-                days: "Dauer (Tage)",
-                create: "Lizenz erstellen",
-                existing: "Vorhandene Lizenzen",
-                created: "Erstellt",
-                expires: "Läuft ab",
-                extend: "Verlängern",
-                revoke: "Widerrufen",
-                status_active: "Aktiv",
-                status_expired: "Abgelaufen",
-                status_revoked: "Widerrufen",
-                status_none: "Unbekannt",
-                none: "Keine Lizenzdatensätze vorhanden."
-            },
-
-            licenses: {
-                admin_eyebrow: "ADMINISTRACIÓN",
-                title: "Gestión de licencias",
-                description: "Crea, amplía y revoca licencias de servidores directamente desde el sitio de Misuki.",
-                back_statistics: "Volver a estadísticas",
-                create_title: "Crear una licencia",
-                create_description: "Una nueva licencia se activa inmediatamente después de crearla.",
-                server_id: "ID del servidor",
-                days: "Duración (días)",
-                create: "Crear licencia",
-                existing: "Licencias existentes",
-                created: "Creada",
-                expires: "Expira",
-                extend: "Ampliar",
-                revoke: "Revocar",
-                status_active: "Activa",
-                status_expired: "Expirada",
-                status_revoked: "Revocada",
-                status_none: "Desconocida",
-                none: "No hay registros de licencias."
-            },
-
-            licenses: {
-                admin_eyebrow: "ADMINISTRATION",
                 title: "Gestion des licences",
                 description: "Créez, prolongez et révoquez les licences de serveurs directement depuis le site Misuki.",
                 back_statistics: "Retour aux statistiques",
@@ -205,6 +117,28 @@
                 status_revoked: "Révoquée",
                 status_none: "Inconnue",
                 none: "Aucun enregistrement de licence."
+            },
+
+            licenses: {
+                admin_eyebrow: "ADMINISTRATION",
+                title: "License management",
+                description: "Create, extend and revoke server licenses directly from the Misuki website.",
+                back_statistics: "Back to statistics",
+                create_title: "Create a license",
+                create_description: "A new license becomes active immediately after creation.",
+                server_id: "Server ID",
+                days: "Duration (days)",
+                create: "Create license",
+                existing: "Existing licenses",
+                created: "Created",
+                expires: "Expires",
+                extend: "Extend",
+                revoke: "Revoke",
+                status_active: "Active",
+                status_expired: "Expired",
+                status_revoked: "Revoked",
+                status_none: "Unknown",
+                none: "There are no license records."
             },
 
             advertisements: {
@@ -586,6 +520,28 @@
                 login: "Entrar com o Discord"
             },
 
+            licenses: {
+                admin_eyebrow: "ADMINISTRAÇÃO",
+                title: "Gestão de licenças",
+                description: "Crie, prolongue e revogue licenças de servidores diretamente no site do Misuki.",
+                back_statistics: "Voltar às estatísticas",
+                create_title: "Criar uma licença",
+                create_description: "Uma nova licença fica ativa imediatamente após a criação.",
+                server_id: "ID do servidor",
+                days: "Duração (dias)",
+                create: "Criar licença",
+                existing: "Licenças existentes",
+                created: "Criada",
+                expires: "Expira",
+                extend: "Prolongar",
+                revoke: "Revogar",
+                status_active: "Ativa",
+                status_expired: "Expirada",
+                status_revoked: "Revogada",
+                status_none: "Desconhecida",
+                none: "Não existem registos de licenças."
+            },
+
             advertisements: {
                       "section_kicker": "Publicidade",
                       "featured_servers": "Servidores em destaque",
@@ -961,6 +917,28 @@
                 cookies: "Cookies",
                 logout: "Abmelden",
                 login: "Mit Discord anmelden"
+            },
+
+            licenses: {
+                admin_eyebrow: "ADMINISTRATION",
+                title: "Lizenzverwaltung",
+                description: "Erstellen, verlängern und widerrufen Sie Serverlizenzen direkt auf der Misuki-Website.",
+                back_statistics: "Zurück zu den Statistiken",
+                create_title: "Lizenz erstellen",
+                create_description: "Eine neue Lizenz wird sofort nach der Erstellung aktiv.",
+                server_id: "Server-ID",
+                days: "Dauer (Tage)",
+                create: "Lizenz erstellen",
+                existing: "Vorhandene Lizenzen",
+                created: "Erstellt",
+                expires: "Läuft ab",
+                extend: "Verlängern",
+                revoke: "Widerrufen",
+                status_active: "Aktiv",
+                status_expired: "Abgelaufen",
+                status_revoked: "Widerrufen",
+                status_none: "Unbekannt",
+                none: "Keine Lizenzdatensätze vorhanden."
             },
 
             advertisements: {
@@ -1340,6 +1318,28 @@
                 login: "Iniciar sesión con Discord"
             },
 
+            licenses: {
+                admin_eyebrow: "ADMINISTRACIÓN",
+                title: "Gestión de licencias",
+                description: "Crea, amplía y revoca licencias de servidores directamente desde el sitio de Misuki.",
+                back_statistics: "Volver a estadísticas",
+                create_title: "Crear una licencia",
+                create_description: "Una nueva licencia se activa inmediatamente después de crearla.",
+                server_id: "ID del servidor",
+                days: "Duración (días)",
+                create: "Crear licencia",
+                existing: "Licencias existentes",
+                created: "Creada",
+                expires: "Expira",
+                extend: "Ampliar",
+                revoke: "Revocar",
+                status_active: "Activa",
+                status_expired: "Expirada",
+                status_revoked: "Revocada",
+                status_none: "Desconocida",
+                none: "No hay registros de licencias."
+            },
+
             advertisements: {
                       "section_kicker": "Publicidad",
                       "featured_servers": "Servidores destacados",
@@ -1715,6 +1715,28 @@
                 cookies: "Cookies",
                 logout: "Se déconnecter",
                 login: "Se connecter avec Discord"
+            },
+
+            licenses: {
+                admin_eyebrow: "ADMINISTRATION",
+                title: "Gestion des licences",
+                description: "Créez, prolongez et révoquez les licences de serveurs directement depuis le site Misuki.",
+                back_statistics: "Retour aux statistiques",
+                create_title: "Créer une licence",
+                create_description: "Une nouvelle licence devient active immédiatement après sa création.",
+                server_id: "Server ID",
+                days: "Durée (jours)",
+                create: "Créer la licence",
+                existing: "Licences existantes",
+                created: "Créée",
+                expires: "Expire",
+                extend: "Prolonger",
+                revoke: "Révoquer",
+                status_active: "Active",
+                status_expired: "Expirée",
+                status_revoked: "Révoquée",
+                status_none: "Inconnue",
+                none: "Aucun enregistrement de licence."
             },
 
             advertisements: {
