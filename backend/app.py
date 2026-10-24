@@ -4680,6 +4680,15 @@ def get_admin_users(admin_servers, snapshot_users=None):
     if not BOT_TOKEN:
         return []
 
+    if not admin_servers:
+        try:
+            admin_servers = get_bot_guilds()
+        except Exception as error:
+            print(
+                f"⚠️ Could not load bot servers for user search: {error}"
+            )
+            admin_servers = []
+
     users_by_id = {}
 
     headers = {
