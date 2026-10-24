@@ -4825,7 +4825,11 @@ def statistics_api():
                 bot_snapshot[key]
             )
 
-    statistics_data["version"] = MISUKI_VERSION
+    statistics_data["version"] = (
+        MISUKI_VERSION
+        or bot_snapshot.get("version")
+        or ""
+    )
 
 
     # =====================================================
