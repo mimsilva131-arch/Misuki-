@@ -17,7 +17,7 @@ Advertisement Admin — Misuki
     <div class="container">
 
 
-        <h1 data-i18n="nav.advertisement_admin">
+        <h1 data-i18n="advertisements.advertisement_management">
             Advertisement Management
         </h1>
 
@@ -64,7 +64,7 @@ Advertisement Admin — Misuki
 
                             <div class="server-id">
 
-                                User ID:
+                                <span data-i18n="advertisements.user_id">User ID:</span>
                                 {{ ad.user_id }}
 
                             </div>
@@ -72,9 +72,9 @@ Advertisement Admin — Misuki
 
                             <div class="server-id">
 
-                                Duration:
+                                <span data-i18n="advertisements.duration">Duration:</span>
                                 {{ ad.duration_days }}
-                                days
+                                <span data-i18n="common.days">days</span>
 
                             </div>
 
@@ -107,7 +107,7 @@ Advertisement Admin — Misuki
 
                                 <span class="badge badge-active">
 
-                                    🟢 Active
+                                    <span data-i18n="advertisements.active">Active</span>
 
                                 </span>
 
@@ -116,7 +116,7 @@ Advertisement Admin — Misuki
 
                                 <span class="badge badge-expired">
 
-                                    🔴 Rejected
+                                    <span data-i18n="advertisements.rejected">Rejected</span>
 
                                 </span>
 
@@ -125,7 +125,7 @@ Advertisement Admin — Misuki
 
                                 <span class="badge badge-none">
 
-                                    ⚪ Expired
+                                    <span data-i18n="advertisements.expired">Expired</span>
 
                                 </span>
 
@@ -134,7 +134,7 @@ Advertisement Admin — Misuki
 
                                 <span class="badge badge-none">
 
-                                    ⚫ Disabled
+                                    <span data-i18n="advertisements.disabled">Disabled</span>
 
                                 </span>
 
@@ -153,7 +153,7 @@ Advertisement Admin — Misuki
 
                             <p class="server-id">
 
-                                Início:
+                                <span data-i18n="advertisements.start">Início:</span>
                                 {{ ad.start_at }}
 
                             </p>
@@ -169,7 +169,7 @@ Advertisement Admin — Misuki
 
                             <p class="server-id">
 
-                                Fim:
+                                <span data-i18n="advertisements.end">Fim:</span>
                                 {{ ad.end_at }}
 
                             </p>
@@ -186,7 +186,7 @@ Advertisement Admin — Misuki
                             <p>
 
                                 <strong>
-                                    Motivo da rejeição:
+                                    <span data-i18n="advertisements.rejection_reason">Motivo da rejeição:</span>
                                 </strong>
 
                                 {{ ad.rejection_reason }}
@@ -212,7 +212,7 @@ Advertisement Admin — Misuki
                                 class="button manage"
                             >
 
-                                🔗 Abrir
+                                <span data-i18n="advertisements.open">Abrir</span>
 
                             </a>
 
@@ -226,7 +226,7 @@ Advertisement Admin — Misuki
                                 <form method="POST" action="/admin/advertise/{{ ad.id }}/approve">
                                     <textarea
                                         name="reason"
-                                        placeholder="Justificação da aprovação"
+                                        placeholder="Justification for approval" data-i18n-attr="placeholder:advertisements.approval_reason_placeholder"
                                         maxlength="500"
                                         rows="3"
                                         required
@@ -246,7 +246,7 @@ Advertisement Admin — Misuki
 
                                     <textarea
                                         name="reason"
-                                        placeholder="Justificação da rejeição"
+                                        placeholder="Justification for rejection" data-i18n-attr="placeholder:advertisements.rejection_reason_placeholder"
                                         maxlength="500"
                                         rows="3"
                                         required
@@ -314,7 +314,7 @@ Advertisement Admin — Misuki
 
             <div class="empty">
 
-                Ainda não existem publicidades.
+                <span data-i18n="advertisements.no_ads_admin">Ainda não existem publicidades.</span>
 
             </div>
 
