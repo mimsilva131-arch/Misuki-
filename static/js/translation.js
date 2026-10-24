@@ -96,7 +96,7 @@
                 login: "Login with Discord"
             },
 
-            advertisements:             {
+            advertisements: {
                       "section_kicker": "Advertisement",
                       "featured_servers": "Featured servers",
                       "subtitle": "Discover community servers on Misuki.",
@@ -118,8 +118,7 @@
                       "proposal_submitted": "Advertisement submitted",
                       "proposal_pending_review": "Your proposal is now pending review by the Misuki team. We will review it before any payment is requested.",
                       "proposal_review_before_payment": "Payment will only become available after the proposal has been approved.",
-                      "back_to_dashboard": "Back to Dashboard"
-            },
+                      "back_to_dashboard": "Back to Dashboard",
                 "status_intro": "Track each proposal, check whether it was approved, review the payment and confirm when the advertisement is active.",
                 "approved_proposal": "Proposal approved",
                 "rejection_reason": "Rejection reason",
@@ -133,6 +132,7 @@
                 "payment_completed": "Payment completed",
                 "payment_status": "Advertisement status",
                 "payment_status_desc": "You can check at any time whether the advertisement is active, the contracted period and the payment status in My Advertisements.",
+                "payment_success_description": "Your advertisement payment was confirmed successfully. The approved proposal is now ready for the contracted period.",
                 "return_dashboard": "Return to Dashboard",
                 "payment_cancelled": "Payment cancelled",
                 "payment_not_completed": "The payment was not completed.",
@@ -142,13 +142,13 @@
                 "duration": "Duration:",
                 "start": "Start:",
                 "end": "End:",
-                "open": "Open",
                 "approve": "Approve",
                 "reject": "Reject",
                 "disable": "Disable",
                 "approval_reason_placeholder": "Approval justification",
                 "rejection_reason_placeholder": "Rejection justification",
                 "no_ads_admin": "There are no advertisements yet."
+            },
 
             menu_controls: {
                 open: "Open menu",
@@ -473,7 +473,7 @@
                 login: "Entrar com o Discord"
             },
 
-            advertisements:             {
+            advertisements: {
                       "section_kicker": "Publicidade",
                       "featured_servers": "Servidores em destaque",
                       "subtitle": "Descubra servidores da comunidade no Misuki.",
@@ -495,8 +495,7 @@
                       "proposal_submitted": "Publicidade enviada",
                       "proposal_pending_review": "A sua proposta está agora pendente de análise pela equipa do Misuki. Será analisada antes de qualquer pagamento ser solicitado.",
                       "proposal_review_before_payment": "O pagamento só ficará disponível depois de a proposta ser aprovada.",
-                      "back_to_dashboard": "Voltar ao painel"
-            },
+                      "back_to_dashboard": "Voltar ao painel",
                 "status_intro": "Aqui pode acompanhar cada proposta, verificar se foi aprovada, consultar o pagamento e confirmar quando a publicidade está ativa.",
                 "approved_proposal": "Proposta aprovada",
                 "rejection_reason": "Motivo da rejeição",
@@ -510,6 +509,7 @@
                 "payment_completed": "Pagamento concluído",
                 "payment_status": "Estado da publicidade",
                 "payment_status_desc": "Pode consultar a qualquer momento se a publicidade está ativa, o período contratado e o estado do pagamento na área “As minhas publicidades”.",
+                "payment_success_description": "O pagamento da sua publicidade foi confirmado com sucesso. A proposta aprovada está agora pronta para o período contratado.",
                 "return_dashboard": "Voltar ao painel",
                 "payment_cancelled": "Pagamento cancelado",
                 "payment_not_completed": "O pagamento não foi concluído.",
@@ -519,13 +519,13 @@
                 "duration": "Duração:",
                 "start": "Início:",
                 "end": "Fim:",
-                "open": "Abrir",
                 "approve": "Aprovar",
                 "reject": "Rejeitar",
                 "disable": "Desativar",
                 "approval_reason_placeholder": "Justificação da aprovação",
                 "rejection_reason_placeholder": "Justificação da rejeição",
                 "no_ads_admin": "Ainda não existem publicidades."
+            },
 
             menu_controls: {
                 open: "Abrir menu",
@@ -848,7 +848,7 @@
                 login: "Mit Discord anmelden"
             },
 
-            advertisements:             {
+            advertisements: {
                       "section_kicker": "Werbung",
                       "featured_servers": "Ausgewählte Server",
                       "subtitle": "Entdecke Community-Server auf Misuki.",
@@ -870,8 +870,7 @@
                       "proposal_submitted": "Werbung eingereicht",
                       "proposal_pending_review": "Dein Vorschlag wird jetzt vom Misuki-Team geprüft. Er wird vor jeder Zahlungsanforderung überprüft.",
                       "proposal_review_before_payment": "Die Zahlung wird erst nach Genehmigung des Vorschlags verfügbar.",
-                      "back_to_dashboard": "Zurück zum Dashboard"
-            },
+                      "back_to_dashboard": "Zurück zum Dashboard",
                 "status_intro": "Verfolge jede Bewerbung, prüfe die Genehmigung, den Zahlungsstatus und wann die Werbung aktiv ist.",
                 "approved_proposal": "Werbung genehmigt",
                 "rejection_reason": "Ablehnungsgrund",
@@ -885,6 +884,7 @@
                 "payment_completed": "Zahlung abgeschlossen",
                 "payment_status": "Werbestatus",
                 "payment_status_desc": "Du kannst jederzeit prüfen, ob die Werbung aktiv ist, welchen Zeitraum du gebucht hast und wie der Zahlungsstatus ist.",
+                "payment_success_description": "Die Zahlung für deine Werbung wurde erfolgreich bestätigt. Der genehmigte Vorschlag ist jetzt für den gebuchten Zeitraum bereit.",
                 "return_dashboard": "Zurück zum Dashboard",
                 "payment_cancelled": "Zahlung abgebrochen",
                 "payment_not_completed": "Die Zahlung wurde nicht abgeschlossen.",
@@ -894,13 +894,13 @@
                 "duration": "Dauer:",
                 "start": "Beginn:",
                 "end": "Ende:",
-                "open": "Öffnen",
                 "approve": "Genehmigen",
                 "reject": "Ablehnen",
                 "disable": "Deaktivieren",
                 "approval_reason_placeholder": "Begründung der Genehmigung",
                 "rejection_reason_placeholder": "Begründung der Ablehnung",
                 "no_ads_admin": "Es gibt noch keine Werbungen."
+            },
 
             menu_controls: {
                 open: "Menü öffnen",
@@ -1223,7 +1223,7 @@
                 login: "Iniciar sesión con Discord"
             },
 
-            advertisements:             {
+            advertisements: {
                       "section_kicker": "Publicidad",
                       "featured_servers": "Servidores destacados",
                       "subtitle": "Descubre servidores de la comunidad en Misuki.",
@@ -1245,8 +1245,7 @@
                       "proposal_submitted": "Publicidad enviada",
                       "proposal_pending_review": "Tu propuesta está pendiente de revisión por el equipo de Misuki. Se revisará antes de solicitar cualquier pago.",
                       "proposal_review_before_payment": "El pago solo estará disponible después de aprobar la propuesta.",
-                      "back_to_dashboard": "Volver al panel"
-            },
+                      "back_to_dashboard": "Volver al panel",
                 "status_intro": "Consulta cada propuesta, comprueba si fue aprobada, revisa el pago y confirma cuándo la publicidad está activa.",
                 "approved_proposal": "Propuesta aprobada",
                 "rejection_reason": "Motivo del rechazo",
@@ -1260,6 +1259,7 @@
                 "payment_completed": "Pago completado",
                 "payment_status": "Estado de la publicidad",
                 "payment_status_desc": "Puedes consultar en cualquier momento si la publicidad está activa, el periodo contratado y el estado del pago en Mis publicidades.",
+                "payment_success_description": "El pago de tu publicidad se confirmó correctamente. La propuesta aprobada está lista para el periodo contratado.",
                 "return_dashboard": "Volver al panel",
                 "payment_cancelled": "Pago cancelado",
                 "payment_not_completed": "El pago no se completó.",
@@ -1269,13 +1269,13 @@
                 "duration": "Duración:",
                 "start": "Inicio:",
                 "end": "Fin:",
-                "open": "Abrir",
                 "approve": "Aprobar",
                 "reject": "Rechazar",
                 "disable": "Desactivar",
                 "approval_reason_placeholder": "Justificación de la aprobación",
                 "rejection_reason_placeholder": "Justificación del rechazo",
                 "no_ads_admin": "Todavía no hay publicidades."
+            },
 
             menu_controls: {
                 open: "Abrir menú",
@@ -1598,7 +1598,7 @@
                 login: "Se connecter avec Discord"
             },
 
-            advertisements:             {
+            advertisements: {
                       "section_kicker": "Publicité",
                       "featured_servers": "Serveurs en vedette",
                       "subtitle": "Découvrez les serveurs de la communauté sur Misuki.",
@@ -1620,8 +1620,7 @@
                       "proposal_submitted": "Publicité envoyée",
                       "proposal_pending_review": "Votre proposition est maintenant en attente d'examen par l'équipe Misuki. Elle sera examinée avant toute demande de paiement.",
                       "proposal_review_before_payment": "Le paiement ne sera disponible qu'après l'approbation de la proposition.",
-                      "back_to_dashboard": "Retour au tableau de bord"
-            },
+                      "back_to_dashboard": "Retour au tableau de bord",
                 "status_intro": "Suivez chaque proposition, vérifiez son approbation, consultez le paiement et confirmez quand la publicité est active.",
                 "approved_proposal": "Proposition approuvée",
                 "rejection_reason": "Motif du rejet",
@@ -1635,6 +1634,7 @@
                 "payment_completed": "Paiement effectué",
                 "payment_status": "État de la publicité",
                 "payment_status_desc": "Vous pouvez vérifier à tout moment si la publicité est active, la période souscrite et l'état du paiement dans Mes publicités.",
+                "payment_success_description": "Le paiement de votre publicité a été confirmé avec succès. La proposition approuvée est maintenant prête pour la période souscrite.",
                 "return_dashboard": "Retour au tableau de bord",
                 "payment_cancelled": "Paiement annulé",
                 "payment_not_completed": "Le paiement n'a pas été effectué.",
@@ -1644,13 +1644,13 @@
                 "duration": "Durée :",
                 "start": "Début :",
                 "end": "Fin :",
-                "open": "Ouvrir",
                 "approve": "Approuver",
                 "reject": "Rejeter",
                 "disable": "Désactiver",
                 "approval_reason_placeholder": "Justification de l'approbation",
                 "rejection_reason_placeholder": "Justification du rejet",
                 "no_ads_admin": "Aucune publicité pour le moment."
+            },
 
             menu_controls: {
                 open: "Ouvrir le menu",
