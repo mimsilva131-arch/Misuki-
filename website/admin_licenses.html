@@ -112,12 +112,12 @@ Misuki — License Management
                         <span class="badge
                             {% if license.status == 'active' %}
                                 badge-active
-                            {% elif license.status == 'expired' %}
-                                badge-warning
                             {% else %}
                                 badge-warning
                             {% endif %}
-                        ">
+                        "
+                            data-i18n="licenses.status_{{ license.status }}"
+                        >
                             {{ license.status }}
                         </span>
 
@@ -168,7 +168,6 @@ Misuki — License Management
                                 class="button danger"
                                 type="submit"
                                 data-i18n="licenses.revoke"
-                                onclick="return confirm('Revoke this license?')"
                             >
                                 Revoke
                             </button>
