@@ -1955,3 +1955,44 @@ select {
     }
 
 }
+
+
+/* =========================================================
+   ADVERTISEMENT STATUS SPACING
+   ========================================================= */
+
+.advertisement-status-intro {
+    max-width: 760px;
+    margin: 0 0 38px;
+    color: var(--text-muted);
+    line-height: 1.7;
+}
+
+.advertisement-status-page .server-card {
+    padding: 23px 22px 22px;
+}
+
+.advertisement-status-page .server-name {
+    margin-top: 8px;
+    margin-bottom: 16px;
+}
+
+.advertisement-status-page .server-id + .server-id {
+    margin-top: 6px;
+}
+
+.advertisement-status-page .badges {
+    margin-top: 4px;
+    margin-bottom: 19px;
+}
+
+.advertisement-status-page .server-card > p {
+    margin: 17px 0 19px;
+    color: var(--text-muted);
+    line-height: 1.65;
+}
+
+.advertisement-status-page .advertisement-status-note,
+.advertisement-status-page .advertisement-status-dates {
+    margin-top: 17px;
+}
