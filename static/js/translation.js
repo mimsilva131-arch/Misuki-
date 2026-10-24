@@ -1724,7 +1724,7 @@
                 back_statistics: "Retour aux statistiques",
                 create_title: "Créer une licence",
                 create_description: "Une nouvelle licence devient active immédiatement après sa création.",
-                server_id: "Server ID",
+                server_id: "ID du serveur",
                 days: "Durée (jours)",
                 create: "Créer la licence",
                 existing: "Licences existantes",
