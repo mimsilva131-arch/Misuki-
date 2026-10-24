@@ -129,12 +129,12 @@ Misuki — Discord Bot
 
     <section class="section" id="publicidades">
         <div class="container">
-            <h2 class="section-title">📢 Publicidades</h2>
+            <div class="advertisements-heading">\n                <div>\n                    <span class="section-kicker">Publicidade</span>\n                    <h2 class="section-title">Descubra novos servidores</h2>\n                    <p class="advertisements-subtitle">Servidores da comunidade em destaque no Misuki.</p>\n                </div>\n                <a href="/advertise" class="advertisements-link">Publicitar o seu servidor</a>\n            </div>
 
             {% if advertisements %}
                 <div class="server-grid">
                     {% for ad in advertisements %}
-                        <a href="{{ ad.target_url }}" target="_blank" rel="noopener noreferrer" class="card advertisement-card">
+                        <a href="{{ ad.target_url }}" target="_blank" rel="noopener noreferrer" class="card advertisement-card">\n                            <div class="advertisement-media">
                             {% if ad.image_url %}
                                 <img src="{{ ad.image_url }}" alt="{{ ad.title }}" class="advertisement-image">
                             {% endif %}
