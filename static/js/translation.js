@@ -119,7 +119,7 @@
                       "proposal_pending_review": "Your proposal is now pending review by the Misuki team. We will review it before any payment is requested.",
                       "proposal_review_before_payment": "Payment will only become available after the proposal has been approved.",
                       "back_to_dashboard": "Back to Dashboard"
-            }
+            },
 
             menu_controls: {
                 open: "Open menu",
@@ -466,7 +466,7 @@
                       "proposal_pending_review": "A sua proposta está agora pendente de análise pela equipa do Misuki. Será analisada antes de qualquer pagamento ser solicitado.",
                       "proposal_review_before_payment": "O pagamento só ficará disponível depois de a proposta ser aprovada.",
                       "back_to_dashboard": "Voltar ao painel"
-            }
+            },
 
             menu_controls: {
                 open: "Abrir menu",
@@ -811,7 +811,7 @@
                       "proposal_pending_review": "Dein Vorschlag wird jetzt vom Misuki-Team geprüft. Er wird vor jeder Zahlungsanforderung überprüft.",
                       "proposal_review_before_payment": "Die Zahlung wird erst nach Genehmigung des Vorschlags verfügbar.",
                       "back_to_dashboard": "Zurück zum Dashboard"
-            }
+            },
 
             menu_controls: {
                 open: "Menü öffnen",
@@ -1156,7 +1156,7 @@
                       "proposal_pending_review": "Tu propuesta está pendiente de revisión por el equipo de Misuki. Se revisará antes de solicitar cualquier pago.",
                       "proposal_review_before_payment": "El pago solo estará disponible después de aprobar la propuesta.",
                       "back_to_dashboard": "Volver al panel"
-            }
+            },
 
             menu_controls: {
                 open: "Abrir menú",
@@ -1501,7 +1501,7 @@
                       "proposal_pending_review": "Votre proposition est maintenant en attente d'examen par l'équipe Misuki. Elle sera examinée avant toute demande de paiement.",
                       "proposal_review_before_payment": "Le paiement ne sera disponible qu'après l'approbation de la proposition.",
                       "back_to_dashboard": "Retour au tableau de bord"
-            }
+            },
 
             menu_controls: {
                 open: "Ouvrir le menu",
