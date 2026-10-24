@@ -344,9 +344,9 @@ def initialize_statistics_database():
                     uptime, version, last_seen, admin_servers, admin_users, updated_at
                 ) VALUES (
                     1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Offline', '0s', %s,
-                    NULL, '[]'::jsonb, %s
+                    NULL, '[]'::jsonb, '[]'::jsonb, %s
                 ) ON CONFLICT (id) DO NOTHING
-            """, (os.getenv("MISUKI_VERSION", "1.0.0"), time.time()))
+            """, (os.getenv("MISUKI_VERSION", "").strip(), time.time()))
         connection.commit()
         print("🗄️ Statistics database initialized.")
     except Exception as error:
