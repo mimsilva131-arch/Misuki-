@@ -2602,6 +2602,64 @@ def verification_bot_is_in_guild(guild_id):
     )
 
 
+def create_verification_captcha(guild_id):
+    """Create a short-lived, session-bound verification challenge."""
+    first = random.randint(2, 9)
+    second = random.randint(2, 9)
+    operation = random.choice(["+", "*"])
+
+    if operation == "+":
+        answer = first + second
+        question = f"{first} + {second} = ?"
+    else:
+        answer = first * second
+        question = f"{first} × {second} = ?"
+
+    token = secrets.token_urlsafe(24)
+
+    session["verification_captcha"] = {
+        "guild_id": str(guild_id),
+        "token": token,
+        "answer": str(answer),
+        "expires_at": time.time() + 600,
+    }
+    session.modified = True
+
+    return question, token
+
+
+def validate_verification_captcha(guild_id, token, answer):
+    challenge = session.get("verification_captcha")
+
+    if not isinstance(challenge, dict):
+        return False, "A verificação de segurança expirou. Recarregue a página."
+
+    if str(challenge.get("guild_id")) != str(guild_id):
+        return False, "A verificação de segurança não corresponde a este servidor."
+
+    if not secrets.compare_digest(
+        str(challenge.get("token", "")),
+        str(token or "")
+    ):
+        return False, "A verificação de segurança é inválida."
+
+    if time.time() > float(challenge.get("expires_at", 0)):
+        session.pop("verification_captcha", None)
+        session.modified = True
+        return False, "A verificação de segurança expirou. Recarregue a página."
+
+    if not secrets.compare_digest(
+        str(challenge.get("answer", "")).strip(),
+        str(answer or "").strip()
+    ):
+        return False, "A resposta da verificação está incorreta."
+
+    session.pop("verification_captcha", None)
+    session.modified = True
+
+    return True, None
+
+
 @app.route(
     "/verify/guild=<int:guild_id>",
     methods=["GET"]
@@ -2732,6 +2790,10 @@ def verification():
             user
         )
 
+    captcha_question, captcha_token = create_verification_captcha(
+        guild_id_int
+    )
+
     return render_template(
         "verification.html",
         user=user,
@@ -2742,6 +2804,8 @@ def verification():
         ),
         guild_name=guild.get("name") or "Discord Server",
         guild_id=str(guild_id_int),
+        captcha_question=captcha_question,
+        captcha_token=captcha_token,
         is_admin=is_admin
     )
 
@@ -2833,6 +2897,43 @@ def submit_verification():
             500,
             user
         )
+
+    captcha_token = request.form.get(
+        "captcha_token",
+        ""
+    ).strip()
+
+    captcha_answer = request.form.get(
+        "captcha_answer",
+        ""
+    ).strip()
+
+    captcha_valid, captcha_error = validate_verification_captcha(
+        guild_id_int,
+        captcha_token,
+        captcha_answer
+    )
+
+    if not captcha_valid:
+        captcha_question, new_captcha_token = create_verification_captcha(
+            guild_id_int
+        )
+
+        return render_template(
+            "verification.html",
+            user=user,
+            username=(
+                user.get("global_name")
+                or user.get("username")
+                or "Discord User"
+            ),
+            guild_name=guild.get("name") or "Discord Server",
+            guild_id=str(guild_id_int),
+            captcha_question=captcha_question,
+            captcha_token=new_captcha_token,
+            captcha_error=captcha_error,
+            is_admin=is_admin
+        ), 400
 
     try:
 
