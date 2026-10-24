@@ -45,7 +45,7 @@ load_dotenv(
 MISUKI_VERSION = os.getenv(
     "MISUKI_VERSION",
     "1.0.0"
-)
+).strip()
 
 # =========================================================
 # PATHS
@@ -119,7 +119,6 @@ SECRET_KEY = os.getenv(
     "FLASK_SECRET_KEY"
 )
 
-MISUKI_VERSION = os.getenv("MISUKI_VERSION", "").strip()
 
 ADMIN_DISCORD_IDS = {
     str(admin_id).strip()
