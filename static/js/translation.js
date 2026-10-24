@@ -241,6 +241,7 @@
                 payment_secure: "Your payment will be securely processed through PayPal.",
                 continue_paypal: "Continue to PayPal",
                 advertisement_note: "Your advertisement will be reviewed and activated after successful payment.",
+                days: "days",
                 option_7: "7 days — €0.99",
                 option_14: "14 days — €1.50",
                 option_30: "30 days — €2.50",
@@ -586,6 +587,7 @@
                 payment_secure: "O seu pagamento será processado de forma segura através do PayPal.",
                 continue_paypal: "Continuar para o PayPal",
                 advertisement_note: "A sua publicidade será analisada e ativada após o pagamento ser concluído.",
+                days: "dias",
                 option_7: "7 dias — €0,99",
                 option_14: "14 dias — €1,50",
                 option_30: "30 dias — €2,50",
@@ -931,6 +933,7 @@
                 payment_secure: "Ihre Zahlung wird sicher über PayPal verarbeitet.",
                 continue_paypal: "Weiter zu PayPal",
                 advertisement_note: "Ihre Werbung wird nach erfolgreicher Zahlung geprüft und aktiviert.",
+                days: "Tage",
                 option_7: "7 Tage — €0,99",
                 option_14: "14 Tage — €1,50",
                 option_30: "30 Tage — €2,50",
@@ -1276,6 +1279,7 @@
                 payment_secure: "Tu pago se procesará de forma segura mediante PayPal.",
                 continue_paypal: "Continuar a PayPal",
                 advertisement_note: "Tu anuncio será revisado y activado después de realizar el pago correctamente.",
+                days: "días",
                 option_7: "7 días — €0,99",
                 option_14: "14 días — €1,50",
                 option_30: "30 días — €2,50",
@@ -1621,6 +1625,7 @@
                 payment_secure: "Votre paiement sera traité en toute sécurité via PayPal.",
                 continue_paypal: "Continuer vers PayPal",
                 advertisement_note: "Votre publicité sera examinée et activée après le paiement.",
+                days: "jours",
                 option_7: "7 jours — 0,99 €",
                 option_14: "14 jours — 1,50 €",
                 option_30: "30 jours — 2,50 €",
@@ -1782,6 +1787,96 @@
         }
     };
 
+
+    /* =========================================================
+       AUTOMATIC STATIC TEXT TRANSLATION
+       ========================================================= */
+
+    const englishPhraseKeys = {};
+
+    function buildEnglishPhraseIndex(value, path) {
+        if (!value || typeof value !== "object") return;
+
+        Object.keys(value).forEach(function (key) {
+            const current = value[key];
+            const currentPath = path ? path + "." + key : key;
+
+            if (typeof current === "string") {
+                const normalized = normalizeStaticText(current);
+                if (normalized && !englishPhraseKeys[normalized]) {
+                    englishPhraseKeys[normalized] = currentPath;
+                }
+            } else if (current && typeof current === "object") {
+                buildEnglishPhraseIndex(current, currentPath);
+            }
+        });
+    }
+
+    function normalizeStaticText(value) {
+        return String(value || "")
+            .replace(/^\s+|\s+$/g, "")
+            .replace(/^([\p{Extended_Pictographic}\uFE0F]\s*)+/u, "")
+            .replace(/\s+/g, " ")
+            .trim();
+    }
+
+    function isProtectedStaticElement(element) {
+        if (!element || element.nodeType !== 1) return true;
+
+        if (element.closest(
+            "script, style, textarea, input, select, option, " +
+            ".server-name, .server-id, .review-text, " +
+            ".advertisement-card, .advertisement-content, " +
+            "[data-dynamic-content]"
+        )) {
+            return true;
+        }
+
+        return element.hasAttribute("data-i18n");
+    }
+
+    function translateStaticText(language) {
+        if (language === "en") return;
+
+        const walker = document.createTreeWalker(
+            document.body,
+            NodeFilter.SHOW_TEXT
+        );
+
+        const nodes = [];
+        let node;
+
+        while ((node = walker.nextNode())) {
+            nodes.push(node);
+        }
+
+        nodes.forEach(function (textNode) {
+            const parent = textNode.parentElement;
+
+            if (isProtectedStaticElement(parent)) return;
+            if (!textNode.nodeValue || !textNode.nodeValue.trim()) return;
+
+            const raw = textNode.nodeValue;
+
+            if (raw.includes("{{") || raw.includes("{%")) return;
+
+            const normalized = normalizeStaticText(raw);
+            const key = englishPhraseKeys[normalized];
+
+            if (!key) return;
+
+            const translated = getTranslation(language, key);
+
+            if (translated === null || translated === normalized) return;
+
+            const leading = raw.match(/^\s*/)?.[0] || "";
+            const trailing = raw.match(/\s*$/)?.[0] || "";
+
+            textNode.nodeValue = leading + translated + trailing;
+        });
+    }
+
+    buildEnglishPhraseIndex(translations.en, "");
 
     /* =========================================================
        GET TRANSLATION
@@ -2152,6 +2247,10 @@
             });
 
         translateAttributes(
+            language
+        );
+
+        translateStaticText(
             language
         );
 
