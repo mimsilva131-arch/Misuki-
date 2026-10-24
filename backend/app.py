@@ -4408,16 +4408,8 @@ def statistics():
                     ):
                         if key in bot_snapshot:
                             statistics_data[key] = bot_snapshot[key]
-<<<<<<< HEAD
                     statistics_data["misuki_version"] = MISUKI_VERSION
                     statistics_data["version"] = MISUKI_VERSION
-=======
-                    statistics_data["version"] = (
-        MISUKI_VERSION
-        or bot_snapshot.get("version")
-        or ""
-    )
->>>>>>> 02d41aa86cf58118e2ebee4076df89145b5ce0a8
     except Exception as error:
         print(f"⚠️ Could not load live bot statistics: {error}")
 
@@ -4994,11 +4986,8 @@ def statistics_api():
 
         "api_status": "Unavailable",
 
-<<<<<<< HEAD
         "misuki_version": MISUKI_VERSION,
 
-=======
->>>>>>> 02d41aa86cf58118e2ebee4076df89145b5ce0a8
         "version": MISUKI_VERSION,
 
         "uptime": "0s",
@@ -5122,16 +5111,8 @@ def statistics_api():
                 bot_snapshot[key]
             )
 
-<<<<<<< HEAD
     statistics_data["misuki_version"] = MISUKI_VERSION
     statistics_data["version"] = MISUKI_VERSION
-=======
-    statistics_data["version"] = (
-        MISUKI_VERSION
-        or bot_snapshot.get("version")
-        or ""
-    )
->>>>>>> 02d41aa86cf58118e2ebee4076df89145b5ce0a8
 
 
     # =====================================================
