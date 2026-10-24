@@ -29,13 +29,16 @@
 
     let lastX = 0;
     let lastY = 0;
+    let targetX = 0;
+    let targetY = 0;
 
     let mouseReady = false;
-
+    let animationFrame = null;
     let lastTrailTime = 0;
 
-    const TRAIL_INTERVAL = 22;
-
+    const TRAIL_INTERVAL = 16;
+    const TRAIL_SPACING = 5;
+    const FOLLOW_SPEED = 0.34;
 
     document.addEventListener(
         "mousemove",
@@ -45,118 +48,65 @@
                 return;
             }
 
-
-            const x =
-                event.clientX;
-
-            const y =
-                event.clientY;
-
+            targetX = event.clientX;
+            targetY = event.clientY;
 
             if (!mouseReady) {
-
-                lastX = x;
-                lastY = y;
-
+                lastX = targetX;
+                lastY = targetY;
                 mouseReady = true;
-
-                return;
             }
 
-
-            const now =
-                performance.now();
-
-
-            if (
-                now - lastTrailTime <
-                TRAIL_INTERVAL
-            ) {
-                return;
+            if (animationFrame === null) {
+                animationFrame = requestAnimationFrame(updateTrail);
             }
+        },
+        { passive: true }
+    );
 
+    function updateTrail(now) {
 
-            const dx =
-                x - lastX;
+        animationFrame = null;
 
-            const dy =
-                y - lastY;
+        if (!mouseReady || !isHome()) {
+            return;
+        }
 
+        lastX += (targetX - lastX) * FOLLOW_SPEED;
+        lastY += (targetY - lastY) * FOLLOW_SPEED;
 
-            const distance =
-                Math.sqrt(
-                    dx * dx +
-                    dy * dy
-                );
+        const dx = targetX - lastX;
+        const dy = targetY - lastY;
+        const distance = Math.hypot(dx, dy);
 
+        if (
+            now - lastTrailTime >= TRAIL_INTERVAL &&
+            distance > 1.2
+        ) {
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            const steps = Math.max(1, Math.ceil(distance / TRAIL_SPACING));
 
-            if (distance < 2) {
-                return;
-            }
-
-
-            /*
-             * Criar segmentos contínuos
-             * entre a posição anterior
-             * e a atual.
-             */
-
-            const steps =
-                Math.max(
-                    1,
-                    Math.ceil(
-                        distance / 7
-                    )
-                );
-
-
-            for (
-                let i = 1;
-                i <= steps;
-                i++
-            ) {
-
-                const progress =
-                    i / steps;
-
-
-                const trailX =
-                    lastX +
-                    (x - lastX) *
-                    progress;
-
-
-                const trailY =
-                    lastY +
-                    (y - lastY) *
-                    progress;
-
+            for (let i = 1; i <= steps; i++) {
+                const progress = i / steps;
 
                 createTrail(
-                    trailX,
-                    trailY,
-                    Math.atan2(dy, dx) * 180 / Math.PI,
-                    Math.max(
-                        5,
-                        Math.min(
-                            18,
-                            distance / steps
-                        )
-                    )
+                    lastX + dx * progress,
+                    lastY + dy * progress,
+                    angle,
+                    Math.max(5, Math.min(18, distance / steps))
                 );
             }
 
-
-            lastX = x;
-            lastY = y;
-
             lastTrailTime = now;
-
-        },
-        {
-            passive: true
         }
-    );
+
+        if (
+            Math.abs(targetX - lastX) > 0.5 ||
+            Math.abs(targetY - lastY) > 0.5
+        ) {
+            animationFrame = requestAnimationFrame(updateTrail);
+        }
+    }
 
 
     function createTrail(
