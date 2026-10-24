@@ -2692,6 +2692,40 @@ def verification():
             user
         )
 
+    try:
+        with database_connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    SELECT status, expires_at
+                    FROM licenses
+                    WHERE guild_id = %s
+                    """,
+                    (guild_id_int,)
+                )
+                license_data = cursor.fetchone()
+        license_active = bool(license_data and license_data[0] == "active")
+        if license_active and license_data[1] is not None:
+            expiration = license_data[1]
+            if expiration.tzinfo is None:
+                expiration = expiration.replace(tzinfo=timezone.utc)
+            license_active = datetime.now(timezone.utc) < expiration
+        if not license_active:
+            return error_page(
+                "❌ Verification unavailable",
+                "This server does not currently have an active Misuki license.",
+                403,
+                user
+            )
+    except Exception as error:
+        print(f"❌ Verification license check error: {error}")
+        return error_page(
+            "❌ Verification unavailable",
+            "The server license could not be verified.",
+            500,
+            user
+        )
+
     return render_template(
         "verification.html",
         user=user,
@@ -2757,6 +2791,40 @@ def submit_verification():
             "❌ Verification unavailable",
             "The server could not be verified.",
             400,
+            user
+        )
+
+    try:
+        with database_connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    SELECT status, expires_at
+                    FROM licenses
+                    WHERE guild_id = %s
+                    """,
+                    (guild_id_int,)
+                )
+                license_data = cursor.fetchone()
+        license_active = bool(license_data and license_data[0] == "active")
+        if license_active and license_data[1] is not None:
+            expiration = license_data[1]
+            if expiration.tzinfo is None:
+                expiration = expiration.replace(tzinfo=timezone.utc)
+            license_active = datetime.now(timezone.utc) < expiration
+        if not license_active:
+            return error_page(
+                "❌ Verification unavailable",
+                "This server does not currently have an active Misuki license.",
+                403,
+                user
+            )
+    except Exception as error:
+        print(f"❌ Verification license check error: {error}")
+        return error_page(
+            "❌ Verification unavailable",
+            "The server license could not be verified.",
+            500,
             user
         )
 
