@@ -33,7 +33,7 @@
         0 0 8px rgba(88, 101, 242, .28);
     opacity: .82;
     will-change: transform, opacity, width;
-    animation: misuki-mouse-fade 700ms cubic-bezier(.22, .61, .36, 1) forwards;
+    animation: misuki-mouse-fade 560ms cubic-bezier(.22, .61, .36, 1) forwards;
 }
 
 
