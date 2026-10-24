@@ -1,21 +1,108 @@
 {% extends "base.html" %}
 
 {% block title %}
-Pagamento concluído — Miskui
+Pagamento concluído — Misuki
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.payment-success-page {
+    min-height: 62vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 0 72px;
+}
+.payment-success-card {
+    width: min(100%, 760px);
+    padding: 42px;
+    text-align: center;
+    border: 1px solid rgba(120, 167, 255, .18);
+    background: linear-gradient(145deg, rgba(20, 29, 50, .94), rgba(10, 14, 25, .97));
+    box-shadow: 0 24px 70px rgba(0, 0, 0, .28);
+}
+.payment-success-mark {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid rgba(93, 211, 158, .28);
+    background: rgba(93, 211, 158, .08);
+    color: #8de3ba;
+    font-size: 32px;
+    font-weight: 800;
+}
+.payment-success-card h1 { margin-bottom: 12px; }
+.payment-success-card > p {
+    max-width: 590px;
+    margin: 0 auto;
+    color: var(--text-muted);
+    line-height: 1.7;
+}
+.payment-success-details {
+    max-width: 590px;
+    margin: 26px auto 0;
+    padding: 18px 20px;
+    text-align: left;
+    border: 1px solid rgba(255, 255, 255, .07);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .025);
+}
+.payment-success-details strong { display: block; margin-bottom: 6px; }
+.payment-success-details span {
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.6;
+}
+.payment-success-actions {
+    margin-top: 28px;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.payment-success-actions .button { min-width: 190px; }
+@media (max-width: 600px) {
+    .payment-success-card { padding: 30px 20px; }
+    .payment-success-actions .button { width: 100%; }
+}
+</style>
 {% endblock %}
 
 {% block content %}
-<main>
-    <section class="section">
-        <div class="container">
-            <div class="card legal-page" style="text-align:center; max-width:760px; margin:40px auto;">
-                <h1>✅ Pagamento concluído</h1>
-                <p>O seu pagamento foi confirmado com sucesso.</p>
-                <p>A sua publicidade foi ativada e será apresentada na página inicial durante o período contratado.</p>
-                <a href="/advertise/status" class="button">📋 Ver as minhas publicidades</a>
-                <a href="/dashboard" class="button">🚀 Voltar ao painel</a>
+<main class="payment-success-page">
+    <div class="container">
+        <section class="card payment-success-card">
+            <div class="payment-success-mark" aria-hidden="true">✓</div>
+
+            <h1>Pagamento concluído</h1>
+
+            <p>
+                O pagamento da sua publicidade foi confirmado com sucesso.
+                A proposta aprovada está agora pronta para o período contratado.
+            </p>
+
+            <div class="payment-success-details">
+                <strong>Estado da publicidade</strong>
+                <span>
+                    Pode consultar a qualquer momento se a publicidade está ativa,
+                    o período contratado e o estado do pagamento na área
+                    “As minhas publicidades”.
+                </span>
             </div>
-        </div>
-    </section>
+
+            <div class="payment-success-actions">
+                <a href="/advertise/status" class="button add">
+                    Ver as minhas publicidades
+                </a>
+                <a href="/dashboard" class="button manage">
+                    Voltar ao painel
+                </a>
+            </div>
+        </section>
+    </div>
 </main>
 {% endblock %}
