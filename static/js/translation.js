@@ -87,12 +87,113 @@
                 support: "Support",
                 advertisement: "Advertisement",
                 advertisement_admin: "Advertisement Admin",
+                license_management: "License Management",
+                my_advertisements: "My Advertisements",
                 terms: "Terms",
                 privacy: "Privacy",
                 data: "Data",
                 cookies: "Cookies",
                 logout: "Logout",
                 login: "Login with Discord"
+            },
+
+            licenses: {
+                admin_eyebrow: "ADMINISTRATION",
+                title: "Gestion des licences",
+                description: "Créez, prolongez et révoquez les licences de serveurs directement depuis le site Misuki.",
+                back_statistics: "Retour aux statistiques",
+                create_title: "Créer une licence",
+                create_description: "Une nouvelle licence devient active immédiatement après sa création.",
+                server_id: "ID du serveur",
+                days: "Durée (jours)",
+                create: "Créer la licence",
+                existing: "Licences existantes",
+                created: "Créée",
+                expires: "Expire",
+                extend: "Prolonger",
+                revoke: "Révoquer",
+                status_active: "Active",
+                status_expired: "Expirée",
+                status_revoked: "Révoquée",
+                status_none: "Inconnue",
+                none: "Aucun enregistrement de licence."
+            },
+
+            licenses: {
+                admin_eyebrow: "ADMINISTRATION",
+                title: "License management",
+                description: "Create, extend and revoke server licenses directly from the Misuki website.",
+                back_statistics: "Back to statistics",
+                create_title: "Create a license",
+                create_description: "A new license becomes active immediately after creation.",
+                server_id: "Server ID",
+                days: "Duration (days)",
+                create: "Create license",
+                existing: "Existing licenses",
+                created: "Created",
+                expires: "Expires",
+                extend: "Extend",
+                revoke: "Revoke",
+                status_active: "Active",
+                status_expired: "Expired",
+                status_revoked: "Revoked",
+                status_none: "Unknown",
+                none: "There are no license records."
+            },
+
+            advertisements: {
+                      "section_kicker": "Advertisement",
+                      "featured_servers": "Featured servers",
+                      "subtitle": "Discover community servers on Misuki.",
+                      "advertise_server": "Advertise your server",
+                      "space_available": "Advertising space available",
+                      "space_description": "Your server can appear here. Be one of the first to advertise on Misuki.",
+                      "pending_review": "Pending review",
+                      "approved_payment_pending": "Approved — payment pending",
+                      "active": "Active",
+                      "rejected": "Rejected",
+                      "expired": "Expired",
+                      "disabled": "Disabled",
+                      "paid": "Paid",
+                      "payment_pending": "Payment pending",
+                      "payment_failed": "Payment not completed",
+                      "reason": "Reason:",
+                      "pay_paypal": "Pay with PayPal",
+                      "open": "Open",
+                      "no_advertisements": "You have no advertisements yet.",
+                      "proposal_submitted": "Advertisement submitted",
+                      "proposal_pending_review": "Your proposal is now pending review by the Misuki team. We will review it before any payment is requested.",
+                      "proposal_review_before_payment": "Payment will only become available after the proposal has been approved.",
+                      "back_to_dashboard": "Back to Dashboard",
+                "status_intro": "Track each proposal, check whether it was approved, review the payment and confirm when the advertisement is active.",
+                "approved_proposal": "Proposal approved",
+                "rejection_reason": "Rejection reason",
+                "period": "Period:",
+                "pay_ad": "Make PayPal payment",
+                "open_ad": "Open advertisement",
+                "no_proposals": "You do not have any advertisement proposals yet.",
+                "proposal_sent": "Proposal submitted",
+                "send_another": "Submit another proposal",
+                "panel": "Dashboard",
+                "payment_completed": "Payment completed",
+                "payment_status": "Advertisement status",
+                "payment_status_desc": "You can check at any time whether the advertisement is active, the contracted period and the payment status in My Advertisements.",
+                "payment_success_description": "Your advertisement payment was confirmed successfully. The approved proposal is now ready for the contracted period.",
+                "return_dashboard": "Return to Dashboard",
+                "payment_cancelled": "Payment cancelled",
+                "payment_not_completed": "The payment was not completed.",
+                "return": "Return",
+                "advertisement_management": "Advertisement Management",
+                "user_id": "User ID:",
+                "duration": "Duration:",
+                "start": "Start:",
+                "end": "End:",
+                "approve": "Approve",
+                "reject": "Reject",
+                "disable": "Disable",
+                "approval_reason_placeholder": "Approval justification",
+                "rejection_reason_placeholder": "Rejection justification",
+                "no_ads_admin": "There are no advertisements yet."
             },
 
             menu_controls: {
@@ -211,10 +312,11 @@
                 save_more: "SAVE MORE",
                 popular: "POPULAR",
                 save: "Save",
-                secure_payment: "Secure payment with PayPal",
-                payment_secure: "Your payment will be securely processed through PayPal.",
+                secure_payment: "Payment after approval",
+                payment_secure: "No payment is requested when you submit the proposal. If approved, you will receive access to PayPal payment.",
                 continue_paypal: "Continue to PayPal",
-                advertisement_note: "Your advertisement will be reviewed and activated after successful payment.",
+                advertisement_note: "Your advertisement will be reviewed before any payment is requested. You can only pay after the Misuki team approves the proposal.",
+                days: "days",
                 option_7: "7 days — €0.99",
                 option_14: "14 days — €1.50",
                 option_30: "30 days — €2.50",
@@ -408,12 +510,91 @@
                 support: "Suporte",
                 advertisement: "Publicidade",
                 advertisement_admin: "Administração de Publicidade",
+                license_management: "Gestão de Licenças",
+                my_advertisements: "As minhas publicidades",
                 terms: "Termos",
                 privacy: "Privacidade",
                 data: "Dados",
                 cookies: "Cookies",
                 logout: "Terminar sessão",
                 login: "Entrar com o Discord"
+            },
+
+            licenses: {
+                admin_eyebrow: "ADMINISTRAÇÃO",
+                title: "Gestão de licenças",
+                description: "Crie, prolongue e revogue licenças de servidores diretamente no site do Misuki.",
+                back_statistics: "Voltar às estatísticas",
+                create_title: "Criar uma licença",
+                create_description: "Uma nova licença fica ativa imediatamente após a criação.",
+                server_id: "ID do servidor",
+                days: "Duração (dias)",
+                create: "Criar licença",
+                existing: "Licenças existentes",
+                created: "Criada",
+                expires: "Expira",
+                extend: "Prolongar",
+                revoke: "Revogar",
+                status_active: "Ativa",
+                status_expired: "Expirada",
+                status_revoked: "Revogada",
+                status_none: "Desconhecida",
+                none: "Não existem registos de licenças."
+            },
+
+            advertisements: {
+                      "section_kicker": "Publicidade",
+                      "featured_servers": "Servidores em destaque",
+                      "subtitle": "Descubra servidores da comunidade no Misuki.",
+                      "advertise_server": "Publicitar o seu servidor",
+                      "space_available": "Espaço publicitário disponível",
+                      "space_description": "O seu servidor pode aparecer aqui. Seja um dos primeiros a publicitar no Misuki.",
+                      "pending_review": "Pendente de análise",
+                      "approved_payment_pending": "Aprovada — pagamento pendente",
+                      "active": "Ativa",
+                      "rejected": "Rejeitada",
+                      "expired": "Expirada",
+                      "disabled": "Desativada",
+                      "paid": "Pago",
+                      "payment_pending": "Pagamento pendente",
+                      "payment_failed": "Pagamento não concluído",
+                      "reason": "Motivo:",
+                      "pay_paypal": "Pagar com PayPal",
+                      "open": "Abrir",
+                      "no_advertisements": "Ainda não existem publicidades.",
+                      "proposal_submitted": "Publicidade enviada",
+                      "proposal_pending_review": "A sua proposta está agora pendente de análise pela equipa do Misuki. Será analisada antes de qualquer pagamento ser solicitado.",
+                      "proposal_review_before_payment": "O pagamento só ficará disponível depois de a proposta ser aprovada.",
+                      "back_to_dashboard": "Voltar ao painel",
+                "status_intro": "Aqui pode acompanhar cada proposta, verificar se foi aprovada, consultar o pagamento e confirmar quando a publicidade está ativa.",
+                "approved_proposal": "Proposta aprovada",
+                "rejection_reason": "Motivo da rejeição",
+                "period": "Período:",
+                "pay_ad": "Efetuar pagamento com PayPal",
+                "open_ad": "Abrir publicidade",
+                "no_proposals": "Ainda não tem propostas de publicidade.",
+                "proposal_sent": "Proposta enviada",
+                "send_another": "Enviar outra proposta",
+                "panel": "Painel",
+                "payment_completed": "Pagamento concluído",
+                "payment_status": "Estado da publicidade",
+                "payment_status_desc": "Pode consultar a qualquer momento se a publicidade está ativa, o período contratado e o estado do pagamento na área “As minhas publicidades”.",
+                "payment_success_description": "O pagamento da sua publicidade foi confirmado com sucesso. A proposta aprovada está agora pronta para o período contratado.",
+                "return_dashboard": "Voltar ao painel",
+                "payment_cancelled": "Pagamento cancelado",
+                "payment_not_completed": "O pagamento não foi concluído.",
+                "return": "Voltar",
+                "advertisement_management": "Gestão de publicidade",
+                "user_id": "ID do utilizador:",
+                "duration": "Duração:",
+                "start": "Início:",
+                "end": "Fim:",
+                "approve": "Aprovar",
+                "reject": "Rejeitar",
+                "disable": "Desativar",
+                "approval_reason_placeholder": "Justificação da aprovação",
+                "rejection_reason_placeholder": "Justificação da rejeição",
+                "no_ads_admin": "Ainda não existem publicidades."
             },
 
             menu_controls: {
@@ -530,10 +711,11 @@
                 save_more: "POUPE MAIS",
                 popular: "POPULAR",
                 save: "Poupe",
-                secure_payment: "Pagamento seguro com PayPal",
-                payment_secure: "O seu pagamento será processado de forma segura através do PayPal.",
+                secure_payment: "Pagamento após aprovação",
+                payment_secure: "Não é solicitado qualquer pagamento ao enviar a proposta. Se for aprovada, terá acesso ao pagamento através do PayPal.",
                 continue_paypal: "Continuar para o PayPal",
-                advertisement_note: "A sua publicidade será analisada e ativada após o pagamento ser concluído.",
+                advertisement_note: "A sua publicidade será analisada antes de qualquer pagamento. Só poderá efetuar o pagamento depois de a equipa do Misuki aprovar a proposta.",
+                days: "dias",
                 option_7: "7 dias — €0,99",
                 option_14: "14 dias — €1,50",
                 option_30: "30 dias — €2,50",
@@ -727,12 +909,91 @@
                 support: "Support",
                 advertisement: "Werbung",
                 advertisement_admin: "Werbeverwaltung",
+                license_management: "Lizenzverwaltung",
+                my_advertisements: "Meine Werbungen",
                 terms: "Bedingungen",
                 privacy: "Datenschutz",
                 data: "Daten",
                 cookies: "Cookies",
                 logout: "Abmelden",
                 login: "Mit Discord anmelden"
+            },
+
+            licenses: {
+                admin_eyebrow: "ADMINISTRATION",
+                title: "Lizenzverwaltung",
+                description: "Erstellen, verlängern und widerrufen Sie Serverlizenzen direkt auf der Misuki-Website.",
+                back_statistics: "Zurück zu den Statistiken",
+                create_title: "Lizenz erstellen",
+                create_description: "Eine neue Lizenz wird sofort nach der Erstellung aktiv.",
+                server_id: "Server-ID",
+                days: "Dauer (Tage)",
+                create: "Lizenz erstellen",
+                existing: "Vorhandene Lizenzen",
+                created: "Erstellt",
+                expires: "Läuft ab",
+                extend: "Verlängern",
+                revoke: "Widerrufen",
+                status_active: "Aktiv",
+                status_expired: "Abgelaufen",
+                status_revoked: "Widerrufen",
+                status_none: "Unbekannt",
+                none: "Keine Lizenzdatensätze vorhanden."
+            },
+
+            advertisements: {
+                      "section_kicker": "Werbung",
+                      "featured_servers": "Ausgewählte Server",
+                      "subtitle": "Entdecke Community-Server auf Misuki.",
+                      "advertise_server": "Deinen Server bewerben",
+                      "space_available": "Werbeplatz verfügbar",
+                      "space_description": "Dein Server kann hier erscheinen. Sei einer der ersten, der auf Misuki wirbt.",
+                      "pending_review": "Prüfung ausstehend",
+                      "approved_payment_pending": "Genehmigt — Zahlung ausstehend",
+                      "active": "Aktiv",
+                      "rejected": "Abgelehnt",
+                      "expired": "Abgelaufen",
+                      "disabled": "Deaktiviert",
+                      "paid": "Bezahlt",
+                      "payment_pending": "Zahlung ausstehend",
+                      "payment_failed": "Zahlung nicht abgeschlossen",
+                      "reason": "Grund:",
+                      "pay_paypal": "Mit PayPal bezahlen",
+                      "open": "Öffnen",
+                      "no_advertisements": "Du hast noch keine Werbungen.",
+                      "proposal_submitted": "Werbung eingereicht",
+                      "proposal_pending_review": "Dein Vorschlag wird jetzt vom Misuki-Team geprüft. Er wird vor jeder Zahlungsanforderung überprüft.",
+                      "proposal_review_before_payment": "Die Zahlung wird erst nach Genehmigung des Vorschlags verfügbar.",
+                      "back_to_dashboard": "Zurück zum Dashboard",
+                "status_intro": "Verfolge jede Bewerbung, prüfe die Genehmigung, den Zahlungsstatus und wann die Werbung aktiv ist.",
+                "approved_proposal": "Werbung genehmigt",
+                "rejection_reason": "Ablehnungsgrund",
+                "period": "Zeitraum:",
+                "pay_ad": "Mit PayPal bezahlen",
+                "open_ad": "Werbung öffnen",
+                "no_proposals": "Du hast noch keine Werbevorschläge.",
+                "proposal_sent": "Vorschlag eingereicht",
+                "send_another": "Weiteren Vorschlag einreichen",
+                "panel": "Dashboard",
+                "payment_completed": "Zahlung abgeschlossen",
+                "payment_status": "Werbestatus",
+                "payment_status_desc": "Du kannst jederzeit prüfen, ob die Werbung aktiv ist, welchen Zeitraum du gebucht hast und wie der Zahlungsstatus ist.",
+                "payment_success_description": "Die Zahlung für deine Werbung wurde erfolgreich bestätigt. Der genehmigte Vorschlag ist jetzt für den gebuchten Zeitraum bereit.",
+                "return_dashboard": "Zurück zum Dashboard",
+                "payment_cancelled": "Zahlung abgebrochen",
+                "payment_not_completed": "Die Zahlung wurde nicht abgeschlossen.",
+                "return": "Zurück",
+                "advertisement_management": "Werbeverwaltung",
+                "user_id": "Benutzer-ID:",
+                "duration": "Dauer:",
+                "start": "Beginn:",
+                "end": "Ende:",
+                "approve": "Genehmigen",
+                "reject": "Ablehnen",
+                "disable": "Deaktivieren",
+                "approval_reason_placeholder": "Begründung der Genehmigung",
+                "rejection_reason_placeholder": "Begründung der Ablehnung",
+                "no_ads_admin": "Es gibt noch keine Werbungen."
             },
 
             menu_controls: {
@@ -849,10 +1110,11 @@
                 save_more: "MEHR SPAREN",
                 popular: "BELIEBT",
                 save: "Sparen",
-                secure_payment: "Sichere Zahlung mit PayPal",
-                payment_secure: "Ihre Zahlung wird sicher über PayPal verarbeitet.",
+                secure_payment: "Zahlung nach Genehmigung",
+                payment_secure: "Beim Einreichen des Vorschlags ist keine Zahlung erforderlich. Nach der Genehmigung erhalten Sie Zugang zur PayPal-Zahlung.",
                 continue_paypal: "Weiter zu PayPal",
-                advertisement_note: "Ihre Werbung wird nach erfolgreicher Zahlung geprüft und aktiviert.",
+                advertisement_note: "Ihre Werbung wird vor jeder Zahlungsanforderung geprüft. Sie können erst nach der Genehmigung durch das Misuki-Team bezahlen.",
+                days: "Tage",
                 option_7: "7 Tage — €0,99",
                 option_14: "14 Tage — €1,50",
                 option_30: "30 Tage — €2,50",
@@ -1046,12 +1308,91 @@
                 support: "Soporte",
                 advertisement: "Publicidad",
                 advertisement_admin: "Administración de Publicidad",
+                license_management: "Gestión de licencias",
+                my_advertisements: "Mis publicidades",
                 terms: "Términos",
                 privacy: "Privacidad",
                 data: "Datos",
                 cookies: "Cookies",
                 logout: "Cerrar sesión",
                 login: "Iniciar sesión con Discord"
+            },
+
+            licenses: {
+                admin_eyebrow: "ADMINISTRACIÓN",
+                title: "Gestión de licencias",
+                description: "Crea, amplía y revoca licencias de servidores directamente desde el sitio de Misuki.",
+                back_statistics: "Volver a estadísticas",
+                create_title: "Crear una licencia",
+                create_description: "Una nueva licencia se activa inmediatamente después de crearla.",
+                server_id: "ID del servidor",
+                days: "Duración (días)",
+                create: "Crear licencia",
+                existing: "Licencias existentes",
+                created: "Creada",
+                expires: "Expira",
+                extend: "Ampliar",
+                revoke: "Revocar",
+                status_active: "Activa",
+                status_expired: "Expirada",
+                status_revoked: "Revocada",
+                status_none: "Desconocida",
+                none: "No hay registros de licencias."
+            },
+
+            advertisements: {
+                      "section_kicker": "Publicidad",
+                      "featured_servers": "Servidores destacados",
+                      "subtitle": "Descubre servidores de la comunidad en Misuki.",
+                      "advertise_server": "Publicitar tu servidor",
+                      "space_available": "Espacio publicitario disponible",
+                      "space_description": "Tu servidor puede aparecer aquí. Sé de los primeros en publicitar en Misuki.",
+                      "pending_review": "Pendiente de revisión",
+                      "approved_payment_pending": "Aprobada — pago pendiente",
+                      "active": "Activa",
+                      "rejected": "Rechazada",
+                      "expired": "Expirada",
+                      "disabled": "Desactivada",
+                      "paid": "Pagado",
+                      "payment_pending": "Pago pendiente",
+                      "payment_failed": "Pago no completado",
+                      "reason": "Motivo:",
+                      "pay_paypal": "Pagar con PayPal",
+                      "open": "Abrir",
+                      "no_advertisements": "Todavía no tienes publicidades.",
+                      "proposal_submitted": "Publicidad enviada",
+                      "proposal_pending_review": "Tu propuesta está pendiente de revisión por el equipo de Misuki. Se revisará antes de solicitar cualquier pago.",
+                      "proposal_review_before_payment": "El pago solo estará disponible después de aprobar la propuesta.",
+                      "back_to_dashboard": "Volver al panel",
+                "status_intro": "Consulta cada propuesta, comprueba si fue aprobada, revisa el pago y confirma cuándo la publicidad está activa.",
+                "approved_proposal": "Propuesta aprobada",
+                "rejection_reason": "Motivo del rechazo",
+                "period": "Periodo:",
+                "pay_ad": "Realizar pago con PayPal",
+                "open_ad": "Abrir publicidad",
+                "no_proposals": "Todavía no tienes propuestas publicitarias.",
+                "proposal_sent": "Propuesta enviada",
+                "send_another": "Enviar otra propuesta",
+                "panel": "Panel",
+                "payment_completed": "Pago completado",
+                "payment_status": "Estado de la publicidad",
+                "payment_status_desc": "Puedes consultar en cualquier momento si la publicidad está activa, el periodo contratado y el estado del pago en Mis publicidades.",
+                "payment_success_description": "El pago de tu publicidad se confirmó correctamente. La propuesta aprobada está lista para el periodo contratado.",
+                "return_dashboard": "Volver al panel",
+                "payment_cancelled": "Pago cancelado",
+                "payment_not_completed": "El pago no se completó.",
+                "return": "Volver",
+                "advertisement_management": "Gestión de publicidad",
+                "user_id": "ID de usuario:",
+                "duration": "Duración:",
+                "start": "Inicio:",
+                "end": "Fin:",
+                "approve": "Aprobar",
+                "reject": "Rechazar",
+                "disable": "Desactivar",
+                "approval_reason_placeholder": "Justificación de la aprobación",
+                "rejection_reason_placeholder": "Justificación del rechazo",
+                "no_ads_admin": "Todavía no hay publicidades."
             },
 
             menu_controls: {
@@ -1169,9 +1510,10 @@
                 popular: "POPULAR",
                 save: "Ahorra",
                 secure_payment: "Pago seguro con PayPal",
-                payment_secure: "Tu pago se procesará de forma segura mediante PayPal.",
+                payment_secure: "No se solicita ningún pago al enviar la propuesta. Si se aprueba, recibirás acceso al pago mediante PayPal.",
                 continue_paypal: "Continuar a PayPal",
-                advertisement_note: "Tu anuncio será revisado y activado después de realizar el pago correctamente.",
+                advertisement_note: "Tu anuncio será revisado antes de solicitar cualquier pago. Solo podrás pagar después de que el equipo de Misuki apruebe la propuesta.",
+                days: "días",
                 option_7: "7 días — €0,99",
                 option_14: "14 días — €1,50",
                 option_30: "30 días — €2,50",
@@ -1365,12 +1707,91 @@
                 support: "Support",
                 advertisement: "Publicité",
                 advertisement_admin: "Administration de la publicité",
+                license_management: "Gestion des licences",
+                my_advertisements: "Mes publicités",
                 terms: "Conditions",
                 privacy: "Confidentialité",
                 data: "Données",
                 cookies: "Cookies",
                 logout: "Se déconnecter",
                 login: "Se connecter avec Discord"
+            },
+
+            licenses: {
+                admin_eyebrow: "ADMINISTRATION",
+                title: "Gestion des licences",
+                description: "Créez, prolongez et révoquez les licences de serveurs directement depuis le site Misuki.",
+                back_statistics: "Retour aux statistiques",
+                create_title: "Créer une licence",
+                create_description: "Une nouvelle licence devient active immédiatement après sa création.",
+                server_id: "ID du serveur",
+                days: "Durée (jours)",
+                create: "Créer la licence",
+                existing: "Licences existantes",
+                created: "Créée",
+                expires: "Expire",
+                extend: "Prolonger",
+                revoke: "Révoquer",
+                status_active: "Active",
+                status_expired: "Expirée",
+                status_revoked: "Révoquée",
+                status_none: "Inconnue",
+                none: "Aucun enregistrement de licence."
+            },
+
+            advertisements: {
+                      "section_kicker": "Publicité",
+                      "featured_servers": "Serveurs en vedette",
+                      "subtitle": "Découvrez les serveurs de la communauté sur Misuki.",
+                      "advertise_server": "Publiciser votre serveur",
+                      "space_available": "Espace publicitaire disponible",
+                      "space_description": "Votre serveur peut apparaître ici. Soyez parmi les premiers à faire de la publicité sur Misuki.",
+                      "pending_review": "En attente d'examen",
+                      "approved_payment_pending": "Approuvée — paiement en attente",
+                      "active": "Active",
+                      "rejected": "Rejetée",
+                      "expired": "Expirée",
+                      "disabled": "Désactivée",
+                      "paid": "Payée",
+                      "payment_pending": "Paiement en attente",
+                      "payment_failed": "Paiement non effectué",
+                      "reason": "Motif :",
+                      "pay_paypal": "Payer avec PayPal",
+                      "open": "Ouvrir",
+                      "no_advertisements": "Vous n'avez encore aucune publicité.",
+                      "proposal_submitted": "Publicité envoyée",
+                      "proposal_pending_review": "Votre proposition est maintenant en attente d'examen par l'équipe Misuki. Elle sera examinée avant toute demande de paiement.",
+                      "proposal_review_before_payment": "Le paiement ne sera disponible qu'après l'approbation de la proposition.",
+                      "back_to_dashboard": "Retour au tableau de bord",
+                "status_intro": "Suivez chaque proposition, vérifiez son approbation, consultez le paiement et confirmez quand la publicité est active.",
+                "approved_proposal": "Proposition approuvée",
+                "rejection_reason": "Motif du rejet",
+                "period": "Période :",
+                "pay_ad": "Effectuer le paiement avec PayPal",
+                "open_ad": "Ouvrir la publicité",
+                "no_proposals": "Vous n'avez encore aucune proposition publicitaire.",
+                "proposal_sent": "Proposition envoyée",
+                "send_another": "Envoyer une autre proposition",
+                "panel": "Tableau de bord",
+                "payment_completed": "Paiement effectué",
+                "payment_status": "État de la publicité",
+                "payment_status_desc": "Vous pouvez vérifier à tout moment si la publicité est active, la période souscrite et l'état du paiement dans Mes publicités.",
+                "payment_success_description": "Le paiement de votre publicité a été confirmé avec succès. La proposition approuvée est maintenant prête pour la période souscrite.",
+                "return_dashboard": "Retour au tableau de bord",
+                "payment_cancelled": "Paiement annulé",
+                "payment_not_completed": "Le paiement n'a pas été effectué.",
+                "return": "Retour",
+                "advertisement_management": "Gestion de la publicité",
+                "user_id": "ID utilisateur :",
+                "duration": "Durée :",
+                "start": "Début :",
+                "end": "Fin :",
+                "approve": "Approuver",
+                "reject": "Rejeter",
+                "disable": "Désactiver",
+                "approval_reason_placeholder": "Justification de l'approbation",
+                "rejection_reason_placeholder": "Justification du rejet",
+                "no_ads_admin": "Aucune publicité pour le moment."
             },
 
             menu_controls: {
@@ -1487,10 +1908,11 @@
                 save_more: "ÉCONOMISEZ PLUS",
                 popular: "POPULAIRE",
                 save: "Économisez",
-                secure_payment: "Paiement sécurisé avec PayPal",
-                payment_secure: "Votre paiement sera traité en toute sécurité via PayPal.",
+                secure_payment: "Paiement après approbation",
+                payment_secure: "Aucun paiement n'est demandé lors de l'envoi de la proposition. Si elle est approuvée, vous aurez accès au paiement via PayPal.",
                 continue_paypal: "Continuer vers PayPal",
-                advertisement_note: "Votre publicité sera examinée et activée après le paiement.",
+                advertisement_note: "Votre publicité sera examinée avant toute demande de paiement. Vous ne pourrez payer qu'après l'approbation de la proposition par l'équipe Misuki.",
+                days: "jours",
                 option_7: "7 jours — 0,99 €",
                 option_14: "14 jours — 1,50 €",
                 option_30: "30 jours — 2,50 €",
@@ -1652,6 +2074,116 @@
         }
     };
 
+
+    /* =========================================================
+       AUTOMATIC STATIC TEXT TRANSLATION
+       ========================================================= */
+
+    const englishPhraseKeys = {};
+
+    function buildEnglishPhraseIndex(value, path) {
+        if (!value || typeof value !== "object") return;
+
+        Object.keys(value).forEach(function (key) {
+            const current = value[key];
+            const currentPath = path ? path + "." + key : key;
+
+            if (typeof current === "string") {
+                const normalized = normalizeStaticText(current);
+                if (normalized && !englishPhraseKeys[normalized]) {
+                    englishPhraseKeys[normalized] = currentPath;
+                }
+            } else if (current && typeof current === "object") {
+                buildEnglishPhraseIndex(current, currentPath);
+            }
+        });
+    }
+
+    function normalizeStaticText(value) {
+        return String(value || "")
+            .replace(/^\s+|\s+$/g, "")
+            .replace(/^([\p{Extended_Pictographic}\uFE0F]\s*)+/u, "")
+            .replace(/\s+/g, " ")
+            .trim();
+    }
+
+    function isProtectedStaticElement(element) {
+        if (!element || element.nodeType !== 1) return true;
+
+        if (element.closest(
+            "script, style, textarea, input, select, option, " +
+            ".server-name, .server-id, .review-text, " +
+            ".advertisement-card, .advertisement-content, " +
+            "[data-dynamic-content]"
+        )) {
+            return true;
+        }
+
+        return element.hasAttribute("data-i18n");
+    }
+
+    function translateStaticText(language) {
+
+        const walker = document.createTreeWalker(
+            document.body,
+            NodeFilter.SHOW_TEXT
+        );
+
+        const nodes = [];
+        let node;
+
+        while ((node = walker.nextNode())) {
+            nodes.push(node);
+        }
+
+        nodes.forEach(function (textNode) {
+            const parent = textNode.parentElement;
+
+            if (isProtectedStaticElement(parent)) return;
+            if (!textNode.nodeValue || !textNode.nodeValue.trim()) return;
+
+            if (
+                !textNode.__misukiOriginalText &&
+                !textNode.nodeValue.includes("{{") &&
+                !textNode.nodeValue.includes("{%")
+            ) {
+                textNode.__misukiOriginalText = textNode.nodeValue;
+            }
+
+            const original =
+                textNode.__misukiOriginalText ||
+                textNode.nodeValue;
+
+            if (original.includes("{{") || original.includes("{%")) return;
+
+            if (language === "en") {
+                textNode.nodeValue = original;
+                return;
+            }
+
+            const normalized = normalizeStaticText(original);
+            const key = englishPhraseKeys[normalized];
+
+            if (!key) {
+                textNode.nodeValue = original;
+                return;
+            }
+
+            const translated = getTranslation(language, key);
+
+            if (translated === null || translated === normalized) {
+                textNode.nodeValue = original;
+                return;
+            }
+
+            const leading = original.match(/^\s*/)?.[0] || "";
+            const trailing = original.match(/\s*$/)?.[0] || "";
+
+            textNode.nodeValue = leading + translated + trailing;
+        });
+    }
+
+    buildEnglishPhraseIndex(translations.en, "");
 
     /* =========================================================
        GET TRANSLATION
@@ -1940,6 +2472,16 @@
 
             "/advertise": "nav.advertisement",
 
+            "/advertise/status": "nav.my_advertisements",
+
+            "/advertise/success": "advertisements.proposal_submitted",
+
+            "/payment/success": "advertisements.payment_completed",
+
+            "/payment/cancel": "advertisements.payment_cancelled",
+
+            "/admin/advertise": "advertisements.advertisement_management",
+
             "/terms": "nav.terms",
 
             "/privacy": "nav.privacy",
@@ -2022,6 +2564,10 @@
             });
 
         translateAttributes(
+            language
+        );
+
+        translateStaticText(
             language
         );
 

@@ -4,6 +4,9 @@ import secrets
 import sqlite3
 import time
 import json
+import subprocess
+import atexit
+import sys
   
 from decimal import Decimal, InvalidOperation
 from datetime import datetime, timedelta, timezone
@@ -36,7 +39,7 @@ APP_START_TIME = time.time()
 # =========================================================
 
 load_dotenv(
-    override=True
+    override=False
 )
 
 MISUKI_VERSION = os.getenv(
@@ -116,6 +119,8 @@ SECRET_KEY = os.getenv(
     "FLASK_SECRET_KEY"
 )
 
+MISUKI_VERSION = os.getenv("MISUKI_VERSION", "").strip()
+
 ADMIN_DISCORD_IDS = {
     str(admin_id).strip()
     for admin_id in os.getenv(
@@ -143,13 +148,19 @@ except (
 # PAYPAL CONFIGURATION
 # =========================================================
 
-PAYPAL_CLIENT_ID = os.getenv(
-    "PAYPAL_CLIENT_ID"
-)
+PAYPAL_CLIENT_ID = (
+    os.getenv(
+        "PAYPAL_CLIENT_ID"
+    )
+    or ""
+).strip()
 
-PAYPAL_CLIENT_SECRET = os.getenv(
-    "PAYPAL_CLIENT_SECRET"
-)
+PAYPAL_CLIENT_SECRET = (
+    os.getenv(
+        "PAYPAL_CLIENT_SECRET"
+    )
+    or ""
+).strip()
 
 PAYPAL_MODE = os.getenv(
     "PAYPAL_MODE",
@@ -520,6 +531,8 @@ def create_database():
 
                         rejection_reason TEXT,
 
+                        approval_reason TEXT,
+
                         duration_days INTEGER NOT NULL
                             DEFAULT 7,
 
@@ -540,6 +553,13 @@ def create_database():
                     ALTER TABLE advertisements
                     ADD COLUMN IF NOT EXISTS duration_days
                     INTEGER NOT NULL DEFAULT 7
+                    """
+                )
+
+                cursor.execute(
+                    """
+                    ALTER TABLE advertisements
+                    ADD COLUMN IF NOT EXISTS approval_reason TEXT
                     """
                 )
 
@@ -759,12 +779,46 @@ def paypal_get_access_token():
     if response.status_code != 200:
 
         print(
-            "❌ PayPal authentication failed:"
+            "❌ PayPal authentication failed.",
+            flush=True
         )
 
         print(
-            response.text
+            f"   HTTP status: {response.status_code}",
+            flush=True
         )
+
+        try:
+
+            error_data = response.json()
+
+            print(
+                f"   Name: {error_data.get('name')}"
+            )
+
+            print(
+                f"   Message: {error_data.get('message')}"
+            )
+
+            print(
+                f"   Debug ID: {error_data.get('debug_id')}"
+            )
+
+            for detail in error_data.get("details", []):
+
+                print(
+                    "   Detail: "
+                    f"{detail.get('issue')} | "
+                    f"{detail.get('description')} | "
+                    f"field={detail.get('field')} | "
+                    f"value={detail.get('value')}"
+                )
+
+        except ValueError:
+
+            print(
+                f"   Response: {response.text[:2000]}"
+            )
 
         raise RuntimeError(
             "PayPal authentication failed."
@@ -806,7 +860,47 @@ def paypal_create_order(
             "PayPal is not configured."
         )
 
+    print(
+        "💳 PayPal order creation started.",
+        flush=True
+    )
+
+    print(
+        f"   Mode: {PAYPAL_MODE}",
+        flush=True
+    )
+
+    print(
+        f"   API: {PAYPAL_API_BASE}",
+        flush=True
+    )
+
+    print(
+        f"   Currency: {PAYPAL_CURRENCY}",
+        flush=True
+    )
+
+    print(
+        f"   Client ID configured: {bool(PAYPAL_CLIENT_ID)}",
+        flush=True
+    )
+
+    print(
+        f"   Client Secret configured: {bool(PAYPAL_CLIENT_SECRET)}",
+        flush=True
+    )
+
+    print(
+        "💳 Requesting PayPal OAuth access token...",
+        flush=True
+    )
+
     access_token = paypal_get_access_token()
+
+    print(
+        "✅ PayPal OAuth access token obtained.",
+        flush=True
+    )
 
     amount = Decimal(
         amount
@@ -887,6 +981,11 @@ def paypal_create_order(
             secrets.token_urlsafe(24)
     }
 
+    print(
+        f"   Amount: {amount:.2f}",
+        flush=True
+    )
+
     try:
 
         response = requests.post(
@@ -912,11 +1011,13 @@ def paypal_create_order(
     ):
 
         print(
-            "❌ PayPal create order failed."
+            "❌ PayPal create order failed.",
+            flush=True
         )
 
         print(
-            f"   HTTP status: {response.status_code}"
+            f"   HTTP status: {response.status_code}",
+            flush=True
         )
 
         try:
@@ -960,7 +1061,11 @@ def paypal_create_order(
             )
 
         raise RuntimeError(
-            "PayPal could not create the payment."
+            "PayPal could not create the payment. "
+            f"HTTP {response.status_code}: "
+            f"{error_data.get('name', 'Unknown')} - "
+            f"{error_data.get('message', 'Unknown error')} "
+            f"(debug_id={error_data.get('debug_id', 'none')})"
         )
 
     try:
@@ -2594,6 +2699,40 @@ def verification():
             user
         )
 
+    try:
+        with database_connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    SELECT status, expires_at
+                    FROM licenses
+                    WHERE guild_id = %s
+                    """,
+                    (guild_id_int,)
+                )
+                license_data = cursor.fetchone()
+        license_active = bool(license_data and license_data[0] == "active")
+        if license_active and license_data[1] is not None:
+            expiration = license_data[1]
+            if expiration.tzinfo is None:
+                expiration = expiration.replace(tzinfo=timezone.utc)
+            license_active = datetime.now(timezone.utc) < expiration
+        if not license_active:
+            return error_page(
+                "❌ Verification unavailable",
+                "This server does not currently have an active Misuki license.",
+                403,
+                user
+            )
+    except Exception as error:
+        print(f"❌ Verification license check error: {error}")
+        return error_page(
+            "❌ Verification unavailable",
+            "The server license could not be verified.",
+            500,
+            user
+        )
+
     return render_template(
         "verification.html",
         user=user,
@@ -2659,6 +2798,40 @@ def submit_verification():
             "❌ Verification unavailable",
             "The server could not be verified.",
             400,
+            user
+        )
+
+    try:
+        with database_connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    SELECT status, expires_at
+                    FROM licenses
+                    WHERE guild_id = %s
+                    """,
+                    (guild_id_int,)
+                )
+                license_data = cursor.fetchone()
+        license_active = bool(license_data and license_data[0] == "active")
+        if license_active and license_data[1] is not None:
+            expiration = license_data[1]
+            if expiration.tzinfo is None:
+                expiration = expiration.replace(tzinfo=timezone.utc)
+            license_active = datetime.now(timezone.utc) < expiration
+        if not license_active:
+            return error_page(
+                "❌ Verification unavailable",
+                "This server does not currently have an active Misuki license.",
+                403,
+                user
+            )
+    except Exception as error:
+        print(f"❌ Verification license check error: {error}")
+        return error_page(
+            "❌ Verification unavailable",
+            "The server license could not be verified.",
+            500,
             user
         )
 
@@ -3337,6 +3510,7 @@ def get_all_advertisements():
                         target_url,
                         status,
                         rejection_reason,
+                        approval_reason,
                         duration_days,
                         start_at,
                         end_at,
@@ -3885,6 +4059,276 @@ def reviews():
 
 
 # =========================================================
+# ADMIN LICENSE MANAGEMENT
+# =========================================================
+
+@app.route("/admin/licenses", methods=["GET", "POST"])
+def admin_licenses():
+
+    user = get_user()
+
+    if not user:
+        session["next_url"] = "/admin/licenses"
+        return redirect("/login")
+
+    if not is_admin(user):
+        return error_page(
+            "Access denied",
+            "Only authorized Misuki administrators can manage licenses.",
+            403,
+            user
+        )
+
+    action = request.form.get("action", "").strip().lower()
+
+    if request.method == "POST":
+        guild_id_raw = request.form.get("guild_id", "").strip()
+        days_raw = request.form.get("days", "").strip()
+
+        try:
+            guild_id = int(guild_id_raw)
+        except (TypeError, ValueError):
+            return error_page(
+                "Invalid server ID",
+                "The server ID must be a valid Discord server ID.",
+                400,
+                user
+            )
+
+        if action not in ("create", "extend", "revoke"):
+            return error_page(
+                "Invalid action",
+                "The requested license action is invalid.",
+                400,
+                user
+            )
+
+        if action in ("create", "extend"):
+            try:
+                days = int(days_raw)
+            except (TypeError, ValueError):
+                return error_page(
+                    "Invalid duration",
+                    "The license duration must be a whole number of days.",
+                    400,
+                    user
+                )
+
+            if days < 1 or days > 3650:
+                return error_page(
+                    "Invalid duration",
+                    "License duration must be between 1 and 3650 days.",
+                    400,
+                    user
+                )
+
+        try:
+            with database_connection() as connection:
+                with connection.cursor(
+                    cursor_factory=psycopg2.extras.RealDictCursor
+                ) as cursor:
+
+                    cursor.execute(
+                        """
+                        SELECT
+                            guild_id,
+                            license_key,
+                            status,
+                            expires_at,
+                            created_at
+                        FROM licenses
+                        WHERE guild_id = %s
+                        LIMIT 1
+                        """,
+                        (guild_id,)
+                    )
+                    existing = cursor.fetchone()
+
+                    if action == "create":
+                        if existing:
+                            return error_page(
+                                "License already exists",
+                                "This server already has a license record. Revoke it first if you need to create a new license.",
+                                409,
+                                user
+                            )
+
+                        now = utc_now()
+                        expires_at = now + timedelta(days=days)
+
+                        while True:
+                            license_key = (
+                                "MISUKI-"
+                                + "-"
+                                .join(
+                                    secrets.token_hex(4).upper()
+                                    for _ in range(4)
+                                )
+                            )
+                            cursor.execute(
+                                "SELECT 1 FROM licenses WHERE license_key = %s",
+                                (license_key,)
+                            )
+                            if cursor.fetchone() is None:
+                                break
+
+                        cursor.execute(
+                            """
+                            INSERT INTO licenses
+                            (
+                                guild_id,
+                                license_key,
+                                status,
+                                expires_at,
+                                created_at
+                            )
+                            VALUES
+                            (
+                                %s, %s, 'active', %s, %s
+                            )
+                            """,
+                            (
+                                guild_id,
+                                license_key,
+                                expires_at,
+                                now
+                            )
+                        )
+
+                    elif action == "extend":
+                        if not existing or str(existing["status"]).lower() != "active":
+                            return error_page(
+                                "License unavailable",
+                                "This server does not have an active license that can be extended.",
+                                409,
+                                user
+                            )
+
+                        expiration = parse_datetime(existing["expires_at"])
+                        if not expiration or utc_now() >= expiration:
+                            return error_page(
+                                "License expired",
+                                "This license has already expired and cannot be extended.",
+                                409,
+                                user
+                            )
+
+                        cursor.execute(
+                            """
+                            UPDATE licenses
+                            SET expires_at = %s
+                            WHERE guild_id = %s
+                            """,
+                            (
+                                expiration + timedelta(days=days),
+                                guild_id
+                            )
+                        )
+
+                    else:
+                        if not existing:
+                            return error_page(
+                                "License not found",
+                                "This server does not have a license.",
+                                404,
+                                user
+                            )
+
+                        cursor.execute(
+                            """
+                            DELETE FROM licenses
+                            WHERE guild_id = %s
+                            """,
+                            (guild_id,)
+                        )
+
+                connection.commit()
+
+            g.license_cache = None
+            g.active_license_ids = None
+
+            return redirect("/admin/licenses")
+
+        except Exception as error:
+            print(f"❌ Admin license management error: {error}")
+            return error_page(
+                "License management error",
+                "The license change could not be completed.",
+                500,
+                user
+            )
+
+    licenses = []
+
+    try:
+        with database_connection() as connection:
+            with connection.cursor(
+                cursor_factory=psycopg2.extras.RealDictCursor
+            ) as cursor:
+                cursor.execute(
+                    """
+                    SELECT
+                        guild_id,
+                        license_key,
+                        status,
+                        expires_at,
+                        created_at
+                    FROM licenses
+                    ORDER BY created_at DESC
+                    """
+                )
+                rows = cursor.fetchall()
+
+        guilds_by_id = {
+            str(guild.get("id")): guild
+            for guild in get_bot_guilds()
+            if guild.get("id")
+        }
+
+        now = utc_now()
+
+        for row in rows:
+            item = dict(row)
+            guild = guilds_by_id.get(str(item["guild_id"]))
+            item["server_name"] = (
+                guild.get("name")
+                if guild
+                else "Server not currently visible to the bot"
+            )
+            item["server_icon"] = (
+                guild.get("icon")
+                if guild
+                else None
+            )
+
+            if (
+                str(item.get("status") or "").lower() == "active"
+                and item.get("expires_at")
+            ):
+                expiration = parse_datetime(item["expires_at"])
+                if expiration and now >= expiration:
+                    item["status"] = "expired"
+
+            licenses.append(item)
+
+    except Exception as error:
+        print(f"❌ Could not load admin licenses: {error}")
+        return error_page(
+            "License management error",
+            "The licenses could not be loaded.",
+            500,
+            user
+        )
+
+    return render_template(
+        "admin_licenses.html",
+        user=user,
+        licenses=licenses,
+        is_admin=is_admin
+    )
+
+
+# =========================================================
 # STATISTICS PAGE
 # =========================================================
 
@@ -3913,8 +4357,11 @@ def statistics():
 
         "api_status": "Offline",
 
+<<<<<<< HEAD
         "misuki_version": MISUKI_VERSION,
 
+=======
+>>>>>>> 02d41aa86cf58118e2ebee4076df89145b5ce0a8
         "version": MISUKI_VERSION,
 
         "uptime": "0s",
@@ -3937,7 +4384,7 @@ def statistics():
                         servers, users, channels, latency, commands,
                         tickets, moderation_actions, announcements,
                         verifications, bot_status, uptime, version,
-                        last_seen, admin_servers, updated_at
+                        last_seen, admin_servers, admin_users, updated_at
                     FROM bot_statistics
                     WHERE id = 1
                 """)
@@ -3953,7 +4400,8 @@ def statistics():
                         "bot_status": result[9], "uptime": result[10],
                         "version": result[11], "last_seen": result[12],
                         "admin_servers": result[13] or [],
-                        "updated_at": result[14],
+                        "admin_users": result[14] or [],
+                        "updated_at": result[15],
                     }
                     for key in (
                         "servers", "users", "channels", "latency",
@@ -3963,8 +4411,16 @@ def statistics():
                     ):
                         if key in bot_snapshot:
                             statistics_data[key] = bot_snapshot[key]
+<<<<<<< HEAD
                     statistics_data["misuki_version"] = MISUKI_VERSION
                     statistics_data["version"] = MISUKI_VERSION
+=======
+                    statistics_data["version"] = (
+        MISUKI_VERSION
+        or bot_snapshot.get("version")
+        or ""
+    )
+>>>>>>> 02d41aa86cf58118e2ebee4076df89145b5ce0a8
     except Exception as error:
         print(f"⚠️ Could not load live bot statistics: {error}")
 
@@ -4180,7 +4636,8 @@ def statistics():
     if user_is_admin:
         try:
             admin_users = get_admin_users(
-                admin_servers
+                admin_servers,
+                bot_snapshot.get("admin_users", [])
             )
         except Exception as error:
             print(
@@ -4220,7 +4677,7 @@ def statistics():
         "statistics.html",
         user=current_user,
         is_admin=is_admin,
-        is_misuki_admin=user_is_admin,
+        can_view_user_search=user_is_admin,
         statistics=statistics_data,
         admin_statistics=admin_statistics,
         admin_servers=admin_servers,
@@ -4231,24 +4688,23 @@ def statistics():
 # =====================================================
 # ADMIN USER INFORMATION
 # =====================================================
-def get_admin_users(admin_servers):
-    """
-    Obtém os utilizadores dos servidores onde o bot está presente.
+def get_admin_users(admin_servers, snapshot_users=None):
+    """Return the administrator user index generated by the bot."""
+    if isinstance(snapshot_users, list) and snapshot_users:
+        return snapshot_users
 
-    Inclui:
-    - Avatar
-    - Display name
-    - Username
-    - Discord ID
-    - Data de criação da conta
-    - Número de servidores em comum
-    - Badge para quem adicionou o Misuki ao servidor
-
-    Bots são ignorados.
-    """
-
+    # Compatibility fallback for older bot snapshots.
     if not BOT_TOKEN:
         return []
+
+    if not admin_servers:
+        try:
+            admin_servers = get_bot_guilds()
+        except Exception as error:
+            print(
+                f"⚠️ Could not load bot servers for user search: {error}"
+            )
+            admin_servers = []
 
     users_by_id = {}
 
@@ -4453,7 +4909,8 @@ def get_admin_users(admin_servers):
         try:
 
             admin_users = get_admin_users(
-                admin_servers
+                admin_servers,
+                bot_snapshot.get("admin_users", [])
             )
 
         except Exception as error:
@@ -4540,8 +4997,11 @@ def statistics_api():
 
         "api_status": "Unavailable",
 
+<<<<<<< HEAD
         "misuki_version": MISUKI_VERSION,
 
+=======
+>>>>>>> 02d41aa86cf58118e2ebee4076df89145b5ce0a8
         "version": MISUKI_VERSION,
 
         "uptime": "0s",
@@ -4590,6 +5050,7 @@ def statistics_api():
                         version,
                         last_seen,
                         admin_servers,
+                        admin_users,
                         updated_at
                     FROM bot_statistics
                     WHERE id = 1
@@ -4664,8 +5125,16 @@ def statistics_api():
                 bot_snapshot[key]
             )
 
+<<<<<<< HEAD
     statistics_data["misuki_version"] = MISUKI_VERSION
     statistics_data["version"] = MISUKI_VERSION
+=======
+    statistics_data["version"] = (
+        MISUKI_VERSION
+        or bot_snapshot.get("version")
+        or ""
+    )
+>>>>>>> 02d41aa86cf58118e2ebee4076df89145b5ce0a8
 
 
     # =====================================================
@@ -4929,9 +5398,11 @@ def statistics_api():
             "last_seen"
         ],
 
-        "updated_at": statistics_data[
+        "updated_at": statistics_data.get(
             "updated_at"
-        ],
+        ) or statistics_data.get(
+            "last_seen"
+        ),
     }
 
 
@@ -4952,9 +5423,13 @@ def statistics_api():
         ] = get_admin_users(
             response.get(
                 "admin_servers",
-        []
-    )
-)
+                []
+            ),
+            bot_snapshot.get(
+                "admin_users",
+                []
+            )
+        )
         response[
             "admin_statistics"
         ] = {
@@ -5185,212 +5660,55 @@ def create_advertisement():
     user = get_user()
 
     if not user:
+        session["next_url"] = "/advertise"
+        return redirect("/login")
 
-        session["next_url"] = (
-            "/advertise"
-        )
-
-        return redirect(
-            "/login"
-        )
-
-    title = request.form.get(
-        "title",
-        ""
-    ).strip()
-
-    description = request.form.get(
-        "description",
-        ""
-    ).strip()
-
-    image_url = request.form.get(
-        "image_url",
-        ""
-    ).strip()
-
-    target_url = request.form.get(
-        "target_url",
-        ""
-    ).strip()
-
-    duration_raw = request.form.get(
-        "duration",
-        "7"
-    ).strip()
-
-    # -----------------------------------------------------
-    # VALIDATION
-    # -----------------------------------------------------
+    title = request.form.get("title", "").strip()[:100]
+    description = request.form.get("description", "").strip()[:500]
+    image_url = request.form.get("image_url", "").strip()[:1000]
+    target_url = request.form.get("target_url", "").strip()[:1000]
+    duration_raw = request.form.get("duration", "7").strip()
 
     if not title:
-
-        return error_page(
-            "❌ Invalid advertisement",
-            "The advertisement needs a title.",
-            400,
-            user
-        )
+        return error_page("❌ Invalid advertisement", "The advertisement needs a title.", 400, user)
 
     if not description:
+        return error_page("❌ Invalid advertisement", "The advertisement needs a description.", 400, user)
 
-        return error_page(
-            "❌ Invalid advertisement",
-            "The advertisement needs a description.",
-            400,
-            user
-        )
+    if not target_url or not valid_http_url(target_url):
+        return error_page("❌ Invalid URL", "Please provide a valid HTTP or HTTPS destination URL.", 400, user)
 
-    if not target_url or not valid_http_url(
-        target_url
-    ):
-
-        return error_page(
-            "❌ Invalid URL",
-            "Please provide a valid HTTP or HTTPS destination URL.",
-            400,
-            user
-        )
-
-    if image_url and not valid_http_url(
-        image_url
-    ):
-
-        return error_page(
-            "❌ Invalid image URL",
-            "The image URL must use HTTP or HTTPS.",
-            400,
-            user
-        )
-
-    # -----------------------------------------------------
-    # DURATION
-    # -----------------------------------------------------
+    if image_url and not valid_http_url(image_url):
+        return error_page("❌ Invalid image URL", "The image URL must use HTTP or HTTPS.", 400, user)
 
     try:
+        duration = int(duration_raw)
+    except (ValueError, TypeError):
+        return error_page("❌ Invalid duration", "The advertisement duration is invalid.", 400, user)
 
-        duration = int(
-            duration_raw
-        )
+    if duration not in (7, 14, 30):
+        return error_page("❌ Invalid duration", "The advertisement duration must be 7, 14 or 30 days.", 400, user)
 
-    except (
-        ValueError,
-        TypeError
-    ):
-
-        return error_page(
-            "❌ Invalid duration",
-            "The advertisement duration is invalid.",
-            400,
-            user
-        )
-
-    if duration not in (
-        7,
-        14,
-        30
-    ):
-
-        return error_page(
-            "❌ Invalid duration",
-            "The advertisement duration must be 7, 14 or 30 days.",
-            400,
-            user
-        )
-
-    amount = ADVERTISEMENT_PRICES.get(
-        duration
-    )
-
+    amount = ADVERTISEMENT_PRICES.get(duration)
     if amount is None:
-
-        return error_page(
-            "❌ Invalid price",
-            "The selected advertisement price is invalid.",
-            400,
-            user
-        )
-
-    # -----------------------------------------------------
-    # PAYPAL CONFIGURATION
-    # -----------------------------------------------------
-
-    if not paypal_is_configured():
-
-        return error_page(
-            "❌ Payment unavailable",
-            "PayPal is not configured yet. Please try again later.",
-            503,
-            user
-        )
-
-    # -----------------------------------------------------
-    # LIMITS
-    # -----------------------------------------------------
-
-    title = title[:100]
-
-    description = description[:500]
-
-    target_url = target_url[:1000]
-
-    image_url = (
-        image_url[:1000]
-        if image_url
-        else None
-    )
-
-    # -----------------------------------------------------
-    # USER
-    # -----------------------------------------------------
-
-    user_id = str(
-        user.get("id")
-        or ""
-    )
-
-    if not user_id:
-
-        return error_page(
-            "❌ Advertisement Error",
-            "Your Discord account could not be identified.",
-            400,
-            user
-        )
-
-    username = (
-        user.get("global_name")
-        or
-        user.get("username")
-        or
-        "Discord User"
-    )
-
-    now = utc_now().isoformat()
-
-    # -----------------------------------------------------
-    # DATABASE CHECK
-    # -----------------------------------------------------
+        return error_page("❌ Invalid price", "The selected advertisement price is invalid.", 400, user)
 
     if not DATABASE_URL:
+        return error_page("❌ Database error", "The database is not configured.", 500, user)
 
-        return error_page(
-            "❌ Database error",
-            "The database is not configured.",
-            500,
-            user
-        )
+    user_id = str(user.get("id") or "")
+    if not user_id:
+        return error_page("❌ Advertisement Error", "Your Discord account could not be identified.", 400, user)
 
-    # =====================================================
-    # CREATE ADVERTISEMENT
-    # =====================================================
+    username = user.get("global_name") or user.get("username") or "Discord User"
+    now = utc_now().isoformat()
 
+    # IMPORTANT:
+    # Submission never creates a PayPal order and never activates the ad.
+    # It remains pending until a staff member explicitly approves it.
     try:
-
         with database_connection() as connection:
-
             with connection.cursor() as cursor:
-
                 cursor.execute(
                     """
                     INSERT INTO advertisements
@@ -5403,6 +5721,7 @@ def create_advertisement():
                         target_url,
                         status,
                         rejection_reason,
+                        approval_reason,
                         duration_days,
                         start_at,
                         end_at,
@@ -5411,13 +5730,9 @@ def create_advertisement():
                     )
                     VALUES
                     (
-                        %s,
-                        %s,
-                        %s,
-                        %s,
-                        %s,
-                        %s,
+                        %s, %s, %s, %s, %s, %s,
                         'pending',
+                        NULL,
                         NULL,
                         %s,
                         NULL,
@@ -5432,50 +5747,14 @@ def create_advertisement():
                         username,
                         title,
                         description,
-                        image_url,
+                        image_url or None,
                         target_url,
                         duration,
                         now,
                         now
                     )
                 )
-
-                result = cursor.fetchone()
-
-                if not result:
-
-                    raise RuntimeError(
-                        "Advertisement ID was not returned."
-                    )
-
-                advertisement_id = result[0]
-
-            connection.commit()
-
-    except Exception as error:
-
-        print(
-            f"❌ Advertisement creation error: {error}"
-        )
-
-        return error_page(
-            "❌ Advertisement Error",
-            "The advertisement could not be created.",
-            500,
-            user
-        )
-
-    # =====================================================
-    # CREATE PAYMENT RECORD
-    # =====================================================
-
-    payment_id = None
-
-    try:
-
-        with database_connection() as connection:
-
-            with connection.cursor() as cursor:
+                advertisement_id = cursor.fetchone()[0]
 
                 cursor.execute(
                     """
@@ -5485,8 +5764,6 @@ def create_advertisement():
                         user_id,
                         provider,
                         provider_payment_id,
-                        provider_order_id,
-                        provider_capture_id,
                         amount,
                         currency,
                         status,
@@ -5499,15 +5776,12 @@ def create_advertisement():
                         %s,
                         'paypal',
                         NULL,
-                        NULL,
-                        NULL,
                         %s,
                         %s,
-                        'pending',
+                        'awaiting_approval',
                         %s,
                         %s
                     )
-                    RETURNING id
                     """,
                     (
                         advertisement_id,
@@ -5519,192 +5793,261 @@ def create_advertisement():
                     )
                 )
 
-                payment_result = (
-                    cursor.fetchone()
+            connection.commit()
+
+    except Exception as error:
+        print(f"❌ Advertisement creation error: {error}")
+        return error_page(
+            "❌ Advertisement Error",
+            "The advertisement could not be submitted.",
+            500,
+            user
+        )
+
+    return render_template(
+        "advertise_success.html",
+        user=user,
+        is_admin=is_admin,
+        advertisement_id=advertisement_id
+    )
+
+
+# =========================================================
+# PAY FOR APPROVED ADVERTISEMENT
+# =========================================================
+
+@app.route(
+    "/advertise/<int:advertisement_id>/pay"
+)
+def pay_for_advertisement(advertisement_id):
+
+    user = get_user()
+
+    if not user:
+        session["next_url"] = f"/advertise/{advertisement_id}/pay"
+        return redirect("/login")
+
+    if not DATABASE_URL:
+        return error_page("❌ Database error", "The database is not configured.", 500, user)
+
+    user_id = str(user.get("id") or "")
+    now = utc_now().isoformat()
+
+    try:
+        with database_connection() as connection:
+            with connection.cursor(
+                cursor_factory=psycopg2.extras.RealDictCursor
+            ) as cursor:
+
+                cursor.execute(
+                    """
+                    SELECT
+                        id,
+                        user_id,
+                        title,
+                        duration_days,
+                        status
+                    FROM advertisements
+                    WHERE id = %s
+                    AND user_id = %s
+                    LIMIT 1
+                    """,
+                    (advertisement_id, user_id)
                 )
+                advertisement = cursor.fetchone()
 
-                if not payment_result:
-
-                    raise RuntimeError(
-                        "Payment ID was not returned."
+                if not advertisement:
+                    return error_page(
+                        "❌ Advertisement not found",
+                        "This advertisement does not exist or does not belong to your account.",
+                        404,
+                        user
                     )
 
-                payment_id = (
-                    payment_result[0]
+                if str(advertisement["status"]).lower() != "approved_pending_payment":
+                    return error_page(
+                        "❌ Payment unavailable",
+                        "This advertisement is not currently waiting for payment.",
+                        400,
+                        user
+                    )
+
+                cursor.execute(
+                    """
+                    SELECT
+                        id,
+                        amount,
+                        currency,
+                        status,
+                        provider_order_id
+                    FROM advertisement_payments
+                    WHERE advertisement_id = %s
+                    AND user_id = %s
+                    AND provider = 'paypal'
+                    ORDER BY id DESC
+                    LIMIT 1
+                    """,
+                    (advertisement_id, user_id)
                 )
+                payment = cursor.fetchone()
+
+                if not payment:
+                    return error_page(
+                        "❌ Payment Error",
+                        "The payment record could not be found.",
+                        404,
+                        user
+                    )
+
+                amount = Decimal(str(payment["amount"])).quantize(Decimal("0.01"))
+
+                # Reuse a still-open order if one exists.
+                existing_order_id = payment.get("provider_order_id")
+                payment_status = str(payment.get("status") or "").lower()
+
+                if existing_order_id and payment_status in ("pending", "awaiting_payment"):
+                    payment_id = int(payment["id"])
+                    order_id = str(existing_order_id)
+                    approval_url = None
+                else:
+                    payment_id = int(payment["id"])
+                    order_id = None
+                    approval_url = None
 
             connection.commit()
 
     except Exception as error:
+        print(f"❌ Approved advertisement payment lookup error: {error}")
+        return error_page("❌ Payment Error", "The payment could not be prepared.", 500, user)
 
-        print(
-            f"❌ Advertisement payment record error: {error}"
-        )
-
-        return error_page(
-            "❌ Payment Error",
-            "The payment record could not be created.",
-            500,
-            user
-        )
-
-    # =====================================================
-    # CREATE PAYPAL ORDER
-    # =====================================================
-
-    try:
-
-        paypal_order = paypal_create_order(
-            advertisement_id,
-            title,
-            duration,
-            amount
-        )
-
-    except Exception as error:
-
-        print(
-            f"❌ PayPal order creation error: {error}"
-        )
-
-        update_payment_record(
-            payment_id,
-            "failed"
-        )
-
-        # The advertisement must never remain pending when
-        # its PayPal order could not be created.
+    # Create a fresh PayPal order only after staff approval.
+    if not approval_url:
         try:
+            paypal_order = paypal_create_order(
+                advertisement_id,
+                advertisement["title"],
+                int(advertisement["duration_days"]),
+                amount
+            )
+            order_id = paypal_order["id"]
+            approval_url = paypal_order["approval_url"]
 
             with database_connection() as connection:
-
                 with connection.cursor() as cursor:
-
                     cursor.execute(
                         """
-                        UPDATE advertisements
+                        UPDATE advertisement_payments
                         SET
-                            status = 'payment_failed',
+                            status = 'pending',
+                            provider_order_id = %s,
+                            provider_payment_id = %s,
                             updated_at = %s
                         WHERE id = %s
-                        AND status = 'pending'
                         """,
                         (
-                            utc_now().isoformat(),
-                            advertisement_id
+                            order_id,
+                            order_id,
+                            now,
+                            payment_id
                         )
                     )
-
                 connection.commit()
 
-        except Exception as cleanup_error:
-
-            print(
-                f"⚠️ Could not mark failed advertisement: {cleanup_error}"
+        except Exception as error:
+            print(f"❌ PayPal order creation error: {error}")
+            return error_page(
+                "❌ Payment Error",
+                "The PayPal payment could not be created. Please try again later.",
+                502,
+                user
             )
 
+    session["pending_paypal_order_id"] = order_id
+    session["pending_paypal_advertisement_id"] = advertisement_id
+    session["pending_paypal_payment_id"] = payment_id
+    session.permanent = True
+    session.modified = True
+
+    return redirect(approval_url)
+
+
+# =========================================================
+# ADVERTISEMENT STATUS
+# =========================================================
+
+@app.route(
+    "/advertise/status"
+)
+def advertisement_status():
+
+    user = get_user()
+
+    if not user:
+        session["next_url"] = "/advertise/status"
+        return redirect("/login")
+
+    user_id = str(user.get("id") or "")
+    advertisements = []
+
+    try:
+        with database_connection() as connection:
+            with connection.cursor(
+                cursor_factory=psycopg2.extras.RealDictCursor
+            ) as cursor:
+                cursor.execute(
+                    """
+                    SELECT
+                        a.id,
+                        a.title,
+                        a.description,
+                        a.image_url,
+                        a.target_url,
+                        a.status,
+                        a.rejection_reason,
+                        a.approval_reason,
+                        a.duration_days,
+                        a.start_at,
+                        a.end_at,
+                        a.created_at,
+                        p.status AS payment_status,
+                        p.amount,
+                        p.currency
+                    FROM advertisements a
+                    LEFT JOIN LATERAL (
+                        SELECT
+                            status,
+                            amount,
+                            currency
+                        FROM advertisement_payments
+                        WHERE advertisement_id = a.id
+                        AND user_id = a.user_id
+                        AND provider = 'paypal'
+                        ORDER BY id DESC
+                        LIMIT 1
+                    ) p ON TRUE
+                    WHERE a.user_id = %s
+                    ORDER BY a.id DESC
+                    """,
+                    (user_id,)
+                )
+                advertisements = cursor.fetchall()
+
+    except Exception as error:
+        print(f"❌ Could not load advertisement status: {error}")
         return error_page(
-            "❌ Payment Error",
-            "The PayPal payment could not be created. Please try again.",
-            502,
-            user
-        )
-
-    # =====================================================
-    # SAVE PAYPAL ORDER
-    # =====================================================
-
-    updated = update_payment_record(
-        payment_id,
-        "pending",
-        provider_order_id=paypal_order["id"],
-        provider_payment_id=paypal_order["id"],
-        amount=amount,
-        currency=PAYPAL_CURRENCY
-    )
-
-    if not updated:
-
-        print(
-            "⚠️ PayPal order was created but payment record "
-            "could not be updated."
-        )
-
-        return error_page(
-            "❌ Payment Error",
-            "The payment could not be prepared safely. Please contact support.",
+            "❌ Advertisement Error",
+            "Your advertisements could not be loaded.",
             500,
             user
         )
 
-    # =====================================================
-    # SAVE PAYMENT CONTEXT
-    # =====================================================
-
-    session["pending_paypal_order_id"] = (
-        paypal_order["id"]
+    return render_template(
+        "advertise_status.html",
+        user=user,
+        is_admin=is_admin,
+        advertisements=advertisements
     )
 
-    session["pending_paypal_advertisement_id"] = (
-        advertisement_id
-    )
-
-    session["pending_paypal_payment_id"] = (
-        payment_id
-    )
-
-    session.permanent = True
-
-    session.modified = True
-
-    # =====================================================
-    # REDIRECT TO PAYPAL
-    # =====================================================
-
-    approval_url = (
-        paypal_order.get(
-            "approval_url"
-        )
-        if isinstance(
-            paypal_order,
-            dict
-        )
-        else None
-    )
-
-    if not approval_url or not valid_http_url(
-        approval_url
-    ):
-
-        print(
-            "❌ PayPal returned an invalid checkout URL."
-        )
-
-        print(
-            f"   Order: {paypal_order}"
-        )
-
-        update_payment_record(
-            payment_id,
-            "failed"
-        )
-
-        return error_page(
-            "❌ Payment Error",
-            "PayPal returned an invalid checkout link. Please try again.",
-            502,
-            user
-        )
-
-    return redirect(
-        approval_url,
-        code=303
-    )
-
-
-# =========================================================
-# PAYPAL SUCCESS
-# =========================================================
 
 @app.route(
     "/advertise/paypal/success"
@@ -6079,6 +6422,106 @@ def paypal_success():
     # SUCCESS
     # -----------------------------------------------------
 
+    # -----------------------------------------------------
+    # ACTIVATE ONLY AFTER STAFF APPROVAL + PAYMENT
+    # -----------------------------------------------------
+
+    # Re-check the advertisement state from the database so a payment
+    # callback can never activate an unapproved advertisement.
+    try:
+        with database_connection() as connection:
+            with connection.cursor(
+                cursor_factory=psycopg2.extras.RealDictCursor
+            ) as cursor:
+                cursor.execute(
+                    """
+                    SELECT
+                        duration_days,
+                        status,
+                        user_id
+                    FROM advertisements
+                    WHERE id = %s
+                    LIMIT 1
+                    """,
+                    (advertisement_id,)
+                )
+                current_advertisement = cursor.fetchone()
+
+        if not current_advertisement:
+            return error_page(
+                "❌ Payment Error",
+                "The advertisement could not be found.",
+                404,
+                user
+            )
+
+        if str(current_advertisement["user_id"]) != str(user.get("id")):
+            return error_page(
+                "❌ Payment Error",
+                "This advertisement does not belong to your account.",
+                403,
+                user
+            )
+
+        if str(current_advertisement["status"]).lower() != "approved_pending_payment":
+            return error_page(
+                "❌ Payment Error",
+                "The advertisement was not approved by staff before payment.",
+                409,
+                user
+            )
+
+        duration_days = int(current_advertisement["duration_days"])
+
+    except Exception as error:
+        print(f"❌ Advertisement approval-state verification error: {error}")
+        return error_page(
+            "❌ Payment Error",
+            "The advertisement approval could not be verified.",
+            500,
+            user
+        )
+
+    start_at = utc_now()
+    end_at = start_at + timedelta(days=duration_days)
+    now = utc_now().isoformat()
+
+    try:
+        with database_connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    UPDATE advertisements
+                    SET
+                        status = 'active',
+                        rejection_reason = NULL,
+                        start_at = %s,
+                        end_at = %s,
+                        updated_at = %s
+                    WHERE id = %s
+                    AND user_id = %s
+                    AND status = 'approved_pending_payment'
+                    """,
+                    (
+                        start_at.isoformat(),
+                        end_at.isoformat() if end_at else None,
+                        now,
+                        advertisement_id,
+                        str(user.get("id"))
+                    )
+                )
+            connection.commit()
+    except Exception as error:
+        print(f"❌ Advertisement activation error: {error}")
+        return error_page(
+            "❌ Payment Error",
+            "Payment completed, but the advertisement could not be activated automatically.",
+            500,
+            user
+        )
+
+
+
     return render_template(
         "payment_success.html",
         user=user,
@@ -6128,10 +6571,10 @@ def paypal_cancel():
                         """
                         UPDATE advertisements
                         SET
-                            status = 'cancelled',
+                            status = 'approved_pending_payment',
                             updated_at = %s
                         WHERE id = %s
-                        AND status = 'pending'
+                        AND status = 'approved_pending_payment'
                         """,
                         (
                             utc_now().isoformat(),
@@ -6221,6 +6664,56 @@ def admin_advertisements():
     )
 
 
+def notify_advertisement_user(user_id, title, approved=False, reason=""):
+
+    if not BOT_TOKEN or not user_id:
+        return False
+
+    try:
+        headers = {
+            "Authorization": f"Bot {BOT_TOKEN}",
+            "Content-Type": "application/json"
+        }
+        dm_response = requests.post(
+            "https://discord.com/api/v10/users/@me/channels",
+            json={"recipient_id": str(user_id)},
+            headers=headers,
+            timeout=10
+        )
+        if dm_response.status_code not in (200, 201):
+            print(f"⚠️ Could not create Discord DM channel: HTTP {dm_response.status_code}")
+            return False
+        channel_id = dm_response.json().get("id")
+        if not channel_id:
+            return False
+        if approved:
+            content = (
+                f"📢 **Publicidade aprovada**\\n\\n"
+                f"A sua publicidade **{title}** foi aprovada pela equipa.\\n"
+                f"**Motivo:** {reason}\\n\\n"
+                f"Pode agora efetuar o pagamento para a publicidade ficar ativa."
+            )
+        else:
+            content = (
+                f"📢 **Publicidade rejeitada**\\n\\n"
+                f"A sua publicidade **{title}** foi rejeitada pela equipa.\\n"
+                f"**Motivo:** {reason}"
+            )
+        message_response = requests.post(
+            f"https://discord.com/api/v10/channels/{channel_id}/messages",
+            json={"content": content},
+            headers=headers,
+            timeout=10
+        )
+        if message_response.status_code not in (200, 201):
+            print(f"⚠️ Could not send advertisement Discord notification: HTTP {message_response.status_code}")
+            return False
+        return True
+    except requests.RequestException as error:
+        print(f"⚠️ Advertisement Discord notification error: {error}")
+        return False
+
+
 # =========================================================
 # ADMIN APPROVE ADVERTISEMENT
 # =========================================================
@@ -6229,24 +6722,15 @@ def admin_advertisements():
     "/admin/advertise/<int:advertisement_id>/approve",
     methods=["POST"]
 )
-def approve_advertisement(
-    advertisement_id
-):
+def approve_advertisement(advertisement_id):
 
     user = get_user()
 
     if not user:
-
-        session["next_url"] = (
-            "/admin/advertise"
-        )
-
-        return redirect(
-            "/login"
-        )
+        session["next_url"] = "/admin/advertise"
+        return redirect("/login")
 
     if not is_admin(user):
-
         return error_page(
             "🚫 Access denied",
             "You do not have permission to approve advertisements.",
@@ -6255,320 +6739,79 @@ def approve_advertisement(
         )
 
     if not DATABASE_URL:
+        return error_page("❌ Database error", "The database is not configured.", 500, user)
 
+    reason = request.form.get("reason", "").strip()[:500]
+
+    if not reason:
         return error_page(
-            "❌ Database error",
-            "The database is not configured.",
-            500,
+            "❌ Motivo obrigatório",
+            "Indique a justificação da aprovação antes de aprovar a publicidade.",
+            400,
             user
         )
 
-    now = utc_now()
-
-    # -----------------------------------------------------
-    # GET ADVERTISEMENT
-    # -----------------------------------------------------
+    now = utc_now().isoformat()
+    approved_title = None
+    approved_user_id = None
 
     try:
-
         with database_connection() as connection:
-
-            with connection.cursor(
-                cursor_factory=psycopg2.extras.RealDictCursor
-            ) as cursor:
-
-                cursor.execute(
-                    """
-                    SELECT
-                        id,
-                        user_id,
-                        duration_days,
-                        status
-                    FROM advertisements
-                    WHERE id = %s
-                    LIMIT 1
-                    """,
-                    (
-                        advertisement_id,
-                    )
-                )
-
-                advertisement = (
-                    cursor.fetchone()
-                )
-
-    except Exception as error:
-
-        print(
-            f"❌ Advertisement lookup error: {error}"
-        )
-
-        return error_page(
-            "❌ Advertisement Error",
-            "The advertisement could not be loaded.",
-            500,
-            user
-        )
-
-    if not advertisement:
-
-        return error_page(
-            "❌ Advertisement not found",
-            "This advertisement does not exist.",
-            404,
-            user
-        )
-
-    # -----------------------------------------------------
-    # PAYMENT VERIFICATION
-    # -----------------------------------------------------
-
-    try:
-
-        with database_connection() as connection:
-
-            with connection.cursor(
-                cursor_factory=psycopg2.extras.RealDictCursor
-            ) as cursor:
-
-                cursor.execute(
-                    """
-                    SELECT
-                        id,
-                        amount,
-                        currency,
-                        status,
-                        provider,
-                        provider_order_id,
-                        provider_capture_id
-                    FROM advertisement_payments
-                    WHERE advertisement_id = %s
-                    AND provider = 'paypal'
-                    ORDER BY id DESC
-                    LIMIT 1
-                    """,
-                    (
-                        advertisement_id,
-                    )
-                )
-
-                payment = cursor.fetchone()
-
-    except Exception as error:
-
-        print(
-            f"❌ Advertisement payment lookup error: {error}"
-        )
-
-        return error_page(
-            "❌ Payment Error",
-            "The advertisement payment could not be verified.",
-            500,
-            user
-        )
-
-    if not payment:
-
-        return error_page(
-            "❌ Payment required",
-            "This advertisement has no PayPal payment record.",
-            402,
-            user
-        )
-
-    if str(
-        payment.get(
-            "status",
-            ""
-        )
-    ).lower() != "paid":
-
-        return error_page(
-            "❌ Payment required",
-            "This advertisement cannot be approved until the PayPal payment is completed.",
-            402,
-            user
-        )
-
-    # -----------------------------------------------------
-    # VERIFY STORED PRICE
-    # -----------------------------------------------------
-
-    try:
-
-        duration_days = int(
-            advertisement[
-                "duration_days"
-            ]
-        )
-
-    except (
-        ValueError,
-        TypeError
-    ):
-
-        return error_page(
-            "❌ Advertisement Error",
-            "The advertisement duration is invalid.",
-            400,
-            user
-        )
-
-    expected_amount = (
-        ADVERTISEMENT_PRICES.get(
-            duration_days
-        )
-    )
-
-    if expected_amount is None:
-
-        return error_page(
-            "❌ Advertisement Error",
-            "The advertisement duration has an invalid price.",
-            400,
-            user
-        )
-
-    try:
-
-        paid_amount = Decimal(
-            str(
-                payment.get(
-                    "amount"
-                )
-            )
-        ).quantize(
-            Decimal("0.01")
-        )
-
-    except (
-        InvalidOperation,
-        ValueError,
-        TypeError
-    ):
-
-        return error_page(
-            "❌ Payment Error",
-            "The stored payment amount is invalid.",
-            500,
-            user
-        )
-
-    if paid_amount != expected_amount:
-
-        return error_page(
-            "❌ Payment Error",
-            "The payment amount does not match the advertisement duration.",
-            400,
-            user
-        )
-
-    if str(
-        payment.get(
-            "currency"
-        )
-        or
-        ""
-    ).upper() != PAYPAL_CURRENCY:
-
-        return error_page(
-            "❌ Payment Error",
-            "The payment currency is invalid.",
-            400,
-            user
-        )
-
-    # -----------------------------------------------------
-    # PREVENT RE-APPROVAL
-    # -----------------------------------------------------
-
-    if str(
-        advertisement.get(
-            "status"
-        )
-        or
-        ""
-    ).lower() == "active":
-
-        return redirect(
-            "/admin/advertise"
-        )
-
-    # -----------------------------------------------------
-    # CALCULATE START AND END
-    # -----------------------------------------------------
-
-    start_at = now
-
-    end_at = (
-        start_at
-        +
-        timedelta(
-            days=duration_days
-        )
-    )
-
-    print(
-        "📢 Advertisement approved:"
-    )
-
-    print(
-        f"   ID: {advertisement_id}"
-    )
-
-    print(
-        f"   Duration: {duration_days} days"
-    )
-
-    print(
-        f"   Paid: €{paid_amount:.2f}"
-    )
-
-    print(
-        f"   Start: {start_at.isoformat()}"
-    )
-
-    print(
-        f"   End: {end_at.isoformat()}"
-    )
-
-    # -----------------------------------------------------
-    # ACTIVATE
-    # -----------------------------------------------------
-
-    try:
-
-        with database_connection() as connection:
-
-            with connection.cursor() as cursor:
+            with connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
 
                 cursor.execute(
                     """
                     UPDATE advertisements
                     SET
-                        status = 'active',
+                        status = 'approved_pending_payment',
                         rejection_reason = NULL,
-                        start_at = %s,
-                        end_at = %s,
+                        approval_reason = %s,
                         updated_at = %s
                     WHERE id = %s
+                    AND status = 'pending'
+                    RETURNING id, title, user_id
                     """,
-                    (
-                        start_at.isoformat(),
-                        end_at.isoformat(),
-                        now.isoformat(),
-                        advertisement_id
+                    (reason, now, advertisement_id)
+                )
+                result = cursor.fetchone()
+
+                if result:
+                    approved_title = result["title"]
+                    approved_user_id = result["user_id"]
+
+                if not result:
+                    connection.rollback()
+                    return error_page(
+                        "❌ Advertisement",
+                        "This advertisement is no longer pending.",
+                        409,
+                        user
                     )
+
+                cursor.execute(
+                    """
+                    UPDATE advertisement_payments
+                    SET
+                        status = 'awaiting_payment',
+                        updated_at = %s
+                    WHERE advertisement_id = %s
+                    AND provider = 'paypal'
+                    AND status <> 'paid'
+                    """,
+                    (now, advertisement_id)
                 )
 
             connection.commit()
 
-    except Exception as error:
-
-        print(
-            f"❌ Advertisement approval error: {error}"
+        notify_advertisement_user(
+            approved_user_id,
+            approved_title or "Publicidade",
+            approved=True,
+            reason=reason
         )
 
+    except Exception as error:
+        print(f"❌ Advertisement approval error: {error}")
         return error_page(
             "❌ Advertisement Error",
             "The advertisement could not be approved.",
@@ -6576,37 +6819,22 @@ def approve_advertisement(
             user
         )
 
-    return redirect(
-        "/admin/advertise"
-    )
+    return redirect("/admin/advertise")
 
-
-# =========================================================
-# ADMIN REJECT ADVERTISEMENT
-# =========================================================
 
 @app.route(
     "/admin/advertise/<int:advertisement_id>/reject",
     methods=["POST"]
 )
-def reject_advertisement(
-    advertisement_id
-):
+def reject_advertisement(advertisement_id):
 
     user = get_user()
 
     if not user:
-
-        session["next_url"] = (
-            "/admin/advertise"
-        )
-
-        return redirect(
-            "/login"
-        )
+        session["next_url"] = "/admin/advertise"
+        return redirect("/login")
 
     if not is_admin(user):
-
         return error_page(
             "🚫 Access denied",
             "You do not have permission to reject advertisements.",
@@ -6614,20 +6842,23 @@ def reject_advertisement(
             user
         )
 
-    reason = request.form.get(
-        "reason",
-        ""
-    ).strip()
+    reason = request.form.get("reason", "").strip()[:500]
 
-    reason = reason[:500]
+    if not reason:
+        return error_page(
+            "❌ Rejection reason required",
+            "Please provide a justification before rejecting this advertisement.",
+            400,
+            user
+        )
 
     now = utc_now().isoformat()
+    rejected_title = None
+    rejected_user_id = None
 
     try:
-
         with database_connection() as connection:
-
-            with connection.cursor() as cursor:
+            with connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
 
                 cursor.execute(
                     """
@@ -6635,26 +6866,53 @@ def reject_advertisement(
                     SET
                         status = 'rejected',
                         rejection_reason = %s,
+                        approval_reason = NULL,
                         updated_at = %s
                     WHERE id = %s
+                    AND status IN ('pending', 'approved_pending_payment')
+                    RETURNING id, title, user_id
                     """,
-                    (
-                        reason
-                        or
-                        "Rejected by administrator.",
-                        now,
-                        advertisement_id
+                    (reason, now, advertisement_id)
+                )
+                result = cursor.fetchone()
+
+                if result:
+                    rejected_title = result["title"]
+                    rejected_user_id = result["user_id"]
+
+                if not result:
+                    connection.rollback()
+                    return error_page(
+                        "❌ Advertisement",
+                        "This advertisement cannot be rejected in its current state.",
+                        409,
+                        user
                     )
+
+                cursor.execute(
+                    """
+                    UPDATE advertisement_payments
+                    SET
+                        status = 'rejected',
+                        updated_at = %s
+                    WHERE advertisement_id = %s
+                    AND provider = 'paypal'
+                    AND status <> 'paid'
+                    """,
+                    (now, advertisement_id)
                 )
 
             connection.commit()
 
-    except Exception as error:
-
-        print(
-            f"❌ Advertisement rejection error: {error}"
+        notify_advertisement_user(
+            rejected_user_id,
+            rejected_title or "Publicidade",
+            approved=False,
+            reason=reason
         )
 
+    except Exception as error:
+        print(f"❌ Advertisement rejection error: {error}")
         return error_page(
             "❌ Advertisement Error",
             "The advertisement could not be rejected.",
@@ -6662,14 +6920,8 @@ def reject_advertisement(
             user
         )
 
-    return redirect(
-        "/admin/advertise"
-    )
+    return redirect("/admin/advertise")
 
-
-# =========================================================
-# ADMIN DISABLE ADVERTISEMENT
-# =========================================================
 
 @app.route(
     "/admin/advertise/<int:advertisement_id>/disable",
@@ -6890,6 +7142,37 @@ def health():
 # START
 # =========================================================
 
+bot_process = None
+
+
+def start_discord_bot():
+    global bot_process
+
+    if not BOT_TOKEN:
+        print("⚠️ Discord bot not started: DISCORD_BOT_TOKEN is not configured.")
+        return
+
+    try:
+        bot_path = os.path.join(BASE_DIR, "bot.py")
+        bot_process = subprocess.Popen(
+            [sys.executable, bot_path],
+            cwd=BASE_DIR
+        )
+        print(f"🤖 Discord bot process started (PID {bot_process.pid}).")
+    except Exception as error:
+        print(f"❌ Could not start Discord bot: {error}")
+
+
+def stop_discord_bot():
+    global bot_process
+
+    if bot_process and bot_process.poll() is None:
+        try:
+            bot_process.terminate()
+        except Exception:
+            pass
+
+
 if __name__ == "__main__":
 
     print(
@@ -6978,6 +7261,9 @@ if __name__ == "__main__":
     print(
         "=========================================="
     )
+
+    start_discord_bot()
+    atexit.register(stop_discord_bot)
 
     app.run(
         host="0.0.0.0",

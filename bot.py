@@ -15,7 +15,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 
-load_dotenv(override=True)
+load_dotenv(override=False)
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 MISUKI_VERSION = os.getenv("MISUKI_VERSION", "1.0.0")
@@ -70,65 +70,123 @@ async def refresh_bot_installers():
             print(f"⚠️ Could not read installer audit log for {guild.name} ({guild.id}): {error}")
 
 
-async def count_statistics_users():
-    """Count unique human Discord users across all guilds."""
-    BOT_GUILD_HUMAN_COUNTS.clear()
-    user_ids = set()
-    scanned = 0
-    excluded_bots = 0
+BOT_ADMIN_USERS = []
 
+async def populate_member_cache():
+    """Populate Discord member caches so statistics can use real member data."""
     for guild in bot.guilds:
-        guild_seen = set()
         try:
-            async for member in guild.fetch_members(limit=None):
-                member_id = getattr(member, "id", None)
-                if member_id is None or member_id in guild_seen:
-                    continue
-
-                guild_seen.add(member_id)
-                scanned += 1
-
-                if not is_human_member(member):
-                    excluded_bots += 1
-                    continue
-
-                user_ids.add(member_id)
-
-            BOT_GUILD_HUMAN_COUNTS[str(guild.id)] = len(
-                [member_id for member_id in guild_seen
-                 if member_id in user_ids]
-            )
-
+            await guild.chunk(cache=True)
         except Exception as error:
             print(
-                f"⚠️ Could not fetch members for {guild.name} ({guild.id}): {error}"
+                f"⚠️ Could not populate members for {guild.name} "
+                f"({guild.id}): {error}"
             )
 
-            for member in guild.members:
-                member_id = getattr(member, "id", None)
-                if member_id is None or member_id in guild_seen:
-                    continue
 
-                guild_seen.add(member_id)
-                scanned += 1
+async def count_statistics_users():
+    """Count unique human Discord users from the bot's populated member cache."""
+    global BOT_ADMIN_USERS
 
-                if not is_human_member(member):
-                    excluded_bots += 1
-                    continue
+    BOT_GUILD_HUMAN_COUNTS.clear()
 
-                user_ids.add(member_id)
+    users_by_id = {}
 
-            BOT_GUILD_HUMAN_COUNTS[str(guild.id)] = len(
-                [member_id for member_id in guild_seen
-                 if member_id in user_ids]
+    for guild in bot.guilds:
+        guild_humans = set()
+
+        for member in guild.members:
+            member_id = getattr(member, "id", None)
+
+            if member_id is None:
+                continue
+
+            if not is_human_member(member):
+                continue
+
+            member_id = str(member_id)
+            guild_humans.add(member_id)
+
+            username = str(
+                getattr(member, "name", "")
+                or ""
             )
 
-    print(f"   Members scanned: {scanned}")
-    print(f"   Bots excluded: {excluded_bots}")
-    print(f"   Unique human users: {len(user_ids)}")
+            display_name = str(
+                getattr(member, "display_name", "")
+                or username
+                or "Discord User"
+            )
 
-    return len(user_ids)
+            avatar_url = None
 
+            try:
+                avatar = getattr(member, "display_avatar", None)
+                if avatar:
+                    avatar_url = str(avatar.url)
+            except Exception:
+                avatar_url = None
+
+            user = users_by_id.get(member_id)
+
+            if user is None:
+                user = {
+                    "id": member_id,
+                    "name": display_name,
+                    "username": username,
+                    "avatar": avatar_url,
+                    "servers_count": 0,
+                    "created_at": None,
+                    "added_bot": False
+                }
+                users_by_id[member_id] = user
+
+            user["servers_count"] += 1
+
+            if avatar_url:
+                user["avatar"] = avatar_url
+
+            if display_name:
+                user["name"] = display_name
+
+            if username:
+                user["username"] = username
+
+        BOT_GUILD_HUMAN_COUNTS[str(guild.id)] = len(guild_humans)
+
+    installer_ids = {
+        str(value)
+        for value in BOT_INSTALLERS.values()
+        if value
+    }
+
+    for user in users_by_id.values():
+        try:
+            discord_id = int(user["id"])
+            timestamp = (
+                (discord_id >> 22) + 1420070400000
+            ) / 1000
+
+            user["created_at"] = time.strftime(
+                "%d/%m/%Y",
+                time.gmtime(timestamp)
+            )
+        except Exception:
+            user["created_at"] = None
+
+        user["added_bot"] = user["id"] in installer_ids
+
+    BOT_ADMIN_USERS = sorted(
+        users_by_id.values(),
+        key=lambda user: (
+            str(user.get("name") or "").lower(),
+            str(user.get("id") or "")
+        )
+    )
+
+    print(f"   Unique human users: {len(BOT_ADMIN_USERS)}")
+
+    return len(BOT_ADMIN_USERS)
 
 def count_verified_users():
     connection = None
@@ -192,9 +250,10 @@ def initialize_statistics_database():
                     verifications INTEGER NOT NULL DEFAULT 0,
                     bot_status TEXT NOT NULL DEFAULT 'Offline',
                     uptime TEXT NOT NULL DEFAULT '0s',
-                    version TEXT NOT NULL DEFAULT '1.0.0',
+                    version TEXT NOT NULL DEFAULT '',
                     last_seen DOUBLE PRECISION,
                     admin_servers JSONB NOT NULL DEFAULT '[]'::jsonb,
+                    admin_users JSONB NOT NULL DEFAULT '[]'::jsonb,
                     updated_at DOUBLE PRECISION NOT NULL
                 )
             """)
@@ -204,6 +263,7 @@ def initialize_statistics_database():
                 "ALTER TABLE bot_statistics ADD COLUMN IF NOT EXISTS moderation_actions BIGINT NOT NULL DEFAULT 0",
                 "ALTER TABLE bot_statistics ADD COLUMN IF NOT EXISTS announcements BIGINT NOT NULL DEFAULT 0",
                 "ALTER TABLE bot_statistics ADD COLUMN IF NOT EXISTS admin_servers JSONB NOT NULL DEFAULT '[]'::jsonb",
+                "ALTER TABLE bot_statistics ADD COLUMN IF NOT EXISTS admin_users JSONB NOT NULL DEFAULT '[]'::jsonb",
                 "ALTER TABLE bot_statistics ADD COLUMN IF NOT EXISTS last_seen DOUBLE PRECISION",
                 "ALTER TABLE bot_statistics ADD COLUMN IF NOT EXISTS updated_at DOUBLE PRECISION NOT NULL DEFAULT 0",
             ]
@@ -213,12 +273,16 @@ def initialize_statistics_database():
                 INSERT INTO bot_statistics (
                     id, servers, users, channels, latency, commands, tickets,
                     moderation_actions, announcements, verifications, bot_status,
-                    uptime, version, last_seen, admin_servers, updated_at
+                    uptime, version, last_seen, admin_servers, admin_users, updated_at
                 ) VALUES (
                     1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Offline', '0s', %s,
-                    NULL, '[]'::jsonb, %s
+                    NULL, '[]'::jsonb, '[]'::jsonb, %s
                 ) ON CONFLICT (id) DO NOTHING
+<<<<<<< HEAD
             """, (MISUKI_VERSION, time.time()))
+=======
+            """, (os.getenv("MISUKI_VERSION", "").strip(), time.time()))
+>>>>>>> 02d41aa86cf58118e2ebee4076df89145b5ce0a8
         connection.commit()
         print("🗄️ Statistics database initialized.")
     except Exception as error:
@@ -284,7 +348,11 @@ async def update_stats_snapshot():
         latency = round(bot.latency * 1000)
         bot_status = "Online" if bot.is_ready() else "Offline"
         uptime = get_uptime()
+<<<<<<< HEAD
         version = MISUKI_VERSION
+=======
+        version = os.getenv("MISUKI_VERSION", "").strip()
+>>>>>>> 02d41aa86cf58118e2ebee4076df89145b5ce0a8
         channels_count = sum(len(guild.channels) for guild in bot.guilds)
         connection = get_database_connection()
         with connection.cursor() as cursor:
@@ -304,13 +372,14 @@ async def update_stats_snapshot():
                     version = %s,
                     last_seen = %s,
                     admin_servers = %s::jsonb,
+                    admin_users = %s::jsonb,
                     updated_at = %s
                 WHERE id = 1
             """, (
                 servers_count, users_count, channels_count, latency,
                 commands_count, verifications_count, bot_status, uptime,
                 version, last_seen, json.dumps(detected_servers, ensure_ascii=False),
-                last_seen
+                json.dumps(BOT_ADMIN_USERS, ensure_ascii=False), last_seen
             ))
         connection.commit()
         print("📊 Bot statistics updated:")
@@ -369,6 +438,7 @@ async def on_ready():
     print(f"🟢 Bot status: {bot.status}")
     print(f"🏠 Discord guild count: {len(bot.guilds)}")
     await refresh_bot_installers()
+    await populate_member_cache()
     print_detected_servers()
     print("📋 Comandos registados:")
     registered_count = 0
@@ -454,6 +524,7 @@ EXTENSIONS = [
     "cogs.announcements",
     "cogs.utility",
     "cogs.licenses",
+    "cogs.onboarding",
     "cogs.triggers",
     "cogs.impersonate",
 ]

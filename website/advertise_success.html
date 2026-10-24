@@ -2,7 +2,7 @@
 
 
 {% block title %}
-Advertisement Submitted — Misuki
+Publicidade enviada — Misuki
 {% endblock %}
 
 
@@ -29,18 +29,17 @@ Advertisement Submitted — Misuki
                 class="advertise-badge"
                 style="margin-bottom: 18px;"
             >
-                ✅ Advertisement Submitted
+                Proposta enviada
             </div>
 
 
-            <h1>
-                Your advertisement was sent successfully.
+            <h1 data-i18n="advertisements.proposal_submitted">
+                A sua proposta de publicidade foi enviada com sucesso.
             </h1>
 
 
-            <p>
-                It is now pending review by the Misuki team.
-                We will review it and decide whether it should be approved or rejected.
+            <p data-i18n="advertisements.proposal_pending_review">
+                A proposta ficará pendente de análise pela equipa do Misuki. A publicidade será analisada antes de qualquer pagamento. Só depois de ser aprovada poderá efetuar o pagamento através do PayPal.
             </p>
 
 
@@ -58,15 +57,22 @@ Advertisement Submitted — Misuki
                     href="/advertise"
                     class="button manage"
                 >
-                    Submit another
+                    Enviar outra proposta
                 </a>
 
 
                 <a
-                    href="/dashboard"
+                    href="/advertise/status"
                     class="button add"
                 >
-                    Dashboard
+                    Ver as minhas publicidades
+                </a>
+
+                <a
+                    href="/dashboard"
+                    class="button manage"
+                >
+                    Painel
                 </a>
 
             </div>

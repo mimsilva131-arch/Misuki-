@@ -1,0 +1,360 @@
+{% extends "base.html" %}
+
+{% block title %}
+Misuki — License Management
+{% endblock %}
+
+{% block content %}
+
+<section class="section">
+    <div class="container admin-license-page">
+
+        <div class="admin-section-header">
+            <div>
+                <span class="eyebrow" data-i18n="licenses.admin_eyebrow">
+                    ADMINISTRATION
+                </span>
+                <h1 data-i18n="licenses.title">
+                    License management
+                </h1>
+                <p class="statistics-description" data-i18n="licenses.description">
+                    Create, extend and revoke server licenses directly from the Misuki website.
+                </p>
+            </div>
+
+            <a
+                class="button secondary"
+                href="/statistics"
+                data-i18n="licenses.back_statistics"
+            >
+                Back to statistics
+            </a>
+        </div>
+
+        <div class="card admin-license-create-card">
+            <h2 data-i18n="licenses.create_title">Create a license</h2>
+            <p data-i18n="licenses.create_description">
+                A new license becomes active immediately after creation.
+            </p>
+
+            <form method="post" class="admin-license-form">
+                <input type="hidden" name="action" value="create">
+
+                <label>
+                    <span data-i18n="licenses.server_id">Server ID</span>
+                    <input
+                        type="text"
+                        name="guild_id"
+                        inputmode="numeric"
+                        required
+                        placeholder="123456789012345678"
+                    >
+                </label>
+
+                <label>
+                    <span data-i18n="licenses.days">Duration (days)</span>
+                    <input
+                        type="number"
+                        name="days"
+                        min="1"
+                        max="3650"
+                        value="30"
+                        required
+                    >
+                </label>
+
+                <button class="button" type="submit" data-i18n="licenses.create">
+                    Create license
+                </button>
+            </form>
+        </div>
+
+        <div class="admin-license-list">
+
+            <div class="admin-subsection">
+                <h2 data-i18n="licenses.existing">Existing licenses</h2>
+            </div>
+
+            {% if licenses %}
+
+                {% for license in licenses %}
+
+                <article class="card admin-license-card">
+
+                    <div class="admin-license-main">
+
+                        {% if license.server_icon %}
+                            <img
+                                class="admin-license-server-icon"
+                                src="{{ license.server_icon }}"
+                                alt=""
+                            >
+                        {% else %}
+                            <div class="admin-license-server-placeholder">
+                                {{ license.server_name[0] if license.server_name else "S" }}
+                            </div>
+                        {% endif %}
+
+                        <div class="admin-license-info">
+
+                            <h3>{{ license.server_name }}</h3>
+
+                            <span class="server-id">
+                                ID: {{ license.guild_id }}
+                            </span>
+
+                            <span class="license-key">
+                                {{ license.license_key }}
+                            </span>
+
+                        </div>
+
+                        <span class="badge
+                            {% if license.status == 'active' %}
+                                badge-active
+                            {% else %}
+                                badge-warning
+                            {% endif %}
+                        "
+                            data-i18n="licenses.status_{{ license.status }}"
+                        >
+                            {{ license.status }}
+                        </span>
+
+                    </div>
+
+                    <div class="admin-license-details">
+
+                        <div>
+                            <span data-i18n="licenses.created">Created</span>
+                            <strong>{{ license.created_at }}</strong>
+                        </div>
+
+                        <div>
+                            <span data-i18n="licenses.expires">Expires</span>
+                            <strong>{{ license.expires_at or "—" }}</strong>
+                        </div>
+
+                    </div>
+
+                    {% if license.status == "active" %}
+
+                    <div class="admin-license-actions">
+
+                        <form method="post">
+                            <input type="hidden" name="action" value="extend">
+                            <input type="hidden" name="guild_id" value="{{ license.guild_id }}">
+
+                            <input
+                                type="number"
+                                name="days"
+                                min="1"
+                                max="3650"
+                                value="30"
+                                required
+                                aria-label="Days to extend"
+                            >
+
+                            <button class="button secondary" type="submit" data-i18n="licenses.extend">
+                                Extend
+                            </button>
+                        </form>
+
+                        <form method="post">
+                            <input type="hidden" name="action" value="revoke">
+                            <input type="hidden" name="guild_id" value="{{ license.guild_id }}">
+
+                            <button
+                                class="button danger"
+                                type="submit"
+                                data-i18n="licenses.revoke"
+                            >
+                                Revoke
+                            </button>
+                        </form>
+
+                    </div>
+
+                    {% endif %}
+
+                </article>
+
+                {% endfor %}
+
+            {% else %}
+
+                <div class="statistics-empty" data-i18n="licenses.none">
+                    There are no license records.
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+</section>
+
+<style>
+.admin-license-page {
+    max-width: 1080px;
+}
+
+.admin-license-create-card {
+    margin-top: 28px;
+    padding: 26px;
+}
+
+.admin-license-form {
+    display: grid;
+    grid-template-columns: 1fr 220px auto;
+    gap: 14px;
+    align-items: end;
+    margin-top: 20px;
+}
+
+.admin-license-form label,
+.admin-license-actions form {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.admin-license-form label span {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.admin-license-form input,
+.admin-license-actions input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 11px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,.1);
+    background: rgba(255,255,255,.035);
+    color: var(--text);
+    outline: none;
+}
+
+.admin-license-list {
+    margin-top: 42px;
+}
+
+.admin-license-card {
+    padding: 22px;
+    margin-top: 15px;
+}
+
+.admin-license-main {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.admin-license-server-icon,
+.admin-license-server-placeholder {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    flex: 0 0 52px;
+}
+
+.admin-license-server-icon {
+    object-fit: cover;
+}
+
+.admin-license-server-placeholder {
+    display: grid;
+    place-items: center;
+    background: rgba(255,255,255,.06);
+    color: var(--text-muted);
+    font-weight: 700;
+}
+
+.admin-license-info {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.admin-license-info h3 {
+    margin: 0;
+}
+
+.admin-license-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.admin-license-details div {
+    padding: 13px 14px;
+    border-radius: 12px;
+    background: rgba(255,255,255,.03);
+}
+
+.admin-license-details span {
+    display: block;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+}
+
+.admin-license-details strong {
+    font-size: 13px;
+}
+
+.admin-license-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.admin-license-actions form {
+    flex-direction: row;
+    align-items: center;
+}
+
+.admin-license-actions input {
+    width: 100px;
+}
+
+.button.danger {
+    border-color: rgba(255, 80, 80, .28);
+}
+
+@media (max-width: 760px) {
+    .admin-license-form {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-license-main {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .admin-license-details {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-license-actions {
+        justify-content: stretch;
+        flex-direction: column;
+    }
+
+    .admin-license-actions form {
+        width: 100%;
+    }
+
+    .admin-license-actions input {
+        flex: 1;
+        width: auto;
+    }
+}
+</style>
+
+{% endblock %}

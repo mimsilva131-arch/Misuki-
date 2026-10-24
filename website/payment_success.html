@@ -1,51 +1,116 @@
 {% extends "base.html" %}
 
 {% block title %}
-Payment Successful — Misuki
+Pagamento concluído — Misuki
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.payment-success-page {
+    min-height: 68vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 72px 0 96px;
+}
+.payment-success-card {
+    position: relative;
+    width: min(100%, 780px);
+    padding: 54px 52px 48px;
+    text-align: center;
+    border: 1px solid rgba(120, 167, 255, .20);
+    background:
+        radial-gradient(circle at 50% 0%, rgba(88, 101, 242, .14), transparent 48%),
+        linear-gradient(145deg, rgba(20, 29, 50, .97), rgba(8, 12, 22, .99));
+    box-shadow:
+        0 30px 90px rgba(0, 0, 0, .36),
+        0 0 80px rgba(88, 101, 242, .08);
+    overflow: hidden;
+}
+.payment-success-mark {
+    width: 82px;
+    height: 82px;
+    margin: 0 auto 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid rgba(93, 211, 158, .28);
+    background: rgba(93, 211, 158, .08);
+    color: #8de3ba;
+    font-size: 36px;
+    font-weight: 800;
+}
+ .payment-success-card h1 {
+    margin-bottom: 16px;
+    font-size: clamp(30px, 5vw, 42px);
+    letter-spacing: -1px;
+}
+.payment-success-card > p {
+    max-width: 590px;
+    margin: 0 auto;
+    color: var(--text-muted);
+    line-height: 1.7;
+}
+.payment-success-details {
+    max-width: 590px;
+    margin: 34px auto 0;
+    padding: 21px 22px;
+    text-align: left;
+    border: 1px solid rgba(255, 255, 255, .07);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, .025);
+}
+.payment-success-details strong { display: block; margin-bottom: 6px; }
+.payment-success-details span {
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.6;
+}
+ .payment-success-actions {
+    margin-top: 34px;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.payment-success-actions .button { min-width: 190px; }
+@media (max-width: 600px) {
+    .payment-success-page { padding: 45px 0 65px; }
+    .payment-success-card { padding: 34px 20px 30px; }
+    .payment-success-actions .button { width: 100%; }
+}
+</style>
 {% endblock %}
 
 {% block content %}
+<main class="payment-success-page">
+    <div class="container">
+        <section class="card payment-success-card">
+            <div class="payment-success-mark" aria-hidden="true">✓</div>
 
-<main>
+            <h1 data-i18n="advertisements.payment_completed">Pagamento concluído</h1>
 
-    <section class="section">
+            <p data-i18n="advertisements.payment_success_description">
+                O pagamento da sua publicidade foi confirmado com sucesso. A proposta aprovada está agora pronta para o período contratado.
+            </p>
 
-        <div class="container">
-
-            <div
-                class="card legal-page"
-                style="
-                    text-align:center;
-                    max-width:760px;
-                    margin:40px auto;
-                "
-            >
-
-                <h1>
-                    ✅ Payment Successful
-                </h1>
-
-                <p>
-                    Your payment was confirmed.
-                </p>
-
-                <p>
-                    Your advertisement will be processed in accordance with Misuki rules.
-                </p>
-
-                <a
-                    href="/dashboard"
-                    class="button"
-                >
-                    Return to dashboard
-                </a>
-
+            <div class="payment-success-details">
+                <strong data-i18n="advertisements.payment_status">Estado da publicidade</strong>
+                <span data-i18n="advertisements.payment_status_desc">
+                    Pode consultar a qualquer momento se a publicidade está ativa, o período contratado e o estado do pagamento na área “As minhas publicidades”.
+                </span>
             </div>
 
-        </div>
-
-    </section>
-
+            <div class="payment-success-actions">
+                <a href="/advertise/status" class="button add">
+                    Ver as minhas publicidades
+                </a>
+                <a href="/dashboard" class="button manage">
+                    Voltar ao painel
+                </a>
+            </div>
+        </section>
+    </div>
 </main>
-
 {% endblock %}

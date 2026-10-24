@@ -507,6 +507,60 @@ class Verification(commands.Cog):
             if connection:
                 connection.close()
 
+
+    async def remove_verification_panel(self, guild_id):
+        connection = None
+        try:
+            connection = get_database_connection()
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT channel_id, message_id FROM verification_panels WHERE guild_id = %s", (int(guild_id),))
+                row = cursor.fetchone()
+                if row:
+                    channel = self.bot.get_channel(int(row[0]))
+                    if channel:
+                        try:
+                            message = await channel.fetch_message(int(row[1]))
+                            await message.delete()
+                        except (discord.NotFound, discord.Forbidden, discord.HTTPException):
+                            pass
+                cursor.execute("DELETE FROM verification_panels WHERE guild_id = %s", (int(guild_id),))
+            connection.commit()
+        except Exception as error:
+            if connection:
+                connection.rollback()
+            print(f"⚠️ Error removing verification panel for {guild_id}: {error}")
+        finally:
+            if connection:
+                connection.close()
+
+    async def ensure_active_panel(self, guild_id):
+        guild = self.bot.get_guild(int(guild_id))
+        if guild is None:
+            return False
+        connection = None
+        row = None
+        try:
+            connection = get_database_connection()
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT channel_id, message_id FROM verification_panels WHERE guild_id = %s", (int(guild_id),))
+                row = cursor.fetchone()
+        except Exception as error:
+            print(f"⚠️ Error checking verification panel for {guild_id}: {error}")
+            return False
+        finally:
+            if connection:
+                connection.close()
+        if row:
+            channel = self.bot.get_channel(int(row[0]))
+            if channel:
+                try:
+                    await channel.fetch_message(int(row[1]))
+                    return True
+                except (discord.NotFound, discord.Forbidden, discord.HTTPException):
+                    pass
+        success, _ = await self.send_verification_panel(guild)
+        return success
+
     # =====================================================
     # GET PENDING VERIFICATIONS
     # =====================================================
@@ -749,6 +803,15 @@ class Verification(commands.Cog):
         guild = self.bot.get_guild(
             int(guild_id)
         )
+
+        license_manager = self.bot.get_cog("LicenseManager")
+        if license_manager is None or not await license_manager.has_active_license(guild_id):
+            self.update_verification_status(
+                request_id,
+                "unverified",
+                "No active Misuki license is available."
+            )
+            return
 
         if guild is None:
 

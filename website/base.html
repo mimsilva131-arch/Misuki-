@@ -323,6 +323,17 @@
         Advertisement
     </a>
 
+    {% if user %}
+
+        <a
+            href="/advertise/status"
+            data-i18n="nav.my_advertisements"
+        >
+            As minhas publicidades
+        </a>
+
+    {% endif %}
+
 
     {% if is_admin(user) %}
 
@@ -331,6 +342,13 @@
             data-i18n="nav.advertisement_admin"
         >
             Advertisement Admin
+        </a>
+
+        <a
+            href="/admin/licenses"
+            data-i18n="nav.license_management"
+        >
+            License Management
         </a>
 
     {% endif %}

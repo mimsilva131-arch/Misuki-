@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}
+As minhas publicidades — Misuki
+{% endblock %}
+
+{% block content %}
+<section class="section advertisement-status-page">
+    <div class="container">
+        <h1 data-i18n="nav.my_advertisements">As minhas publicidades</h1>
+        <p class="advertisement-status-intro" data-i18n="advertisements.status_intro">Aqui pode acompanhar cada proposta, verificar se foi aprovada, consultar o pagamento e confirmar quando a publicidade está ativa.</p>
+
+        {% if advertisements %}
+            <div class="server-grid">
+                {% for ad in advertisements %}
+                    <div class="card server-card">
+
+                        {% if ad.image_url %}
+                            <img class="server-icon" src="{{ ad.image_url }}" alt="{{ ad.title }}">
+                        {% endif %}
+
+                        <div class="server-name">{{ ad.title }}</div>
+                        <div class="server-id">ID: {{ ad.id }}</div>
+                        <div class="server-id">{{ ad.duration_days }} <span data-i18n="common.days">days</span> · €{{ "%.2f"|format(ad.amount or 0) }}</div>
+
+                        <p>{{ ad.description }}</p>
+
+                        <div class="badges">
+                            {% if ad.status == "pending" %}
+                                <span class="badge badge-warning" data-i18n="advertisements.pending_review">Pendente de análise</span>
+                            {% elif ad.status == "approved_pending_payment" %}
+                                <span class="badge badge-warning" data-i18n="advertisements.approved_payment_pending">Aprovada — pagamento pendente</span>
+                            {% elif ad.status == "active" %}
+                                <span class="badge badge-active" data-i18n="advertisements.active">Ativa</span>
+                            {% elif ad.status == "rejected" %}
+                                <span class="badge badge-expired" data-i18n="advertisements.rejected">Rejeitada</span>
+                            {% elif ad.status == "expired" %}
+                                <span class="badge badge-none" data-i18n="advertisements.expired">Expirada</span>
+                            {% elif ad.status == "disabled" %}
+                                <span class="badge badge-none" data-i18n="advertisements.disabled">Desativada</span>
+                            {% else %}
+                                <span class="badge badge-none">{{ ad.status }}</span>
+                            {% endif %}
+
+                            {% if ad.payment_status == "paid" %}
+                                <span class="badge badge-active" data-i18n="advertisements.payment_completed">Pagamento concluído</span>
+                            {% endif %}
+                        </div>
+
+                        {% if ad.approval_reason %}
+                            <div class="advertisement-status-note">
+                                <strong data-i18n="advertisements.approved_proposal">Proposta aprovada</strong>
+                                <span>{{ ad.approval_reason }}</span>
+                            </div>
+                        {% endif %}
+
+                        {% if ad.rejection_reason %}
+                            <div class="advertisement-status-note advertisement-status-rejected">
+                                <strong data-i18n="advertisements.rejection_reason">Motivo da rejeição</strong>
+                                <span>{{ ad.rejection_reason }}</span>
+                            </div>
+                        {% endif %}
+
+                        {% if ad.start_at and ad.end_at %}
+                            <div class="advertisement-status-dates">
+                                <span data-i18n="advertisements.period">Período:</span> {{ ad.start_at }} — {{ ad.end_at }}
+                            </div>
+                        {% endif %}
+
+                        {% if ad.status == "approved_pending_payment" %}
+                            <a href="/advertise/{{ ad.id }}/pay" class="button add">
+                                Efetuar pagamento com PayPal
+                            </a>
+                        {% elif ad.status == "active" and ad.target_url %}
+                            <a href="{{ ad.target_url }}" target="_blank" rel="noopener noreferrer" class="button manage">
+                                Abrir publicidade
+                            </a>
+                        {% endif %}
+
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty">
+                <span data-i18n="advertisements.no_proposals">Ainda não tem propostas de publicidade.</span>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

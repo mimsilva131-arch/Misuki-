@@ -127,17 +127,37 @@ Misuki — Discord Bot
          ADVERTISEMENTS
     ================================================== -->
 
-    {% if advertisements %}
+    <section class="section" id="publicidades">
 
-        <section class="section">
+        <div class="container">
 
-            <div class="container">
+            <div class="advertisements-heading">
 
-                <h2 class="section-title" data-i18n="common.advertisement">
-                    Advertisement
-                </h2>
+                <div>
+                    <span class="section-kicker" data-i18n="advertisements.section_kicker">Publicidade</span>
 
-                <div class="server-grid">
+                    <h2 class="section-title" data-i18n="advertisements.featured_servers">
+                        Servidores em destaque
+                    </h2>
+
+                    <p class="advertisements-subtitle" data-i18n="advertisements.subtitle">
+                        Descubra servidores da comunidade no Misuki.
+                    </p>
+                </div>
+
+                <a
+                    href="/advertise"
+                    class="advertisements-link"
+                    data-i18n="advertisements.advertise_server"
+                >
+                    Publicitar o seu servidor
+                </a>
+
+            </div>
+
+            {% if advertisements %}
+
+                <div class="advertisement-grid">
 
                     {% for ad in advertisements %}
 
@@ -148,25 +168,29 @@ Misuki — Discord Bot
                             class="card advertisement-card"
                         >
 
-                            {% if ad.image_url %}
+                            <div class="advertisement-media">
 
-                                <img
-                                    src="{{ ad.image_url }}"
-                                    alt="{{ ad.title }}"
-                                    class="advertisement-image"
-                                >
+                                {% if ad.image_url %}
 
-                            {% endif %}
+                                    <img
+                                        src="{{ ad.image_url }}"
+                                        alt="{{ ad.title }}"
+                                        class="advertisement-image"
+                                    >
+
+                                {% else %}
+
+                                    <div class="advertisement-image advertisement-image-placeholder"></div>
+
+                                {% endif %}
+
+                            </div>
 
                             <div class="advertisement-content">
 
-                                <h3>
-                                    {{ ad.title }}
-                                </h3>
+                                <h3>{{ ad.title }}</h3>
 
-                                <p>
-                                    {{ ad.description }}
-                                </p>
+                                <p>{{ ad.description }}</p>
 
                             </div>
 
@@ -176,11 +200,34 @@ Misuki — Discord Bot
 
                 </div>
 
-            </div>
+            {% else %}
 
-        </section>
+                <div class="card advertisements-empty">
 
-    {% endif %}
+                    <div>
+                        <h3 data-i18n="advertisements.space_available">Espaço publicitário disponível</h3>
+
+                        <p data-i18n="advertisements.space_description">
+                            O seu servidor pode aparecer aqui.
+                            Seja um dos primeiros a publicitar no Misuki.
+                        </p>
+                    </div>
+
+                    <a
+                        href="/advertise"
+                        class="button"
+                        data-i18n="advertisements.advertise_server"
+                    >
+                        Publicitar o seu servidor
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </section>
 
 
     <!-- =================================================
