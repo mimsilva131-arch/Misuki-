@@ -8,7 +8,7 @@ As minhas publicidades — Misuki
 <section class="section advertisement-status-page">
     <div class="container">
         <h1 data-i18n="nav.my_advertisements">As minhas publicidades</h1>
-        <p class="advertisement-status-intro">Aqui pode acompanhar cada proposta, verificar se foi aprovada, consultar o pagamento e confirmar quando a publicidade está ativa.</p>
+        <p class="advertisement-status-intro" data-i18n="advertisements.status_intro">Aqui pode acompanhar cada proposta, verificar se foi aprovada, consultar o pagamento e confirmar quando a publicidade está ativa.</p>
 
         {% if advertisements %}
             <div class="server-grid">
@@ -21,44 +21,44 @@ As minhas publicidades — Misuki
 
                         <div class="server-name">{{ ad.title }}</div>
                         <div class="server-id">ID: {{ ad.id }}</div>
-                        <div class="server-id">{{ ad.duration_days }} days · €{{ "%.2f"|format(ad.amount or 0) }}</div>
+                        <div class="server-id">{{ ad.duration_days }} <span data-i18n="common.days">days</span> · €{{ "%.2f"|format(ad.amount or 0) }}</div>
 
                         <p>{{ ad.description }}</p>
 
                         <div class="badges">
                             {% if ad.status == "pending" %}
-                                <span class="badge badge-warning">Pendente de análise</span>
+                                <span class="badge badge-warning" data-i18n="advertisements.pending_review">Pendente de análise</span>
                             {% elif ad.status == "approved_pending_payment" %}
-                                <span class="badge badge-warning">Aprovada — pagamento pendente</span>
+                                <span class="badge badge-warning" data-i18n="advertisements.approved_payment_pending">Aprovada — pagamento pendente</span>
                             {% elif ad.status == "active" %}
-                                <span class="badge badge-active">Ativa</span>
+                                <span class="badge badge-active" data-i18n="advertisements.active">Ativa</span>
                             {% elif ad.status == "rejected" %}
-                                <span class="badge badge-expired">Rejeitada</span>
+                                <span class="badge badge-expired" data-i18n="advertisements.rejected">Rejeitada</span>
                             {% elif ad.status == "expired" %}
-                                <span class="badge badge-none">Expirada</span>
+                                <span class="badge badge-none" data-i18n="advertisements.expired">Expirada</span>
                             {% elif ad.status == "disabled" %}
-                                <span class="badge badge-none">Desativada</span>
+                                <span class="badge badge-none" data-i18n="advertisements.disabled">Desativada</span>
                             {% else %}
                                 <span class="badge badge-none">{{ ad.status }}</span>
                             {% endif %}
 
                             {% if ad.payment_status == "paid" %}
-                                <span class="badge badge-active">Pagamento concluído</span>
+                                <span class="badge badge-active" data-i18n="advertisements.payment_completed">Pagamento concluído</span>
                             {% elif ad.payment_status in ("awaiting_payment", "pending") %}
-                                <span class="badge badge-warning">Pagamento pendente</span>
+                                <span class="badge badge-warning" data-i18n="advertisements.payment_pending">Pagamento pendente</span>
                             {% endif %}
                         </div>
 
                         {% if ad.approval_reason %}
                             <div class="advertisement-status-note">
-                                <strong>Proposta aprovada</strong>
+                                <strong data-i18n="advertisements.approved_proposal">Proposta aprovada</strong>
                                 <span>{{ ad.approval_reason }}</span>
                             </div>
                         {% endif %}
 
                         {% if ad.rejection_reason %}
                             <div class="advertisement-status-note advertisement-status-rejected">
-                                <strong>Motivo da rejeição</strong>
+                                <strong data-i18n="advertisements.rejection_reason">Motivo da rejeição</strong>
                                 <span>{{ ad.rejection_reason }}</span>
                             </div>
                         {% endif %}
