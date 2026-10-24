@@ -71,6 +71,18 @@ async def refresh_bot_installers():
 
 BOT_ADMIN_USERS = []
 
+async def populate_member_cache():
+    """Populate Discord member caches so statistics can use real member data."""
+    for guild in bot.guilds:
+        try:
+            await guild.chunk(cache=True)
+        except Exception as error:
+            print(
+                f"⚠️ Could not populate members for {guild.name} "
+                f"({guild.id}): {error}"
+            )
+
+
 async def count_statistics_users():
     """Count unique human Discord users from the bot's populated member cache."""
     global BOT_ADMIN_USERS
@@ -417,6 +429,7 @@ async def on_ready():
     print(f"🟢 Bot status: {bot.status}")
     print(f"🏠 Discord guild count: {len(bot.guilds)}")
     await refresh_bot_installers()
+    await populate_member_cache()
     print_detected_servers()
     print("📋 Comandos registados:")
     registered_count = 0
