@@ -96,6 +96,31 @@
                 login: "Login with Discord"
             },
 
+            advertisements:             {
+                      "section_kicker": "Advertisement",
+                      "featured_servers": "Featured servers",
+                      "subtitle": "Discover community servers on Misuki.",
+                      "advertise_server": "Advertise your server",
+                      "space_available": "Advertising space available",
+                      "space_description": "Your server can appear here. Be one of the first to advertise on Misuki.",
+                      "pending_review": "Pending review",
+                      "approved_payment_pending": "Approved — payment pending",
+                      "active": "Active",
+                      "rejected": "Rejected",
+                      "expired": "Expired",
+                      "disabled": "Disabled",
+                      "paid": "Paid",
+                      "payment_pending": "Payment pending",
+                      "reason": "Reason:",
+                      "pay_paypal": "Pay with PayPal",
+                      "open": "Open",
+                      "no_advertisements": "You have no advertisements yet.",
+                      "proposal_submitted": "Advertisement submitted",
+                      "proposal_pending_review": "Your proposal is now pending review by the Misuki team. We will review it before any payment is requested.",
+                      "proposal_review_before_payment": "Payment will only become available after the proposal has been approved.",
+                      "back_to_dashboard": "Back to Dashboard"
+            }
+
             menu_controls: {
                 open: "Open menu",
                 close: "Close menu"
@@ -418,6 +443,31 @@
                 login: "Entrar com o Discord"
             },
 
+            advertisements:             {
+                      "section_kicker": "Publicidade",
+                      "featured_servers": "Servidores em destaque",
+                      "subtitle": "Descubra servidores da comunidade no Misuki.",
+                      "advertise_server": "Publicitar o seu servidor",
+                      "space_available": "Espaço publicitário disponível",
+                      "space_description": "O seu servidor pode aparecer aqui. Seja um dos primeiros a publicitar no Misuki.",
+                      "pending_review": "Pendente de análise",
+                      "approved_payment_pending": "Aprovada — pagamento pendente",
+                      "active": "Ativa",
+                      "rejected": "Rejeitada",
+                      "expired": "Expirada",
+                      "disabled": "Desativada",
+                      "paid": "Pago",
+                      "payment_pending": "Pagamento pendente",
+                      "reason": "Motivo:",
+                      "pay_paypal": "Pagar com PayPal",
+                      "open": "Abrir",
+                      "no_advertisements": "Ainda não existem publicidades.",
+                      "proposal_submitted": "Publicidade enviada",
+                      "proposal_pending_review": "A sua proposta está agora pendente de análise pela equipa do Misuki. Será analisada antes de qualquer pagamento ser solicitado.",
+                      "proposal_review_before_payment": "O pagamento só ficará disponível depois de a proposta ser aprovada.",
+                      "back_to_dashboard": "Voltar ao painel"
+            }
+
             menu_controls: {
                 open: "Abrir menu",
                 close: "Fechar menu"
@@ -737,6 +787,31 @@
                 logout: "Abmelden",
                 login: "Mit Discord anmelden"
             },
+
+            advertisements:             {
+                      "section_kicker": "Werbung",
+                      "featured_servers": "Ausgewählte Server",
+                      "subtitle": "Entdecke Community-Server auf Misuki.",
+                      "advertise_server": "Deinen Server bewerben",
+                      "space_available": "Werbeplatz verfügbar",
+                      "space_description": "Dein Server kann hier erscheinen. Sei einer der ersten, der auf Misuki wirbt.",
+                      "pending_review": "Prüfung ausstehend",
+                      "approved_payment_pending": "Genehmigt — Zahlung ausstehend",
+                      "active": "Aktiv",
+                      "rejected": "Abgelehnt",
+                      "expired": "Abgelaufen",
+                      "disabled": "Deaktiviert",
+                      "paid": "Bezahlt",
+                      "payment_pending": "Zahlung ausstehend",
+                      "reason": "Grund:",
+                      "pay_paypal": "Mit PayPal bezahlen",
+                      "open": "Öffnen",
+                      "no_advertisements": "Du hast noch keine Werbungen.",
+                      "proposal_submitted": "Werbung eingereicht",
+                      "proposal_pending_review": "Dein Vorschlag wird jetzt vom Misuki-Team geprüft. Er wird vor jeder Zahlungsanforderung überprüft.",
+                      "proposal_review_before_payment": "Die Zahlung wird erst nach Genehmigung des Vorschlags verfügbar.",
+                      "back_to_dashboard": "Zurück zum Dashboard"
+            }
 
             menu_controls: {
                 open: "Menü öffnen",
@@ -1058,6 +1133,31 @@
                 login: "Iniciar sesión con Discord"
             },
 
+            advertisements:             {
+                      "section_kicker": "Publicidad",
+                      "featured_servers": "Servidores destacados",
+                      "subtitle": "Descubre servidores de la comunidad en Misuki.",
+                      "advertise_server": "Publicitar tu servidor",
+                      "space_available": "Espacio publicitario disponible",
+                      "space_description": "Tu servidor puede aparecer aquí. Sé de los primeros en publicitar en Misuki.",
+                      "pending_review": "Pendiente de revisión",
+                      "approved_payment_pending": "Aprobada — pago pendiente",
+                      "active": "Activa",
+                      "rejected": "Rechazada",
+                      "expired": "Expirada",
+                      "disabled": "Desactivada",
+                      "paid": "Pagado",
+                      "payment_pending": "Pago pendiente",
+                      "reason": "Motivo:",
+                      "pay_paypal": "Pagar con PayPal",
+                      "open": "Abrir",
+                      "no_advertisements": "Todavía no tienes publicidades.",
+                      "proposal_submitted": "Publicidad enviada",
+                      "proposal_pending_review": "Tu propuesta está pendiente de revisión por el equipo de Misuki. Se revisará antes de solicitar cualquier pago.",
+                      "proposal_review_before_payment": "El pago solo estará disponible después de aprobar la propuesta.",
+                      "back_to_dashboard": "Volver al panel"
+            }
+
             menu_controls: {
                 open: "Abrir menú",
                 close: "Cerrar menú"
@@ -1377,6 +1477,31 @@
                 logout: "Se déconnecter",
                 login: "Se connecter avec Discord"
             },
+
+            advertisements:             {
+                      "section_kicker": "Publicité",
+                      "featured_servers": "Serveurs en vedette",
+                      "subtitle": "Découvrez les serveurs de la communauté sur Misuki.",
+                      "advertise_server": "Publiciser votre serveur",
+                      "space_available": "Espace publicitaire disponible",
+                      "space_description": "Votre serveur peut apparaître ici. Soyez parmi les premiers à faire de la publicité sur Misuki.",
+                      "pending_review": "En attente d'examen",
+                      "approved_payment_pending": "Approuvée — paiement en attente",
+                      "active": "Active",
+                      "rejected": "Rejetée",
+                      "expired": "Expirée",
+                      "disabled": "Désactivée",
+                      "paid": "Payée",
+                      "payment_pending": "Paiement en attente",
+                      "reason": "Motif :",
+                      "pay_paypal": "Payer avec PayPal",
+                      "open": "Ouvrir",
+                      "no_advertisements": "Vous n'avez encore aucune publicité.",
+                      "proposal_submitted": "Publicité envoyée",
+                      "proposal_pending_review": "Votre proposition est maintenant en attente d'examen par l'équipe Misuki. Elle sera examinée avant toute demande de paiement.",
+                      "proposal_review_before_payment": "Le paiement ne sera disponible qu'après l'approbation de la proposition.",
+                      "back_to_dashboard": "Retour au tableau de bord"
+            }
 
             menu_controls: {
                 open: "Ouvrir le menu",
