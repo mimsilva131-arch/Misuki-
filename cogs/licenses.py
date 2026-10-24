@@ -645,7 +645,7 @@ class LicenseManager(commands.Cog):
 
         if now >= expires_at:
 
-            await self.set_expired(
+            await self.delete_expired_license(
                 guild_id
             )
 
@@ -766,9 +766,9 @@ class LicenseManager(commands.Cog):
 
             if now >= expires_at:
 
-                await self.set_expired(
-                    guild_id
-                )
+                await self.delete_expired_license(
+                guild_id
+            )
 
                 status = "expired"
 
