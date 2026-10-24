@@ -112,6 +112,10 @@
                 expires: "Expires",
                 extend: "Extend",
                 revoke: "Revoke",
+                status_active: "Active",
+                status_expired: "Expired",
+                status_revoked: "Revoked",
+                status_none: "Unknown",
                 none: "There are no license records."
             },
 
@@ -130,6 +134,10 @@
                 expires: "Expira",
                 extend: "Prolongar",
                 revoke: "Revogar",
+                status_active: "Ativa",
+                status_expired: "Expirada",
+                status_revoked: "Revogada",
+                status_none: "Desconhecida",
                 none: "Não existem registos de licenças."
             },
 
@@ -148,6 +156,10 @@
                 expires: "Läuft ab",
                 extend: "Verlängern",
                 revoke: "Widerrufen",
+                status_active: "Aktiv",
+                status_expired: "Abgelaufen",
+                status_revoked: "Widerrufen",
+                status_none: "Unbekannt",
                 none: "Keine Lizenzdatensätze vorhanden."
             },
 
@@ -166,6 +178,10 @@
                 expires: "Expira",
                 extend: "Ampliar",
                 revoke: "Revocar",
+                status_active: "Activa",
+                status_expired: "Expirada",
+                status_revoked: "Revocada",
+                status_none: "Desconocida",
                 none: "No hay registros de licencias."
             },
 
@@ -184,6 +200,10 @@
                 expires: "Expire",
                 extend: "Prolonger",
                 revoke: "Révoquer",
+                status_active: "Active",
+                status_expired: "Expirée",
+                status_revoked: "Révoquée",
+                status_none: "Inconnue",
                 none: "Aucun enregistrement de licence."
             },
 
