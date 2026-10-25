@@ -35,7 +35,6 @@ PREMIUM_COMMANDS = {
 }
 
 
-@bot.tree.interaction_check
 async def global_license_check(interaction: discord.Interaction):
     """Block premium application commands when the guild has no active license."""
     if interaction.guild is None:
@@ -75,6 +74,9 @@ async def global_license_check(interaction: discord.Interaction):
         ephemeral=True
     )
     return False
+
+
+bot.tree.interaction_check = global_license_check
 
 
 def count_commands(commands_list):
