@@ -42,10 +42,7 @@ load_dotenv(
     override=False
 )
 
-MISUKI_VERSION = os.getenv(
-    "MISUKI_VERSION",
-    "1.0.0"
-).strip()
+MISUKI_VERSION = os.getenv("MISUKI_VERSION", "").strip()
 
 # =========================================================
 # PATHS
