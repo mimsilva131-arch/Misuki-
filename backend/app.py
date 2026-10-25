@@ -7364,6 +7364,15 @@ def reject_advertisement(advertisement_id):
             reason=reason
         )
 
+        create_site_notification(
+            rejected_user_id,
+            "advertisement_rejected",
+            "notifications.advertisement_rejected_title",
+            "notifications.advertisement_rejected_body",
+            {"advertisement": rejected_title or "Publicidade", "reason": reason},
+            "/advertise/status"
+        )
+
     except Exception as error:
         print(f"❌ Advertisement rejection error: {error}")
         return error_page(
