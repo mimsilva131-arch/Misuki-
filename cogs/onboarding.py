@@ -58,7 +58,8 @@ class Onboarding(commands.Cog):
                 "license_text": "License key: {key}\nExpires: {date}\n\nNo funds will be charged when your free license expires. There are no automatic charges, renewals, or payments after the free period. When the license expires, your Premium benefits will simply end.",
                 "help": "Need Help?",
                 "help_text": "You can use the Misuki dashboard to manage your server and license. Make sure Misuki has the permissions required by the features you enable.",
-                "footer": "Misuki • Premium License"
+                "footer": "Misuki • Premium License",
+                "date_fallback": "30 days after activation"
             },
             "pt": {
                 "title": "Bem-vindo ao Misuki",
@@ -69,7 +70,8 @@ class Onboarding(commands.Cog):
                 "license_text": "Chave da licença: {key}\nExpira em: {date}\n\nNão será cobrado qualquer valor quando a sua licença gratuita expirar. Não existem cobranças, renovações ou pagamentos automáticos após o período gratuito. Quando a licença expirar, os benefícios Premium simplesmente terminam.",
                 "help": "Precisa de ajuda?",
                 "help_text": "Pode utilizar o painel do Misuki para gerir o seu servidor e a licença. Certifique-se de que o Misuki tem as permissões necessárias para as funcionalidades que ativar.",
-                "footer": "Misuki • Licença Premium"
+                "footer": "Misuki • Licença Premium",
+                "date_fallback": "30 dias após a ativação"
             },
             "de": {
                 "title": "Willkommen bei Misuki",
@@ -80,7 +82,8 @@ class Onboarding(commands.Cog):
                 "license_text": "Lizenzschlüssel: {key}\nLäuft ab: {date}\n\nNach Ablauf der kostenlosen Lizenz werden keine Kosten berechnet. Es gibt keine automatischen Gebühren, Verlängerungen oder Zahlungen. Nach Ablauf endet einfach der Premium-Zugriff.",
                 "help": "Brauchen Sie Hilfe?",
                 "help_text": "Sie können das Misuki-Dashboard verwenden, um Ihren Server und Ihre Lizenz zu verwalten. Stellen Sie sicher, dass Misuki die erforderlichen Berechtigungen besitzt.",
-                "footer": "Misuki • Premium-Lizenz"
+                "footer": "Misuki • Premium-Lizenz",
+                "date_fallback": "30 Tage nach der Aktivierung"
             },
             "es": {
                 "title": "Bienvenido a Misuki",
@@ -91,7 +94,8 @@ class Onboarding(commands.Cog):
                 "license_text": "Clave de licencia: {key}\nCaduca: {date}\n\nNo se cobrará ningún importe cuando expire tu licencia gratuita. No hay cargos, renovaciones ni pagos automáticos. Cuando expire la licencia, simplemente terminarán los beneficios Premium.",
                 "help": "¿Necesitas ayuda?",
                 "help_text": "Puedes usar el panel de Misuki para gestionar tu servidor y tu licencia. Asegúrate de que Misuki tenga los permisos necesarios.",
-                "footer": "Misuki • Licencia Premium"
+                "footer": "Misuki • Licencia Premium",
+                "date_fallback": "30 días después de la activación"
             },
             "fr": {
                 "title": "Bienvenue sur Misuki",
@@ -102,7 +106,8 @@ class Onboarding(commands.Cog):
                 "license_text": "Clé de licence : {key}\nExpire le : {date}\n\nAucun montant ne sera facturé à l’expiration de votre licence gratuite. Il n’y a aucun prélèvement, renouvellement ou paiement automatique. À l’expiration, les avantages Premium prennent simplement fin.",
                 "help": "Besoin d’aide ?",
                 "help_text": "Vous pouvez utiliser le tableau de bord Misuki pour gérer votre serveur et votre licence. Vérifiez que Misuki dispose des permissions nécessaires.",
-                "footer": "Misuki • Licence Premium"
+                "footer": "Misuki • Licence Premium",
+                "date_fallback": "30 jours après l’activation"
             }
         }
 
@@ -117,7 +122,7 @@ class Onboarding(commands.Cog):
                 timezone_name
             )
             if expires_at
-            else "30 days after activation"
+            else text["date_fallback"]
         )
 
         embed = discord.Embed(
