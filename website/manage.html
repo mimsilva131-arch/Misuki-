@@ -39,15 +39,18 @@ Misuki
                     <h2 data-i18n="license.information">
                         Informação da licença
                     </h2>
+                    <p class="manage-license-description" data-i18n="license.description">
+                        Consulte aqui o estado e os detalhes da licença deste servidor.
+                    </p>
                 </div>
 
                 {% if license_active %}
-                    <span class="badge badge-active" data-i18n="dashboard.license_active">
-                        🟢 Licença ativa
+                    <span class="license-status license-status-active" data-i18n="license.active">
+                        Ativa
                     </span>
                 {% else %}
-                    <span class="badge badge-expired" data-i18n="dashboard.license_expired">
-                        🔴 Licença inativa
+                    <span class="license-status license-status-inactive" data-i18n="license.inactive">
+                        Inativa
                     </span>
                 {% endif %}
             </div>
@@ -81,8 +84,9 @@ Misuki
                     </div>
                 </div>
             {% else %}
-                <div class="empty" data-i18n="license.no_license">
-                    🔒 Este servidor não tem uma licença registada.
+                <div class="license-empty">
+                    <strong data-i18n="license.no_license_title">Sem licença</strong>
+                    <span data-i18n="license.no_license">Este servidor não tem uma licença registada.</span>
                 </div>
             {% endif %}
         </div>
