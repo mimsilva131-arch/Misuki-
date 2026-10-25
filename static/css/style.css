@@ -940,3 +940,96 @@ footer {
 }
 
 
+
+
+/* =========================================================
+   ADVERTISEMENT GRID — SQUARE CARDS
+   ========================================================= */
+
+.advertisement-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 250px));
+    justify-content: center;
+    gap: 18px;
+}
+
+.advertisement-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 250px;
+    aspect-ratio: 1 / 1;
+    min-height: 0 !important;
+    padding: 0;
+    overflow: hidden;
+    border-radius: 16px;
+}
+
+.advertisement-media {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100% !important;
+    border: 0;
+    background: #0b1020;
+}
+
+.advertisement-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    display: block;
+    background: #0b1020;
+}
+
+.advertisement-image-placeholder {
+    min-height: 0;
+}
+
+.advertisement-content {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    padding: 28px 13px 13px !important;
+    background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, .88),
+        rgba(0, 0, 0, .62) 48%,
+        transparent
+    );
+}
+
+.advertisement-content h3 {
+    margin: 0 0 5px;
+    font-size: 14px;
+    line-height: 1.25;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.advertisement-content p {
+    margin: 0;
+    color: rgba(255, 255, 255, .78);
+    font-size: 11px;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+}
+
+@media (max-width: 560px) {
+    .advertisement-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .advertisement-card {
+        max-width: none;
+    }
+}
