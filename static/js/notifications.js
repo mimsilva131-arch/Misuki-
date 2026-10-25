@@ -12,16 +12,16 @@
     let notifications = [];
 
     function getCurrentLanguage() {
-        return localStorage.getItem("misuki_language") || "en";
+        return window.MisukiTranslation && window.MisukiTranslation.getLanguage
+            ? window.MisukiTranslation.getLanguage()
+            : "en";
     }
 
     function getTranslation(key) {
-        const parts = key.split(".");
-        let value = window.MisukiTranslations;
-        for (const part of parts) {
-            value = value && value[part];
+        if (window.MisukiTranslation && window.MisukiTranslation.getTranslation) {
+            return window.MisukiTranslation.getTranslation(getCurrentLanguage(), key) || key;
         }
-        return typeof value === "string" ? value : key;
+        return key;
     }
 
     function formatDate(value) {
