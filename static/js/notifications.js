@@ -138,6 +138,6 @@
     }
 
     button.addEventListener("click", subscribe);
-    window.addEventListener("misuki:language-changed", syncLabel);
+    window.addEventListener("misukiLanguageChanged", syncLabel);
     initialize();
 })();
