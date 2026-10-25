@@ -2000,3 +2000,12 @@ select {
 .advertisement-status-page .advertisement-status-dates {
     margin-top: 17px;
 }
+
+
+/* Advertisement rows: fill each row before moving to the next */
+.advertisement-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;width:100%;max-width:1180px;margin-inline:auto}
+.advertisement-card{width:100%;max-width:none;min-width:0;aspect-ratio:1/1;min-height:0!important;margin:0;position:relative;display:block}
+.advertisement-media{position:absolute;inset:0;width:100%;height:100%!important;border:0;background:#0b1020}
+.advertisement-image{width:100%;height:100%;object-fit:contain}
+.advertisement-content{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:28px 12px 12px!important;background:linear-gradient(to top,rgba(0,0,0,.88),rgba(0,0,0,.58) 55%,transparent)}
+@media(max-width:700px){.advertisement-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}}
