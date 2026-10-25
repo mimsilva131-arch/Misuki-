@@ -412,20 +412,20 @@ class Utility(
                 available_commands.append('/' + name)
 
         available_commands.sort()
-        status_text = 'Active' if active_license else 'Inactive'
+        status_text = translations["license_active"] if active_license else translations["license_inactive"]
 
         embed = discord.Embed(
             title=translations["title"],
             description=translations["description"] + "\n\n" +
-                "**License:** " + status_text + "\n\n" +
-                "**Available commands:**\n" +
+                "**" + translations["license_label"] + ":** " + status_text + "\\n\\n" +
+                "**" + translations["available_commands"] + ":**\\n" +
                 "\n".join("• " + name for name in available_commands),
             color=discord.Color.green() if active_license else discord.Color.blurple()
         )
 
         embed.add_field(
             name=translations["settings_title"],
-            value="Use /setup to configure your language and timezone for Misuki DMs.",
+            value=translations["setup_help"],
             inline=False
         )
 
