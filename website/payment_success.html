@@ -7,14 +7,27 @@ Pagamento concluído — Misuki
 {% block extra_css %}
 <style>
 .payment-success-page {
-    min-height: 68vh;
+    min-height: 72vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 72px 0 96px;
+    padding: 76px 0 100px;
+    position: relative;
+}
+.payment-success-page::before {
+    content: "";
+    position: absolute;
+    width: 520px;
+    height: 520px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(93, 211, 158, .10), transparent 68%);
+    pointer-events: none;
 }
 .payment-success-card {
     position: relative;
+    z-index: 1;
     width: min(100%, 780px);
     padding: 54px 52px 48px;
     text-align: center;
@@ -35,11 +48,27 @@ Pagamento concluído — Misuki
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    border: 1px solid rgba(93, 211, 158, .28);
-    background: rgba(93, 211, 158, .08);
+    border: 1px solid rgba(93, 211, 158, .34);
+    background: linear-gradient(145deg, rgba(93, 211, 158, .13), rgba(93, 211, 158, .04));
     color: #8de3ba;
     font-size: 36px;
     font-weight: 800;
+    box-shadow: 0 0 0 8px rgba(93, 211, 158, .035), 0 16px 40px rgba(0, 0, 0, .18);
+}
+.payment-success-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding: 7px 12px;
+    border: 1px solid rgba(93, 211, 158, .22);
+    border-radius: 999px;
+    background: rgba(93, 211, 158, .07);
+    color: #8de3ba;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
 }
  .payment-success-card h1 {
     margin-bottom: 16px;
@@ -89,7 +118,12 @@ Pagamento concluído — Misuki
         <section class="card payment-success-card">
             <div class="payment-success-mark" aria-hidden="true">✓</div>
 
-            <h1 data-i18n="advertisements.payment_completed">Pagamento concluído</h1>
+            <div class="payment-success-eyebrow">
+                <span aria-hidden="true">✓</span>
+                <span data-i18n="advertisements.payment_completed">Pagamento concluído</span>
+            </div>
+
+            <h1 data-i18n="advertisements.payment_success_title">Pagamento efetuado com sucesso</h1>
 
             <p data-i18n="advertisements.payment_success_description">
                 O pagamento da sua publicidade foi confirmado com sucesso. A proposta aprovada está agora pronta para o período contratado.
@@ -103,10 +137,10 @@ Pagamento concluído — Misuki
             </div>
 
             <div class="payment-success-actions">
-                <a href="/advertise/status" class="button add">
-                    Ver as minhas publicidades
+                <a href="/advertise/status" class="button add" data-i18n="nav.my_advertisements">
+                    As minhas publicidades
                 </a>
-                <a href="/dashboard" class="button manage">
+                <a href="/dashboard" class="button manage" data-i18n="advertisements.return_dashboard">
                     Voltar ao painel
                 </a>
             </div>
