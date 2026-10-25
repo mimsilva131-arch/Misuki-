@@ -494,6 +494,7 @@
                 processing: "The bot will process your verification and assign the appropriate role on the server.",
                 return_discord: "You can return to Discord. If the role takes a few seconds to be assigned, please wait while Misuki processes your request.",
                 info: "By continuing, Misuki will confirm your Discord account and send a verification request to the bot to assign your verification role.",
+                captcha_placeholder: "Answer",
                 footer: "Protected by Misuki"
             }
         },
@@ -910,6 +911,7 @@
                 processing: "O bot irá processar a sua verificação e atribuir o cargo correspondente no servidor.",
                 return_discord: "Pode voltar ao Discord. Se a atribuição do cargo demorar alguns segundos, aguarde enquanto o Misuki processa o seu pedido.",
                 info: "Ao continuar, o Misuki irá confirmar a sua conta Discord e enviar um pedido de verificação ao bot para atribuir o seu cargo de verificação.",
+                captcha_placeholder: "Respuesta",
                 footer: "Protegido por Misuki"
             }====================================
            DEUTSCH
@@ -1332,6 +1334,7 @@
                 processing: "Der Bot wird Ihre Verifizierung bearbeiten und die entsprechende Rolle auf dem Server vergeben.",
                 return_discord: "Sie können zu Discord zurückkehren. Wenn die Vergabe der Rolle einige Sekunden dauert, warten Sie bitte, während Misuki Ihre Anfrage verarbeitet.",
                 info: "Wenn Sie fortfahren, bestätigt Misuki Ihr Discord-Konto und sendet eine Verifizierungsanfrage an den Bot, damit Ihre Verifizierungsrolle vergeben werden kann.",
+                captcha_placeholder: "Antwort",
                 footer: "Geschützt durch Misuki"
             }
         },
@@ -2184,6 +2187,7 @@
                 processing: "Le bot traitera votre vérification et attribuera le rôle correspondant sur le serveur.",
                 return_discord: "Vous pouvez retourner sur Discord. Si l'attribution du rôle prend quelques secondes, veuillez patienter pendant que Misuki traite votre demande.",
                 info: "En continuant, Misuki confirmera votre compte Discord et enverra une demande de vérification au bot afin d'attribuer votre rôle de vérification.",
+                captcha_placeholder: "Réponse",
                 footer: "Protégé par Misuki"
             }
         }
