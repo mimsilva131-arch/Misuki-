@@ -196,7 +196,7 @@
                 empty: "No notifications yet.",
                 advertisement_approved_title: "Advertisement approved",
                 advertisement_approved_body: "Your advertisement {advertisement} was approved. You can now complete the payment."
-            }
+            },
 
 
             reviews: {
@@ -635,7 +635,7 @@
                 empty: "Ainda não existem notificações.",
                 advertisement_approved_title: "Publicidade aprovada",
                 advertisement_approved_body: "A sua publicidade {advertisement} foi aprovada. Já pode efetuar o pagamento."
-            }
+            },
 
 
             reviews: {
@@ -1062,7 +1062,7 @@
                 empty: "Noch keine Benachrichtigungen.",
                 advertisement_approved_title: "Werbung genehmigt",
                 advertisement_approved_body: "Ihre Werbung {advertisement} wurde genehmigt. Sie können jetzt die Zahlung abschließen."
-            }
+            },
 
 
             reviews: {
@@ -1493,7 +1493,7 @@
                 empty: "Aún no hay notificaciones.",
                 advertisement_approved_title: "Publicidad aprobada",
                 advertisement_approved_body: "Tu publicidad {advertisement} ha sido aprobada. Ya puedes completar el pago."
-            }
+            },
 
 
             reviews: {
@@ -1923,7 +1923,7 @@
                 empty: "Aucune notification pour le moment.",
                 advertisement_approved_title: "Publicité approuvée",
                 advertisement_approved_body: "Votre publicité {advertisement} a été approuvée. Vous pouvez maintenant effectuer le paiement."
-            }
+            },
 
 
             reviews: {
