@@ -632,6 +632,26 @@ def create_database():
                 )
 
                 # -------------------------------------------------
+                # IN-SITE NOTIFICATIONS
+                # -------------------------------------------------
+
+                cursor.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS notifications (
+                        id SERIAL PRIMARY KEY,
+                        user_id TEXT NOT NULL,
+                        type TEXT NOT NULL,
+                        title_key TEXT NOT NULL,
+                        body_key TEXT NOT NULL,
+                        payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+                        url TEXT NOT NULL DEFAULT '/advertise/status',
+                        is_read BOOLEAN NOT NULL DEFAULT FALSE,
+                        created_at TEXT NOT NULL
+                    )
+                    """
+                )
+
+                # -------------------------------------------------
                 # ADVERTISEMENT PAYMENTS
                 # -------------------------------------------------
 
@@ -6879,6 +6899,31 @@ def notify_advertisement_user(user_id, title, approved=False, reason=""):
 # WEB PUSH NOTIFICATIONS
 # =========================================================
 
+def create_site_notification(user_id, notification_type, title_key, body_key, payload=None, url="/advertise/status"):
+    if not user_id:
+        return False
+
+    try:
+        with database_connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    INSERT INTO notifications
+                        (user_id, type, title_key, body_key, payload, url, created_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    """,
+                    (
+                        str(user_id), notification_type, title_key, body_key,
+                        json.dumps(payload or {}), url, utc_now().isoformat()
+                    )
+                )
+            connection.commit()
+        return True
+    except Exception as error:
+        print(f"❌ Could not create site notification: {error}")
+        return False
+
+
 def send_web_push_notification(user_id, title, body, url="/advertise/status"):
 
     if not user_id or not VAPID_PUBLIC_KEY or not VAPID_PRIVATE_KEY:
@@ -6968,6 +7013,84 @@ def notification_public_key():
         return jsonify({"error": "Notifications are not configured."}), 503
 
     return jsonify({"public_key": VAPID_PUBLIC_KEY})
+
+
+@app.route(
+    "/api/notifications",
+    methods=["GET"]
+)
+def get_notifications():
+    user = get_user()
+    if not user:
+        return jsonify({"error": "Login required."}), 401
+
+    try:
+        with database_connection() as connection:
+            with connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
+                cursor.execute(
+                    """
+                    SELECT id, type, title_key, body_key, payload, url, is_read, created_at
+                    FROM notifications
+                    WHERE user_id = %s
+                    ORDER BY created_at DESC, id DESC
+                    LIMIT 30
+                    """,
+                    (str(user.get("id")),)
+                )
+                rows = cursor.fetchall()
+                cursor.execute(
+                    """
+                    SELECT COUNT(*) AS count
+                    FROM notifications
+                    WHERE user_id = %s AND is_read = FALSE
+                    """,
+                    (str(user.get("id")),)
+                )
+                unread = int(cursor.fetchone()["count"] or 0)
+        return jsonify({"notifications": rows, "unread": unread})
+    except Exception as error:
+        print(f"❌ Notification list error: {error}")
+        return jsonify({"error": "Could not load notifications."}), 500
+
+
+@app.route(
+    "/api/notifications/read",
+    methods=["POST"]
+)
+def read_notifications():
+    user = get_user()
+    if not user:
+        return jsonify({"error": "Login required."}), 401
+
+    payload = request.get_json(silent=True) or {}
+    notification_id = payload.get("id")
+
+    try:
+        with database_connection() as connection:
+            with connection.cursor() as cursor:
+                if notification_id:
+                    cursor.execute(
+                        """
+                        UPDATE notifications
+                        SET is_read = TRUE
+                        WHERE id = %s AND user_id = %s
+                        """,
+                        (int(notification_id), str(user.get("id")))
+                    )
+                else:
+                    cursor.execute(
+                        """
+                        UPDATE notifications
+                        SET is_read = TRUE
+                        WHERE user_id = %s
+                        """,
+                        (str(user.get("id")),)
+                    )
+            connection.commit()
+        return jsonify({"success": True})
+    except Exception as error:
+        print(f"❌ Notification read error: {error}")
+        return jsonify({"error": "Could not update notifications."}), 500
 
 
 @app.route(
@@ -7122,6 +7245,15 @@ def approve_advertisement(advertisement_id):
             approved_title or "Publicidade",
             approved=True,
             reason=reason
+        )
+
+        create_site_notification(
+            approved_user_id,
+            "advertisement_approved",
+            "notifications.advertisement_approved_title",
+            "notifications.advertisement_approved_body",
+            {"advertisement": approved_title or "Publicidade"},
+            "/advertise/status"
         )
 
         send_web_push_notification(
