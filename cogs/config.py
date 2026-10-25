@@ -6,6 +6,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from cogs.utility import SettingsView
+
 
 # =========================================================
 # PATHS
@@ -1067,6 +1069,9 @@ class MainSetupView(discord.ui.View):
         self.add_item(
             RolesButton(config)
         )
+        self.add_item(
+            PersonalSettingsButton()
+        )
 
         self.add_item(
             ChannelsButton(config)
@@ -1130,6 +1135,25 @@ class MainSetupView(discord.ui.View):
                 discord.ButtonStyle.secondary,
                 "announcements"
             )
+        )
+
+
+class PersonalSettingsButton(
+    discord.ui.Button
+):
+
+    def __init__(self):
+        super().__init__(
+            label="Personal Settings",
+            emoji="⚙️",
+            style=discord.ButtonStyle.secondary
+        )
+
+    async def callback(self, interaction):
+        await interaction.response.send_message(
+            "🌐 Language and 🕐 Timezone",
+            view=SettingsView(interaction.user.id),
+            ephemeral=True
         )
 
 
