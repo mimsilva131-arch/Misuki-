@@ -94,6 +94,29 @@
 
     <div class="header-right">
 
+        <!-- NOTIFICATIONS -->
+
+        {% if user %}
+        <button
+            type="button"
+            class="notification-button"
+            id="notificationButton"
+            aria-label="Enable notifications"
+            aria-pressed="false"
+            title="Enable notifications"
+            data-i18n-attr="aria-label:notifications.enable,title:notifications.enable"
+        >
+            <span class="notification-bell" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+                    <path d="M10 21h4"></path>
+                </svg>
+                <span class="notification-dot" id="notificationDot" aria-hidden="true"></span>
+            </span>
+        </button>
+        {% endif %}
+
+
         <!-- LANGUAGE SELECTOR -->
 
         <div
@@ -577,6 +600,11 @@
 
 <script
     src="/static/js/translation.js?v=4"
+    defer
+></script>
+
+<script
+    src="/static/js/notifications.js?v=1"
     defer
 ></script>
 
