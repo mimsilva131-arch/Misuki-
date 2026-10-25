@@ -104,6 +104,14 @@
         }
     }
 
+    function syncLabel() {
+        if (button.classList.contains("is-enabled")) {
+            showMessage("enabled");
+        } else {
+            showMessage("enable");
+        }
+    }
+
     async function initialize() {
         if (!("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) {
             return;
@@ -113,11 +121,13 @@
             const registration = await navigator.serviceWorker.register("/service-worker.js", { scope: "/" });
             const subscription = await registration.pushManager.getSubscription();
             setState(Boolean(subscription && Notification.permission === "granted"));
+            syncLabel();
         } catch (error) {
             console.error("Misuki notification initialization:", error);
         }
     }
 
     button.addEventListener("click", subscribe);
+    window.addEventListener("misuki:language-changed", syncLabel);
     initialize();
 })();
