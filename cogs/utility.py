@@ -383,52 +383,63 @@ class Utility(
         interaction: discord.Interaction
     ):
 
-        language, timezone_name = get_user_preferences(
-            interaction.user.id
-        )
+        language, timezone_name = get_user_preferences(interaction.user.id)
+        translations = TRANSLATIONS.get(language, TRANSLATIONS[DEFAULT_LANGUAGE])
 
-        translations = TRANSLATIONS.get(
-            language,
-            TRANSLATIONS[DEFAULT_LANGUAGE]
-        )
+        license_manager = self.bot.get_cog("LicenseManager")
+        active_license = False
+        if interaction.guild is not None and license_manager is not None:
+            try:
+                active_license = await license_manager.has_active_license(interaction.guild.id)
+            except Exception as error:
+                print(f"⚠️ Could not check license for /help: {error}")
+
+        owner_id = int(os.getenv("OWNER_ID", "1146083816503529545"))
+        free_commands = {"help", "ping", "setup", "license"}
+        owner_commands = {"createlicense", "revokelicense", "extendlicense"}
+        premium_commands = {"ticket", "verify", "warn", "warnings", "unwarn", "clearwarnings", "clear", "timeout", "untimeout", "kick", "ban", "unban", "softban", "jail", "unjail", "jailinfo", "announce", "trigger", "impersonate"}
+        available_commands = []
+
+        for command in self.bot.tree.get_commands():
+            name = getattr(command, 'name', None)
+            if not name:
+                continue
+            if name in owner_commands and interaction.user.id != owner_id:
+                continue
+            if name in premium_commands and not active_license:
+                continue
+            if name in free_commands or name in premium_commands or name in owner_commands:
+                available_commands.append('/' + name)
+
+        available_commands.sort()
+        status_text = 'Active' if active_license else 'Inactive'
 
         embed = discord.Embed(
             title=translations["title"],
-            description=translations["description"],
-            color=discord.Color.blurple()
+            description=translations["description"] + "\n\n" +
+                "**License:** " + status_text + "\n\n" +
+                "**Available commands:**\n" +
+                "\n".join("• " + name for name in available_commands),
+            color=discord.Color.green() if active_license else discord.Color.blurple()
         )
 
         embed.add_field(
             name=translations["settings_title"],
-            value=translations["settings_description"],
+            value="Use /setup to configure your language and timezone for Misuki DMs.",
             inline=False
         )
 
         embed.set_footer(
             text=translations["settings_footer"].format(
-                language=SUPPORTED_LANGUAGES.get(
-                    language,
-                    DEFAULT_LANGUAGE
-                ),
+                language=SUPPORTED_LANGUAGES.get(language, DEFAULT_LANGUAGE),
                 timezone=timezone_name
             )
         )
 
         try:
-
-            await interaction.response.send_message(
-                embed=embed,
-                view=SettingsView(
-                    interaction.user.id
-                ),
-                ephemeral=True
-            )
-
+            await interaction.response.send_message(embed=embed, ephemeral=True)
         except discord.HTTPException as error:
-
-            print(
-                f"❌ Error executing /help: {error}"
-            )
+            print(f"❌ Error executing /help: {error}")
 
 
 # =========================================================
