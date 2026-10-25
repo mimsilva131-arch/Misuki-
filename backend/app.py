@@ -2700,13 +2700,27 @@ def verification():
 
     if not user:
 
-        session["next_url"] = (
+        next_url = (
             f"/verify?guild_id={guild_id}"
             if guild_id
             else "/verify"
         )
 
-        return redirect("/login")
+        login_url = (
+            "/login?"
+            + urlencode({"next": next_url})
+        )
+
+        return render_template(
+            "verification.html",
+            user=None,
+            username=None,
+            guild_name=None,
+            guild_id=guild_id,
+            login_required=True,
+            login_url=login_url,
+            is_admin=is_admin
+        )
 
     if not guild_id:
 
