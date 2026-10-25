@@ -306,6 +306,33 @@ app.wsgi_app = ProxyFix(
 # TEMPLATE HELPERS
 # =========================================================
 
+def format_short_datetime(value):
+    if not value:
+        return "—"
+
+    try:
+        if isinstance(value, datetime):
+            parsed = value
+        else:
+            text = str(value).strip()
+            parsed = datetime.fromisoformat(
+                text.replace("Z", "+00:00")
+            )
+
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=timezone.utc)
+
+        return parsed.astimezone(timezone.utc).strftime(
+            "%d/%m/%Y %H:%M:%S"
+        )
+
+    except Exception:
+        return str(value)
+
+
+app.jinja_env.filters["short_datetime"] = format_short_datetime
+
+
 @app.context_processor
 def inject_template_helpers():
 
@@ -5013,7 +5040,7 @@ def get_admin_users(admin_servers, snapshot_users=None):
             user["created_at"] = datetime.fromtimestamp(
                 timestamp,
                 timezone.utc
-            ).strftime("%d/%m/%Y")
+            ).strftime("%d/%m/%Y %H:%M:%S")
 
         except Exception:
             user["created_at"] = None
