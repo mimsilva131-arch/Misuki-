@@ -194,11 +194,11 @@
             },
 
             license: {
-                information: "Informations sur la licence",
-                description: "Consultez l’état actuel et les détails de la licence de votre serveur.",
-                inactive: "Cette licence n’est plus active.",
-                created: "Créée",
-                no_license_title: "Aucune licence active",
+                information: "License information",
+                description: "View the status and details of this server's license here.",
+                inactive: "Inactive",
+                created: "Created",
+                no_license_title: "No license",
                 title: "License",
                 back_to_dashboard: "Back to Dashboard",
                 status: "Status",
@@ -208,12 +208,7 @@
                 key: "License Key",
                 expires: "Expires",
                 never: "Never",
-                missing: "This server does not have a Misuki license.",
-                information: "License information",
-                description: "View the status and details of this server's license here.",
-                inactive: "Inactive",
-                created: "Created",
-                no_license_title: "No license"
+                missing: "This server does not have a Misuki license."
             },
 
             dashboard: {
@@ -228,14 +223,7 @@
                 add_misuki: "➕ Add Misuki",
                 cannot_add: "⚠️ Cannot Add",
                 leave_review: "⭐ Leave a Review",
-                license: "License",
-                no_authorized: "🔒 No authorized servers found.",
-                no_available: "No additional servers available.",
-                add_permission: "Add permission ✓",
-                no_authorization: "⚠️ No authorization",
-                add_misuki: "➕ Add Misuki",
-                cannot_add: "⚠️ Cannot Add",
-                leave_review: "⭐ Leave a Review"
+                license: "License"
             },
 
             footer: {
@@ -286,10 +274,9 @@
                 what_users_say: "⭐ What users say",
                 report_problem: "🐛 Report a Problem",
                 documentation_help: "Check the documentation for information about configuring and using Misuki.",
-                report_problem_text: "Found a bug or something that isn't working correctly? Contact the Misuki support team through Discord."
-            ,
+                report_problem_text: "Found a bug or something that isn't working correctly? Contact the Misuki support team through Discord.",
 
-                                 advertisement_title: "Advertisement title",
+                advertisement_title: "Advertisement title",
                 description: "Description",
                 image_url: "Image URL",
                 destination_url: "Destination URL",
@@ -313,7 +300,8 @@
                 days_14: "14 DAYS",
                 days_30: "30 DAYS",
                 save_001: "Save €0.01",
-                save_050: "Save €0.50",},
+                save_050: "Save €0.50"
+            },
 
             statistics: {
                 overview_kicker: "Overview",
@@ -1806,7 +1794,7 @@
             },
 
             reviews: {
-                intro: "Avis des membres des communautés Misuki.",
+                intro: "Avis des membres des communautés de Misuki.",
                 title: "Avis de la communauté",
                 no_reviews: "Aucun avis pour le moment.",
                 write_review: "Écrire un avis",
@@ -2093,9 +2081,15 @@
        AUTOMATIC STATIC TEXT TRANSLATION
        ========================================================= */
 
-    const englishPhraseKeys = {};
+    const staticPhraseKeys = {
+        en: {},
+        pt: {},
+        de: {},
+        es: {},
+        fr: {}
+    };
 
-    function buildEnglishPhraseIndex(value, path) {
+    function buildPhraseIndex(value, path, language) {
         if (!value || typeof value !== "object") return;
 
         Object.keys(value).forEach(function (key) {
@@ -2104,13 +2098,29 @@
 
             if (typeof current === "string") {
                 const normalized = normalizeStaticText(current);
-                if (normalized && !englishPhraseKeys[normalized]) {
-                    englishPhraseKeys[normalized] = currentPath;
+                if (
+                    normalized &&
+                    !staticPhraseKeys[language][normalized]
+                ) {
+                    staticPhraseKeys[language][normalized] = currentPath;
                 }
             } else if (current && typeof current === "object") {
-                buildEnglishPhraseIndex(current, currentPath);
+                buildPhraseIndex(current, currentPath, language);
             }
         });
+    }
+
+    function findStaticTranslationKey(normalized) {
+        if (!normalized) return null;
+
+        for (const sourceLanguage of SUPPORTED_LANGUAGES) {
+            const index = staticPhraseKeys[sourceLanguage];
+            if (index && index[normalized]) {
+                return index[normalized];
+            }
+        }
+
+        return null;
     }
 
     function normalizeStaticText(value) {
@@ -2176,7 +2186,7 @@
             }
 
             const normalized = normalizeStaticText(original);
-            const key = englishPhraseKeys[normalized];
+            const key = findStaticTranslationKey(normalized);
 
             if (!key) {
                 textNode.nodeValue = original;
@@ -2197,7 +2207,13 @@
         });
     }
 
-    buildEnglishPhraseIndex(translations.en, "");
+    SUPPORTED_LANGUAGES.forEach(function (language) {
+        buildPhraseIndex(
+            translations[language],
+            "",
+            language
+        );
+    });
 
     /* =========================================================
        GET TRANSLATION
