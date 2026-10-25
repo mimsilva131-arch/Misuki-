@@ -99,28 +99,6 @@
 
             licenses: {
                 admin_eyebrow: "ADMINISTRATION",
-                title: "Gestion des licences",
-                description: "Créez, prolongez et révoquez les licences de serveurs directement depuis le site Misuki.",
-                back_statistics: "Retour aux statistiques",
-                create_title: "Créer une licence",
-                create_description: "Une nouvelle licence devient active immédiatement après sa création.",
-                server_id: "ID du serveur",
-                days: "Durée (jours)",
-                create: "Créer la licence",
-                existing: "Licences existantes",
-                created: "Créée",
-                expires: "Expire",
-                extend: "Prolonger",
-                revoke: "Révoquer",
-                status_active: "Active",
-                status_expired: "Expirée",
-                status_revoked: "Révoquée",
-                status_none: "Inconnue",
-                none: "Aucun enregistrement de licence."
-            },
-
-            licenses: {
-                admin_eyebrow: "ADMINISTRATION",
                 title: "License management",
                 description: "Create, extend and revoke server licenses directly from the Misuki website.",
                 back_statistics: "Back to statistics",
@@ -230,13 +208,12 @@
                 key: "License Key",
                 expires: "Expires",
                 never: "Never",
-                missing: "This server does not have a Misuki license."
+                missing: "This server does not have a Misuki license.",
                 information: "License information",
                 description: "View the status and details of this server's license here.",
                 inactive: "Inactive",
                 created: "Created",
-                no_license_title: "No license",
-
+                no_license_title: "No license"
             },
 
             dashboard: {
@@ -339,8 +316,8 @@
                 save_050: "Save €0.50",},
 
             statistics: {
-                overview_kicker: "Vue d’ensemble",
-                status_kicker: "État",
+                overview_kicker: "Overview",
+                status_kicker: "Status",
                 performance_kicker: "Performance",
                 hero_description: "Overview of the Misuki service and its current statistics.",
                 service_description: "General statistics about the Misuki service.",
@@ -489,7 +466,17 @@
                 return_discord: "You can return to Discord. If the role takes a few seconds to be assigned, please wait while Misuki processes your request.",
                 info: "By continuing, Misuki will confirm your Discord account and send a verification request to the bot to assign your verification role.",
                 footer: "Protected by Misuki"
-            } title: "Menu",
+            }
+        },
+
+        /* =====================================================
+           PORTUGUÊS
+           ===================================================== */
+
+        pt: {
+
+            menu: {
+                title: "Menu",
                 navigation: "Navegação",
                 resources: "Recursos",
                 legal: "Legal",
