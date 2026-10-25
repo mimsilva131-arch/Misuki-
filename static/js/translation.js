@@ -290,6 +290,22 @@
                 report_problem: "🐛 Report a Problem",
                 documentation_help: "Check the documentation for information about configuring and using Misuki.",
                 report_problem_text: "Found a bug or something that isn't working correctly? Contact the Misuki support team through Discord.",
+<<<<<<< HEAD
+=======
+                need_help: "Need help? Choose the option above that best matches what you need.",
+                return_home: "← Return Home",
+                try_login_again: "Try Login Again",
+                continue_later: "If the problem continues, please try again later.",
+                view_my_advertisements: "View My Advertisements",
+                search_users: "Search name, @username or ID",
+                added_misuki_server: "Added Misuki to a server",
+                no_users_match: "No users match your search.",
+                id_label: "ID:",
+                account: "Account",
+                servers: "Servers",
+                return: "Return"
+            ,
+>>>>>>> 484c83e (Atualização)
 
                 advertisement_title: "Advertisement title",
                 description: "Description",
@@ -357,7 +373,17 @@
                 moderation_actions: "Moderation actions",
                 announcements: "Announcements",
                 privacy: "Privacy",
-                privacy_description: "Public statistics are presented in an aggregated form. Specific server and user information is restricted to authorized Misuki administrators."
+                privacy_description: "Public statistics are presented in an aggregated form. Specific server and user information is restricted to authorized Misuki administrators.",
+                account: "Account",
+                search_users: "Search name, @username or ID",
+                added_misuki: "Added Misuki to a server",
+                no_users_match: "No users match your search."
+            },
+
+            error: {
+                title: "Something went wrong",
+                subtitle: "We couldn't complete your request.",
+                continue_later: "If the problem continues, please try again later."
             },
 
             cookies: {

@@ -20,8 +20,13 @@ As minhas publicidades — Misuki
                         {% endif %}
 
                         <div class="server-name">{{ ad.title }}</div>
+<<<<<<< HEAD
                         <div class="server-id"><span data-i18n="advertisements.status_id">ID:</span> {{ ad.id }}</div>
                         <div class="server-id">{{ ad.duration_days }} <span data-i18n="advertisements.duration_days">days</span> · €{{ "%.2f"|format(ad.amount or 0) }}</div>
+=======
+                        <div class="server-id"><span data-i18n="common.id_label">ID:</span> {{ ad.id }}</div>
+                        <div class="server-id">{{ ad.duration_days }} <span data-i18n="common.days">days</span> · €{{ "%.2f"|format(ad.amount or 0) }}</div>
+>>>>>>> 484c83e (Atualização)
 
                         <p>{{ ad.description }}</p>
 
@@ -68,12 +73,21 @@ As minhas publicidades — Misuki
                         {% endif %}
 
                         {% if ad.status == "approved_pending_payment" %}
+<<<<<<< HEAD
                             <a href="/advertise/{{ ad.id }}/pay" class="button add">
                                 <span data-i18n="advertisements.pay_ad">Efetuar pagamento com PayPal</span>
                             </a>
                         {% elif ad.status == "active" and ad.target_url %}
                             <a href="{{ ad.target_url }}" target="_blank" rel="noopener noreferrer" class="button manage">
                                 <span data-i18n="advertisements.open_ad">Abrir publicidade</span>
+=======
+                            <a href="/advertise/{{ ad.id }}/pay" class="button add" data-i18n="advertisements.pay_ad">
+                                Efetuar pagamento com PayPal
+                            </a>
+                        {% elif ad.status == "active" and ad.target_url %}
+                            <a href="{{ ad.target_url }}" target="_blank" rel="noopener noreferrer" class="button manage" data-i18n="advertisements.open_ad">
+                                Abrir publicidade
+>>>>>>> 484c83e (Atualização)
                             </a>
                         {% endif %}
 

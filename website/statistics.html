@@ -614,6 +614,8 @@ Misuki — Statistics
                         id="admin-user-search"
                         type="search"
                         autocomplete="off"
+                        data-i18n-placeholder="common.search_users"
+                        data-i18n-attr="aria-label:common.search_users"
                         placeholder="Search name, @username or ID"
                         aria-label="Search users"
                     >
@@ -671,6 +673,7 @@ Misuki — Statistics
                                 class="admin-user-bot-badge"
                                 title="Added Misuki to a server"
                                 aria-label="Added Misuki to a server"
+                                data-i18n-attr="title:common.added_misuki_server;aria-label:common.added_misuki_server"
                             >
                                 🤖
                             </span>
@@ -691,7 +694,7 @@ Misuki — Statistics
 
 
                         <span class="admin-user-meta">
-                            Account:
+                            <span data-i18n="statistics.account">Account:</span>
                             <b class="admin-user-created">
                                 {{ user.created_at|default('—', true) }}
                             </b>
@@ -701,7 +704,7 @@ Misuki — Statistics
                         {% if user.servers_count is defined %}
 
                         <span class="admin-user-meta">
-                            Servers: {{ user.servers_count }}
+                            <span data-i18n="statistics.servers">Servers:</span> {{ user.servers_count }}
                         </span>
 
                         {% endif %}
@@ -718,6 +721,7 @@ Misuki — Statistics
                 class="statistics-empty admin-user-no-results"
                 id="admin-user-no-results"
                 hidden
+                data-i18n="common.no_users_match"
             >
                 No users match your search.
             </div>
