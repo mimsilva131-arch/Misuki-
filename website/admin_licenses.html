@@ -127,12 +127,12 @@ Misuki — License Management
 
                         <div>
                             <span data-i18n="licenses.created">Created</span>
-                            <strong>{{ license.created_at }}</strong>
+                            <strong>{{ license.created_at|short_datetime }}</strong>
                         </div>
 
                         <div>
                             <span data-i18n="licenses.expires">Expires</span>
-                            <strong>{{ license.expires_at or "—" }}</strong>
+                            <strong>{{ license.expires_at|short_datetime if license.expires_at else "—" }}</strong>
                         </div>
 
                     </div>
