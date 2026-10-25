@@ -6929,7 +6929,7 @@ def send_web_push_notification(user_id, title, body, url="/advertise/status"):
 )
 def notification_service_worker():
 
-    return app.send_static_file("service-worker.js")
+    return send_from_directory(STATIC_DIR, "service-worker.js", mimetype="application/javascript")
 
 
 @app.route(
