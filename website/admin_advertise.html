@@ -154,7 +154,7 @@ Advertisement Admin — Misuki
                             <p class="server-id">
 
                                 <span data-i18n="advertisements.start">Início:</span>
-                                {{ ad.start_at }}
+                                {{ ad.start_at|short_datetime }}
 
                             </p>
 
@@ -170,7 +170,7 @@ Advertisement Admin — Misuki
                             <p class="server-id">
 
                                 <span data-i18n="advertisements.end">Fim:</span>
-                                {{ ad.end_at }}
+                                {{ ad.end_at|short_datetime }}
 
                             </p>
 
