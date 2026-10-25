@@ -339,6 +339,7 @@
 
             statistics: {
                 overview_kicker: "Overview",
+                account: "Account",
                 status_kicker: "Status",
                 performance_kicker: "Performance",
                 hero_description: "Overview of the Misuki service and its current statistics.",
@@ -897,6 +898,7 @@ data: {
 
             statistics: {
                 overview_kicker: "Visão geral",
+                account: "Account",
                 status_kicker: "Estado",
                 performance_kicker: "Desempenho",
                 hero_description: "Visão geral do serviço Misuki e das suas estatísticas atuais.",
@@ -1326,6 +1328,7 @@ data: {
 
             statistics: {
                 overview_kicker: "Übersicht",
+                account: "Account",
                 status_kicker: "Status",
                 performance_kicker: "Leistung",
                 hero_description: "Übersicht über den Misuki-Dienst und seine aktuellen Statistiken.",
@@ -1759,6 +1762,7 @@ data: {
 
             statistics: {
                 overview_kicker: "Resumen",
+                account: "Account",
                 status_kicker: "Estado",
                 performance_kicker: "Rendimiento",
                 hero_description: "Descripción general del servicio Misuki y sus estadísticas actuales.",
@@ -2191,6 +2195,7 @@ data: {
 
             statistics: {
                 overview_kicker: "Vue d’ensemble",
+                account: "Account",
                 status_kicker: "État",
                 performance_kicker: "Performance",
                 hero_description: "Vue d’ensemble du service Misuki et de ses statistiques actuelles.",
