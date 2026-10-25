@@ -59,7 +59,7 @@ Misuki
                 <div class="license-details">
                     <div class="license-detail">
                         <span data-i18n="license.status">Estado</span>
-                        <strong>{{ license_data[2] }}</strong>
+                        <strong>{% if license_data[2] == "active" %}<span data-i18n="license.active">Ativa</span>{% else %}<span data-i18n="license.inactive">{{ license_data[2] }}</span>{% endif %}</strong>
                     </div>
 
                     <div class="license-detail">
@@ -71,7 +71,7 @@ Misuki
                         <span data-i18n="license.expires">Expira em</span>
                         <strong>
                             {% if license_data[3] %}
-                                {{ license_data[3] }}
+                                {{ license_data[3]|short_datetime }}
                             {% else %}
                                 <span data-i18n="license.never">Sem data de expiração</span>
                             {% endif %}
@@ -80,7 +80,7 @@ Misuki
 
                     <div class="license-detail">
                         <span data-i18n="license.created">Criada em</span>
-                        <strong>{{ license_data[4] }}</strong>
+                        <strong>{{ license_data[4]|short_datetime }}</strong>
                     </div>
                 </div>
             {% else %}
