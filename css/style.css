@@ -2009,3 +2009,62 @@ select {
 .advertisement-image{width:100%;height:100%;object-fit:contain}
 .advertisement-content{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:28px 12px 12px!important;background:linear-gradient(to top,rgba(0,0,0,.88),rgba(0,0,0,.58) 55%,transparent)}
 @media(max-width:700px){.advertisement-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}}
+
+
+/* More spacious advertisement status panels */
+.advertisement-status-page .advertisement-status-intro {
+    max-width: 820px;
+    margin: 0 auto 34px;
+    line-height: 1.75;
+}
+
+.advertisement-status-page .server-grid {
+    gap: 24px;
+}
+
+.advertisement-status-page .server-card {
+    padding: 30px 28px 28px;
+}
+
+.advertisement-status-page .server-name {
+    margin-top: 12px;
+    margin-bottom: 20px;
+    line-height: 1.35;
+}
+
+.advertisement-status-page .server-id + .server-id {
+    margin-top: 10px;
+}
+
+.advertisement-status-page .server-card > p {
+    margin: 22px 0 24px;
+    line-height: 1.75;
+}
+
+.advertisement-status-page .badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-top: 6px;
+    margin-bottom: 24px;
+}
+
+.advertisement-status-page .advertisement-status-note,
+.advertisement-status-page .advertisement-status-dates {
+    margin-top: 20px;
+    line-height: 1.65;
+}
+
+.advertisement-status-page .advertisement-status-note {
+    padding: 14px 16px;
+}
+
+.advertisement-status-page .button {
+    margin-top: 24px;
+}
+
+@media (max-width: 700px) {
+    .advertisement-status-page .server-card {
+        padding: 24px 20px 22px;
+    }
+}
