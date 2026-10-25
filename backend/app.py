@@ -6386,6 +6386,48 @@ def paypal_success():
         )
 
     # -----------------------------------------------------
+    # RE-CHECK STAFF APPROVAL BEFORE CAPTURE
+    # -----------------------------------------------------
+
+    try:
+        with database_connection() as connection:
+            with connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
+                cursor.execute(
+                    """
+                    SELECT status, user_id
+                    FROM advertisements
+                    WHERE id = %s
+                    LIMIT 1
+                    """,
+                    (advertisement_id,)
+                )
+                approval_state = cursor.fetchone()
+
+        if not approval_state or str(approval_state["user_id"]) != str(user.get("id")):
+            return error_page(
+                "❌ Payment Error",
+                "The advertisement could not be verified.",
+                403,
+                user
+            )
+
+        if str(approval_state["status"]).lower() != "approved_pending_payment":
+            return error_page(
+                "❌ Payment unavailable",
+                "The advertisement is no longer approved for payment.",
+                409,
+                user
+            )
+    except Exception as error:
+        print(f"❌ Pre-capture approval verification error: {error}")
+        return error_page(
+            "❌ Payment Error",
+            "The advertisement approval could not be verified.",
+            500,
+            user
+        )
+
+    # -----------------------------------------------------
     # CAPTURE
     # -----------------------------------------------------
 
