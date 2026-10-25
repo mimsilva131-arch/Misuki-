@@ -1861,12 +1861,12 @@ select {
     flex-direction: column;
     overflow: hidden;
     text-decoration: none;
-    min-height: 220px;
+    min-height: 180px;
 }
 
 .advertisement-media {
     width: 100%;
-    height: 100px;
+    height: 75px;
     overflow: hidden;
     background: #0b1020;
     border-bottom: 1px solid var(--border);
@@ -1895,19 +1895,19 @@ select {
 }
 
 .advertisement-content {
-    padding: 13px 16px 15px;
+    padding: 9px 13px 11px;
 }
 
 .advertisement-content h3 {
     margin-bottom: 8px;
-    font-size: 16px;
-    line-height: 1.3;
+    font-size: 15px;
+    line-height: 1.25;
 }
 
 .advertisement-content p {
     color: var(--text-muted);
-    font-size: 13px;
-    line-height: 1.5;
+    font-size: 12px;
+    line-height: 1.4;
 }
 
 .advertisements-empty {
