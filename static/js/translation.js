@@ -2180,11 +2180,6 @@
 
             if (original.includes("{{") || original.includes("{%")) return;
 
-            if (language === "en") {
-                textNode.nodeValue = original;
-                return;
-            }
-
             const normalized = normalizeStaticText(original);
             const key = findStaticTranslationKey(normalized);
 
