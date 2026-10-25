@@ -525,6 +525,7 @@
             },
 
             advertisements: {
+                advertisement_id: "ID:",
                       "section_kicker": "Publicidade",
                       "featured_servers": "Servidores em destaque",
                       "subtitle": "Descubra servidores da comunidade no Misuki.",
@@ -598,6 +599,11 @@
             },
 
             license: {
+                information: "Informação da licença",
+                description: "Consulte aqui o estado e os detalhes da licença deste servidor.",
+                inactive: "Inativa",
+                created: "Criada",
+                no_license_title: "Sem licença",
                 title: "Licença",
                 back_to_dashboard: "Voltar ao painel",
                 status: "Estado",
@@ -708,6 +714,9 @@
                 save_050: "Poupe €0,50",},
 
             statistics: {
+                overview_kicker: "Visão geral",
+                status_kicker: "Estado",
+                performance_kicker: "Desempenho",
                 hero_description: "Visão geral do serviço Misuki e das suas estatísticas atuais.",
                 service_description: "Estatísticas gerais sobre o serviço Misuki.",
                 servers: "Servidores",
@@ -920,6 +929,7 @@
             },
 
             advertisements: {
+                advertisement_id: "ID:",
                       "section_kicker": "Werbung",
                       "featured_servers": "Ausgewählte Server",
                       "subtitle": "Entdecke Community-Server auf Misuki.",
@@ -993,6 +1003,11 @@
             },
 
             license: {
+                information: "Lizenzinformationen",
+                description: "Sehen Sie hier den Status und die Details der Lizenz dieses Servers.",
+                inactive: "Inaktiv",
+                created: "Erstellt",
+                no_license_title: "Keine Lizenz",
                 title: "Lizenz",
                 back_to_dashboard: "Zurück zum Dashboard",
                 status: "Status",
@@ -1103,6 +1118,9 @@
                 save_050: "Sparen Sie €0,50",},
 
             statistics: {
+                overview_kicker: "Übersicht",
+                status_kicker: "Status",
+                performance_kicker: "Leistung",
                 hero_description: "Übersicht über den Misuki-Dienst und seine aktuellen Statistiken.",
                 service_description: "Allgemeine Statistiken über den Misuki-Dienst.",
                 servers: "Server",
@@ -1319,6 +1337,7 @@
             },
 
             advertisements: {
+                advertisement_id: "ID:",
                       "section_kicker": "Publicidad",
                       "featured_servers": "Servidores destacados",
                       "subtitle": "Descubre servidores de la comunidad en Misuki.",
@@ -1392,6 +1411,11 @@
             },
 
             license: {
+                information: "Información de la licencia",
+                description: "Consulta aquí el estado y los detalles de la licencia de este servidor.",
+                inactive: "Inactiva",
+                created: "Creada",
+                no_license_title: "Sin licencia",
                 title: "Licencia",
                 back_to_dashboard: "Volver al panel",
                 status: "Estado",
@@ -1502,6 +1526,9 @@
                 save_050: "Ahorra €0,50",},
 
             statistics: {
+                overview_kicker: "Resumen",
+                status_kicker: "Estado",
+                performance_kicker: "Rendimiento",
                 hero_description: "Descripción general del servicio Misuki y sus estadísticas actuales.",
                 service_description: "Estadísticas generales sobre el servicio Misuki.",
                 servers: "Servidores",
@@ -1718,6 +1745,7 @@
             },
 
             advertisements: {
+                advertisement_id: "ID:",
                       "section_kicker": "Publicité",
                       "featured_servers": "Serveurs en vedette",
                       "subtitle": "Découvrez les serveurs de la communauté sur Misuki.",
@@ -1791,6 +1819,11 @@
             },
 
             license: {
+                information: "Informations sur la licence",
+                description: "Consultez ici l’état et les détails de la licence de ce serveur.",
+                inactive: "Inactive",
+                created: "Créée",
+                no_license_title: "Aucune licence",
                 title: "Licence",
                 back_to_dashboard: "Retour au tableau de bord",
                 status: "Statut",
@@ -1901,6 +1934,9 @@
                 save_050: "Économisez 0,50 €",},
 
             statistics: {
+                overview_kicker: "Vue d’ensemble",
+                status_kicker: "État",
+                performance_kicker: "Performance",
                 hero_description: "Vue d’ensemble du service Misuki et de ses statistiques actuelles.",
                 service_description: "Statistiques générales du service Misuki.",
                 servers: "Serveurs",
