@@ -2068,3 +2068,83 @@ select {
         padding: 24px 20px 22px;
     }
 }
+
+
+/* =========================================================
+   NOTIFICATION BUTTON
+   ========================================================= */
+
+.notification-button {
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+    cursor: pointer;
+    position: relative;
+    z-index: 10004;
+    outline: none;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.notification-button:hover {
+    background: rgba(255, 255, 255, 0.10);
+    border-color: rgba(255, 255, 255, 0.20);
+}
+
+.notification-button:active {
+    transform: scale(0.97);
+}
+
+.notification-button:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.35);
+    outline-offset: 2px;
+}
+
+.notification-button.is-enabled {
+    border-color: rgba(88, 101, 242, 0.55);
+    box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.10);
+}
+
+.notification-bell {
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.notification-bell svg {
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.notification-dot {
+    position: absolute;
+    top: -2px;
+    right: -3px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--blue);
+    box-shadow: 0 0 0 2px #0b0b12;
+    opacity: 0;
+    transform: scale(0.7);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.notification-button.is-enabled .notification-dot {
+    opacity: 1;
+    transform: scale(1);
+}
