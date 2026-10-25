@@ -676,7 +676,7 @@
                 home_title: "Bot do Discord",
                 community: "Comunidade",
                 advertise: "Publicidade",
-                meet: "Conheça a",
+                meet: "Conheça o",
                 hero_description: "Um poderoso bot do Discord criado para tornar o seu servidor mais fácil de gerir, seguro e divertido.",
                 open_dashboard: "🚀 Abrir painel",
                 why_misuki: "Porquê o Misuki?",
