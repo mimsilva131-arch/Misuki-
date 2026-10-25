@@ -290,8 +290,6 @@
                 report_problem: "🐛 Report a Problem",
                 documentation_help: "Check the documentation for information about configuring and using Misuki.",
                 report_problem_text: "Found a bug or something that isn't working correctly? Contact the Misuki support team through Discord.",
-<<<<<<< HEAD
-=======
                 need_help: "Need help? Choose the option above that best matches what you need.",
                 return_home: "← Return Home",
                 try_login_again: "Try Login Again",
@@ -305,7 +303,6 @@
                 servers: "Servers",
                 return: "Return"
             ,
->>>>>>> 484c83e (Atualização)
 
                 advertisement_title: "Advertisement title",
                 description: "Description",
