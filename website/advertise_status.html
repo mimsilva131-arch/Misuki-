@@ -69,11 +69,11 @@ As minhas publicidades — Misuki
 
                         {% if ad.status == "approved_pending_payment" %}
                             <a href="/advertise/{{ ad.id }}/pay" class="button add">
-                                Efetuar pagamento com PayPal
+                                <span data-i18n="advertisements.pay_ad">Efetuar pagamento com PayPal</span>
                             </a>
                         {% elif ad.status == "active" and ad.target_url %}
                             <a href="{{ ad.target_url }}" target="_blank" rel="noopener noreferrer" class="button manage">
-                                Abrir publicidade
+                                <span data-i18n="advertisements.open_ad">Abrir publicidade</span>
                             </a>
                         {% endif %}
 
