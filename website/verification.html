@@ -205,6 +205,14 @@ Verificação — Misuki
         box-sizing: border-box;
     }
 
+    .verification-login-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        box-sizing: border-box;
+    }
+
     .verification-note {
         margin: 20px 0 0;
         color: #777783;
@@ -391,6 +399,17 @@ Verificação — Misuki
                 </span>
             </div>
 
+        </section>
+
+        {% elif login_required %}
+
+        <section class="verification-card">
+            <div class="verification-icon">🔐</div>
+            <h1 data-i18n="verification.login_required">Inicie sessão para continuar</h1>
+            <p class="verification-subtitle" data-i18n="verification.login_description">Para iniciar a verificação, precisa de iniciar sessão com a sua conta Discord.</p>
+            <a href="{{ login_url }}" class="verify-button verification-login-button" data-i18n="nav.login">Entrar com o Discord</a>
+            <p class="verification-note" data-i18n="verification.login_note">Depois de iniciar sessão, voltará automaticamente para esta página e poderá continuar a verificação.</p>
+            <div class="verification-footer"><span data-i18n="verification.protected">Protegido por Misuki</span></div>
         </section>
 
         {% else %}
