@@ -7,7 +7,7 @@ As minhas publicidades — Misuki
 {% block content %}
 <section class="section advertisement-status-page">
     <div class="container">
-        <h1 data-i18n="nav.my_advertisements">As minhas publicidades</h1>
+        <h1 data-i18n="advertisements.status_page_title">As minhas publicidades</h1>
         <p class="advertisement-status-intro" data-i18n="advertisements.status_intro">Aqui pode acompanhar cada proposta, verificar se foi aprovada, consultar o pagamento e confirmar quando a publicidade está ativa.</p>
 
         {% if advertisements %}
@@ -20,8 +20,8 @@ As minhas publicidades — Misuki
                         {% endif %}
 
                         <div class="server-name">{{ ad.title }}</div>
-                        <div class="server-id"><span data-i18n="advertisements.advertisement_id">ID:</span> {{ ad.id }}</div>
-                        <div class="server-id">{{ ad.duration_days }} <span data-i18n="common.days">days</span> · €{{ "%.2f"|format(ad.amount or 0) }}</div>
+                        <div class="server-id"><span data-i18n="advertisements.status_id">ID:</span> {{ ad.id }}</div>
+                        <div class="server-id">{{ ad.duration_days }} <span data-i18n="advertisements.duration_days">days</span> · €{{ "%.2f"|format(ad.amount or 0) }}</div>
 
                         <p>{{ ad.description }}</p>
 
@@ -39,7 +39,7 @@ As minhas publicidades — Misuki
                             {% elif ad.status == "disabled" %}
                                 <span class="badge badge-none" data-i18n="advertisements.disabled">Desativada</span>
                             {% else %}
-                                <span class="badge badge-none">{{ ad.status }}</span>
+                                <span class="badge badge-none" data-i18n="advertisements.status_unknown">Status unavailable</span>
                             {% endif %}
 
                             {% if ad.payment_status == "paid" %}
