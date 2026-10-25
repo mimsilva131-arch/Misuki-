@@ -28,6 +28,55 @@ intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 
+PREMIUM_COMMANDS = {
+    "ticket", "verify", "warn", "warnings", "unwarn", "clearwarnings",
+    "clear", "timeout", "untimeout", "kick", "ban", "unban", "softban",
+    "jail", "unjail", "jailinfo", "announce", "trigger", "impersonate"
+}
+
+
+@bot.tree.interaction_check
+async def global_license_check(interaction: discord.Interaction):
+    """Block premium application commands when the guild has no active license."""
+    if interaction.guild is None:
+        return True
+
+    command = getattr(interaction, "command", None)
+    command_name = getattr(command, "qualified_name", None) or getattr(command, "name", None)
+    if command_name:
+        command_name = str(command_name).split()[-1].lower()
+
+    if command_name not in PREMIUM_COMMANDS:
+        return True
+
+    license_manager = bot.get_cog("LicenseManager")
+    if license_manager is None:
+        await interaction.response.send_message(
+            "❌ Premium functionality is temporarily unavailable. Please try again later.",
+            ephemeral=True
+        )
+        return False
+
+    try:
+        active = await license_manager.has_active_license(interaction.guild.id)
+    except Exception as error:
+        print(f"⚠️ Could not verify license for /{command_name}: {error}")
+        await interaction.response.send_message(
+            "❌ The license could not be verified. Please try again later.",
+            ephemeral=True
+        )
+        return False
+
+    if active:
+        return True
+
+    await interaction.response.send_message(
+        "🔒 This command requires an active Misuki license for this server.",
+        ephemeral=True
+    )
+    return False
+
+
 def count_commands(commands_list):
     total = 0
     for command in commands_list:
