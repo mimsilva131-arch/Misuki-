@@ -11,6 +11,11 @@
         button.classList.toggle("is-enabled", enabled);
         button.setAttribute("aria-pressed", enabled ? "true" : "false");
         button.setAttribute("data-notifications-enabled", enabled ? "true" : "false");
+        button.setAttribute(
+            "data-i18n-attr",
+            "aria-label:notifications." + (enabled ? "enabled" : "enable") +
+            ",title:notifications." + (enabled ? "enabled" : "enable")
+        );
     }
 
     function getText(key) {
@@ -21,6 +26,11 @@
     function showMessage(key) {
         const message = getText(key);
         if (message) {
+            button.setAttribute(
+                "data-i18n-attr",
+                "aria-label:notifications." + key +
+                ",title:notifications." + key
+            );
             button.title = message;
             button.setAttribute("aria-label", message);
         }
