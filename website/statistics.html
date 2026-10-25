@@ -1834,7 +1834,7 @@ Misuki — Statistics
                     "admin-user-meta";
 
                 accountElement.innerHTML =
-                    `Account: <b class="admin-user-created">${escapeHtml(createdAt)}</b>`;
+                    `${escapeHtml(getTranslation("statistics.account", "Account"))}: <b class="admin-user-created">${escapeHtml(createdAt)}</b>`;
 
                 info.appendChild(
                     accountElement
@@ -1854,7 +1854,7 @@ Misuki — Statistics
                         "admin-user-meta";
 
                     serversElement.textContent =
-                        `Servers: ${serversCount}`;
+                        `${escapeHtml(getTranslation("statistics.servers", "Servers"))}: ${serversCount}`;
 
                     info.appendChild(
                         serversElement
