@@ -120,6 +120,11 @@
             },
 
             advertisements: {
+                status_page_title: "My Advertisements",
+                status_id: "ID:",
+                duration_days: "days",
+                payment_completed: "Payment completed",
+                status_unknown: "Status unavailable",
                 advertisement_id: "ID :",
                       "section_kicker": "Advertisement",
                       "featured_servers": "Featured servers",
@@ -516,6 +521,11 @@
             },
 
             advertisements: {
+                status_page_title: "As minhas publicidades",
+                status_id: "ID:",
+                duration_days: "dias",
+                payment_completed: "Pagamento concluído",
+                status_unknown: "Estado indisponível",
                 advertisement_id: "ID:",
                       "section_kicker": "Publicidade",
                       "featured_servers": "Servidores em destaque",
@@ -923,6 +933,11 @@
             },
 
             advertisements: {
+                status_page_title: "Meine Werbungen",
+                status_id: "ID:",
+                duration_days: "Tage",
+                payment_completed: "Zahlung abgeschlossen",
+                status_unknown: "Status nicht verfügbar",
                 advertisement_id: "ID:",
                       "section_kicker": "Werbung",
                       "featured_servers": "Ausgewählte Server",
@@ -1334,6 +1349,11 @@
             },
 
             advertisements: {
+                status_page_title: "Mis publicidades",
+                status_id: "ID:",
+                duration_days: "días",
+                payment_completed: "Pago completado",
+                status_unknown: "Estado no disponible",
                 advertisement_id: "ID:",
                       "section_kicker": "Publicidad",
                       "featured_servers": "Servidores destacados",
@@ -1745,6 +1765,11 @@
             },
 
             advertisements: {
+                status_page_title: "Mes publicités",
+                status_id: "ID :",
+                duration_days: "jours",
+                payment_completed: "Paiement effectué",
+                status_unknown: "État indisponible",
                 advertisement_id: "ID:",
                       "section_kicker": "Publicité",
                       "featured_servers": "Serveurs en vedette",
