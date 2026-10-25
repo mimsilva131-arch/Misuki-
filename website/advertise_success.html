@@ -1,86 +1,48 @@
 {% extends "base.html" %}
 
-
 {% block title %}
 Publicidade enviada — Misuki
 {% endblock %}
 
-
 {% block content %}
-
-<!-- =====================================================
-     MAIN
-====================================================== -->
-
-<section class="section">
-
+<section class="section advertise-success-page">
     <div class="container">
+        <div class="advertise-success-card">
+            <div class="advertise-success-icon" aria-hidden="true">✓</div>
 
-        <div
-            class="card"
-            style="
-                max-width: 760px;
-                margin: 40px auto;
-                text-align: center;
-            "
-        >
-
-            <div
-                class="advertise-badge"
-                style="margin-bottom: 18px;"
-            >
+            <span class="advertise-success-badge" data-i18n="advertisements.proposal_sent">
                 Proposta enviada
-            </div>
-
+            </span>
 
             <h1 data-i18n="advertisements.proposal_submitted">
                 A sua proposta de publicidade foi enviada com sucesso.
             </h1>
 
-
-            <p data-i18n="advertisements.proposal_pending_review">
+            <p class="advertise-success-description" data-i18n="advertisements.proposal_pending_review">
                 A proposta ficará pendente de análise pela equipa do Misuki. A publicidade será analisada antes de qualquer pagamento. Só depois de ser aprovada poderá efetuar o pagamento através do PayPal.
             </p>
 
-
-            <div
-                style="
-                    margin-top: 24px;
-                    display: flex;
-                    justify-content: center;
-                    gap: 12px;
-                    flex-wrap: wrap;
-                "
-            >
-
-                <a
-                    href="/advertise"
-                    class="button manage"
-                >
-                    Enviar outra proposta
-                </a>
-
-
-                <a
-                    href="/advertise/status"
-                    class="button add"
-                >
-                    Ver as minhas publicidades
-                </a>
-
-                <a
-                    href="/dashboard"
-                    class="button manage"
-                >
-                    Painel
-                </a>
-
+            <div class="advertise-success-status">
+                <span class="advertise-success-status-dot" aria-hidden="true"></span>
+                <span data-i18n="advertisements.proposal_review_before_payment">
+                    O pagamento só ficará disponível depois de a proposta ser aprovada.
+                </span>
             </div>
 
+            <div class="advertise-success-actions">
+                <a href="/advertise/status" class="button add">
+                    <span data-i18n="nav.my_advertisements">Ver as minhas publicidades</span>
+                </a>
+
+                <a href="/advertise" class="button manage">
+                    <span data-i18n="advertisements.send_another">Enviar outra proposta</span>
+                </a>
+
+                <a href="/dashboard" class="button manage">
+                    <span data-i18n="advertisements.panel">Painel</span>
+                </a>
+            </div>
         </div>
-
     </div>
-
 </section>
-
 {% endblock %}
