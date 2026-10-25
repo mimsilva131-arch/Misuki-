@@ -200,8 +200,13 @@ class Config(commands.Cog):
         }
 
         migrations = {
+            "configuration_log_channel_id": "INTEGER",
             "transcript_log_channel_id": "INTEGER",
+            "jail_log_channel_id": "INTEGER",
+            "moderation_log_channel_id": "INTEGER",
+            "welcome_channel_id": "INTEGER",
             "announcement_channel_id": "INTEGER",
+            "verification_channel_id": "INTEGER",
             "verified_log_channel_id": "INTEGER",
             "unverified_log_channel_id": "INTEGER",
             "ticket_category_id": "INTEGER",
