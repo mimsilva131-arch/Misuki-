@@ -13,6 +13,7 @@ from datetime import datetime, timedelta, timezone
 from urllib.parse import urlencode, urlparse
 
 import requests
+from pywebpush import webpush, WebPushException
 import psycopg2
 import psycopg2.extras
 
@@ -107,6 +108,24 @@ BOT_TOKEN = (
     os.getenv("DISCORD_BOT_TOKEN")
     or os.getenv("DISCORD_TOKEN")
 )
+
+VAPID_PUBLIC_KEY = (
+    os.getenv("VAPID_PUBLIC_KEY")
+    or ""
+).strip()
+
+VAPID_PRIVATE_KEY = (
+    os.getenv("VAPID_PRIVATE_KEY")
+    or ""
+).strip()
+
+VAPID_SUBJECT = (
+    os.getenv(
+        "VAPID_SUBJECT",
+        "https://misuki.onrender.com"
+    )
+    or "https://misuki.onrender.com"
+).strip()
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL"
@@ -556,6 +575,32 @@ def create_database():
                     """
                     ALTER TABLE advertisements
                     ADD COLUMN IF NOT EXISTS approval_reason TEXT
+                    """
+                )
+
+                # -------------------------------------------------
+                # WEB PUSH NOTIFICATION SUBSCRIPTIONS
+                # -------------------------------------------------
+
+                cursor.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS notification_subscriptions (
+
+                        id SERIAL PRIMARY KEY,
+
+                        user_id TEXT NOT NULL,
+
+                        endpoint TEXT UNIQUE NOT NULL,
+
+                        p256dh TEXT NOT NULL,
+
+                        auth TEXT NOT NULL,
+
+                        created_at TEXT NOT NULL,
+
+                        updated_at TEXT NOT NULL
+
+                    )
                     """
                 )
 
@@ -6804,6 +6849,159 @@ def notify_advertisement_user(user_id, title, approved=False, reason=""):
 
 
 # =========================================================
+# WEB PUSH NOTIFICATIONS
+# =========================================================
+
+def send_web_push_notification(user_id, title, body, url="/advertise/status"):
+
+    if not user_id or not VAPID_PUBLIC_KEY or not VAPID_PRIVATE_KEY:
+        return 0
+
+    sent = 0
+
+    try:
+        with database_connection() as connection:
+            with connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
+                cursor.execute(
+                    """
+                    SELECT id, endpoint, p256dh, auth
+                    FROM notification_subscriptions
+                    WHERE user_id = %s
+                    """,
+                    (str(user_id),)
+                )
+                subscriptions = cursor.fetchall()
+
+                stale_ids = []
+
+                for subscription in subscriptions:
+                    subscription_info = {
+                        "endpoint": subscription["endpoint"],
+                        "keys": {
+                            "p256dh": subscription["p256dh"],
+                            "auth": subscription["auth"]
+                        }
+                    }
+
+                    try:
+                        webpush(
+                            subscription_info=subscription_info,
+                            data=json.dumps({
+                                "title": title,
+                                "body": body,
+                                "url": url,
+                                "icon": "/assets/images/favicon.png?v=3",
+                                "badge": "/assets/images/favicon.png?v=3",
+                                "tag": "misuki-advertisement"
+                            }),
+                            vapid_private_key=VAPID_PRIVATE_KEY,
+                            vapid_claims={"sub": VAPID_SUBJECT}
+                        )
+                        sent += 1
+                    except WebPushException as error:
+                        response = getattr(error, "response", None)
+                        status_code = getattr(response, "status_code", None)
+                        if status_code in (404, 410):
+                            stale_ids.append(subscription["id"])
+                        print(f"⚠️ Web push notification failed: {error}")
+                    except Exception as error:
+                        print(f"⚠️ Web push notification error: {error}")
+
+                if stale_ids:
+                    cursor.execute(
+                        """
+                        DELETE FROM notification_subscriptions
+                        WHERE id = ANY(%s)
+                        """,
+                        (stale_ids,)
+                    )
+
+            connection.commit()
+
+    except Exception as error:
+        print(f"⚠️ Could not load web push subscriptions: {error}")
+
+    return sent
+
+
+@app.route(
+    "/service-worker.js"
+)
+def notification_service_worker():
+
+    return app.send_static_file("service-worker.js")
+
+
+@app.route(
+    "/api/notifications/public-key"
+)
+def notification_public_key():
+
+    if not VAPID_PUBLIC_KEY:
+        return jsonify({"error": "Notifications are not configured."}), 503
+
+    return jsonify({"public_key": VAPID_PUBLIC_KEY})
+
+
+@app.route(
+    "/api/notifications/subscribe",
+    methods=["POST"]
+)
+def subscribe_notifications():
+
+    user = get_user()
+
+    if not user:
+        return jsonify({"error": "Login required."}), 401
+
+    if not VAPID_PUBLIC_KEY or not VAPID_PRIVATE_KEY:
+        return jsonify({"error": "Notifications are not configured."}), 503
+
+    payload = request.get_json(silent=True) or {}
+    endpoint = str(payload.get("endpoint") or "").strip()
+    keys = payload.get("keys") or {}
+    p256dh = str(keys.get("p256dh") or "").strip()
+    auth = str(keys.get("auth") or "").strip()
+
+    if not endpoint or not p256dh or not auth:
+        return jsonify({"error": "Invalid notification subscription."}), 400
+
+    now = utc_now().isoformat()
+
+    try:
+        with database_connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    INSERT INTO notification_subscriptions
+                        (user_id, endpoint, p256dh, auth, created_at, updated_at)
+                    VALUES
+                        (%s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (endpoint)
+                    DO UPDATE SET
+                        user_id = EXCLUDED.user_id,
+                        p256dh = EXCLUDED.p256dh,
+                        auth = EXCLUDED.auth,
+                        updated_at = EXCLUDED.updated_at
+                    """,
+                    (
+                        str(user.get("id")),
+                        endpoint,
+                        p256dh,
+                        auth,
+                        now,
+                        now
+                    )
+                )
+            connection.commit()
+    except Exception as error:
+        print(f"❌ Notification subscription error: {error}")
+        return jsonify({"error": "Could not save notification subscription."}), 500
+
+    return jsonify({"success": True})
+
+
+# =========================================================
 # ADMIN APPROVE ADVERTISEMENT
 # =========================================================
 
@@ -6897,6 +7095,13 @@ def approve_advertisement(advertisement_id):
             approved_title or "Publicidade",
             approved=True,
             reason=reason
+        )
+
+        send_web_push_notification(
+            approved_user_id,
+            "Publicidade aprovada — Misuki",
+            f"A sua publicidade {approved_title or 'Publicidade'} foi aprovada. Pode agora efetuar o pagamento.",
+            "/advertise/status"
         )
 
     except Exception as error:
@@ -7345,6 +7550,11 @@ if __name__ == "__main__":
     print(
         f"🍪 Secure Cookies: "
         f"{COOKIE_SECURE}"
+    )
+
+    print(
+        f"🔔 Web Push configured: "
+        f"{bool(VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY)}"
     )
 
     print(
