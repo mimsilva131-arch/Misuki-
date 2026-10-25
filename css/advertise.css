@@ -640,3 +640,120 @@
         transform: none;
     }
 }
+
+
+/* =========================================================
+   ADVERTISEMENT SUBMISSION SUCCESS
+   ========================================================= */
+
+.advertise-success-page {
+    padding-top: 70px;
+    padding-bottom: 80px;
+}
+
+.advertise-success-card {
+    position: relative;
+    max-width: 760px;
+    margin: 40px auto;
+    padding: 42px 36px;
+    text-align: center;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, .10);
+    background: linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.025));
+    box-shadow: 0 24px 70px rgba(0,0,0,.28);
+    overflow: hidden;
+}
+
+.advertise-success-card::before {
+    content: "";
+    position: absolute;
+    width: 220px;
+    height: 220px;
+    top: -120px;
+    right: -90px;
+    border-radius: 50%;
+    background: rgba(120, 180, 255, .10);
+    filter: blur(8px);
+}
+
+.advertise-success-icon {
+    position: relative;
+    width: 62px;
+    height: 62px;
+    margin: 0 auto 18px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    font-size: 30px;
+    font-weight: 800;
+    background: rgba(80, 200, 130, .14);
+    border: 1px solid rgba(100, 220, 150, .30);
+}
+
+.advertise-success-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 12px;
+    margin-bottom: 16px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .03em;
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(255,255,255,.10);
+}
+
+.advertise-success-card h1 {
+    margin: 0 auto 14px;
+    max-width: 620px;
+}
+
+.advertise-success-description {
+    max-width: 620px;
+    margin: 0 auto;
+    line-height: 1.7;
+    opacity: .82;
+}
+
+.advertise-success-status {
+    max-width: 620px;
+    margin: 24px auto 0;
+    padding: 13px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    border-radius: 14px;
+    background: rgba(255,255,255,.045);
+    border: 1px solid rgba(255,255,255,.08);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.advertise-success-status-dot {
+    flex: 0 0 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.advertise-success-actions {
+    margin-top: 28px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+    .advertise-success-card {
+        padding: 32px 20px;
+        border-radius: 20px;
+    }
+
+    .advertise-success-status {
+        align-items: flex-start;
+        text-align: left;
+    }
+}
