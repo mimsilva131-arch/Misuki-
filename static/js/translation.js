@@ -142,6 +142,7 @@
             },
 
             advertisements: {
+                advertisement_id: "ID :",
                       "section_kicker": "Advertisement",
                       "featured_servers": "Featured servers",
                       "subtitle": "Discover community servers on Misuki.",
@@ -867,11 +868,7 @@
                 return_discord: "Pode voltar ao Discord. Se a atribuição do cargo demorar alguns segundos, aguarde enquanto o Misuki processa o seu pedido.",
                 info: "Ao continuar, o Misuki irá confirmar a sua conta Discord e enviar um pedido de verificação ao bot para atribuir o seu cargo de verificação.",
                 footer: "Protegido por Misuki"
-            }
-        },
-
-
-        /* =====================================================
+            }====================================
            DEUTSCH
            ===================================================== */
 
