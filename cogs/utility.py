@@ -348,9 +348,19 @@ class Utility(
                 self.bot.latency * 1000
             )
 
+            language, _ = get_user_preferences(
+                interaction.user.id
+            )
+
+            text = TRANSLATIONS.get(
+                language,
+                TRANSLATIONS[DEFAULT_LANGUAGE]
+            )["ping"].format(
+                latency=latency
+            )
+
             await interaction.response.send_message(
-                f"🏓 **Pong!**\n"
-                f"📡 Latency: `{latency}ms`"
+                text
             )
 
         except discord.HTTPException as error:
@@ -373,23 +383,45 @@ class Utility(
         interaction: discord.Interaction
     ):
 
+        language, timezone_name = get_user_preferences(
+            interaction.user.id
+        )
+
+        translations = TRANSLATIONS.get(
+            language,
+            TRANSLATIONS[DEFAULT_LANGUAGE]
+        )
+
         embed = discord.Embed(
-            title="🤖 Misuki Bot — Commands",
-            description=(
-                "`/ping` — Check if the bot is online.\n"
-                "`/help` — Show this message."
-            ),
+            title=translations["title"],
+            description=translations["description"],
             color=discord.Color.blurple()
         )
 
+        embed.add_field(
+            name=translations["settings_title"],
+            value=translations["settings_description"],
+            inline=False
+        )
+
         embed.set_footer(
-            text="Misuki Bot"
+            text=translations["settings_footer"].format(
+                language=SUPPORTED_LANGUAGES.get(
+                    language,
+                    DEFAULT_LANGUAGE
+                ),
+                timezone=timezone_name
+            )
         )
 
         try:
 
             await interaction.response.send_message(
-                embed=embed
+                embed=embed,
+                view=SettingsView(
+                    interaction.user.id
+                ),
+                ephemeral=True
             )
 
         except discord.HTTPException as error:
@@ -406,6 +438,8 @@ class Utility(
 async def setup(
     bot
 ):
+
+    initialize_preferences_database()
 
     await bot.add_cog(
         Utility(bot)
