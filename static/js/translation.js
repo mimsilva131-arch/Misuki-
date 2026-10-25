@@ -195,7 +195,9 @@
                 error: "Could not enable notifications.",
                 empty: "No notifications yet.",
                 advertisement_approved_title: "Advertisement approved",
-                advertisement_approved_body: "Your advertisement {advertisement} was approved. You can now complete the payment."
+                advertisement_approved_body: "Your advertisement {advertisement} was approved. You can now complete the payment.",
+                advertisement_rejected_title: "Advertisement rejected",
+                advertisement_rejected_body: "Your advertisement {advertisement} was rejected. Reason: {reason}"
             },
 
 
@@ -634,7 +636,9 @@
                 error: "Não foi possível ativar as notificações.",
                 empty: "Ainda não existem notificações.",
                 advertisement_approved_title: "Publicidade aprovada",
-                advertisement_approved_body: "A sua publicidade {advertisement} foi aprovada. Já pode efetuar o pagamento."
+                advertisement_approved_body: "A sua publicidade {advertisement} foi aprovada. Já pode efetuar o pagamento.",
+                advertisement_rejected_title: "Publicidade rejeitada",
+                advertisement_rejected_body: "A sua publicidade {advertisement} foi rejeitada. Motivo: {reason}"
             },
 
 
@@ -1061,7 +1065,9 @@
                 error: "Benachrichtigungen konnten nicht aktiviert werden.",
                 empty: "Noch keine Benachrichtigungen.",
                 advertisement_approved_title: "Werbung genehmigt",
-                advertisement_approved_body: "Ihre Werbung {advertisement} wurde genehmigt. Sie können jetzt die Zahlung abschließen."
+                advertisement_approved_body: "Ihre Werbung {advertisement} wurde genehmigt. Sie können jetzt die Zahlung abschließen.",
+                advertisement_rejected_title: "Werbung abgelehnt",
+                advertisement_rejected_body: "Ihre Werbung {advertisement} wurde abgelehnt. Grund: {reason}"
             },
 
 
@@ -1492,7 +1498,9 @@
                 error: "No se pudieron activar las notificaciones.",
                 empty: "Aún no hay notificaciones.",
                 advertisement_approved_title: "Publicidad aprobada",
-                advertisement_approved_body: "Tu publicidad {advertisement} ha sido aprobada. Ya puedes completar el pago."
+                advertisement_approved_body: "Tu publicidad {advertisement} ha sido aprobada. Ya puedes completar el pago.",
+                advertisement_rejected_title: "Publicidad rechazada",
+                advertisement_rejected_body: "Tu publicidad {advertisement} ha sido rechazada. Motivo: {reason}"
             },
 
 
@@ -1922,7 +1930,9 @@
                 error: "Impossible d’activer les notifications.",
                 empty: "Aucune notification pour le moment.",
                 advertisement_approved_title: "Publicité approuvée",
-                advertisement_approved_body: "Votre publicité {advertisement} a été approuvée. Vous pouvez maintenant effectuer le paiement."
+                advertisement_approved_body: "Votre publicité {advertisement} a été approuvée. Vous pouvez maintenant effectuer le paiement.",
+                advertisement_rejected_title: "Publicité refusée",
+                advertisement_rejected_body: "Votre publicité {advertisement} a été refusée. Motif : {reason}"
             },
 
 
