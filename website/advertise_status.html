@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-As minhas publicidades — Misuki
+<title data-i18n="nav.my_advertisements">As minhas publicidades — Misuki</title>
 {% endblock %}
 
 {% block content %}
@@ -20,7 +20,7 @@ As minhas publicidades — Misuki
                         {% endif %}
 
                         <div class="server-name">{{ ad.title }}</div>
-                        <div class="server-id">ID: {{ ad.id }}</div>
+                        <div class="server-id"><span data-i18n="advertisements.advertisement_id">ID:</span> {{ ad.id }}</div>
                         <div class="server-id">{{ ad.duration_days }} <span data-i18n="common.days">days</span> · €{{ "%.2f"|format(ad.amount or 0) }}</div>
 
                         <p>{{ ad.description }}</p>
