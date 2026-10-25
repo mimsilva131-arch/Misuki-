@@ -2774,10 +2774,14 @@ data: {
             "/advertise/success": "advertisements.proposal_submitted",
 
             "/payment/success": "advertisements.payment_completed",
+            "/advertise/paypal/success": "advertisements.payment_completed",
 
             "/payment/cancel": "advertisements.payment_cancelled",
+            "/advertise/paypal/cancel": "advertisements.payment_cancelled",
 
             "/admin/advertise": "advertisements.advertisement_management",
+            "/admin/licenses": "licenses.title",
+            "/manage": "license.information",
 
             "/terms": "nav.terms",
 
