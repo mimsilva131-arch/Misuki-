@@ -402,7 +402,6 @@ async def statistics_loop():
 statistics_task = None
 
 
-@bot.event
 async def sync_owner_license_command_permissions():
     """Make license-management commands visible only to the bot owner in each guild."""
     if not OWNER_ID:
@@ -531,6 +530,8 @@ async def on_ready():
             "✅ All registered commands/groups were "
             "successfully synchronised with Discord."
         )
+
+        await sync_owner_license_command_permissions()
     except Exception as error:
         print(f"❌ Command sync error: {error}")
     if statistics_task is None or statistics_task.done():
