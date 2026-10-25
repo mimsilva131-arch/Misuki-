@@ -418,7 +418,7 @@ class Utility(
             title=translations["title"],
             description=translations["description"] + "\n\n" +
                 "**" + translations["license_label"] + ":** " + status_text + "\n\n" +
-                "**" + translations["available_commands"] + ":**\\n" +
+                "**" + translations["available_commands"] + ":**\n" +
                 "\n".join("• " + name for name in available_commands),
             color=discord.Color.green() if active_license else discord.Color.blurple()
         )
