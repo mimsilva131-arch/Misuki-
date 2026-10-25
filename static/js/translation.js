@@ -215,6 +215,11 @@
             },
 
             license: {
+                information: "Informations sur la licence",
+                description: "Consultez l’état actuel et les détails de la licence de votre serveur.",
+                inactive: "Cette licence n’est plus active.",
+                created: "Créée",
+                no_license_title: "Aucune licence active",
                 title: "License",
                 back_to_dashboard: "Back to Dashboard",
                 status: "Status",
@@ -333,6 +338,9 @@
                 save_050: "Save €0.50",},
 
             statistics: {
+                overview_kicker: "Vue d’ensemble",
+                status_kicker: "État",
+                performance_kicker: "Performance",
                 hero_description: "Overview of the Misuki service and its current statistics.",
                 service_description: "General statistics about the Misuki service.",
                 servers: "Servers",
@@ -480,27 +488,7 @@
                 return_discord: "You can return to Discord. If the role takes a few seconds to be assigned, please wait while Misuki processes your request.",
                 info: "By continuing, Misuki will confirm your Discord account and send a verification request to the bot to assign your verification role.",
                 footer: "Protected by Misuki"
-            }
-        },
-
-
-        /* =====================================================
-           PORTUGUÊS
-           ===================================================== */
-
-        pt: {
-
-            language: {
-                select: "Selecionar idioma",
-                en: "Inglês",
-                pt: "Português",
-                de: "Alemão",
-                es: "Espanhol",
-                fr: "Francês"
-            },
-
-            menu: {
-                title: "Menu",
+            } title: "Menu",
                 navigation: "Navegação",
                 resources: "Recursos",
                 legal: "Legal",
