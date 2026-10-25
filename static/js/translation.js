@@ -225,6 +225,12 @@
                 expires: "Expires",
                 never: "Never",
                 missing: "This server does not have a Misuki license."
+                information: "License information",
+                description: "View the status and details of this server's license here.",
+                inactive: "Inactive",
+                created: "Created",
+                no_license_title: "No license",
+
             },
 
             dashboard: {
