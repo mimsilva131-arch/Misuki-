@@ -63,7 +63,7 @@ As minhas publicidades — Misuki
 
                         {% if ad.start_at and ad.end_at %}
                             <div class="advertisement-status-dates">
-                                <span data-i18n="advertisements.period">Período:</span> {{ ad.start_at }} — {{ ad.end_at }}
+                                <span data-i18n="advertisements.period">Período:</span> {{ ad.start_at|short_datetime }} — {{ ad.end_at|short_datetime }}
                             </div>
                         {% endif %}
 
