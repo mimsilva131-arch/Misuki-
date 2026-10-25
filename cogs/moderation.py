@@ -13,6 +13,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from cogs.utility import get_user_preferences
+
 
 # =========================================================
 # DATABASE
@@ -259,11 +261,96 @@ async def send_dm(
     color=discord.Color.blurple()
 ):
 
+    language, _ = get_user_preferences(
+        user.id
+    )
+
+    translations = {
+        "en": {
+            "⚠️ You received a warning": "⚠️ You received a warning",
+            "🔇 You received a timeout": "🔇 You received a timeout",
+            "👢 You were kicked": "👢 You were kicked",
+            "🔨 You were banned": "🔨 You were banned",
+            "Server": "Server",
+            "Reason": "Reason",
+            "Warning ID": "Warning ID",
+            "Duration": "Duration",
+            "footer": "Misuki • Moderation"
+        },
+        "pt": {
+            "⚠️ You received a warning": "⚠️ Recebeu uma advertência",
+            "🔇 You received a timeout": "🔇 Foi colocado em timeout",
+            "👢 You were kicked": "👢 Foi expulso",
+            "🔨 You were banned": "🔨 Foi banido",
+            "Server": "Servidor",
+            "Reason": "Motivo",
+            "Warning ID": "ID da advertência",
+            "Duration": "Duração",
+            "footer": "Misuki • Moderação"
+        },
+        "de": {
+            "⚠️ You received a warning": "⚠️ Sie haben eine Verwarnung erhalten",
+            "🔇 You received a timeout": "🔇 Sie haben einen Timeout erhalten",
+            "👢 You were kicked": "👢 Sie wurden gekickt",
+            "🔨 You were banned": "🔨 Sie wurden gebannt",
+            "Server": "Server",
+            "Reason": "Grund",
+            "Warning ID": "Verwarnungs-ID",
+            "Duration": "Dauer",
+            "footer": "Misuki • Moderation"
+        },
+        "es": {
+            "⚠️ You received a warning": "⚠️ Has recibido una advertencia",
+            "🔇 You received a timeout": "🔇 Has recibido un timeout",
+            "👢 You were kicked": "👢 Has sido expulsado",
+            "🔨 You were banned": "🔨 Has sido baneado",
+            "Server": "Servidor",
+            "Reason": "Motivo",
+            "Warning ID": "ID de advertencia",
+            "Duration": "Duración",
+            "footer": "Misuki • Moderación"
+        },
+        "fr": {
+            "⚠️ You received a warning": "⚠️ Vous avez reçu un avertissement",
+            "🔇 You received a timeout": "🔇 Vous avez reçu un timeout",
+            "👢 You were kicked": "👢 Vous avez été expulsé",
+            "🔨 You were banned": "🔨 Vous avez été banni",
+            "Server": "Serveur",
+            "Reason": "Motif",
+            "Warning ID": "ID de l’avertissement",
+            "Duration": "Durée",
+            "footer": "Misuki • Modération"
+        }
+    }
+
+    text = translations.get(
+        language,
+        translations["en"]
+    )
+
+    localized_title = text.get(
+        title,
+        title
+    )
+
+    localized_description = description
+
+    for source, target in (
+        ("**Server:**", f"**{text['Server']}:**"),
+        ("**Reason:**", f"**{text['Reason']}:**"),
+        ("**Warning ID:**", f"**{text['Warning ID']}:**"),
+        ("**Duration:**", f"**{text['Duration']}:**"),
+    ):
+        localized_description = localized_description.replace(
+            source,
+            target
+        )
+
     try:
 
         embed = discord.Embed(
-            title=title,
-            description=description,
+            title=localized_title,
+            description=localized_description,
             color=color,
             timestamp=datetime.now(
                 timezone.utc
@@ -271,7 +358,7 @@ async def send_dm(
         )
 
         embed.set_footer(
-            text="Misuki • Moderation"
+            text=text["footer"]
         )
 
         await user.send(
