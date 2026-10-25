@@ -441,6 +441,9 @@
 },
 
             verification: {
+                login_required: "Sign in to continue",
+                login_description: "To start verification, you need to sign in with your Discord account.",
+                login_note: "After signing in, you will automatically return to this page and can continue the verification.",
                 title: "Verification",
                 subtitle: "Confirm your Discord account to get access to the server.",
                 authenticated_account: "Authenticated account",
@@ -839,6 +842,9 @@
 },
 
             verification: {
+                login_required: "Inicie sessão para continuar",
+                login_description: "Para iniciar a verificação, precisa de iniciar sessão com a sua conta Discord.",
+                login_note: "Depois de iniciar sessão, voltará automaticamente para esta página e poderá continuar a verificação.",
                 title: "Verificação",
                 subtitle: "Confirme a sua conta Discord para obter acesso ao servidor.",
                 authenticated_account: "Conta autenticada",
@@ -1243,6 +1249,9 @@
 },
 
             verification: {
+                login_required: "Anmelden, um fortzufahren",
+                login_description: "Um die Verifizierung zu starten, müssen Sie sich mit Ihrem Discord-Konto anmelden.",
+                login_note: "Nach der Anmeldung kehren Sie automatisch zu dieser Seite zurück und können die Verifizierung fortsetzen.",
                 title: "Verifizierung",
                 subtitle: "Bestätigen Sie Ihr Discord-Konto, um Zugriff auf den Server zu erhalten.",
                 authenticated_account: "Authentifiziertes Konto",
@@ -1651,6 +1660,9 @@
 },
 
             verification: {
+                login_required: "Inicia sesión para continuar",
+                login_description: "Para iniciar la verificación, debes iniciar sesión con tu cuenta de Discord.",
+                login_note: "Después de iniciar sesión, volverás automáticamente a esta página y podrás continuar con la verificación.",
                 title: "Verificación",
                 subtitle: "Confirma tu cuenta de Discord para obtener acceso al servidor.",
                 authenticated_account: "Cuenta autenticada",
@@ -2059,6 +2071,9 @@
 },
 
             verification: {
+                login_required: "Connectez-vous pour continuer",
+                login_description: "Pour commencer la vérification, vous devez vous connecter avec votre compte Discord.",
+                login_note: "Après vous être connecté, vous reviendrez automatiquement sur cette page et pourrez poursuivre la vérification.",
                 title: "Vérification",
                 subtitle: "Confirmez votre compte Discord pour obtenir l'accès au serveur.",
                 authenticated_account: "Compte authentifié",
