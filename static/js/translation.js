@@ -185,6 +185,16 @@
                 close: "Close menu"
             },
 
+            notifications: {
+                enable: "Enable notifications",
+                enabled: "Notifications enabled",
+                denied: "Notifications are blocked in your browser settings.",
+                unsupported: "Notifications are not supported by this browser.",
+                login_required: "Sign in with Discord to enable notifications.",
+                error: "Could not enable notifications."
+            },
+
+
             reviews: {
                 intro: "Reviews from members of Misuki communities.",
                 title: "Community Reviews",
@@ -585,6 +595,16 @@
                 open: "Abrir menu",
                 close: "Fechar menu"
             },
+
+            notifications: {
+                enable: "Ativar notificações",
+                enabled: "Notificações ativadas",
+                denied: "As notificações estão bloqueadas nas definições do navegador.",
+                unsupported: "As notificações não são suportadas por este navegador.",
+                login_required: "Entre com o Discord para ativar as notificações.",
+                error: "Não foi possível ativar as notificações."
+            },
+
 
             reviews: {
                 intro: "Avaliações dos membros das comunidades do Misuki.",
@@ -997,6 +1017,16 @@
                 open: "Menü öffnen",
                 close: "Menü schließen"
             },
+
+            notifications: {
+                enable: "Benachrichtigungen aktivieren",
+                enabled: "Benachrichtigungen aktiviert",
+                denied: "Benachrichtigungen sind in den Browsereinstellungen blockiert.",
+                unsupported: "Benachrichtigungen werden von diesem Browser nicht unterstützt.",
+                login_required: "Melden Sie sich mit Discord an, um Benachrichtigungen zu aktivieren.",
+                error: "Benachrichtigungen konnten nicht aktiviert werden."
+            },
+
 
             reviews: {
                 intro: "Bewertungen von Mitgliedern der Misuki-Community.",
@@ -1414,6 +1444,16 @@
                 close: "Cerrar menú"
             },
 
+            notifications: {
+                enable: "Activar notificaciones",
+                enabled: "Notificaciones activadas",
+                denied: "Las notificaciones están bloqueadas en la configuración del navegador.",
+                unsupported: "Este navegador no admite notificaciones.",
+                login_required: "Inicia sesión con Discord para activar las notificaciones.",
+                error: "No se pudieron activar las notificaciones."
+            },
+
+
             reviews: {
                 intro: "Reseñas de miembros de las comunidades de Misuki.",
                 title: "Reseñas de la comunidad",
@@ -1829,6 +1869,16 @@
                 open: "Ouvrir le menu",
                 close: "Fermer le menu"
             },
+
+            notifications: {
+                enable: "Activer les notifications",
+                enabled: "Notifications activées",
+                denied: "Les notifications sont bloquées dans les paramètres du navigateur.",
+                unsupported: "Les notifications ne sont pas prises en charge par ce navigateur.",
+                login_required: "Connectez-vous avec Discord pour activer les notifications.",
+                error: "Impossible d’activer les notifications."
+            },
+
 
             reviews: {
                 intro: "Avis des membres des communautés de Misuki.",
