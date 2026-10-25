@@ -29,7 +29,7 @@
 
 <link
     rel="stylesheet"
-    href="/static/css/style.css?v=18"
+    href="/static/css/style.css?v=19"
 >
 
 <link
@@ -97,24 +97,34 @@
         <!-- NOTIFICATIONS -->
 
         {% if user %}
-        <button
-            type="button"
-            class="notification-button"
-            id="notificationButton"
-            aria-label="Enable notifications"
-            aria-pressed="false"
-            title="Enable notifications"
-            data-i18n-attr="aria-label:notifications.enable,title:notifications.enable"
-        >
-            <span class="notification-bell" aria-hidden="true">
-                <svg viewBox="0 0 24 24" focusable="false">
-                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
-                    <path d="M10 21h4"></path>
-                </svg>
-                <span class="notification-dot" id="notificationDot" aria-hidden="true"></span>
-            </span>
-            <span class="notification-label" data-i18n="notifications.enable">Enable notifications</span>
-        </button>
+        <div class="notification-wrapper" id="notificationWrapper">
+            <button
+                type="button"
+                class="notification-button"
+                id="notificationButton"
+                aria-label="Notifications"
+                aria-expanded="false"
+                title="Notifications"
+                data-i18n-attr="aria-label:notifications.title,title:notifications.title"
+            >
+                <span class="notification-bell" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false">
+                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+                        <path d="M10 21h4"></path>
+                    </svg>
+                    <span class="notification-dot" id="notificationDot" aria-hidden="true"></span>
+                </span>
+            </button>
+            <div class="notification-dropdown" id="notificationDropdown" aria-hidden="true">
+                <div class="notification-dropdown-header">
+                    <strong data-i18n="notifications.title">Notifications</strong>
+                    <button type="button" id="notificationEnableButton" class="notification-enable-button" data-i18n="notifications.enable">Enable notifications</button>
+                </div>
+                <div class="notification-list" id="notificationList">
+                    <div class="notification-empty" data-i18n="notifications.empty">No notifications yet.</div>
+                </div>
+            </div>
+        </div>
         {% endif %}
 
 
@@ -605,7 +615,7 @@
 ></script>
 
 <script
-    src="/static/js/notifications.js?v=2"
+    src="/static/js/notifications.js?v=3"
     defer
 ></script>
 
