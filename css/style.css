@@ -1852,8 +1852,9 @@ select {
 
 .advertisement-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 18px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 360px));
+    justify-content: center;
+    gap: 14px;
 }
 
 .advertisement-card {
@@ -1862,6 +1863,9 @@ select {
     overflow: hidden;
     text-decoration: none;
     min-height: 135px !important;
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
 }
 
 .advertisement-media {
