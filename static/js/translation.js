@@ -186,13 +186,17 @@
             },
 
             notifications: {
+                title: "Notifications",
                 enable: "Enable notifications",
                 enabled: "Notifications enabled",
                 denied: "Notifications are blocked in your browser settings.",
                 unsupported: "Notifications are not supported by this browser.",
                 login_required: "Sign in with Discord to enable notifications.",
-                error: "Could not enable notifications."
-            },
+                error: "Could not enable notifications.",
+                empty: "No notifications yet.",
+                advertisement_approved_title: "Advertisement approved",
+                advertisement_approved_body: "Your advertisement {advertisement} was approved. You can now complete the payment."
+            }
 
 
             reviews: {
@@ -621,13 +625,17 @@
             },
 
             notifications: {
+                title: "Notificações",
                 enable: "Ativar notificações",
                 enabled: "Notificações ativadas",
                 denied: "As notificações estão bloqueadas nas definições do navegador.",
                 unsupported: "As notificações não são suportadas por este navegador.",
                 login_required: "Entre com o Discord para ativar as notificações.",
-                error: "Não foi possível ativar as notificações."
-            },
+                error: "Não foi possível ativar as notificações.",
+                empty: "Ainda não existem notificações.",
+                advertisement_approved_title: "Publicidade aprovada",
+                advertisement_approved_body: "A sua publicidade {advertisement} foi aprovada. Já pode efetuar o pagamento."
+            }
 
 
             reviews: {
@@ -1044,13 +1052,17 @@
             },
 
             notifications: {
+                title: "Benachrichtigungen",
                 enable: "Benachrichtigungen aktivieren",
                 enabled: "Benachrichtigungen aktiviert",
                 denied: "Benachrichtigungen sind in den Browsereinstellungen blockiert.",
                 unsupported: "Benachrichtigungen werden von diesem Browser nicht unterstützt.",
                 login_required: "Melden Sie sich mit Discord an, um Benachrichtigungen zu aktivieren.",
-                error: "Benachrichtigungen konnten nicht aktiviert werden."
-            },
+                error: "Benachrichtigungen konnten nicht aktiviert werden.",
+                empty: "Noch keine Benachrichtigungen.",
+                advertisement_approved_title: "Werbung genehmigt",
+                advertisement_approved_body: "Ihre Werbung {advertisement} wurde genehmigt. Sie können jetzt die Zahlung abschließen."
+            }
 
 
             reviews: {
@@ -1471,13 +1483,17 @@
             },
 
             notifications: {
+                title: "Notificaciones",
                 enable: "Activar notificaciones",
                 enabled: "Notificaciones activadas",
                 denied: "Las notificaciones están bloqueadas en la configuración del navegador.",
                 unsupported: "Este navegador no admite notificaciones.",
                 login_required: "Inicia sesión con Discord para activar las notificaciones.",
-                error: "No se pudieron activar las notificaciones."
-            },
+                error: "No se pudieron activar las notificaciones.",
+                empty: "Aún no hay notificaciones.",
+                advertisement_approved_title: "Publicidad aprobada",
+                advertisement_approved_body: "Tu publicidad {advertisement} ha sido aprobada. Ya puedes completar el pago."
+            }
 
 
             reviews: {
@@ -1897,13 +1913,17 @@
             },
 
             notifications: {
+                title: "Notifications",
                 enable: "Activer les notifications",
                 enabled: "Notifications activées",
                 denied: "Les notifications sont bloquées dans les paramètres du navigateur.",
                 unsupported: "Les notifications ne sont pas prises en charge par ce navigateur.",
                 login_required: "Connectez-vous avec Discord pour activer les notifications.",
-                error: "Impossible d’activer les notifications."
-            },
+                error: "Impossible d’activer les notifications.",
+                empty: "Aucune notification pour le moment.",
+                advertisement_approved_title: "Publicité approuvée",
+                advertisement_approved_body: "Votre publicité {advertisement} a été approuvée. Vous pouvez maintenant effectuer le paiement."
+            }
 
 
             reviews: {
