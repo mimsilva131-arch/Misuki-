@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 load_dotenv(override=False)
 
 DATABASE_URL = os.getenv("DATABASE_URL")
-MISUKI_VERSION = os.getenv("MISUKI_VERSION", "1.0.0")
+MISUKI_VERSION = os.getenv("MISUKI_VERSION", "").strip()
 BOT_START_TIME = time.time()
 
 intents = discord.Intents.default()
