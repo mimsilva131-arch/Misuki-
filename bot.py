@@ -403,6 +403,37 @@ statistics_task = None
 
 
 @bot.event
+async def sync_owner_license_command_permissions():
+    """Make license-management commands visible only to the bot owner in each guild."""
+    if not OWNER_ID:
+        return
+
+    commands_to_restrict = {"createlicense", "revokelicense"}
+
+    for guild in bot.guilds:
+        try:
+            for command in bot.tree.get_commands():
+                if command.name not in commands_to_restrict:
+                    continue
+
+                await bot.tree.set_permissions(
+                    guild,
+                    command,
+                    permissions=[
+                        discord.app_commands.CommandPermission(
+                            id=OWNER_ID,
+                            type=discord.app_commands.AppCommandPermissionType.user,
+                            permission=True,
+                        )
+                    ],
+                )
+        except Exception as error:
+            print(
+                f"⚠️ Could not restrict license command permissions in "
+                f"{guild.id}: {error}"
+            )
+
+
 async def on_guild_join(guild):
     print("➕ Bot joined a new server:")
     print(f"   Name: {guild.name}")
