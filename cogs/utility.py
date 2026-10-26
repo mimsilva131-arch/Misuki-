@@ -1,5 +1,20 @@
 
-# =========================================================
+# ==        "setup_title": "Configuration de Misuki",
+        "setup_description": "Configurez Misuki pour ce serveur.",
+        "setup_choose": "Choisissez une catégorie ci-dessous.",
+        "setup_title": "Configuración de Misuki",
+        "setup_description": "Configura Misuki para este servidor.",
+        "setup_choose": "Elige una categoría a continuación.",
+        "setup_title": "Misuki Bot-Konfiguration",
+        "setup_description": "Konfigurieren Sie Misuki für diesen Server.",
+        "setup_choose": "Wählen Sie unten eine Kategorie.",
+        "setup_title": "Configuração do Misuki",
+        "setup_description": "Configure o Misuki para este servidor.",
+        "setup_choose": "Escolha uma categoria abaixo.",
+        "setup_title": "Misuki Bot Setup",
+        "setup_description": "Configure Misuki for this server.",
+        "setup_choose": "Choose a category below.",
+=======================================================
 # MISUKI - UTILITY
 # =========================================================
 
