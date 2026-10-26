@@ -1050,13 +1050,11 @@ class Config(commands.Cog):
         )
 
         embed = discord.Embed(
-            title=f"⚙️ {text['setup_settings']}",
+            title=f"⚙️ {text['setup_title']}",
             description=(
-                text['setup_settings_description']
+                text['setup_description']
                 + "\n\n"
-                + "Choose a category below."
-                if language == "en"
-                else text['setup_settings_description']
+                + text['setup_choose']
             ),
             color=discord.Color.blurple()
         )
