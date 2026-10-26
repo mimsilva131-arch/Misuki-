@@ -6,7 +6,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from cogs.utility import SettingsView
+from cogs.utility import SettingsView, get_user_preferences, TRANSLATIONS, DEFAULT_LANGUAGE
 
 
 # =========================================================
@@ -1044,18 +1044,26 @@ class Config(commands.Cog):
 
             return
 
+        language, _ = get_user_preferences(interaction.user.id)
+        text = TRANSLATIONS.get(
+            language, TRANSLATIONS[DEFAULT_LANGUAGE]
+        )
+
         embed = discord.Embed(
-            title="⚙️ Misuki Bot Setup",
+            title=f"⚙️ {text['setup_settings']}",
             description=(
-                "Configure Misuki for this server.\n\n"
-                "Choose a category below."
+                text['setup_settings_description']
+                + "\n\n"
+                + "Choose a category below."
+                if language == "en"
+                else text['setup_settings_description']
             ),
             color=discord.Color.blurple()
         )
 
         await interaction.response.send_message(
             embed=embed,
-            view=MainSetupView(self)
+            view=MainSetupView(self, interaction.user.id)
         )
 
 
@@ -1065,7 +1073,8 @@ class Config(commands.Cog):
 
 class MainSetupView(discord.ui.View):
 
-    def __init__(self, config):
+    def __init__(self, config, user_id=None):
+        self.user_id = user_id
 
         super().__init__(
             timeout=600
@@ -1075,7 +1084,7 @@ class MainSetupView(discord.ui.View):
             RolesButton(config)
         )
         self.add_item(
-            PersonalSettingsButton()
+            PersonalSettingsButton(self.user_id)
         )
 
         self.add_item(
@@ -1147,7 +1156,8 @@ class PersonalSettingsButton(
     discord.ui.Button
 ):
 
-    def __init__(self):
+    def __init__(self, user_id=None):
+        self.user_id = user_id
         super().__init__(
             label="Personal Settings",
             emoji="⚙️",
@@ -1155,8 +1165,12 @@ class PersonalSettingsButton(
         )
 
     async def callback(self, interaction):
+        language, _ = get_user_preferences(interaction.user.id)
+        text = TRANSLATIONS.get(
+            language, TRANSLATIONS[DEFAULT_LANGUAGE]
+        )
         await interaction.response.send_message(
-            "🌐 Language and 🕐 Timezone",
+            f"🌐 {text['setup_language']} • 🕐 {text['setup_timezone']}\n\n{text['setup_settings_description']}",
             view=SettingsView(interaction.user.id),
             ephemeral=True
         )
