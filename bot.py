@@ -37,6 +37,10 @@ PREMIUM_COMMANDS = {
 
 async def global_license_check(interaction: discord.Interaction):
     """Block premium application commands when the guild has no active license."""
+    # The bot owner is never blocked by license or server permission gates.
+    if OWNER_ID and interaction.user.id == OWNER_ID:
+        return True
+
     if interaction.guild is None:
         return True
 
