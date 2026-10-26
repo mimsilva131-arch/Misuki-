@@ -6,7 +6,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from cogs.utility import SettingsView, get_user_preferences, TRANSLATIONS, DEFAULT_LANGUAGE
+from cogs.utility import SettingsView, LanguageView, get_user_preferences, TRANSLATIONS, DEFAULT_LANGUAGE
 
 
 # =========================================================
@@ -1081,6 +1081,11 @@ class MainSetupView(discord.ui.View):
         self.add_item(
             RolesButton(config)
         )
+
+        self.add_item(
+            LanguageSetupButton(self.user_id)
+        )
+
         self.add_item(
             PersonalSettingsButton(self.user_id)
         )
@@ -1147,6 +1152,37 @@ class MainSetupView(discord.ui.View):
                 discord.ButtonStyle.secondary,
                 "announcements"
             )
+        )
+
+
+class LanguageSetupButton(discord.ui.Button):
+
+    def __init__(self, user_id=None):
+        self.user_id = user_id
+        super().__init__(
+            label="Language",
+            emoji="🌐",
+            style=discord.ButtonStyle.secondary
+        )
+
+    async def callback(self, interaction):
+        if self.user_id is not None and interaction.user.id != self.user_id:
+            await interaction.response.send_message(
+                "❌ These settings belong to another user.",
+                ephemeral=True
+            )
+            return
+
+        language, _ = get_user_preferences(interaction.user.id)
+        text = TRANSLATIONS.get(
+            language,
+            TRANSLATIONS[DEFAULT_LANGUAGE]
+        )
+
+        await interaction.response.send_message(
+            text["language_title"],
+            view=LanguageView(interaction.user.id),
+            ephemeral=True
         )
 
 
