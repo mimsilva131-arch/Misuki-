@@ -87,7 +87,6 @@
                 support: "Support",
                 advertisement: "Advertisement",
                 advertisement_admin: "Advertisement Admin",
-                license_management: "License Management",
                 my_advertisements: "My Advertisements",
                 terms: "Terms",
                 privacy: "Privacy",
@@ -96,6 +95,7 @@
                 logout: "Logout",
                 login: "Login with Discord"
             },
+                license_management: "License Management",
 
             licenses: {
                 admin_eyebrow: "ADMINISTRATION",
@@ -121,12 +121,6 @@
             },
 
             advertisements: {
-                status_page_title: "My Advertisements",
-                status_id: "ID:",
-                duration_days: "days",
-                payment_completed: "Payment completed",
-                status_unknown: "Status unavailable",
-                advertisement_id: "ID :",
                       "section_kicker": "Advertisement",
                       "featured_servers": "Featured servers",
                       "subtitle": "Discover community servers on Misuki.",
@@ -186,22 +180,6 @@
                 close: "Close menu"
             },
 
-            notifications: {
-                title: "Notifications",
-                enable: "Enable notifications",
-                enabled: "Notifications enabled",
-                denied: "Notifications are blocked in your browser settings.",
-                unsupported: "Notifications are not supported by this browser.",
-                login_required: "Sign in with Discord to enable notifications.",
-                error: "Could not enable notifications.",
-                empty: "No notifications yet.",
-                advertisement_approved_title: "Advertisement approved",
-                advertisement_approved_body: "Your advertisement {advertisement} was approved. You can now complete the payment.",
-                advertisement_rejected_title: "Advertisement rejected",
-                advertisement_rejected_body: "Your advertisement {advertisement} was rejected. Reason: {reason}"
-            },
-
-
             reviews: {
                 intro: "Reviews from members of Misuki communities.",
                 title: "Community Reviews",
@@ -216,11 +194,6 @@
             },
 
             license: {
-                information: "License information",
-                description: "View the status and details of this server's license here.",
-                inactive: "Inactive",
-                created: "Created",
-                no_license_title: "No license",
                 title: "License",
                 back_to_dashboard: "Back to Dashboard",
                 status: "Status",
@@ -245,7 +218,14 @@
                 add_misuki: "➕ Add Misuki",
                 cannot_add: "⚠️ Cannot Add",
                 leave_review: "⭐ Leave a Review",
-                license: "License"
+                license: "License",
+                no_authorized: "🔒 No authorized servers found.",
+                no_available: "No additional servers available.",
+                add_permission: "Add permission ✓",
+                no_authorization: "⚠️ No authorization",
+                add_misuki: "➕ Add Misuki",
+                cannot_add: "⚠️ Cannot Add",
+                leave_review: "⭐ Leave a Review"
             },
 
             footer: {
@@ -296,22 +276,10 @@
                 what_users_say: "⭐ What users say",
                 report_problem: "🐛 Report a Problem",
                 documentation_help: "Check the documentation for information about configuring and using Misuki.",
-                report_problem_text: "Found a bug or something that isn't working correctly? Contact the Misuki support team through Discord.",
-                need_help: "Need help? Choose the option above that best matches what you need.",
-                return_home: "← Return Home",
-                try_login_again: "Try Login Again",
-                continue_later: "If the problem continues, please try again later.",
-                view_my_advertisements: "View My Advertisements",
-                search_users: "Search name, @username or ID",
-                added_misuki_server: "Added Misuki to a server",
-                no_users_match: "No users match your search.",
-                id_label: "ID:",
-                account: "Account",
-                servers: "Servers",
-                return: "Return"
+                report_problem_text: "Found a bug or something that isn't working correctly? Contact the Misuki support team through Discord."
             ,
 
-                advertisement_title: "Advertisement title",
+                                 advertisement_title: "Advertisement title",
                 description: "Description",
                 image_url: "Image URL",
                 destination_url: "Destination URL",
@@ -335,14 +303,9 @@
                 days_14: "14 DAYS",
                 days_30: "30 DAYS",
                 save_001: "Save €0.01",
-                save_050: "Save €0.50"
-            },
+                save_050: "Save €0.50",},
 
             statistics: {
-                overview_kicker: "Overview",
-                account: "Account",
-                status_kicker: "Status",
-                performance_kicker: "Performance",
                 hero_description: "Overview of the Misuki service and its current statistics.",
                 service_description: "General statistics about the Misuki service.",
                 servers: "Servers",
@@ -378,17 +341,7 @@
                 moderation_actions: "Moderation actions",
                 announcements: "Announcements",
                 privacy: "Privacy",
-                privacy_description: "Public statistics are presented in an aggregated form. Specific server and user information is restricted to authorized Misuki administrators.",
-                account: "Account",
-                search_users: "Search name, @username or ID",
-                added_misuki: "Added Misuki to a server",
-                no_users_match: "No users match your search."
-            },
-
-            error: {
-                title: "Something went wrong",
-                subtitle: "We couldn't complete your request.",
-                continue_later: "If the problem continues, please try again later."
+                privacy_description: "Public statistics are presented in an aggregated form. Specific server and user information is restricted to authorized Misuki administrators."
             },
 
             cookies: {
@@ -401,131 +354,6 @@
                 terms: "Terms",
                 privacy: "Privacy",
                 policy: "Cookie Policy"
-            },
-
-data: {
-                title: "Your Data",
-                subtitle: "Manage your Misuki data",
-                intro: "Misuki stores certain information required to provide its features. This page explains the types of information that may be associated with your account or Discord server.",
-                stored_title: "What Data May Be Stored?",
-                stored_1: "Discord user ID",
-                stored_2: "Discord server IDs",
-                stored_3: "Server configuration",
-                stored_4: "Misuki feature settings",
-                stored_5: "Information required for licenses and subscriptions",
-                stored_6: "Support or review information that you voluntarily provide",
-                why_title: "Why Is It Stored?",
-                why_text: "This information allows Misuki to provide its functionality, remember server settings, authenticate users and maintain the service.",
-                request_title: "Requesting Your Data",
-                request_text: "You may contact Misuki support if you would like to request information about the data associated with your account.",
-                contact_support: "Contact Support",
-                deletion_title: "Requesting Deletion",
-                deletion_text: "If you would like your data to be deleted, contact Misuki support and provide enough information for us to identify the relevant account or server.",
-                deletion_note: "Some information may need to be retained where required by law or where necessary for security, fraud prevention or legitimate technical purposes.",
-                discord_title: "Discord Data",
-                discord_text: "Misuki uses Discord authentication where applicable. Misuki does not store your Discord password.",
-                discord_policy: "Information received through Discord is handled according to the Misuki Privacy Policy and the permissions requested during authentication.",
-                privacy_button: "Read Privacy Policy"
-            },
-
-data: {
-                title: "Os seus dados",
-                subtitle: "Gerir os seus dados do Misuki",
-                intro: "O Misuki armazena determinadas informações necessárias para disponibilizar as suas funcionalidades. Esta página explica os tipos de informação que podem estar associados à sua conta ou servidor Discord.",
-                stored_title: "Que dados podem ser armazenados?",
-                stored_1: "ID de utilizador do Discord",
-                stored_2: "IDs dos servidores Discord",
-                stored_3: "Configuração do servidor",
-                stored_4: "Definições das funcionalidades do Misuki",
-                stored_5: "Informações necessárias para licenças e subscrições",
-                stored_6: "Informações de suporte ou avaliações que fornecer voluntariamente",
-                why_title: "Porque são armazenados?",
-                why_text: "Estas informações permitem ao Misuki disponibilizar as suas funcionalidades, guardar definições dos servidores, autenticar utilizadores e manter o serviço.",
-                request_title: "Solicitar os seus dados",
-                request_text: "Pode contactar o suporte do Misuki se pretender solicitar informações sobre os dados associados à sua conta.",
-                contact_support: "Contactar o suporte",
-                deletion_title: "Solicitar eliminação",
-                deletion_text: "Se pretender que os seus dados sejam eliminados, contacte o suporte do Misuki e forneça informação suficiente para identificarmos a conta ou servidor relevante.",
-                deletion_note: "Algumas informações poderão ter de ser conservadas quando exigido por lei ou quando necessário para segurança, prevenção de fraude ou fins técnicos legítimos.",
-                discord_title: "Dados do Discord",
-                discord_text: "O Misuki utiliza a autenticação do Discord quando aplicável. O Misuki não armazena a sua palavra-passe do Discord.",
-                discord_policy: "As informações recebidas através do Discord são tratadas de acordo com a Política de Privacidade do Misuki e com as permissões solicitadas durante a autenticação.",
-                privacy_button: "Ler a Política de Privacidade"
-            },
-
-data: {
-                title: "Ihre Daten",
-                subtitle: "Ihre Misuki-Daten verwalten",
-                intro: "Misuki speichert bestimmte Informationen, die für die Bereitstellung seiner Funktionen erforderlich sind. Diese Seite erklärt, welche Arten von Informationen mit Ihrem Konto oder Discord-Server verknüpft sein können.",
-                stored_title: "Welche Daten können gespeichert werden?",
-                stored_1: "Discord-Benutzer-ID",
-                stored_2: "Discord-Server-IDs",
-                stored_3: "Serverkonfiguration",
-                stored_4: "Misuki-Funktionseinstellungen",
-                stored_5: "Für Lizenzen und Abonnements erforderliche Informationen",
-                stored_6: "Freiwillig bereitgestellte Support- oder Bewertungsinformationen",
-                why_title: "Warum werden sie gespeichert?",
-                why_text: "Diese Informationen ermöglichen es Misuki, seine Funktionen bereitzustellen, Servereinstellungen zu speichern, Benutzer zu authentifizieren und den Dienst zu betreiben.",
-                request_title: "Ihre Daten anfordern",
-                request_text: "Sie können den Misuki-Support kontaktieren, wenn Sie Informationen zu den mit Ihrem Konto verbundenen Daten anfordern möchten.",
-                contact_support: "Support kontaktieren",
-                deletion_title: "Löschung anfordern",
-                deletion_text: "Wenn Sie möchten, dass Ihre Daten gelöscht werden, kontaktieren Sie den Misuki-Support und geben Sie genügend Informationen an, damit wir das betreffende Konto oder den Server identifizieren können.",
-                deletion_note: "Einige Informationen müssen möglicherweise aufbewahrt werden, wenn dies gesetzlich vorgeschrieben oder für Sicherheit, Betrugsprävention oder legitime technische Zwecke erforderlich ist.",
-                discord_title: "Discord-Daten",
-                discord_text: "Misuki verwendet gegebenenfalls die Discord-Authentifizierung. Misuki speichert Ihr Discord-Passwort nicht.",
-                discord_policy: "Über Discord erhaltene Informationen werden gemäß der Misuki-Datenschutzerklärung und den während der Authentifizierung angeforderten Berechtigungen verarbeitet.",
-                privacy_button: "Datenschutzerklärung lesen"
-            },
-
-data: {
-                title: "Tus datos",
-                subtitle: "Gestiona tus datos de Misuki",
-                intro: "Misuki almacena cierta información necesaria para proporcionar sus funciones. Esta página explica los tipos de información que pueden estar asociados a tu cuenta o servidor de Discord.",
-                stored_title: "¿Qué datos pueden almacenarse?",
-                stored_1: "ID de usuario de Discord",
-                stored_2: "IDs de servidores de Discord",
-                stored_3: "Configuración del servidor",
-                stored_4: "Configuración de funciones de Misuki",
-                stored_5: "Información necesaria para licencias y suscripciones",
-                stored_6: "Información de soporte o reseñas que proporciones voluntariamente",
-                why_title: "¿Por qué se almacenan?",
-                why_text: "Esta información permite a Misuki proporcionar sus funciones, recordar la configuración de los servidores, autenticar usuarios y mantener el servicio.",
-                request_title: "Solicitar tus datos",
-                request_text: "Puedes contactar con el soporte de Misuki si quieres solicitar información sobre los datos asociados a tu cuenta.",
-                contact_support: "Contactar con soporte",
-                deletion_title: "Solicitar eliminación",
-                deletion_text: "Si quieres que se eliminen tus datos, contacta con el soporte de Misuki y proporciona información suficiente para identificar la cuenta o el servidor correspondiente.",
-                deletion_note: "Es posible que algunos datos deban conservarse cuando lo exija la ley o cuando sea necesario por motivos de seguridad, prevención del fraude o fines técnicos legítimos.",
-                discord_title: "Datos de Discord",
-                discord_text: "Misuki utiliza la autenticación de Discord cuando corresponde. Misuki no almacena tu contraseña de Discord.",
-                discord_policy: "La información recibida a través de Discord se trata de acuerdo con la Política de Privacidad de Misuki y los permisos solicitados durante la autenticación.",
-                privacy_button: "Leer la Política de Privacidad"
-            },
-
-data: {
-                title: "Vos données",
-                subtitle: "Gérer vos données Misuki",
-                intro: "Misuki stocke certaines informations nécessaires à la fourniture de ses fonctionnalités. Cette page explique les types d’informations pouvant être associés à votre compte ou serveur Discord.",
-                stored_title: "Quelles données peuvent être stockées ?",
-                stored_1: "Identifiant utilisateur Discord",
-                stored_2: "Identifiants des serveurs Discord",
-                stored_3: "Configuration du serveur",
-                stored_4: "Paramètres des fonctionnalités de Misuki",
-                stored_5: "Informations nécessaires aux licences et abonnements",
-                stored_6: "Informations de support ou avis que vous fournissez volontairement",
-                why_title: "Pourquoi sont-elles stockées ?",
-                why_text: "Ces informations permettent à Misuki de fournir ses fonctionnalités, de mémoriser les paramètres des serveurs, d’authentifier les utilisateurs et de maintenir le service.",
-                request_title: "Demander vos données",
-                request_text: "Vous pouvez contacter le support Misuki si vous souhaitez demander des informations sur les données associées à votre compte.",
-                contact_support: "Contacter le support",
-                deletion_title: "Demander la suppression",
-                deletion_text: "Si vous souhaitez supprimer vos données, contactez le support Misuki et fournissez suffisamment d’informations pour identifier le compte ou serveur concerné.",
-                deletion_note: "Certaines informations peuvent devoir être conservées lorsque la loi l’exige ou lorsque cela est nécessaire à des fins de sécurité, de prévention de la fraude ou à des fins techniques légitimes.",
-                discord_title: "Données Discord",
-                discord_text: "Misuki utilise l’authentification Discord lorsque cela est applicable. Misuki ne stocke pas votre mot de passe Discord.",
-                discord_policy: "Les informations reçues via Discord sont traitées conformément à la Politique de confidentialité de Misuki et aux autorisations demandées lors de l’authentification.",
-                privacy_button: "Lire la Politique de confidentialité"
             },
 
             legal: {
@@ -612,9 +440,6 @@ data: {
 },
 
             verification: {
-                login_required: "Sign in to continue",
-                login_description: "To start verification, you need to sign in with your Discord account.",
-                login_note: "After signing in, you will automatically return to this page and can continue the verification.",
                 title: "Verification",
                 subtitle: "Confirm your Discord account to get access to the server.",
                 authenticated_account: "Authenticated account",
@@ -627,16 +452,25 @@ data: {
                 processing: "The bot will process your verification and assign the appropriate role on the server.",
                 return_discord: "You can return to Discord. If the role takes a few seconds to be assigned, please wait while Misuki processes your request.",
                 info: "By continuing, Misuki will confirm your Discord account and send a verification request to the bot to assign your verification role.",
-                captcha_placeholder: "Answer",
                 footer: "Protected by Misuki"
             }
         },
+
 
         /* =====================================================
            PORTUGUÊS
            ===================================================== */
 
         pt: {
+
+            language: {
+                select: "Selecionar idioma",
+                en: "Inglês",
+                pt: "Português",
+                de: "Alemão",
+                es: "Espanhol",
+                fr: "Francês"
+            },
 
             menu: {
                 title: "Menu",
@@ -655,7 +489,6 @@ data: {
                 support: "Suporte",
                 advertisement: "Publicidade",
                 advertisement_admin: "Administração de Publicidade",
-                license_management: "Gestão de Licenças",
                 my_advertisements: "As minhas publicidades",
                 terms: "Termos",
                 privacy: "Privacidade",
@@ -664,6 +497,7 @@ data: {
                 logout: "Terminar sessão",
                 login: "Entrar com o Discord"
             },
+                license_management: "Gestão de licenças",
 
             licenses: {
                 admin_eyebrow: "ADMINISTRAÇÃO",
@@ -689,12 +523,6 @@ data: {
             },
 
             advertisements: {
-                status_page_title: "As minhas publicidades",
-                status_id: "ID:",
-                duration_days: "dias",
-                payment_completed: "Pagamento concluído",
-                status_unknown: "Estado indisponível",
-                advertisement_id: "ID:",
                       "section_kicker": "Publicidade",
                       "featured_servers": "Servidores em destaque",
                       "subtitle": "Descubra servidores da comunidade no Misuki.",
@@ -754,24 +582,8 @@ data: {
                 close: "Fechar menu"
             },
 
-            notifications: {
-                title: "Notificações",
-                enable: "Ativar notificações",
-                enabled: "Notificações ativadas",
-                denied: "As notificações estão bloqueadas nas definições do navegador.",
-                unsupported: "As notificações não são suportadas por este navegador.",
-                login_required: "Entre com o Discord para ativar as notificações.",
-                error: "Não foi possível ativar as notificações.",
-                empty: "Ainda não existem notificações.",
-                advertisement_approved_title: "Publicidade aprovada",
-                advertisement_approved_body: "A sua publicidade {advertisement} foi aprovada. Já pode efetuar o pagamento.",
-                advertisement_rejected_title: "Publicidade rejeitada",
-                advertisement_rejected_body: "A sua publicidade {advertisement} foi rejeitada. Motivo: {reason}"
-            },
-
-
             reviews: {
-                intro: "Avaliações dos membros das comunidades do Misuki.",
+                intro: "Avaliações dos membros das comunidades Misuki.",
                 title: "Avaliações da comunidade",
                 no_reviews: "Ainda não há avaliações.",
                 write_review: "Escrever uma avaliação",
@@ -784,11 +596,6 @@ data: {
             },
 
             license: {
-                information: "Informação da licença",
-                description: "Consulte aqui o estado e os detalhes da licença deste servidor.",
-                inactive: "Inativa",
-                created: "Criada",
-                no_license_title: "Sem licença",
                 title: "Licença",
                 back_to_dashboard: "Voltar ao painel",
                 status: "Estado",
@@ -818,7 +625,7 @@ data: {
                 no_available: "Não existem servidores adicionais disponíveis.",
                 add_permission: "Permissão para adicionar ✓",
                 no_authorization: "⚠️ Sem autorização",
-                add_misuki: "➕ Adicionar o Misuki",
+                add_misuki: "➕ Adicionar Misuki",
                 cannot_add: "⚠️ Não é possível adicionar",
                 leave_review: "⭐ Escrever uma avaliação"
             },
@@ -829,7 +636,7 @@ data: {
 
             common: {
                 product: "Produto",
-                advertise_intro: "Promova o seu servidor Discord junto da comunidade do Misuki. Escolha a duração e crie o seu anúncio.",
+                advertise_intro: "Promova o seu servidor Discord junto da comunidade Misuki. Escolha a duração e crie o seu anúncio.",
                 documentation_intro: "Aprenda a configurar e utilizar o Misuki no seu servidor Discord.",
                 logged_in_as: "Sessão iniciada como",
                 authorized_servers: "🔐 Servidores autorizados",
@@ -849,7 +656,7 @@ data: {
                 home_title: "Bot do Discord",
                 community: "Comunidade",
                 advertise: "Publicidade",
-                meet: "Conheça o",
+                meet: "Conheça a",
                 hero_description: "Um poderoso bot do Discord criado para tornar o seu servidor mais fácil de gerir, seguro e divertido.",
                 open_dashboard: "🚀 Abrir painel",
                 why_misuki: "Porquê o Misuki?",
@@ -899,10 +706,6 @@ data: {
                 save_050: "Poupe €0,50",},
 
             statistics: {
-                overview_kicker: "Visão geral",
-                account: "Account",
-                status_kicker: "Estado",
-                performance_kicker: "Desempenho",
                 hero_description: "Visão geral do serviço Misuki e das suas estatísticas atuais.",
                 service_description: "Estatísticas gerais sobre o serviço Misuki.",
                 servers: "Servidores",
@@ -1037,9 +840,6 @@ data: {
 },
 
             verification: {
-                login_required: "Inicie sessão para continuar",
-                login_description: "Para iniciar a verificação, precisa de iniciar sessão com a sua conta Discord.",
-                login_note: "Depois de iniciar sessão, voltará automaticamente para esta página e poderá continuar a verificação.",
                 title: "Verificação",
                 subtitle: "Confirme a sua conta Discord para obter acesso ao servidor.",
                 authenticated_account: "Conta autenticada",
@@ -1052,9 +852,10 @@ data: {
                 processing: "O bot irá processar a sua verificação e atribuir o cargo correspondente no servidor.",
                 return_discord: "Pode voltar ao Discord. Se a atribuição do cargo demorar alguns segundos, aguarde enquanto o Misuki processa o seu pedido.",
                 info: "Ao continuar, o Misuki irá confirmar a sua conta Discord e enviar um pedido de verificação ao bot para atribuir o seu cargo de verificação.",
-                captcha_placeholder: "Respuesta",
                 footer: "Protegido por Misuki"
-            },
+            }
+        },
+
 
         /* =====================================================
            DEUTSCH
@@ -1088,7 +889,6 @@ data: {
                 support: "Support",
                 advertisement: "Werbung",
                 advertisement_admin: "Werbeverwaltung",
-                license_management: "Lizenzverwaltung",
                 my_advertisements: "Meine Werbungen",
                 terms: "Bedingungen",
                 privacy: "Datenschutz",
@@ -1097,6 +897,7 @@ data: {
                 logout: "Abmelden",
                 login: "Mit Discord anmelden"
             },
+                license_management: "Lizenzverwaltung",
 
             licenses: {
                 admin_eyebrow: "ADMINISTRATION",
@@ -1112,7 +913,7 @@ data: {
                 created: "Erstellt",
                 expires: "Läuft ab",
                 extend: "Verlängern",
-                days_to_extend: "Zu verlängernde Tage",
+                days_to_extend: "Tage zur Verlängerung",
                 revoke: "Widerrufen",
                 status_active: "Aktiv",
                 status_expired: "Abgelaufen",
@@ -1122,12 +923,6 @@ data: {
             },
 
             advertisements: {
-                status_page_title: "Meine Werbungen",
-                status_id: "ID:",
-                duration_days: "Tage",
-                payment_completed: "Zahlung abgeschlossen",
-                status_unknown: "Status nicht verfügbar",
-                advertisement_id: "ID:",
                       "section_kicker": "Werbung",
                       "featured_servers": "Ausgewählte Server",
                       "subtitle": "Entdecke Community-Server auf Misuki.",
@@ -1187,22 +982,6 @@ data: {
                 close: "Menü schließen"
             },
 
-            notifications: {
-                title: "Benachrichtigungen",
-                enable: "Benachrichtigungen aktivieren",
-                enabled: "Benachrichtigungen aktiviert",
-                denied: "Benachrichtigungen sind in den Browsereinstellungen blockiert.",
-                unsupported: "Benachrichtigungen werden von diesem Browser nicht unterstützt.",
-                login_required: "Melden Sie sich mit Discord an, um Benachrichtigungen zu aktivieren.",
-                error: "Benachrichtigungen konnten nicht aktiviert werden.",
-                empty: "Noch keine Benachrichtigungen.",
-                advertisement_approved_title: "Werbung genehmigt",
-                advertisement_approved_body: "Ihre Werbung {advertisement} wurde genehmigt. Sie können jetzt die Zahlung abschließen.",
-                advertisement_rejected_title: "Werbung abgelehnt",
-                advertisement_rejected_body: "Ihre Werbung {advertisement} wurde abgelehnt. Grund: {reason}"
-            },
-
-
             reviews: {
                 intro: "Bewertungen von Mitgliedern der Misuki-Community.",
                 title: "Community-Bewertungen",
@@ -1217,11 +996,6 @@ data: {
             },
 
             license: {
-                information: "Lizenzinformationen",
-                description: "Sehen Sie hier den Status und die Details der Lizenz dieses Servers.",
-                inactive: "Inaktiv",
-                created: "Erstellt",
-                no_license_title: "Keine Lizenz",
                 title: "Lizenz",
                 back_to_dashboard: "Zurück zum Dashboard",
                 status: "Status",
@@ -1332,10 +1106,6 @@ data: {
                 save_050: "Sparen Sie €0,50",},
 
             statistics: {
-                overview_kicker: "Übersicht",
-                account: "Account",
-                status_kicker: "Status",
-                performance_kicker: "Leistung",
                 hero_description: "Übersicht über den Misuki-Dienst und seine aktuellen Statistiken.",
                 service_description: "Allgemeine Statistiken über den Misuki-Dienst.",
                 servers: "Server",
@@ -1470,9 +1240,6 @@ data: {
 },
 
             verification: {
-                login_required: "Anmelden, um fortzufahren",
-                login_description: "Um die Verifizierung zu starten, müssen Sie sich mit Ihrem Discord-Konto anmelden.",
-                login_note: "Nach der Anmeldung kehren Sie automatisch zu dieser Seite zurück und können die Verifizierung fortsetzen.",
                 title: "Verifizierung",
                 subtitle: "Bestätigen Sie Ihr Discord-Konto, um Zugriff auf den Server zu erhalten.",
                 authenticated_account: "Authentifiziertes Konto",
@@ -1485,7 +1252,6 @@ data: {
                 processing: "Der Bot wird Ihre Verifizierung bearbeiten und die entsprechende Rolle auf dem Server vergeben.",
                 return_discord: "Sie können zu Discord zurückkehren. Wenn die Vergabe der Rolle einige Sekunden dauert, warten Sie bitte, während Misuki Ihre Anfrage verarbeitet.",
                 info: "Wenn Sie fortfahren, bestätigt Misuki Ihr Discord-Konto und sendet eine Verifizierungsanfrage an den Bot, damit Ihre Verifizierungsrolle vergeben werden kann.",
-                captcha_placeholder: "Antwort",
                 footer: "Geschützt durch Misuki"
             }
         },
@@ -1523,7 +1289,6 @@ data: {
                 support: "Soporte",
                 advertisement: "Publicidad",
                 advertisement_admin: "Administración de Publicidad",
-                license_management: "Gestión de licencias",
                 my_advertisements: "Mis publicidades",
                 terms: "Términos",
                 privacy: "Privacidad",
@@ -1532,6 +1297,7 @@ data: {
                 logout: "Cerrar sesión",
                 login: "Iniciar sesión con Discord"
             },
+                license_management: "Gestión de licencias",
 
             licenses: {
                 admin_eyebrow: "ADMINISTRACIÓN",
@@ -1545,24 +1311,18 @@ data: {
                 create: "Crear licencia",
                 existing: "Licencias existentes",
                 created: "Creada",
-                expires: "Expira",
+                expires: "Caduca",
                 extend: "Ampliar",
-                days_to_extend: "Días a ampliar",
+                days_to_extend: "Días para ampliar",
                 revoke: "Revocar",
                 status_active: "Activa",
-                status_expired: "Expirada",
+                status_expired: "Caducada",
                 status_revoked: "Revocada",
                 status_none: "Desconocida",
                 none: "No hay registros de licencias."
             },
 
             advertisements: {
-                status_page_title: "Mis publicidades",
-                status_id: "ID:",
-                duration_days: "días",
-                payment_completed: "Pago completado",
-                status_unknown: "Estado no disponible",
-                advertisement_id: "ID:",
                       "section_kicker": "Publicidad",
                       "featured_servers": "Servidores destacados",
                       "subtitle": "Descubre servidores de la comunidad en Misuki.",
@@ -1622,22 +1382,6 @@ data: {
                 close: "Cerrar menú"
             },
 
-            notifications: {
-                title: "Notificaciones",
-                enable: "Activar notificaciones",
-                enabled: "Notificaciones activadas",
-                denied: "Las notificaciones están bloqueadas en la configuración del navegador.",
-                unsupported: "Este navegador no admite notificaciones.",
-                login_required: "Inicia sesión con Discord para activar las notificaciones.",
-                error: "No se pudieron activar las notificaciones.",
-                empty: "Aún no hay notificaciones.",
-                advertisement_approved_title: "Publicidad aprobada",
-                advertisement_approved_body: "Tu publicidad {advertisement} ha sido aprobada. Ya puedes completar el pago.",
-                advertisement_rejected_title: "Publicidad rechazada",
-                advertisement_rejected_body: "Tu publicidad {advertisement} ha sido rechazada. Motivo: {reason}"
-            },
-
-
             reviews: {
                 intro: "Reseñas de miembros de las comunidades de Misuki.",
                 title: "Reseñas de la comunidad",
@@ -1652,11 +1396,6 @@ data: {
             },
 
             license: {
-                information: "Información de la licencia",
-                description: "Consulta aquí el estado y los detalles de la licencia de este servidor.",
-                inactive: "Inactiva",
-                created: "Creada",
-                no_license_title: "Sin licencia",
                 title: "Licencia",
                 back_to_dashboard: "Volver al panel",
                 status: "Estado",
@@ -1767,10 +1506,6 @@ data: {
                 save_050: "Ahorra €0,50",},
 
             statistics: {
-                overview_kicker: "Resumen",
-                account: "Account",
-                status_kicker: "Estado",
-                performance_kicker: "Rendimiento",
                 hero_description: "Descripción general del servicio Misuki y sus estadísticas actuales.",
                 service_description: "Estadísticas generales sobre el servicio Misuki.",
                 servers: "Servidores",
@@ -1905,9 +1640,6 @@ data: {
 },
 
             verification: {
-                login_required: "Inicia sesión para continuar",
-                login_description: "Para iniciar la verificación, debes iniciar sesión con tu cuenta de Discord.",
-                login_note: "Después de iniciar sesión, volverás automáticamente a esta página y podrás continuar con la verificación.",
                 title: "Verificación",
                 subtitle: "Confirma tu cuenta de Discord para obtener acceso al servidor.",
                 authenticated_account: "Cuenta autenticada",
@@ -1957,7 +1689,6 @@ data: {
                 support: "Support",
                 advertisement: "Publicité",
                 advertisement_admin: "Administration de la publicité",
-                license_management: "Gestion des licences",
                 my_advertisements: "Mes publicités",
                 terms: "Conditions",
                 privacy: "Confidentialité",
@@ -1966,6 +1697,7 @@ data: {
                 logout: "Se déconnecter",
                 login: "Se connecter avec Discord"
             },
+                license_management: "Gestion des licences",
 
             licenses: {
                 admin_eyebrow: "ADMINISTRATION",
@@ -1991,12 +1723,6 @@ data: {
             },
 
             advertisements: {
-                status_page_title: "Mes publicités",
-                status_id: "ID :",
-                duration_days: "jours",
-                payment_completed: "Paiement effectué",
-                status_unknown: "État indisponible",
-                advertisement_id: "ID:",
                       "section_kicker": "Publicité",
                       "featured_servers": "Serveurs en vedette",
                       "subtitle": "Découvrez les serveurs de la communauté sur Misuki.",
@@ -2056,24 +1782,8 @@ data: {
                 close: "Fermer le menu"
             },
 
-            notifications: {
-                title: "Notifications",
-                enable: "Activer les notifications",
-                enabled: "Notifications activées",
-                denied: "Les notifications sont bloquées dans les paramètres du navigateur.",
-                unsupported: "Les notifications ne sont pas prises en charge par ce navigateur.",
-                login_required: "Connectez-vous avec Discord pour activer les notifications.",
-                error: "Impossible d’activer les notifications.",
-                empty: "Aucune notification pour le moment.",
-                advertisement_approved_title: "Publicité approuvée",
-                advertisement_approved_body: "Votre publicité {advertisement} a été approuvée. Vous pouvez maintenant effectuer le paiement.",
-                advertisement_rejected_title: "Publicité refusée",
-                advertisement_rejected_body: "Votre publicité {advertisement} a été refusée. Motif : {reason}"
-            },
-
-
             reviews: {
-                intro: "Avis des membres des communautés de Misuki.",
+                intro: "Avis des membres des communautés Misuki.",
                 title: "Avis de la communauté",
                 no_reviews: "Aucun avis pour le moment.",
                 write_review: "Écrire un avis",
@@ -2086,11 +1796,6 @@ data: {
             },
 
             license: {
-                information: "Informations sur la licence",
-                description: "Consultez ici l’état et les détails de la licence de ce serveur.",
-                inactive: "Inactive",
-                created: "Créée",
-                no_license_title: "Aucune licence",
                 title: "Licence",
                 back_to_dashboard: "Retour au tableau de bord",
                 status: "Statut",
@@ -2201,10 +1906,6 @@ data: {
                 save_050: "Économisez 0,50 €",},
 
             statistics: {
-                overview_kicker: "Vue d’ensemble",
-                account: "Account",
-                status_kicker: "État",
-                performance_kicker: "Performance",
                 hero_description: "Vue d’ensemble du service Misuki et de ses statistiques actuelles.",
                 service_description: "Statistiques générales du service Misuki.",
                 servers: "Serveurs",
@@ -2339,9 +2040,6 @@ data: {
 },
 
             verification: {
-                login_required: "Connectez-vous pour continuer",
-                login_description: "Pour commencer la vérification, vous devez vous connecter avec votre compte Discord.",
-                login_note: "Après vous être connecté, vous reviendrez automatiquement sur cette page et pourrez poursuivre la vérification.",
                 title: "Vérification",
                 subtitle: "Confirmez votre compte Discord pour obtenir l'accès au serveur.",
                 authenticated_account: "Compte authentifié",
@@ -2354,7 +2052,6 @@ data: {
                 processing: "Le bot traitera votre vérification et attribuera le rôle correspondant sur le serveur.",
                 return_discord: "Vous pouvez retourner sur Discord. Si l'attribution du rôle prend quelques secondes, veuillez patienter pendant que Misuki traite votre demande.",
                 info: "En continuant, Misuki confirmera votre compte Discord et enverra une demande de vérification au bot afin d'attribuer votre rôle de vérification.",
-                captcha_placeholder: "Réponse",
                 footer: "Protégé par Misuki"
             }
         }
@@ -2365,15 +2062,9 @@ data: {
        AUTOMATIC STATIC TEXT TRANSLATION
        ========================================================= */
 
-    const staticPhraseKeys = {
-        en: {},
-        pt: {},
-        de: {},
-        es: {},
-        fr: {}
-    };
+    const englishPhraseKeys = {};
 
-    function buildPhraseIndex(value, path, language) {
+    function buildEnglishPhraseIndex(value, path) {
         if (!value || typeof value !== "object") return;
 
         Object.keys(value).forEach(function (key) {
@@ -2382,29 +2073,13 @@ data: {
 
             if (typeof current === "string") {
                 const normalized = normalizeStaticText(current);
-                if (
-                    normalized &&
-                    !staticPhraseKeys[language][normalized]
-                ) {
-                    staticPhraseKeys[language][normalized] = currentPath;
+                if (normalized && !englishPhraseKeys[normalized]) {
+                    englishPhraseKeys[normalized] = currentPath;
                 }
             } else if (current && typeof current === "object") {
-                buildPhraseIndex(current, currentPath, language);
+                buildEnglishPhraseIndex(current, currentPath);
             }
         });
-    }
-
-    function findStaticTranslationKey(normalized) {
-        if (!normalized) return null;
-
-        for (const sourceLanguage of SUPPORTED_LANGUAGES) {
-            const index = staticPhraseKeys[sourceLanguage];
-            if (index && index[normalized]) {
-                return index[normalized];
-            }
-        }
-
-        return null;
     }
 
     function normalizeStaticText(value) {
@@ -2421,6 +2096,7 @@ data: {
         if (element.closest(
             "script, style, textarea, input, select, option, " +
             ".server-name, .server-id, .review-text, " +
+            ".advertisement-card, .advertisement-content, " +
             "[data-dynamic-content]"
         )) {
             return true;
@@ -2463,8 +2139,13 @@ data: {
 
             if (original.includes("{{") || original.includes("{%")) return;
 
+            if (language === "en") {
+                textNode.nodeValue = original;
+                return;
+            }
+
             const normalized = normalizeStaticText(original);
-            const key = findStaticTranslationKey(normalized);
+            const key = englishPhraseKeys[normalized];
 
             if (!key) {
                 textNode.nodeValue = original;
@@ -2485,13 +2166,7 @@ data: {
         });
     }
 
-    SUPPORTED_LANGUAGES.forEach(function (language) {
-        buildPhraseIndex(
-            translations[language],
-            "",
-            language
-        );
-    });
+    buildEnglishPhraseIndex(translations.en, "");
 
     /* =========================================================
        GET TRANSLATION
@@ -2692,17 +2367,12 @@ data: {
 
 
     /* =========================================================
-       TRANSLATE COMMON HTML ATTRIBUTES
+       TRANSLATE ATTRIBUTES
        ========================================================= */
 
     function translateCommonAttributes(language) {
 
-        const attributes = [
-            "title",
-            "placeholder",
-            "aria-label",
-            "alt"
-        ];
+        const attributes = ["title", "placeholder", "aria-label", "alt"];
 
         document.querySelectorAll("body *").forEach(function (element) {
             if (!element || element.hasAttribute("data-i18n-attr")) return;
@@ -2720,11 +2390,8 @@ data: {
                     element.__misukiOriginalAttributes[attribute] = current;
                 }
 
-                const original =
-                    element.__misukiOriginalAttributes[attribute];
-
-                const normalized = normalizeStaticText(original);
-                const key = findStaticTranslationKey(normalized);
+                const original = element.__misukiOriginalAttributes[attribute];
+                const key = findStaticTranslationKey(normalizeStaticText(original));
                 if (!key) return;
 
                 const translated = getTranslation(language, key);
@@ -2735,10 +2402,6 @@ data: {
         });
     }
 
-
-    /* =========================================================
-       TRANSLATE ATTRIBUTES
-       ========================================================= */
 
     function translateAttributes(language) {
 
@@ -2830,14 +2493,10 @@ data: {
             "/advertise/success": "advertisements.proposal_submitted",
 
             "/payment/success": "advertisements.payment_completed",
-            "/advertise/paypal/success": "advertisements.payment_completed",
 
             "/payment/cancel": "advertisements.payment_cancelled",
-            "/advertise/paypal/cancel": "advertisements.payment_cancelled",
 
             "/admin/advertise": "advertisements.advertisement_management",
-            "/admin/licenses": "licenses.title",
-            "/manage": "license.information",
 
             "/terms": "nav.terms",
 
@@ -2925,10 +2584,6 @@ data: {
                         translated;
                 }
             });
-
-        translateCommonAttributes(
-            language
-        );
 
         translateAttributes(
             language
@@ -3239,48 +2894,33 @@ data: {
 
 
     /* =========================================================
-       DYNAMIC CONTENT TRANSLATION
+       INITIALIZATION
        ========================================================= */
 
     function setupTranslationObserver() {
 
-        if (!document.body || window.__misukiTranslationObserver) {
-            return;
-        }
+        if (!document.body || window.__misukiTranslationObserver) return;
 
-        window.__misukiTranslationObserver =
-            new MutationObserver(function (mutations) {
-                if (translationInProgress) return;
+        window.__misukiTranslationObserver = new MutationObserver(function (mutations) {
+            if (translationInProgress) return;
 
-                let hasAddedNodes = false;
-
-                mutations.forEach(function (mutation) {
-                    if (mutation.addedNodes && mutation.addedNodes.length) {
-                        hasAddedNodes = true;
-                    }
-                });
-
-                if (!hasAddedNodes) return;
-
-                window.requestAnimationFrame(function () {
-                    if (translationInProgress) return;
-                    translatePage(activeLanguage);
-                });
+            const added = mutations.some(function (mutation) {
+                return mutation.addedNodes && mutation.addedNodes.length > 0;
             });
+
+            if (!added) return;
+
+            window.requestAnimationFrame(function () {
+                if (!translationInProgress) translatePage(activeLanguage);
+            });
+        });
 
         window.__misukiTranslationObserver.observe(
             document.body,
-            {
-                childList: true,
-                subtree: true
-            }
+            { childList: true, subtree: true }
         );
     }
 
-
-    /* =========================================================
-       INITIALIZATION
-       ========================================================= */
 
     function initialize() {
 
