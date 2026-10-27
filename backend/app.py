@@ -136,6 +136,8 @@ SECRET_KEY = os.getenv(
 )
 
 
+OWNER_DISCORD_ID = os.getenv("OWNER_ID", "").strip()
+
 ADMIN_DISCORD_IDS = {
     str(admin_id).strip()
     for admin_id in os.getenv(
@@ -144,6 +146,9 @@ ADMIN_DISCORD_IDS = {
     ).split(",")
     if admin_id.strip()
 }
+
+if OWNER_DISCORD_ID:
+    ADMIN_DISCORD_IDS.add(OWNER_DISCORD_ID)
 
 try:
     PORT = int(
