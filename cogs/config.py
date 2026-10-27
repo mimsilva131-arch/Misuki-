@@ -1097,7 +1097,6 @@ class MainSetupView(discord.ui.View):
         )
 
         category_options = [
-            ("language", text["setup_language"], "🌐", discord.ButtonStyle.primary),
             ("personal_settings", text["setup_settings"], "⚙️", discord.ButtonStyle.primary),
             ("tickets", text["setup_tickets"], "🎫", discord.ButtonStyle.success),
             ("moderation", text["setup_moderation"], "🛡️", discord.ButtonStyle.danger),
@@ -1108,14 +1107,7 @@ class MainSetupView(discord.ui.View):
         ]
 
         for key, label, emoji, style in category_options:
-            if key == "language":
-                self.add_item(
-                    SetupLanguageCategoryButton(
-                        self.user_id,
-                        row=1
-                    )
-                )
-            elif key == "personal_settings":
+            if key == "personal_settings":
                 self.add_item(
                     PersonalSettingsCategoryButton(
                         config,
