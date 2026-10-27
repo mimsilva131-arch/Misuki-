@@ -6,7 +6,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from cogs.utility import SettingsView, get_user_preferences, TRANSLATIONS, DEFAULT_LANGUAGE
+from cogs.utility import SettingsView, LanguageView, TimezoneModal, get_user_preferences, TRANSLATIONS, DEFAULT_LANGUAGE
 
 
 # =========================================================
@@ -1083,7 +1083,7 @@ class MainSetupView(discord.ui.View):
         )
 
         self.add_item(
-            PersonalSettingsButton(self.user_id)
+            PersonalSettingsButton(config, self.user_id)
         )
 
         self.add_item(
@@ -1155,7 +1155,8 @@ class PersonalSettingsButton(
     discord.ui.Button
 ):
 
-    def __init__(self, user_id=None):
+    def __init__(self, config, user_id=None):
+        self.config = config
         self.user_id = user_id
         super().__init__(
             label="Personal Settings",
@@ -1178,6 +1179,7 @@ class PersonalSettingsButton(
         await interaction.response.edit_message(
             embed=embed,
             view=PersonalSettingsMenu(
+                self.config,
                 self.user_id or interaction.user.id
             )
         )
@@ -1185,12 +1187,13 @@ class PersonalSettingsButton(
 
 class PersonalSettingsMenu(discord.ui.View):
 
-    def __init__(self, user_id):
+    def __init__(self, config, user_id):
         super().__init__(timeout=600)
+        self.config = config
         self.user_id = user_id
         self.add_item(PersonalLanguageButton(user_id))
         self.add_item(PersonalTimezoneButton(user_id))
-        self.add_item(BackButton(None))
+        self.add_item(BackButton(config))
 
 
 class PersonalLanguageButton(discord.ui.Button):
