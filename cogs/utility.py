@@ -1,4 +1,3 @@
-
 # ==        "setup_title": "Configuration de Misuki",
         "setup_description": "Configurez Misuki pour ce serveur.",
         "setup_choose": "Choisissez une catégorie ci-dessous.",
