@@ -1097,6 +1097,7 @@ class MainSetupView(discord.ui.View):
         )
 
         category_options = [
+            ("language", text["setup_language"], "🌐", discord.ButtonStyle.primary),
             ("personal_settings", text["setup_settings"], "⚙️", discord.ButtonStyle.primary),
             ("tickets", text["setup_tickets"], "🎫", discord.ButtonStyle.success),
             ("moderation", text["setup_moderation"], "🛡️", discord.ButtonStyle.danger),
@@ -1107,7 +1108,13 @@ class MainSetupView(discord.ui.View):
         ]
 
         for key, label, emoji, style in category_options:
-            if key == "personal_settings":
+            if key == "language":
+                self.add_item(
+                    SetupLanguageCategoryButton(
+                        self.user_id
+                    )
+                )
+            elif key == "personal_settings":
                 self.add_item(
                     PersonalSettingsCategoryButton(
                         config,
@@ -1124,6 +1131,58 @@ class MainSetupView(discord.ui.View):
                         key
                     )
                 )
+
+
+class SetupLanguageCategoryButton(discord.ui.Button):
+
+    def __init__(self, user_id=None):
+        self.user_id = user_id
+        language, _ = (
+            get_user_preferences(user_id)
+            if user_id is not None
+            else (DEFAULT_LANGUAGE, DEFAULT_TIMEZONE)
+        )
+        text = TRANSLATIONS.get(
+            language,
+            TRANSLATIONS[DEFAULT_LANGUAGE]
+        )
+        super().__init__(
+            label=text["setup_language"],
+            emoji="🌐",
+            style=discord.ButtonStyle.primary
+        )
+
+    async def callback(self, interaction):
+        if self.user_id is not None and interaction.user.id != self.user_id:
+            await interaction.response.send_message(
+                "❌ These settings belong to another user.",
+                ephemeral=True
+            )
+            return
+
+        language, _ = get_user_preferences(interaction.user.id)
+        text = TRANSLATIONS.get(
+            language,
+            TRANSLATIONS[DEFAULT_LANGUAGE]
+        )
+
+        await interaction.response.edit_message(
+            embed=discord.Embed(
+                title=text["language_title"],
+                description=text["settings_description"],
+                color=discord.Color.blurple()
+            ),
+            view=LanguageCategoryView(
+                interaction.user.id
+            )
+        )
+
+
+class LanguageCategoryView(discord.ui.View):
+
+    def __init__(self, user_id):
+        super().__init__(timeout=180)
+        self.add_item(LanguageSelect(user_id))
 
 
 class PersonalSettingsCategoryButton(
