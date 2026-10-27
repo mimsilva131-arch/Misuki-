@@ -2419,7 +2419,6 @@ data: {
         if (element.closest(
             "script, style, textarea, input, select, option, " +
             ".server-name, .server-id, .review-text, " +
-            ".advertisement-card, .advertisement-content, " +
             "[data-dynamic-content]"
         )) {
             return true;
@@ -2691,6 +2690,39 @@ data: {
 
 
     /* =========================================================
+       TRANSLATE COMMON HTML ATTRIBUTES
+       ========================================================= */
+
+    function translateCommonAttributes(language) {
+        const attributes = [
+            "title",
+            "placeholder",
+            "aria-label",
+            "alt"
+        ];
+
+        document.querySelectorAll("body *").forEach(function (element) {
+            if (!element || element.hasAttribute("data-i18n-attr")) return;
+            if (element.closest("script, style, textarea, input, select, option")) return;
+
+            attributes.forEach(function (attribute) {
+                const value = element.getAttribute(attribute);
+                if (!value) return;
+
+                const normalized = normalizeStaticText(value);
+                const key = findStaticTranslationKey(normalized);
+                if (!key) return;
+
+                const translated = getTranslation(language, key);
+                if (translated && translated !== normalized) {
+                    element.setAttribute(attribute, translated);
+                }
+            });
+        });
+    }
+
+
+    /* =========================================================
        TRANSLATE ATTRIBUTES
        ========================================================= */
 
@@ -2873,6 +2905,10 @@ data: {
                         translated;
                 }
             });
+
+        translateCommonAttributes(
+            language
+        );
 
         translateAttributes(
             language
