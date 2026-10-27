@@ -544,6 +544,10 @@ async def on_ready():
 
     await update_stats_snapshot()
 
+    license_manager = bot.get_cog("LicenseManager")
+    if license_manager is not None:
+        license_manager.start_expiration_worker()
+
     try:
         synced = await bot.tree.sync()
 
