@@ -1131,8 +1131,17 @@ class PersonalSettingsCategoryButton(
     def __init__(self, config, user_id=None):
         self.config = config
         self.user_id = user_id
+        language, _ = (
+            get_user_preferences(user_id)
+            if user_id is not None
+            else (DEFAULT_LANGUAGE, DEFAULT_TIMEZONE)
+        )
+        text = TRANSLATIONS.get(
+            language,
+            TRANSLATIONS[DEFAULT_LANGUAGE]
+        )
         super().__init__(
-            label="Personal Settings",
+            label=text["setup_settings"],
             emoji="⚙️",
             style=discord.ButtonStyle.primary
         )
@@ -1180,8 +1189,13 @@ class PersonalLanguageButton(discord.ui.Button):
 
     def __init__(self, user_id):
         self.user_id = user_id
+        language, _ = get_user_preferences(user_id)
+        text = TRANSLATIONS.get(
+            language,
+            TRANSLATIONS[DEFAULT_LANGUAGE]
+        )
         super().__init__(
-            label="Language",
+            label=text["setup_language"],
             emoji="🌐",
             style=discord.ButtonStyle.secondary
         )
@@ -1210,8 +1224,13 @@ class PersonalTimezoneButton(discord.ui.Button):
 
     def __init__(self, user_id):
         self.user_id = user_id
+        language, _ = get_user_preferences(user_id)
+        text = TRANSLATIONS.get(
+            language,
+            TRANSLATIONS[DEFAULT_LANGUAGE]
+        )
         super().__init__(
-            label="Timezone",
+            label=text["setup_timezone"],
             emoji="🕐",
             style=discord.ButtonStyle.secondary
         )
