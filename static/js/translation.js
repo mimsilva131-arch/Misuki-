@@ -181,6 +181,12 @@
             },
 
             reviews: {
+                eyebrow: "COMMUNITY",
+                your_voice: "Your voice",
+                form_intro: "Share your experience with Misuki.",
+                community_kicker: "COMMUNITY",
+                delete: "Remove",
+                no_reviews_desc: "Be the first member of the community to share your experience.", 
                 intro: "Reviews from members of Misuki communities.",
                 title: "Community Reviews",
                 no_reviews: "No reviews yet.",
