@@ -1168,10 +1168,81 @@ class PersonalSettingsButton(
         text = TRANSLATIONS.get(
             language, TRANSLATIONS[DEFAULT_LANGUAGE]
         )
+
+        embed = discord.Embed(
+            title=f"⚙️ {text['setup_settings']}",
+            description=text['setup_settings_description'],
+            color=discord.Color.blurple()
+        )
+
+        await interaction.response.edit_message(
+            embed=embed,
+            view=PersonalSettingsMenu(
+                self.user_id or interaction.user.id
+            )
+        )
+
+
+class PersonalSettingsMenu(discord.ui.View):
+
+    def __init__(self, user_id):
+        super().__init__(timeout=600)
+        self.user_id = user_id
+        self.add_item(PersonalLanguageButton(user_id))
+        self.add_item(PersonalTimezoneButton(user_id))
+        self.add_item(BackButton(None))
+
+
+class PersonalLanguageButton(discord.ui.Button):
+
+    def __init__(self, user_id):
+        self.user_id = user_id
+        super().__init__(
+            label="Language",
+            emoji="🌐",
+            style=discord.ButtonStyle.secondary
+        )
+
+    async def callback(self, interaction):
+        if interaction.user.id != self.user_id:
+            await interaction.response.send_message(
+                "❌ These settings belong to another user.",
+                ephemeral=True
+            )
+            return
+
+        language, _ = get_user_preferences(interaction.user.id)
+        text = TRANSLATIONS.get(
+            language, TRANSLATIONS[DEFAULT_LANGUAGE]
+        )
+
         await interaction.response.send_message(
-            f"🌐 {text['setup_language']} • 🕐 {text['setup_timezone']}\n\n{text['setup_settings_description']}",
-            view=SettingsView(interaction.user.id),
+            text["language_title"],
+            view=LanguageView(interaction.user.id),
             ephemeral=True
+        )
+
+
+class PersonalTimezoneButton(discord.ui.Button):
+
+    def __init__(self, user_id):
+        self.user_id = user_id
+        super().__init__(
+            label="Timezone",
+            emoji="🕐",
+            style=discord.ButtonStyle.secondary
+        )
+
+    async def callback(self, interaction):
+        if interaction.user.id != self.user_id:
+            await interaction.response.send_message(
+                "❌ These settings belong to another user.",
+                ephemeral=True
+            )
+            return
+
+        await interaction.response.send_modal(
+            TimezoneModal(self.user_id)
         )
 
 
