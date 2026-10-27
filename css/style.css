@@ -2194,8 +2194,8 @@ select {
     }
 
     body {
-        font-size: 16px;
-        line-height: 1.65;
+        font-size: 17px;
+        line-height: 1.68;
     }
 
     .container {
@@ -2224,7 +2224,7 @@ select {
     }
 
     .section-title {
-        font-size: 30px;
+        font-size: 31px;
         line-height: 1.2;
         margin-bottom: 18px;
     }
@@ -2247,17 +2247,17 @@ select {
     .button,
     button,
     input[type="submit"] {
-        min-height: 48px;
-        padding: 12px 18px;
-        font-size: 15px;
+        min-height: 50px;
+        padding: 13px 19px;
+        font-size: 16px;
     }
 
     input,
     textarea,
     select {
-        min-height: 48px;
-        padding: 12px 14px;
-        font-size: 16px;
+        min-height: 50px;
+        padding: 13px 15px;
+        font-size: 17px;
     }
 
     textarea {
@@ -2277,14 +2277,14 @@ select {
 
     .server-card p,
     .advertisement-content p {
-        font-size: 15px;
-        line-height: 1.65;
+        font-size: 16px;
+        line-height: 1.7;
     }
 
     .badge {
-        min-height: 30px;
-        padding: 6px 10px;
-        font-size: 12px;
+        min-height: 31px;
+        padding: 6px 11px;
+        font-size: 13px;
     }
 
     .advertisement-grid {
@@ -2341,9 +2341,9 @@ select {
     }
 
     .menu a {
-        min-height: 48px;
-        padding: 12px 14px;
-        font-size: 15px;
+        min-height: 50px;
+        padding: 13px 15px;
+        font-size: 16px;
     }
 }
 
