@@ -186,6 +186,12 @@
                 form_intro: "Share your experience with Misuki.",
                 community_kicker: "COMMUNITY",
                 delete: "Remove",
+                no_reviews_desc: "Be the first member of the community to share your experience.",
+                eyebrow: "COMMUNITY",
+                your_voice: "Your voice",
+                form_intro: "Share your experience with Misuki.",
+                community_kicker: "COMMUNITY",
+                delete: "Remove",
                 no_reviews_desc: "Be the first member of the community to share your experience.", 
                 intro: "Reviews from members of Misuki communities.",
                 title: "Community Reviews",
@@ -589,6 +595,12 @@
             },
 
             reviews: {
+                eyebrow: "COMUNIDADE",
+                your_voice: "A sua opinião",
+                form_intro: "Partilhe a sua experiência com o Misuki.",
+                community_kicker: "COMUNIDADE",
+                delete: "Remover",
+                no_reviews_desc: "Seja o primeiro membro da comunidade a partilhar a sua experiência.",
                 intro: "Avaliações dos membros das comunidades Misuki.",
                 title: "Avaliações da comunidade",
                 no_reviews: "Ainda não há avaliações.",
@@ -989,6 +1001,12 @@
             },
 
             reviews: {
+                eyebrow: "COMMUNITY",
+                your_voice: "Ihre Meinung",
+                form_intro: "Teilen Sie Ihre Erfahrung mit Misuki.",
+                community_kicker: "COMMUNITY",
+                delete: "Entfernen",
+                no_reviews_desc: "Seien Sie das erste Community-Mitglied, das seine Erfahrung teilt.",
                 intro: "Bewertungen von Mitgliedern der Misuki-Community.",
                 title: "Community-Bewertungen",
                 no_reviews: "Noch keine Bewertungen.",
@@ -1389,6 +1407,12 @@
             },
 
             reviews: {
+                eyebrow: "COMUNIDAD",
+                your_voice: "Tu opinión",
+                form_intro: "Comparte tu experiencia con Misuki.",
+                community_kicker: "COMUNIDAD",
+                delete: "Eliminar",
+                no_reviews_desc: "Sé el primer miembro de la comunidad en compartir tu experiencia.",
                 intro: "Reseñas de miembros de las comunidades de Misuki.",
                 title: "Reseñas de la comunidad",
                 no_reviews: "Todavía no hay reseñas.",
@@ -1789,6 +1813,12 @@
             },
 
             reviews: {
+                eyebrow: "COMMUNAUTÉ",
+                your_voice: "Votre avis",
+                form_intro: "Partagez votre expérience avec Misuki.",
+                community_kicker: "COMMUNAUTÉ",
+                delete: "Supprimer",
+                no_reviews_desc: "Soyez le premier membre de la communauté à partager votre expérience.",
                 intro: "Avis des membres des communautés Misuki.",
                 title: "Avis de la communauté",
                 no_reviews: "Aucun avis pour le moment.",
