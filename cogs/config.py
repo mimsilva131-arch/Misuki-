@@ -1097,22 +1097,22 @@ class MainSetupView(discord.ui.View):
         )
 
         category_options = [
-            ("personal_settings", text["setup_settings"], "⚙️", discord.ButtonStyle.primary),
-            ("tickets", text["setup_tickets"], "🎫", discord.ButtonStyle.success),
-            ("moderation", text["setup_moderation"], "🛡️", discord.ButtonStyle.danger),
-            ("verification", text["setup_verification"], "🔐", discord.ButtonStyle.secondary),
-            ("jail", text["setup_jail"], "⛓️", discord.ButtonStyle.secondary),
-            ("stats", text["setup_stats"], "📊", discord.ButtonStyle.secondary),
-            ("announcements", text["setup_announcements"], "📢", discord.ButtonStyle.secondary),
+            ("personal_settings", text["setup_settings"], "⚙️", discord.ButtonStyle.primary, 1),
+            ("tickets", text["setup_tickets"], "🎫", discord.ButtonStyle.success, 1),
+            ("moderation", text["setup_moderation"], "🛡️", discord.ButtonStyle.danger, 1),
+            ("verification", text["setup_verification"], "🔐", discord.ButtonStyle.secondary, 1),
+            ("jail", text["setup_jail"], "⛓️", discord.ButtonStyle.secondary, 2),
+            ("stats", text["setup_stats"], "📊", discord.ButtonStyle.secondary, 2),
+            ("announcements", text["setup_announcements"], "📢", discord.ButtonStyle.secondary, 2),
         ]
 
-        for key, label, emoji, style in category_options:
+        for key, label, emoji, style, row in category_options:
             if key == "personal_settings":
                 self.add_item(
                     PersonalSettingsCategoryButton(
                         config,
                         self.user_id,
-                        row=1
+                        row=row
                     )
                 )
             else:
@@ -1122,7 +1122,8 @@ class MainSetupView(discord.ui.View):
                         label,
                         emoji,
                         style,
-                        key
+                        key,
+                        row=row
                     )
                 )
 
@@ -1997,7 +1998,8 @@ class SimpleCategoryButton(discord.ui.Button):
         label,
         emoji,
         style,
-        category
+        category,
+        row=None
     ):
 
         self.config = config
@@ -2006,7 +2008,8 @@ class SimpleCategoryButton(discord.ui.Button):
         super().__init__(
             label=label,
             emoji=emoji,
-            style=style
+            style=style,
+            row=row
         )
 
     async def callback(
