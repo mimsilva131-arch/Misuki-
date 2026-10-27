@@ -1054,7 +1054,9 @@ data: {
                 info: "Ao continuar, o Misuki irá confirmar a sua conta Discord e enviar um pedido de verificação ao bot para atribuir o seu cargo de verificação.",
                 captcha_placeholder: "Respuesta",
                 footer: "Protegido por Misuki"
-            }====================================
+            },
+
+        /* =====================================================
            DEUTSCH
            ===================================================== */
 
