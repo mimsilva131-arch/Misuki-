@@ -1,19 +1,5 @@
-# ==        "setup_title": "Configuration de Misuki",
-        "setup_description": "Configurez Misuki pour ce serveur.",
-        "setup_choose": "Choisissez une catégorie ci-dessous.",
-        "setup_title": "Configuración de Misuki",
-        "setup_description": "Configura Misuki para este servidor.",
-        "setup_choose": "Elige una categoría a continuación.",
-        "setup_title": "Misuki Bot-Konfiguration",
-        "setup_description": "Konfigurieren Sie Misuki für diesen Server.",
-        "setup_choose": "Wählen Sie unten eine Kategorie.",
-        "setup_title": "Configuração do Misuki",
-        "setup_description": "Configure o Misuki para este servidor.",
-        "setup_choose": "Escolha uma categoria abaixo.",
-        "setup_title": "Misuki Bot Setup",
-        "setup_description": "Configure Misuki for this server.",
-        "setup_choose": "Choose a category below.",
-=======================================================
+
+# =========================================================
 # MISUKI - UTILITY
 # =========================================================
 
@@ -39,6 +25,9 @@ DEFAULT_TIMEZONE = "UTC"
 TRANSLATIONS = {
     "en": {
         "title": "🤖 Misuki Bot — Commands",
+        "setup_title": "Misuki Bot Setup",
+        "setup_description": "Configure Misuki for this server.",
+        "setup_choose": "Choose a category below.",
         "description": "/ping — Check if the bot is online.\n/help — Show this message.",
         "settings_title": "Personal settings",
         "settings_description": "Choose the language used in your DMs and set your timezone.",
@@ -59,6 +48,9 @@ TRANSLATIONS = {
 ,
     "pt": {
         "title": "🤖 Misuki Bot — Comandos",
+        "setup_title": "Configuração do Misuki",
+        "setup_description": "Configure o Misuki para este servidor.",
+        "setup_choose": "Escolha uma categoria abaixo.",
         "description": "/ping — Verifica se o bot está online.\n/help — Mostra esta mensagem.",
         "settings_title": "Definições pessoais",
         "settings_description": "Escolha a língua usada nas suas DMs e defina o seu fuso horário.",
@@ -79,6 +71,9 @@ TRANSLATIONS = {
 ,
     "de": {
         "title": "🤖 Misuki Bot — Befehle",
+        "setup_title": "Misuki Bot-Konfiguration",
+        "setup_description": "Konfigurieren Sie Misuki für diesen Server.",
+        "setup_choose": "Wählen Sie unten eine Kategorie.",
         "description": "/ping — Prüft, ob der Bot online ist.\n/help — Zeigt diese Nachricht.",
         "settings_title": "Persönliche Einstellungen",
         "settings_description": "Wählen Sie die Sprache für Ihre DMs und Ihre Zeitzone.",
@@ -99,6 +94,9 @@ TRANSLATIONS = {
 ,
     "es": {
         "title": "🤖 Misuki Bot — Comandos",
+        "setup_title": "Configuración de Misuki",
+        "setup_description": "Configura Misuki para este servidor.",
+        "setup_choose": "Elige una categoría a continuación.",
         "description": "/ping — Comprueba si el bot está conectado.\n/help — Muestra este mensaje.",
         "settings_title": "Configuración personal",
         "settings_description": "Elige el idioma de tus DMs y configura tu zona horaria.",
@@ -119,6 +117,9 @@ TRANSLATIONS = {
 ,
     "fr": {
         "title": "🤖 Misuki Bot — Commandes",
+        "setup_title": "Configuration de Misuki",
+        "setup_description": "Configurez Misuki pour ce serveur.",
+        "setup_choose": "Choisissez une catégorie ci-dessous.",
         "description": "/ping — Vérifie si le bot est en ligne.\n/help — Affiche ce message.",
         "settings_title": "Paramètres personnels",
         "settings_description": "Choisissez la langue utilisée dans vos DMs et définissez votre fuseau horaire.",
