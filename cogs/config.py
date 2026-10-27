@@ -1083,7 +1083,10 @@ class MainSetupView(discord.ui.View):
         )
 
         self.add_item(
-            PersonalSettingsButton(config, self.user_id)
+            PersonalSettingsCategoryButton(
+                config,
+                self.user_id
+            )
         )
 
         self.add_item(
@@ -1151,7 +1154,7 @@ class MainSetupView(discord.ui.View):
         )
 
 
-class PersonalSettingsButton(
+class PersonalSettingsCategoryButton(
     discord.ui.Button
 ):
 
@@ -1161,10 +1164,17 @@ class PersonalSettingsButton(
         super().__init__(
             label="Personal Settings",
             emoji="⚙️",
-            style=discord.ButtonStyle.secondary
+            style=discord.ButtonStyle.primary
         )
 
     async def callback(self, interaction):
+        if self.user_id is not None and interaction.user.id != self.user_id:
+            await interaction.response.send_message(
+                "❌ These settings belong to another user.",
+                ephemeral=True
+            )
+            return
+
         language, _ = get_user_preferences(interaction.user.id)
         text = TRANSLATIONS.get(
             language, TRANSLATIONS[DEFAULT_LANGUAGE]
@@ -1180,7 +1190,7 @@ class PersonalSettingsButton(
             embed=embed,
             view=PersonalSettingsMenu(
                 self.config,
-                self.user_id or interaction.user.id
+                interaction.user.id
             )
         )
 
