@@ -2739,6 +2739,10 @@
             language
         );
 
+        translateCommonAttributes(
+            language
+        );
+
         translateStaticText(
             language
         );
