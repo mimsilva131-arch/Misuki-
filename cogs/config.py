@@ -1093,35 +1093,37 @@ class MainSetupView(discord.ui.View):
         )
 
         self.add_item(
-            PersonalSettingsCategoryButton(
-                config,
-                self.user_id
-            )
-        )
-
-        self.add_item(
             ChannelsButton(config, language)
         )
 
         category_options = [
-            (text["setup_tickets"], "🎫", discord.ButtonStyle.success, "tickets"),
-            (text["setup_moderation"], "🛡️", discord.ButtonStyle.danger, "moderation"),
-            (text["setup_verification"], "🔐", discord.ButtonStyle.secondary, "verification"),
-            (text["setup_jail"], "⛓️", discord.ButtonStyle.secondary, "jail"),
-            (text["setup_stats"], "📊", discord.ButtonStyle.secondary, "stats"),
-            (text["setup_announcements"], "📢", discord.ButtonStyle.secondary, "announcements"),
+            ("personal_settings", text["setup_settings"], "⚙️", discord.ButtonStyle.primary),
+            ("tickets", text["setup_tickets"], "🎫", discord.ButtonStyle.success),
+            ("moderation", text["setup_moderation"], "🛡️", discord.ButtonStyle.danger),
+            ("verification", text["setup_verification"], "🔐", discord.ButtonStyle.secondary),
+            ("jail", text["setup_jail"], "⛓️", discord.ButtonStyle.secondary),
+            ("stats", text["setup_stats"], "📊", discord.ButtonStyle.secondary),
+            ("announcements", text["setup_announcements"], "📢", discord.ButtonStyle.secondary),
         ]
 
-        for label, emoji, style, key in category_options:
-            self.add_item(
-                SimpleCategoryButton(
-                    config,
-                    label,
-                    emoji,
-                    style,
-                    key
+        for key, label, emoji, style in category_options:
+            if key == "personal_settings":
+                self.add_item(
+                    PersonalSettingsCategoryButton(
+                        config,
+                        self.user_id
+                    )
                 )
-            )
+            else:
+                self.add_item(
+                    SimpleCategoryButton(
+                        config,
+                        label,
+                        emoji,
+                        style,
+                        key
+                    )
+                )
 
 
 class PersonalSettingsCategoryButton(
