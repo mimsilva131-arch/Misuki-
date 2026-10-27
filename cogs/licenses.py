@@ -170,10 +170,11 @@ class LicenseManager(commands.Cog):
 
             raise
 
-        if self.expiration_task is None:
-            self.expiration_task = asyncio.create_task(
-                self.license_expiration_worker()
-            )
+        return
+
+    def start_expiration_worker(self):
+        if self.expiration_task is None or self.expiration_task.done():
+            self.expiration_task = asyncio.create_task(self.license_expiration_worker())
 
     # =====================================================
     # COG UNLOAD
