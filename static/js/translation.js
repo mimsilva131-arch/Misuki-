@@ -2694,6 +2694,7 @@ data: {
        ========================================================= */
 
     function translateCommonAttributes(language) {
+
         const attributes = [
             "title",
             "placeholder",
@@ -2703,18 +2704,29 @@ data: {
 
         document.querySelectorAll("body *").forEach(function (element) {
             if (!element || element.hasAttribute("data-i18n-attr")) return;
-            if (element.closest("script, style, textarea, input, select, option")) return;
+            if (element.closest("script, style, option")) return;
+
+            if (!element.__misukiOriginalAttributes) {
+                element.__misukiOriginalAttributes = {};
+            }
 
             attributes.forEach(function (attribute) {
-                const value = element.getAttribute(attribute);
-                if (!value) return;
+                const current = element.getAttribute(attribute);
+                if (!current) return;
 
-                const normalized = normalizeStaticText(value);
+                if (element.__misukiOriginalAttributes[attribute] === undefined) {
+                    element.__misukiOriginalAttributes[attribute] = current;
+                }
+
+                const original =
+                    element.__misukiOriginalAttributes[attribute];
+
+                const normalized = normalizeStaticText(original);
                 const key = findStaticTranslationKey(normalized);
                 if (!key) return;
 
                 const translated = getTranslation(language, key);
-                if (translated && translated !== normalized) {
+                if (translated !== null) {
                     element.setAttribute(attribute, translated);
                 }
             });
@@ -2864,6 +2876,9 @@ data: {
        TRANSLATE PAGE
        ========================================================= */
 
+    let activeLanguage = DEFAULT_LANGUAGE;
+    let translationInProgress = false;
+
     function translatePage(language) {
 
         if (
@@ -2875,6 +2890,9 @@ data: {
             language =
                 DEFAULT_LANGUAGE;
         }
+
+        activeLanguage = language;
+        translationInProgress = true;
 
         document
             .querySelectorAll(
@@ -2936,6 +2954,8 @@ data: {
         saveLanguage(
             language
         );
+
+        translationInProgress = false;
 
         window.dispatchEvent(
             new CustomEvent(
@@ -3217,6 +3237,46 @@ data: {
 
 
     /* =========================================================
+       DYNAMIC CONTENT TRANSLATION
+       ========================================================= */
+
+    function setupTranslationObserver() {
+
+        if (!document.body || window.__misukiTranslationObserver) {
+            return;
+        }
+
+        window.__misukiTranslationObserver =
+            new MutationObserver(function (mutations) {
+                if (translationInProgress) return;
+
+                let hasAddedNodes = false;
+
+                mutations.forEach(function (mutation) {
+                    if (mutation.addedNodes && mutation.addedNodes.length) {
+                        hasAddedNodes = true;
+                    }
+                });
+
+                if (!hasAddedNodes) return;
+
+                window.requestAnimationFrame(function () {
+                    if (translationInProgress) return;
+                    translatePage(activeLanguage);
+                });
+            });
+
+        window.__misukiTranslationObserver.observe(
+            document.body,
+            {
+                childList: true,
+                subtree: true
+            }
+        );
+    }
+
+
+    /* =========================================================
        INITIALIZATION
        ========================================================= */
 
@@ -3256,6 +3316,7 @@ data: {
         setupKeyboard();
 
         setupMenuIntegration();
+        setupTranslationObserver();
 
         console.log(
             "✅ Misuki translation system initialized."
