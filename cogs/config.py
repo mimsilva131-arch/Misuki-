@@ -2692,7 +2692,8 @@ class BackButton(
         await interaction.response.edit_message(
             embed=embed,
             view=MainSetupView(
-                self.config
+                self.config,
+                interaction.user.id
             )
         )
 
