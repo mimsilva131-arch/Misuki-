@@ -4266,6 +4266,77 @@ def reviews():
     )
 
 
+@app.route("/reviews/<int:review_id>/delete", methods=["POST"])
+def delete_review(review_id):
+
+    user = get_user()
+
+    if not user:
+        session["next_url"] = "/reviews"
+        return redirect("/login")
+
+    if not DATABASE_URL:
+        return error_page(
+            "Reviews unavailable",
+            "Reviews are currently unavailable.",
+            503,
+            user
+        )
+
+    try:
+        with database_connection() as connection:
+            with connection.cursor(
+                cursor_factory=psycopg2.extras.RealDictCursor
+            ) as cursor:
+                cursor.execute(
+                    """
+                    SELECT user_id
+                    FROM reviews
+                    WHERE id = %s
+                    LIMIT 1
+                    """,
+                    (review_id,)
+                )
+                review = cursor.fetchone()
+
+                if not review:
+                    return error_page(
+                        "Review not found",
+                        "This review no longer exists.",
+                        404,
+                        user
+                    )
+
+                owner_id = str(review["user_id"])
+                current_user_id = str(user.get("id", ""))
+
+                if not is_admin(user) and owner_id != current_user_id:
+                    return error_page(
+                        "Access denied",
+                        "You do not have permission to remove this review.",
+                        403,
+                        user
+                    )
+
+                cursor.execute(
+                    "DELETE FROM reviews WHERE id = %s",
+                    (review_id,)
+                )
+
+            connection.commit()
+
+    except Exception as error:
+        print(f"❌ Review deletion error: {error}")
+        return error_page(
+            "Review error",
+            "The review could not be removed.",
+            500,
+            user
+        )
+
+    return redirect("/reviews")
+
+
 # =========================================================
 # ADMIN LICENSE MANAGEMENT
 # =========================================================
