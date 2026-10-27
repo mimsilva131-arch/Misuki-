@@ -1078,8 +1078,18 @@ class MainSetupView(discord.ui.View):
             timeout=600
         )
 
+        language, _ = (
+            get_user_preferences(self.user_id)
+            if self.user_id is not None
+            else (DEFAULT_LANGUAGE, DEFAULT_TIMEZONE)
+        )
+        text = TRANSLATIONS.get(
+            language,
+            TRANSLATIONS[DEFAULT_LANGUAGE]
+        )
+
         self.add_item(
-            RolesButton(config)
+            RolesButton(config, language)
         )
 
         self.add_item(
@@ -1090,68 +1100,28 @@ class MainSetupView(discord.ui.View):
         )
 
         self.add_item(
-            ChannelsButton(config)
+            ChannelsButton(config, language)
         )
 
-        self.add_item(
-            SimpleCategoryButton(
-                config,
-                "Tickets",
-                "🎫",
-                discord.ButtonStyle.success,
-                "tickets"
-            )
-        )
+        category_options = [
+            (text["setup_tickets"], "🎫", discord.ButtonStyle.success, "tickets"),
+            (text["setup_moderation"], "🛡️", discord.ButtonStyle.danger, "moderation"),
+            (text["setup_verification"], "🔐", discord.ButtonStyle.secondary, "verification"),
+            (text["setup_jail"], "⛓️", discord.ButtonStyle.secondary, "jail"),
+            (text["setup_stats"], "📊", discord.ButtonStyle.secondary, "stats"),
+            (text["setup_announcements"], "📢", discord.ButtonStyle.secondary, "announcements"),
+        ]
 
-        self.add_item(
-            SimpleCategoryButton(
-                config,
-                "Moderation",
-                "🛡️",
-                discord.ButtonStyle.danger,
-                "moderation"
+        for label, emoji, style, key in category_options:
+            self.add_item(
+                SimpleCategoryButton(
+                    config,
+                    label,
+                    emoji,
+                    style,
+                    key
+                )
             )
-        )
-
-        self.add_item(
-            SimpleCategoryButton(
-                config,
-                "Verification",
-                "🔐",
-                discord.ButtonStyle.secondary,
-                "verification"
-            )
-        )
-
-        self.add_item(
-            SimpleCategoryButton(
-                config,
-                "Jail",
-                "⛓️",
-                discord.ButtonStyle.secondary,
-                "jail"
-            )
-        )
-
-        self.add_item(
-            SimpleCategoryButton(
-                config,
-                "Stats",
-                "📊",
-                discord.ButtonStyle.secondary,
-                "stats"
-            )
-        )
-
-        self.add_item(
-            SimpleCategoryButton(
-                config,
-                "Announcements",
-                "📢",
-                discord.ButtonStyle.secondary,
-                "announcements"
-            )
-        )
 
 
 class PersonalSettingsCategoryButton(
@@ -1265,12 +1235,17 @@ class PersonalTimezoneButton(discord.ui.Button):
 
 class RolesButton(discord.ui.Button):
 
-    def __init__(self, config):
+    def __init__(self, config, language=DEFAULT_LANGUAGE):
 
         self.config = config
 
+        text = TRANSLATIONS.get(
+            language,
+            TRANSLATIONS[DEFAULT_LANGUAGE]
+        )
+
         super().__init__(
-            label="Roles",
+            label=text["setup_roles"],
             emoji="👥",
             style=discord.ButtonStyle.primary
         )
@@ -1674,12 +1649,17 @@ class ClearRolesButton(discord.ui.Button):
 
 class ChannelsButton(discord.ui.Button):
 
-    def __init__(self, config):
+    def __init__(self, config, language=DEFAULT_LANGUAGE):
 
         self.config = config
 
+        text = TRANSLATIONS.get(
+            language,
+            TRANSLATIONS[DEFAULT_LANGUAGE]
+        )
+
         super().__init__(
-            label="Channels",
+            label=text["setup_channels"],
             emoji="📁",
             style=discord.ButtonStyle.primary
         )
