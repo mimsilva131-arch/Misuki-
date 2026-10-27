@@ -2182,3 +2182,198 @@ select {
 @media(max-width:480px){.notification-dropdown{right:-45px;width:min(340px,calc(100vw - 20px))}.notification-dropdown-header{padding:12px}}
 
 .notification-button.has-unread .notification-dot{opacity:1;transform:scale(1)}
+
+
+/* =========================================================
+   MOBILE — LARGER, MORE COMFORTABLE LAYOUT
+   ========================================================= */
+
+@media (max-width: 600px) {
+    html {
+        font-size: 17px;
+    }
+
+    body {
+        font-size: 16px;
+        line-height: 1.65;
+    }
+
+    .container {
+        width: calc(100% - 28px);
+    }
+
+    main.container {
+        padding-top: 28px;
+        padding-bottom: 44px;
+    }
+
+    .hero {
+        padding: 42px 0 36px;
+    }
+
+    .hero h1 {
+        font-size: clamp(38px, 12vw, 54px);
+        line-height: 1.08;
+        letter-spacing: -1.5px;
+        margin-bottom: 18px;
+    }
+
+    .hero p {
+        font-size: 17px;
+        line-height: 1.7;
+    }
+
+    .section-title {
+        font-size: 30px;
+        line-height: 1.2;
+        margin-bottom: 18px;
+    }
+
+    .section-subtitle,
+    .advertisements-subtitle,
+    .advertisement-status-intro {
+        font-size: 16px;
+        line-height: 1.75;
+    }
+
+    .card,
+    .server-card,
+    .manage-card,
+    .manage-license,
+    .advertisements-empty {
+        padding: 24px 20px;
+    }
+
+    .button,
+    button,
+    input[type="submit"] {
+        min-height: 48px;
+        padding: 12px 18px;
+        font-size: 15px;
+    }
+
+    input,
+    textarea,
+    select {
+        min-height: 48px;
+        padding: 12px 14px;
+        font-size: 16px;
+    }
+
+    textarea {
+        min-height: 130px;
+    }
+
+    .server-grid,
+    .review-grid {
+        gap: 18px;
+    }
+
+    .server-card h3,
+    .advertisement-content h3 {
+        font-size: 18px;
+        line-height: 1.35;
+    }
+
+    .server-card p,
+    .advertisement-content p {
+        font-size: 15px;
+        line-height: 1.65;
+    }
+
+    .badge {
+        min-height: 30px;
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+
+    .advertisement-grid {
+        gap: 14px;
+    }
+
+    .advertisement-card {
+        min-height: 0 !important;
+    }
+
+    .advertisement-content {
+        padding: 34px 14px 14px !important;
+    }
+
+    .advertisement-content h3 {
+        font-size: 16px;
+    }
+
+    .advertisement-content p {
+        font-size: 13px;
+    }
+
+    .advertisement-status-page .server-card {
+        padding: 28px 22px 26px;
+    }
+
+    .advertisement-status-page .server-name {
+        font-size: 21px;
+        margin-top: 14px;
+        margin-bottom: 20px;
+    }
+
+    .advertisement-status-page .server-card > p {
+        font-size: 16px;
+        line-height: 1.75;
+    }
+
+    .advertisements-empty {
+        gap: 24px;
+    }
+
+    .advertisements-empty h3 {
+        font-size: 21px;
+    }
+
+    .advertisements-empty p {
+        font-size: 15px;
+        line-height: 1.7;
+    }
+
+    .menu {
+        width: min(390px, calc(100vw - 24px));
+        padding: 18px;
+    }
+
+    .menu a {
+        min-height: 48px;
+        padding: 12px 14px;
+        font-size: 15px;
+    }
+}
+
+/* Small phones: preserve the larger controls and allow vertical scrolling. */
+@media (max-width: 380px) {
+    .container {
+        width: calc(100% - 22px);
+    }
+
+    .hero h1 {
+        font-size: 36px;
+    }
+
+    .section-title {
+        font-size: 28px;
+    }
+
+    .card,
+    .server-card,
+    .manage-card,
+    .manage-license {
+        padding: 22px 18px;
+    }
+
+    .advertisement-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .advertisement-card {
+        aspect-ratio: 1 / 1;
+    }
+}
