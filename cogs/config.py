@@ -1089,11 +1089,11 @@ class MainSetupView(discord.ui.View):
         )
 
         self.add_item(
-            RolesButton(config, language)
+            RolesButton(config, language, row=0)
         )
 
         self.add_item(
-            ChannelsButton(config, language)
+            ChannelsButton(config, language, row=0)
         )
 
         category_options = [
@@ -1111,14 +1111,16 @@ class MainSetupView(discord.ui.View):
             if key == "language":
                 self.add_item(
                     SetupLanguageCategoryButton(
-                        self.user_id
+                        self.user_id,
+                        row=1
                     )
                 )
             elif key == "personal_settings":
                 self.add_item(
                     PersonalSettingsCategoryButton(
                         config,
-                        self.user_id
+                        self.user_id,
+                        row=1
                     )
                 )
             else:
@@ -1135,7 +1137,7 @@ class MainSetupView(discord.ui.View):
 
 class SetupLanguageCategoryButton(discord.ui.Button):
 
-    def __init__(self, user_id=None):
+    def __init__(self, user_id=None, row=1):
         self.user_id = user_id
         language, _ = (
             get_user_preferences(user_id)
@@ -1149,7 +1151,8 @@ class SetupLanguageCategoryButton(discord.ui.Button):
         super().__init__(
             label=text["setup_language"],
             emoji="🌐",
-            style=discord.ButtonStyle.primary
+            style=discord.ButtonStyle.primary,
+            row=row
         )
 
     async def callback(self, interaction):
@@ -1189,7 +1192,7 @@ class PersonalSettingsCategoryButton(
     discord.ui.Button
 ):
 
-    def __init__(self, config, user_id=None):
+    def __init__(self, config, user_id=None, row=1):
         self.config = config
         self.user_id = user_id
         language, _ = (
@@ -1204,7 +1207,8 @@ class PersonalSettingsCategoryButton(
         super().__init__(
             label=text["setup_settings"],
             emoji="⚙️",
-            style=discord.ButtonStyle.primary
+            style=discord.ButtonStyle.primary,
+            row=row
         )
 
     async def callback(self, interaction):
@@ -1315,7 +1319,7 @@ class PersonalTimezoneButton(discord.ui.Button):
 
 class RolesButton(discord.ui.Button):
 
-    def __init__(self, config, language=DEFAULT_LANGUAGE):
+    def __init__(self, config, language=DEFAULT_LANGUAGE, row=0):
 
         self.config = config
 
@@ -1327,7 +1331,8 @@ class RolesButton(discord.ui.Button):
         super().__init__(
             label=text["setup_roles"],
             emoji="👥",
-            style=discord.ButtonStyle.primary
+            style=discord.ButtonStyle.primary,
+            row=row
         )
 
     async def callback(
@@ -1729,7 +1734,7 @@ class ClearRolesButton(discord.ui.Button):
 
 class ChannelsButton(discord.ui.Button):
 
-    def __init__(self, config, language=DEFAULT_LANGUAGE):
+    def __init__(self, config, language=DEFAULT_LANGUAGE, row=0):
 
         self.config = config
 
@@ -1741,7 +1746,8 @@ class ChannelsButton(discord.ui.Button):
         super().__init__(
             label=text["setup_channels"],
             emoji="📁",
-            style=discord.ButtonStyle.primary
+            style=discord.ButtonStyle.primary,
+            row=row
         )
 
     async def callback(
