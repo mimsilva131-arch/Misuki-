@@ -121,7 +121,9 @@ Misuki — Reviews
                                         type="submit"
                                         class="review-delete-button"
                                         data-i18n="reviews.delete"
-                                        onclick="return confirm('Remover esta avaliação?');"
+                                        data-confirm=""
+                                        data-i18n-attr="data-confirm:reviews.delete_confirm"
+                                        onclick="return confirm(this.dataset.confirm);"
                                     >
                                         Remover
                                     </button>
