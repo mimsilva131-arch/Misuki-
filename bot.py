@@ -19,6 +19,10 @@ load_dotenv(override=False)
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 MISUKI_VERSION = os.getenv("MISUKI_VERSION", "").strip()
+try:
+    OWNER_ID = int(os.getenv("OWNER_ID", "1146083816503529545"))
+except (TypeError, ValueError):
+    OWNER_ID = 1146083816503529545
 BOT_START_TIME = time.time()
 
 intents = discord.Intents.default()
