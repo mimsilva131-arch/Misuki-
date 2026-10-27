@@ -5,227 +5,139 @@ Misuki — Reviews
 {% endblock %}
 
 {% block extra_css %}
-
-<link
-    rel="stylesheet"
-    href="/static/css/reviews.css?v=1"
->
-
+<link rel="stylesheet" href="/static/css/reviews.css?v=2">
 {% endblock %}
 
 {% block content %}
-
-<main>
-
-    <section class="section">
-
-        <div class="container">
-
-            <h1 data-i18n="nav.reviews">
-                ⭐ Misuki Reviews
-            </h1>
-
-            <p
-                style="color:#aeb3c0;"
-                data-i18n="reviews.intro"
-            >
-                Reviews from members of
-                Misuki communities.
+<main class="reviews-page">
+    <section class="reviews-hero">
+        <div class="container reviews-hero-inner">
+            <div class="reviews-eyebrow" data-i18n="reviews.eyebrow">COMMUNITY</div>
+            <h1 data-i18n="nav.reviews">Avaliações</h1>
+            <p data-i18n="reviews.intro">
+                A opinião de membros das comunidades que utilizam o Misuki.
             </p>
-
-            <!-- =================================================
-                 WRITE REVIEW
-            ================================================== -->
-
-            {% if can_review %}
-
-                <div class="card form">
-
-                    <h2 data-i18n="reviews.write_review">
-                        ✍️ Write a review
-                    </h2>
-
-                    <form
-                        method="POST"
-                        action="/reviews"
-                    >
-
-                        <label data-i18n="reviews.rating">
-                            Rating
-                        </label>
-
-                        <select
-                            name="rating"
-                            required
-                        >
-
-                            <option value="5">
-                                5 — ⭐⭐⭐⭐⭐
-                            </option>
-
-                            <option value="4">
-                                4 — ⭐⭐⭐⭐
-                            </option>
-
-                            <option value="3">
-                                3 — ⭐⭐⭐
-                            </option>
-
-                            <option value="2">
-                                2 — ⭐⭐
-                            </option>
-
-                            <option value="1">
-                                1 — ⭐
-                            </option>
-
-                        </select>
-
-                        <label data-i18n="reviews.review">
-                            Review
-                        </label>
-
-                        <textarea
-                            name="review"
-                            maxlength="1000"
-                            required
-                            placeholder="Tell us what you think about Misuki..."
-                            data-i18n-attr="placeholder:common.review_placeholder"
-                        ></textarea>
-
-                        <button
-                            class="button manage"
-                            type="submit"
-                            data-i18n="reviews.submit"
-                        >
-                            ⭐ Submit Review
-                        </button>
-
-                    </form>
-
-                </div>
-
-            {% elif user %}
-
-                <div class="empty" data-i18n="reviews.need_license">
-
-                    🔒 You need an active Misuki
-                    license to write a review.
-
-                </div>
-
-            {% else %}
-
-                <div class="empty" data-i18n="reviews.login_required">
-
-                    🔐 Log in with Discord and have
-                    an active Misuki license to
-                    write a review.
-
-                </div>
-
-            {% endif %}
-
-            <!-- =================================================
-                 COMMUNITY REVIEWS
-            ================================================== -->
-
-            <h2
-                class="section-title"
-                style="margin-top:60px;"
-                data-i18n="reviews.section_title"
-            >
-                💬 Community Reviews
-            </h2>
-
-            {% if review_list %}
-
-                <div class="review-grid">
-
-                    {% for review in review_list %}
-
-                        <div
-                            class="card review-card"
-                        >
-
-                            <div
-                                class="review-user"
-                            >
-
-                                {% if review.avatar %}
-
-                                    <img
-                                        class="review-avatar"
-                                        src="{{ review.avatar }}"
-                                        alt=""
-                                    >
-
-                                {% else %}
-
-                                    <div
-                                        class="review-avatar"
-                                        style="
-                                            background:#5865f2;
-                                            display:flex;
-                                            align-items:center;
-                                            justify-content:center;
-                                        "
-                                    >
-                                        👤
-                                    </div>
-
-                                {% endif %}
-
-                                <div>
-
-                                    <strong>
-                                        {{ review.username }}
-                                    </strong>
-
-                                    <div
-                                        class="stars"
-                                    >
-
-                                        {% for i in range(review.rating) %}
-
-                                            ★
-
-                                        {% endfor %}
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                            <div
-                                class="review-text"
-                            >
-
-                                {{ review.review }}
-
-                            </div>
-
-                        </div>
-
-                    {% endfor %}
-
-                </div>
-
-            {% else %}
-
-                <div class="empty" data-i18n="reviews.no_reviews">
-
-                    No reviews yet.
-
-                </div>
-
-            {% endif %}
-
         </div>
-
     </section>
 
-</main>
+    <section class="section reviews-section">
+        <div class="container">
 
+            {% if can_review %}
+                <div class="review-form-card">
+                    <div class="review-form-heading">
+                        <div>
+                            <span class="review-form-kicker" data-i18n="reviews.your_voice">A sua opinião</span>
+                            <h2 data-i18n="reviews.write_review">Escrever uma avaliação</h2>
+                            <p data-i18n="reviews.form_intro">Partilhe a sua experiência com o Misuki.</p>
+                        </div>
+                    </div>
+
+                    <form method="POST" action="/reviews" class="review-form">
+                        <div class="review-form-grid">
+                            <label>
+                                <span data-i18n="reviews.rating">Classificação</span>
+                                <select name="rating" required>
+                                    <option value="5">5 — ★★★★★</option>
+                                    <option value="4">4 — ★★★★</option>
+                                    <option value="3">3 — ★★★</option>
+                                    <option value="2">2 — ★★</option>
+                                    <option value="1">1 — ★</option>
+                                </select>
+                            </label>
+
+                            <label class="review-form-message">
+                                <span data-i18n="reviews.review">Avaliação</span>
+                                <textarea
+                                    name="review"
+                                    maxlength="1000"
+                                    required
+                                    placeholder="Diga-nos o que pensa sobre o Misuki..."
+                                    data-i18n-attr="placeholder:common.review_placeholder"
+                                ></textarea>
+                            </label>
+                        </div>
+
+                        <button class="button manage review-submit" type="submit" data-i18n="reviews.submit">
+                            Enviar avaliação
+                        </button>
+                    </form>
+                </div>
+            {% elif user %}
+                <div class="review-access-note" data-i18n="reviews.need_license">
+                    Precisa de uma licença ativa do Misuki para escrever uma avaliação.
+                </div>
+            {% else %}
+                <div class="review-access-note" data-i18n="reviews.login_required">
+                    Inicie sessão com o Discord e tenha uma licença ativa do Misuki para escrever uma avaliação.
+                </div>
+            {% endif %}
+
+            <div class="reviews-list-heading">
+                <div>
+                    <span class="review-form-kicker" data-i18n="reviews.community_kicker">COMUNIDADE</span>
+                    <h2 data-i18n="reviews.section_title">Avaliações da comunidade</h2>
+                </div>
+                {% if review_list %}
+                    <span class="reviews-count">{{ review_list|length }}</span>
+                {% endif %}
+            </div>
+
+            {% if review_list %}
+                <div class="review-grid">
+                    {% for review in review_list %}
+                        <article class="review-card">
+                            <div class="review-card-top">
+                                <div class="review-user">
+                                    {% if review.avatar %}
+                                        <img class="review-avatar" src="{{ review.avatar }}" alt="">
+                                    {% else %}
+                                        <div class="review-avatar review-avatar-fallback">
+                                            {{ review.username[:1]|upper }}
+                                        </div>
+                                    {% endif %}
+
+                                    <div class="review-user-info">
+                                        <strong>{{ review.username }}</strong>
+                                        <span class="review-date">{{ review.created_at|short_datetime }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="review-rating" aria-label="{{ review.rating }}/5">
+                                    <span class="review-stars">
+                                        {% for i in range(review.rating) %}★{% endfor %}
+                                    </span>
+                                    <span class="review-rating-number">{{ review.rating }}/5</span>
+                                </div>
+                            </div>
+
+                            <div class="review-text">
+                                {{ review.review }}
+                            </div>
+
+                            {% if user and (is_admin(user) or user.get("id")|string == review.user_id|string) %}
+                                <form method="POST" action="/reviews/{{ review.id }}/delete" class="review-delete-form">
+                                    <button
+                                        type="submit"
+                                        class="review-delete-button"
+                                        data-i18n="reviews.delete"
+                                        onclick="return confirm('Remover esta avaliação?');"
+                                    >
+                                        Remover
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="review-empty">
+                    <div class="review-empty-mark">—</div>
+                    <h3 data-i18n="reviews.no_reviews">Ainda não existem avaliações.</h3>
+                    <p data-i18n="reviews.no_reviews_desc">Seja o primeiro membro da comunidade a partilhar a sua experiência.</p>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+</main>
 {% endblock %}
