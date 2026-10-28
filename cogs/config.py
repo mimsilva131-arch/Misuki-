@@ -1151,7 +1151,6 @@ class MainSetupView(discord.ui.View):
 
         category_options = [
             ("personal_settings", text["setup_settings"], "⚙️", discord.ButtonStyle.primary, 1),
-            ("language", text["setup_language"], "🌐", discord.ButtonStyle.primary, 1),
             ("tickets", text["setup_tickets"], "🎫", discord.ButtonStyle.success, 1),
             ("moderation", text["setup_moderation"], "🛡️", discord.ButtonStyle.danger, 1),
             ("verification", text["setup_verification"], "🔐", discord.ButtonStyle.secondary, 1),
@@ -1165,13 +1164,6 @@ class MainSetupView(discord.ui.View):
                 self.add_item(
                     PersonalSettingsCategoryButton(
                         config,
-                        self.user_id,
-                        row=row
-                    )
-                )
-            elif key == "language":
-                self.add_item(
-                    SetupLanguageCategoryButton(
                         self.user_id,
                         row=row
                     )
