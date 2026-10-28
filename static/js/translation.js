@@ -1823,7 +1823,7 @@
                 community_kicker: "COMMUNAUTÉ",
                 delete: "Supprimer",
                 no_reviews_desc: "Soyez le premier membre de la communauté à partager votre expérience.",
-                delete_confirm: "Supprimer cet avis ?"
+                delete_confirm: "Supprimer cet avis ?",
                 intro: "Avis des membres des communautés Misuki.",
                 title: "Avis de la communauté",
                 no_reviews: "Aucun avis pour le moment.",
