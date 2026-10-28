@@ -471,18 +471,28 @@ Misuki — Statistics
 
         <div class="admin-section-header">
 
-            <div>
+            <div class="admin-statistics-title">
 
-                <h2 data-i18n="statistics.administrator_statistics">
-                    🔐 Administrator statistics
-                </h2>
-
-                <p
-                    class="statistics-description"
-                    data-i18n="statistics.admin_description"
+                {% if admin_servers is defined and admin_servers and admin_servers[0].icon %}
+                <img
+                    src="{{ admin_servers[0].icon }}"
+                    alt=""
+                    class="admin-statistics-server-icon"
                 >
-                    Detailed information available only to Misuki administrators.
-                </p>
+                {% endif %}
+
+                <div>
+                    <h2 data-i18n="statistics.administrator_statistics">
+                        🔐 Administrator statistics
+                    </h2>
+
+                    <p
+                        class="statistics-description"
+                        data-i18n="statistics.admin_description"
+                    >
+                        Detailed information available only to Misuki administrators.
+                    </p>
+                </div>
 
             </div>
 
