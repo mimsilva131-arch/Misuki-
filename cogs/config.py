@@ -1066,6 +1066,59 @@ class Config(commands.Cog):
 
 
 # =========================================================
+# /TUTORIAL
+# =========================================================
+
+    @app_commands.command(
+        name="tutorial",
+        description="Show the setup tutorial and required permissions."
+    )
+    async def tutorial_command(
+        self,
+        interaction: discord.Interaction
+    ):
+        if interaction.guild is None:
+            await interaction.response.send_message(
+                "This command can only be used in a server.",
+                ephemeral=True
+            )
+            return
+
+        language, _ = get_user_preferences(interaction.user.id)
+        text = TRANSLATIONS.get(
+            language,
+            TRANSLATIONS[DEFAULT_LANGUAGE]
+        )
+
+        embed = discord.Embed(
+            title=text["tutorial_title"],
+            description=text["tutorial_description"],
+            color=discord.Color.blurple()
+        )
+        embed.add_field(
+            name=text["tutorial_permissions_title"],
+            value=text["tutorial_permissions"],
+            inline=False
+        )
+        embed.add_field(
+            name=text["tutorial_steps_title"],
+            value=text["tutorial_steps"],
+            inline=False
+        )
+        embed.add_field(
+            name=text["tutorial_setup_title"],
+            value=text["tutorial_setup"],
+            inline=False
+        )
+        embed.set_footer(text=text["tutorial_footer"])
+
+        await interaction.response.send_message(
+            embed=embed,
+            ephemeral=True
+        )
+
+
+# =========================================================
 # MAIN SETUP
 # =========================================================
 
