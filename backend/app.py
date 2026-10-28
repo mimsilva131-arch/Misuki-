@@ -5351,7 +5351,9 @@ def statistics_api():
 
                         "admin_servers": result[10] or [],
 
-                        "updated_at": result[11],
+                        "admin_users": result[11] or [],
+
+                        "updated_at": result[12],
                     }
 
 
