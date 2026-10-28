@@ -1299,7 +1299,6 @@ class PersonalSettingsMenu(discord.ui.View):
         super().__init__(timeout=600)
         self.config = config
         self.user_id = user_id
-        self.add_item(PersonalLanguageButton(user_id))
         self.add_item(PersonalTimezoneButton(user_id))
         self.add_item(BackButton(config))
 
