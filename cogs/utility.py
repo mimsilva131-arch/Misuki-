@@ -35,7 +35,8 @@ TRANSLATIONS = {
         "setup_announcements": "Announcements",
         "setup_title": "Misuki Bot Setup",
         "setup_description": "Configure Misuki for this server.",
-        "setup_choose": "Choose a category below.",\n        "tutorial_title": "Misuki setup tutorial",
+        "setup_choose": "Choose a category below.",
+        "tutorial_title": "Misuki setup tutorial",
         "tutorial_description": "Follow these steps to configure Misuki correctly on your server.",
         "tutorial_permissions_title": "Required permissions",
         "tutorial_permissions": "Manage Server, Manage Channels, Manage Roles, View Channels, Send Messages, Embed Links, Read Message History, Manage Messages, Manage Webhooks, Moderate Members and View Audit Log. Some features may require additional permissions.",
@@ -64,6 +65,16 @@ TRANSLATIONS = {
         "setup_settings_description": "Choose the language and timezone used by Misuki for your personal messages.",
     },
     "pt": {
+
+        "tutorial_title": "Tutorial de configuração do Misuki",
+        "tutorial_description": "Siga estes passos para configurar corretamente o Misuki no seu servidor.",
+        "tutorial_permissions_title": "Permissões necessárias",
+        "tutorial_permissions": "Gerir servidor, Gerir canais, Gerir cargos, Ver canais, Enviar mensagens, Incorporar links, Ler histórico de mensagens, Gerir mensagens, Gerir webhooks, Moderar membros e Ver registo de auditoria. Algumas funcionalidades podem exigir permissões adicionais.",
+        "tutorial_steps_title": "Passos",
+        "tutorial_steps": "1. Convide o Misuki com as permissões necessárias.\n2. Execute /setup.\n3. Abra as Definições pessoais e escolha a sua língua.\n4. Configure os cargos e canais das funcionalidades que utiliza.\n5. Teste os painéis e comandos configurados.",
+        "tutorial_setup_title": "Comando de configuração",
+        "tutorial_setup": "Use /setup para abrir o menu de configuração. Use /tutorial a qualquer momento para voltar a consultar este guia.",
+        "tutorial_footer": "Misuki • Guia de configuração",
         "title": "🤖 Misuki Bot — Comandos",
         "setup_roles": "Cargos",
         "setup_channels": "Canais",
@@ -95,6 +106,16 @@ TRANSLATIONS = {
         "setup_settings_description": "Escolha a língua e o fuso horário usados pelo Misuki nas suas mensagens pessoais.",
     },
     "de": {
+
+        "tutorial_title": "Misuki-Einrichtungsanleitung",
+        "tutorial_description": "Folgen Sie diesen Schritten, um Misuki korrekt auf Ihrem Server zu konfigurieren.",
+        "tutorial_permissions_title": "Erforderliche Berechtigungen",
+        "tutorial_permissions": "Server verwalten, Kanäle verwalten, Rollen verwalten, Kanäle ansehen, Nachrichten senden, Links einbetten, Nachrichtenverlauf lesen, Nachrichten verwalten, Webhooks verwalten, Mitglieder moderieren und Audit-Log ansehen. Einige Funktionen können zusätzliche Berechtigungen erfordern.",
+        "tutorial_steps_title": "Schritte",
+        "tutorial_steps": "1. Laden Sie Misuki mit den erforderlichen Berechtigungen ein.\n2. Führen Sie /setup aus.\n3. Öffnen Sie die persönlichen Einstellungen und wählen Sie Ihre Sprache.\n4. Konfigurieren Sie Rollen und Kanäle für die gewünschten Funktionen.\n5. Testen Sie die konfigurierten Panels und Befehle.",
+        "tutorial_setup_title": "Setup-Befehl",
+        "tutorial_setup": "Verwenden Sie /setup, um das Konfigurationsmenü zu öffnen. Verwenden Sie jederzeit /tutorial, um diese Anleitung erneut anzuzeigen.",
+        "tutorial_footer": "Misuki • Einrichtungsanleitung"
         "title": "🤖 Misuki Bot — Befehle",
         "setup_roles": "Rollen",
         "setup_channels": "Kanäle",
@@ -126,6 +147,16 @@ TRANSLATIONS = {
         "setup_settings_description": "Wählen Sie die von Misuki für Ihre persönlichen Nachrichten verwendete Sprache und Zeitzone.",
     },
     "es": {
+
+        "tutorial_title": "Tutorial de configuración de Misuki",
+        "tutorial_description": "Sigue estos pasos para configurar correctamente Misuki en tu servidor.",
+        "tutorial_permissions_title": "Permisos necesarios",
+        "tutorial_permissions": "Gestionar servidor, Gestionar canales, Gestionar roles, Ver canales, Enviar mensajes, Insertar enlaces, Leer historial de mensajes, Gestionar mensajes, Gestionar webhooks, Moderar miembros y Ver registro de auditoría. Algunas funciones pueden requerir permisos adicionales.",
+        "tutorial_steps_title": "Pasos",
+        "tutorial_steps": "1. Invita a Misuki con los permisos necesarios.\n2. Ejecuta /setup.\n3. Abre Configuración personal y elige tu idioma.\n4. Configura los roles y canales de las funciones que utilices.\n5. Prueba los paneles y comandos configurados.",
+        "tutorial_setup_title": "Comando de configuración",
+        "tutorial_setup": "Usa /setup para abrir el menú de configuración. Usa /tutorial en cualquier momento para volver a consultar esta guía.",
+        "tutorial_footer": "Misuki • Guía de configuración"
         "title": "🤖 Misuki Bot — Comandos",
         "setup_roles": "Roles",
         "setup_channels": "Canales",
@@ -157,6 +188,16 @@ TRANSLATIONS = {
         "setup_settings_description": "Elige el idioma y la zona horaria que Misuki utilizará en tus mensajes personales.",
     },
     "fr": {
+
+        "tutorial_title": "Guide de configuration de Misuki",
+        "tutorial_description": "Suivez ces étapes pour configurer correctement Misuki sur votre serveur.",
+        "tutorial_permissions_title": "Permissions requises",
+        "tutorial_permissions": "Gérer le serveur, Gérer les salons, Gérer les rôles, Voir les salons, Envoyer des messages, Intégrer des liens, Lire l’historique des messages, Gérer les messages, Gérer les webhooks, Modérer les membres et Voir le journal d’audit. Certaines fonctions peuvent nécessiter des permissions supplémentaires.",
+        "tutorial_steps_title": "Étapes",
+        "tutorial_steps": "1. Invitez Misuki avec les permissions requises.\n2. Exécutez /setup.\n3. Ouvrez les paramètres personnels et choisissez votre langue.\n4. Configurez les rôles et salons des fonctions utilisées.\n5. Testez les panneaux et commandes configurés.",
+        "tutorial_setup_title": "Commande de configuration",
+        "tutorial_setup": "Utilisez /setup pour ouvrir le menu de configuration. Utilisez /tutorial à tout moment pour revoir ce guide.",
+        "tutorial_footer": "Misuki • Guide de configuration"
         "title": "🤖 Misuki Bot — Commandes",
         "setup_roles": "Rôles",
         "setup_channels": "Salons",
