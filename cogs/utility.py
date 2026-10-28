@@ -24,6 +24,11 @@ DEFAULT_TIMEZONE = "UTC"
 
 TRANSLATIONS = {
     "en": {
+        "license_active": "Active",
+        "license_inactive": "Inactive",
+        "license_label": "License",
+        "available_commands": "Available commands",
+        "setup_help": "Use Personal Settings to choose your language and timezone.",
         "title": "🤖 Misuki Bot — Commands",
         "setup_roles": "Roles",
         "setup_channels": "Channels",
@@ -65,6 +70,11 @@ TRANSLATIONS = {
         "setup_settings_description": "Choose the language and timezone used by Misuki for your personal messages.",
     },
     "pt": {
+        "license_active": "Ativa",
+        "license_inactive": "Inativa",
+        "license_label": "Licença",
+        "available_commands": "Comandos disponíveis",
+        "setup_help": "Use as Definições pessoais para escolher a sua língua e o fuso horário.",
 
         "tutorial_title": "Tutorial de configuração do Misuki",
         "tutorial_description": "Siga estes passos para configurar corretamente o Misuki no seu servidor.",
@@ -106,6 +116,11 @@ TRANSLATIONS = {
         "setup_settings_description": "Escolha a língua e o fuso horário usados pelo Misuki nas suas mensagens pessoais.",
     },
     "de": {
+        "license_active": "Aktiv",
+        "license_inactive": "Inaktiv",
+        "license_label": "Lizenz",
+        "available_commands": "Verfügbare Befehle",
+        "setup_help": "Verwenden Sie die persönlichen Einstellungen, um Sprache und Zeitzone auszuwählen.",
 
         "tutorial_title": "Misuki-Einrichtungsanleitung",
         "tutorial_description": "Folgen Sie diesen Schritten, um Misuki korrekt auf Ihrem Server zu konfigurieren.",
@@ -147,6 +162,11 @@ TRANSLATIONS = {
         "setup_settings_description": "Wählen Sie die von Misuki für Ihre persönlichen Nachrichten verwendete Sprache und Zeitzone.",
     },
     "es": {
+        "license_active": "Activa",
+        "license_inactive": "Inactiva",
+        "license_label": "Licencia",
+        "available_commands": "Comandos disponibles",
+        "setup_help": "Usa la configuración personal para elegir tu idioma y zona horaria.",
 
         "tutorial_title": "Tutorial de configuración de Misuki",
         "tutorial_description": "Sigue estos pasos para configurar correctamente Misuki en tu servidor.",
@@ -156,7 +176,7 @@ TRANSLATIONS = {
         "tutorial_steps": "1. Invita a Misuki con los permisos necesarios.\n2. Ejecuta /setup.\n3. Abre Configuración personal y elige tu idioma.\n4. Configura los roles y canales de las funciones que utilices.\n5. Prueba los paneles y comandos configurados.",
         "tutorial_setup_title": "Comando de configuración",
         "tutorial_setup": "Usa /setup para abrir el menú de configuración. Usa /tutorial en cualquier momento para volver a consultar esta guía.",
-        "tutorial_footer": "Misuki • Guía de configuración"
+        "tutorial_footer": "Misuki • Guía de configuración",
         "title": "🤖 Misuki Bot — Comandos",
         "setup_roles": "Roles",
         "setup_channels": "Canales",
@@ -188,6 +208,11 @@ TRANSLATIONS = {
         "setup_settings_description": "Elige el idioma y la zona horaria que Misuki utilizará en tus mensajes personales.",
     },
     "fr": {
+        "license_active": "Active",
+        "license_inactive": "Inactive",
+        "license_label": "Licence",
+        "available_commands": "Commandes disponibles",
+        "setup_help": "Utilisez les paramètres personnels pour choisir votre langue et votre fuseau horaire.",
 
         "tutorial_title": "Guide de configuration de Misuki",
         "tutorial_description": "Suivez ces étapes pour configurer correctement Misuki sur votre serveur.",
@@ -197,7 +222,7 @@ TRANSLATIONS = {
         "tutorial_steps": "1. Invitez Misuki avec les permissions requises.\n2. Exécutez /setup.\n3. Ouvrez les paramètres personnels et choisissez votre langue.\n4. Configurez les rôles et salons des fonctions utilisées.\n5. Testez les panneaux et commandes configurés.",
         "tutorial_setup_title": "Commande de configuration",
         "tutorial_setup": "Utilisez /setup pour ouvrir le menu de configuration. Utilisez /tutorial à tout moment pour revoir ce guide.",
-        "tutorial_footer": "Misuki • Guide de configuration"
+        "tutorial_footer": "Misuki • Guide de configuration",
         "title": "🤖 Misuki Bot — Commandes",
         "setup_roles": "Rôles",
         "setup_channels": "Salons",
