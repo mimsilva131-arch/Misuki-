@@ -4750,19 +4750,12 @@ def statistics():
     # API STATUS
     # =====================================================
 
-    if statistics_data[
-        "bot_status"
-    ] == "Online":
-
-        statistics_data[
-            "api_status"
-        ] = "Operational"
-
-    else:
-
-        statistics_data[
-            "api_status"
-        ] = "Unavailable"
+    # The statistics endpoint being reached successfully means
+    # the API itself is operational. The Discord bot state is
+    # reported independently through its heartbeat.
+    statistics_data[
+        "api_status"
+    ] = "Operational"
 
 
     # =====================================================
