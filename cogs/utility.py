@@ -115,7 +115,7 @@ TRANSLATIONS = {
         "tutorial_steps": "1. Laden Sie Misuki mit den erforderlichen Berechtigungen ein.\n2. Führen Sie /setup aus.\n3. Öffnen Sie die persönlichen Einstellungen und wählen Sie Ihre Sprache.\n4. Konfigurieren Sie Rollen und Kanäle für die gewünschten Funktionen.\n5. Testen Sie die konfigurierten Panels und Befehle.",
         "tutorial_setup_title": "Setup-Befehl",
         "tutorial_setup": "Verwenden Sie /setup, um das Konfigurationsmenü zu öffnen. Verwenden Sie jederzeit /tutorial, um diese Anleitung erneut anzuzeigen.",
-        "tutorial_footer": "Misuki • Einrichtungsanleitung"
+        "tutorial_footer": "Misuki • Einrichtungsanleitung",
         "title": "🤖 Misuki Bot — Befehle",
         "setup_roles": "Rollen",
         "setup_channels": "Kanäle",
