@@ -6,7 +6,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from cogs.utility import SettingsView, LanguageView, TimezoneModal, get_user_preferences, TRANSLATIONS, DEFAULT_LANGUAGE
+from cogs.utility import SettingsView, LanguageView, TimezoneModal, get_user_preferences, TRANSLATIONS, DEFAULT_LANGUAGE, DEFAULT_TIMEZONE
 
 
 # =========================================================
