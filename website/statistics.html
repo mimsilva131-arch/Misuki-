@@ -2393,6 +2393,35 @@ Misuki — Statistics
                 error
             );
 
+            // Never leave a stale online state on the dashboard.
+            updateBotIndicator("Offline");
+            updateDatabaseIndicator("offline");
+            updateApiIndicator("Unavailable");
+
+            const botStatus =
+                document.getElementById("bot-status");
+
+            const databaseStatus =
+                document.getElementById("database-status");
+
+            const apiStatus =
+                document.getElementById("api-status");
+
+            if (botStatus) {
+                botStatus.dataset.rawStatus = "Offline";
+                translateStatus(botStatus, "bot");
+            }
+
+            if (databaseStatus) {
+                databaseStatus.dataset.rawStatus = "Error";
+                translateStatus(databaseStatus, "database");
+            }
+
+            if (apiStatus) {
+                apiStatus.dataset.rawStatus = "Unavailable";
+                translateStatus(apiStatus, "api");
+            }
+
         }
 
     }
