@@ -582,6 +582,7 @@ async def on_resumed():
     GATEWAY_CONNECTED = True
 
 
+@bot.event
 async def on_guild_join(guild):
     print("➕ Bot joined a new server:")
     print(f"   Name: {guild.name}")
