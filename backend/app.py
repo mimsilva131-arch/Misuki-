@@ -4722,9 +4722,10 @@ def statistics():
             ).strip().lower()
 
             # The Discord bot heartbeat runs every 5 seconds.
-            # A heartbeat older than 15 seconds is considered stale.
-            # The stored Discord status must also explicitly be Online.
-            if heartbeat_age <= 15 and stored_status == "online":
+            # The heartbeat itself is authoritative: if it is fresh,
+            # the bot is considered online even if an older database
+            # status value still says Offline.
+            if heartbeat_age <= 15:
 
                 statistics_data[
                     "bot_status"
