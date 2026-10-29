@@ -4651,6 +4651,7 @@ def statistics():
     # =====================================================
 
     bot_snapshot = {}
+    postgres_ok = False
 
     try:
         with database_connection() as connection:
@@ -5326,6 +5327,8 @@ def statistics_api():
                 result = cursor.fetchone()
 
 
+                postgres_ok = True
+
                 if result:
 
                     bot_snapshot = {
@@ -5579,8 +5582,6 @@ def statistics_api():
 
     # The statistics snapshot can only be trusted when PostgreSQL was
     # successfully read above. The local activity databases must also work.
-    postgres_ok = bool(bot_snapshot)
-
     if postgres_ok and database_ok:
 
         statistics_data[
@@ -7752,7 +7753,7 @@ def start_discord_bot():
     try:
         bot_path = os.path.join(BASE_DIR, "bot.py")
         bot_process = subprocess.Popen(
-            [sys.executable, bot_path],
+            [sys.executable, "-u", bot_path],
             cwd=BASE_DIR
         )
         print(f"🤖 Discord bot process started (PID {bot_process.pid}).")
