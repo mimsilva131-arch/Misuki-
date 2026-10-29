@@ -1141,44 +1141,44 @@ class MainSetupView(discord.ui.View):
             TRANSLATIONS[DEFAULT_LANGUAGE]
         )
 
+        # Personal Settings is an explicit top-level Setup category.
+        # Language and Timezone are configured inside it.
         self.add_item(
-            RolesButton(config, language, row=0)
+            PersonalSettingsCategoryButton(
+                config,
+                self.user_id,
+                row=0
+            )
         )
 
         self.add_item(
-            ChannelsButton(config, language, row=0)
+            RolesButton(config, language, row=1)
+        )
+
+        self.add_item(
+            ChannelsButton(config, language, row=1)
         )
 
         category_options = [
-            ("personal_settings", text["setup_settings"], "⚙️", discord.ButtonStyle.primary, 0),
-            ("tickets", text["setup_tickets"], "🎫", discord.ButtonStyle.success, 1),
-            ("moderation", text["setup_moderation"], "🛡️", discord.ButtonStyle.danger, 1),
-            ("verification", text["setup_verification"], "🔐", discord.ButtonStyle.secondary, 1),
-            ("jail", text["setup_jail"], "⛓️", discord.ButtonStyle.secondary, 2),
-            ("stats", text["setup_stats"], "📊", discord.ButtonStyle.secondary, 2),
-            ("announcements", text["setup_announcements"], "📢", discord.ButtonStyle.secondary, 2),
+            ("tickets", text["setup_tickets"], "🎫", discord.ButtonStyle.success, 2),
+            ("moderation", text["setup_moderation"], "🛡️", discord.ButtonStyle.danger, 2),
+            ("verification", text["setup_verification"], "🔐", discord.ButtonStyle.secondary, 2),
+            ("jail", text["setup_jail"], "⛓️", discord.ButtonStyle.secondary, 3),
+            ("stats", text["setup_stats"], "📊", discord.ButtonStyle.secondary, 3),
+            ("announcements", text["setup_announcements"], "📢", discord.ButtonStyle.secondary, 3),
         ]
 
         for key, label, emoji, style, row in category_options:
-            if key == "personal_settings":
-                self.add_item(
-                    PersonalSettingsCategoryButton(
-                        config,
-                        self.user_id,
-                        row=row
-                    )
+            self.add_item(
+                SimpleCategoryButton(
+                    config,
+                    label,
+                    emoji,
+                    style,
+                    key,
+                    row=row
                 )
-            else:
-                self.add_item(
-                    SimpleCategoryButton(
-                        config,
-                        label,
-                        emoji,
-                        style,
-                        key,
-                        row=row
-                    )
-                )
+            )
 
 
 class SetupLanguageCategoryButton(discord.ui.Button):
