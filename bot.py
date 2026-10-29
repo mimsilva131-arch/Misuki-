@@ -459,6 +459,45 @@ async def statistics_loop():
 
 
 statistics_task = None
+heartbeat_task = None
+
+
+async def heartbeat_loop():
+    """Keep the website's Discord bot activity heartbeat independent from heavy statistics work."""
+    await bot.wait_until_ready()
+    while not bot.is_closed():
+        connection = None
+        try:
+            heartbeat = time.time()
+            status = "Online" if bot.is_ready() else "Offline"
+            uptime = get_uptime()
+            latency = round(bot.latency * 1000)
+            connection = get_database_connection()
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    UPDATE bot_statistics
+                    SET bot_status = %s,
+                        latency = %s,
+                        uptime = %s,
+                        version = %s,
+                        last_seen = %s,
+                        updated_at = %s
+                    WHERE id = 1
+                """, (
+                    status,
+                    latency,
+                    uptime,
+                    MISUKI_VERSION,
+                    heartbeat,
+                    heartbeat,
+                ))
+            connection.commit()
+        except Exception as error:
+            print(f"⚠️ Bot heartbeat update failed: {error}")
+        finally:
+            if connection:
+                connection.close()
+        await asyncio.sleep(5)
 
 
 async def sync_owner_license_command_permissions():
@@ -513,7 +552,7 @@ async def on_guild_remove(guild):
 
 @bot.event
 async def on_ready():
-    global statistics_task
+    global statistics_task, heartbeat_task
     await bot.change_presence(status=discord.Status.online, activity=discord.Game(name="Misuki Server"))
     print(f"🤖 Bot connected as {bot.user}")
     print(f"🟢 Bot status: {bot.status}")
@@ -597,6 +636,9 @@ async def on_ready():
         await sync_owner_license_command_permissions()
     except Exception as error:
         print(f"❌ Command sync error: {error}")
+    if heartbeat_task is None or heartbeat_task.done():
+        heartbeat_task = asyncio.create_task(heartbeat_loop())
+
     if statistics_task is None or statistics_task.done():
         statistics_task = asyncio.create_task(statistics_loop())
 
