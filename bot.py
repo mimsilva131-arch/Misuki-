@@ -29,6 +29,23 @@ BOT_START_TIME = time.time()
 # Discord bot is Online while the Gateway is disconnected/reconnecting.
 GATEWAY_CONNECTED = False
 
+RUNTIME_STATUS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "bot_runtime_status.json")
+
+
+def write_runtime_status(status):
+    try:
+        os.makedirs(os.path.dirname(RUNTIME_STATUS_FILE), exist_ok=True)
+        payload = {"status": str(status), "last_seen": time.time(), "version": MISUKI_VERSION}
+        temporary_file = RUNTIME_STATUS_FILE + ".tmp"
+        with open(temporary_file, "w", encoding="utf-8") as file:
+            json.dump(payload, file)
+        os.replace(temporary_file, RUNTIME_STATUS_FILE)
+    except Exception as error:
+        print(f"⚠️ Could not write bot runtime status: {error}")
+
+
+write_runtime_status("Offline")
+
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
@@ -555,6 +572,7 @@ async def on_disconnect():
     """Mark the Discord bot offline immediately when the Gateway drops."""
     global GATEWAY_CONNECTED
     GATEWAY_CONNECTED = False
+    write_runtime_status("Offline")
     connection = None
     try:
         connection = get_database_connection()
@@ -580,6 +598,7 @@ async def on_resumed():
     """Mark the bot online again after the Discord Gateway resumes."""
     global GATEWAY_CONNECTED
     GATEWAY_CONNECTED = True
+    write_runtime_status("Online")
 
 
 @bot.event
@@ -606,6 +625,7 @@ async def on_guild_remove(guild):
 async def on_ready():
     global statistics_task, heartbeat_task, GATEWAY_CONNECTED
     GATEWAY_CONNECTED = True
+    write_runtime_status("Online")
     await bot.change_presence(status=discord.Status.online, activity=discord.Game(name="Misuki Server"))
     print(f"🤖 Bot connected as {bot.user}")
     print(f"🟢 Bot status: {bot.status}")
