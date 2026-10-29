@@ -4717,7 +4717,14 @@ def statistics():
             # 60 SEGUNDOS SEM HEARTBEAT = OFFLINE
             # -------------------------------------------------
 
-            if heartbeat_age <= 60:
+            stored_status = str(
+                bot_snapshot.get("bot_status") or ""
+            ).strip().lower()
+
+            # The Discord bot heartbeat runs every 5 seconds.
+            # A heartbeat older than 15 seconds is considered stale.
+            # The stored Discord status must also explicitly be Online.
+            if heartbeat_age <= 15 and stored_status == "online":
 
                 statistics_data[
                     "bot_status"
