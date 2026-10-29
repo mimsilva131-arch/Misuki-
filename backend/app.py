@@ -5410,7 +5410,9 @@ def statistics_api():
             )
 
 
-            if heartbeat_age <= 30:
+            # The bot sends an independent heartbeat every 5 seconds.
+            # Allow a short deployment/network delay, but never trust stale data.
+            if heartbeat_age <= 15:
 
                 statistics_data[
                     "bot_status"
