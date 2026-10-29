@@ -5418,9 +5418,15 @@ def statistics_api():
             )
 
 
-            # The bot sends an independent heartbeat every 5 seconds.
-            # Allow a short deployment/network delay, but never trust stale data.
-            if heartbeat_age <= 15:
+            # A fresh heartbeat alone only proves that the bot process is
+            # alive. The bot_status value is written from the Discord Gateway
+            # connection state, so both conditions are required for Online.
+            if (
+                heartbeat_age <= 15
+                and str(
+                    bot_snapshot.get("bot_status") or ""
+                ).strip().lower() == "online"
+            ):
 
                 statistics_data[
                     "bot_status"
@@ -5431,6 +5437,16 @@ def statistics_api():
                 statistics_data[
                     "bot_status"
                 ] = "Offline"
+
+                # Never display stale uptime/latency as if the Discord bot
+                # were still connected.
+                statistics_data[
+                    "latency"
+                ] = 0
+
+                statistics_data[
+                    "uptime"
+                ] = "0s"
 
 
         except (
