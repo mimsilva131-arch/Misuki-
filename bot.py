@@ -537,6 +537,38 @@ async def sync_owner_license_command_permissions():
             )
 
 
+@bot.event
+async def on_disconnect():
+    """Mark the Discord bot offline immediately when the Gateway drops."""
+    global GATEWAY_CONNECTED
+    GATEWAY_CONNECTED = False
+    connection = None
+    try:
+        connection = get_database_connection()
+        now = time.time()
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                UPDATE bot_statistics
+                SET bot_status = 'Offline',
+                    last_seen = %s,
+                    updated_at = %s
+                WHERE id = 1
+            """, (now, now))
+        connection.commit()
+    except Exception as error:
+        print(f"⚠️ Could not mark bot offline after Gateway disconnect: {error}")
+    finally:
+        if connection:
+            connection.close()
+
+
+@bot.event
+async def on_resumed():
+    """Mark the bot online again after the Discord Gateway resumes."""
+    global GATEWAY_CONNECTED
+    GATEWAY_CONNECTED = True
+
+
 async def on_guild_join(guild):
     print("➕ Bot joined a new server:")
     print(f"   Name: {guild.name}")
