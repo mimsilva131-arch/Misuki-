@@ -2377,3 +2377,133 @@ select {
         aspect-ratio: 1 / 1;
     }
 }
+
+
+/* =========================================================
+   FINAL RESPONSIVE SAFETY
+   Prevent translated/long text from colliding or overlapping
+   on narrow screens across every page.
+========================================================= */
+
+.language-name {
+    max-width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.language-current {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 10px 10px;
+    margin: 0 0 3px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.language-current-label {
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.language-current-value {
+    min-width: 0;
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+    text-align: right;
+}
+
+main,
+section,
+article,
+.card,
+.container,
+.status-card,
+.statistics-card,
+.feature-card,
+.legal-page {
+    min-width: 0;
+}
+
+h1, h2, h3, h4, h5, h6,
+p, li, label, strong, span, a, button {
+    overflow-wrap: anywhere;
+}
+
+button, a {
+    line-height: 1.35;
+}
+
+@media (max-width: 600px) {
+    header.container {
+        gap: 8px;
+    }
+
+    .header-right {
+        min-width: 0;
+        gap: 7px;
+    }
+
+    .language-button {
+        min-width: 62px;
+        height: 42px;
+        padding: 0 9px;
+        gap: 5px;
+    }
+
+    .language-name {
+        display: none;
+    }
+
+    .language-dropdown {
+        width: min(210px, calc(100vw - 24px));
+        max-width: calc(100vw - 24px);
+    }
+
+    .language-dropdown button {
+        min-width: 0;
+    }
+
+    .language-dropdown button span:last-child {
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .section,
+    .page,
+    .panel,
+    .card,
+    .legal-page {
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .button,
+    button,
+    input,
+    select,
+    textarea {
+        box-sizing: border-box;
+    }
+}
+
+@media (max-width: 380px) {
+    .language-button {
+        min-width: 58px;
+        padding: 0 7px;
+    }
+
+    .language-arrow {
+        display: none;
+    }
+
+    .language-dropdown {
+        right: -4px;
+    }
+}
