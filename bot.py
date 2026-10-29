@@ -418,7 +418,7 @@ async def update_stats_snapshot():
         verifications_count = count_verified_users()
         last_seen = time.time()
         latency = round(bot.latency * 1000)
-        bot_status = "Online" if bot.is_ready() else "Offline"
+        bot_status = "Online" if GATEWAY_CONNECTED and bot.is_ready() else "Offline"
         uptime = get_uptime()
         version = MISUKI_VERSION
         channels_count = sum(len(guild.channels) for guild in bot.guilds)
