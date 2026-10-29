@@ -67,7 +67,8 @@
                 pt: "Portuguese",
                 de: "German",
                 es: "Spanish",
-                fr: "French"
+                fr: "French",
+                current: "Current language"
             },
 
             menu: {
@@ -482,7 +483,8 @@
                 pt: "Português",
                 de: "Alemão",
                 es: "Espanhol",
-                fr: "Francês"
+                fr: "Francês",
+                current: "Idioma atual"
             },
 
             menu: {
@@ -889,7 +891,8 @@
                 pt: "Portugiesisch",
                 de: "Deutsch",
                 es: "Spanisch",
-                fr: "Französisch"
+                fr: "Französisch",
+                current: "Aktuelle Sprache"
             },
 
             menu: {
@@ -1296,7 +1299,8 @@
                 pt: "Portugués",
                 de: "Alemán",
                 es: "Español",
-                fr: "Francés"
+                fr: "Francés",
+                current: "Idioma actual"
             },
 
             menu: {
@@ -1703,7 +1707,8 @@
                 pt: "Portugais",
                 de: "Allemand",
                 es: "Espagnol",
-                fr: "Français"
+                fr: "Français",
+                current: "Langue actuelle"
             },
 
             menu: {
@@ -2467,6 +2472,26 @@
         if (short) {
             short.textContent =
                 info.short;
+        }
+
+        const name =
+            button.querySelector(
+                ".language-name"
+            );
+
+        if (name) {
+            name.textContent =
+                info.name;
+        }
+
+        const currentValue =
+            document.querySelector(
+                "#languageCurrent .language-current-value"
+            );
+
+        if (currentValue) {
+            currentValue.textContent =
+                info.name;
         }
 
         const translatedLabel =
