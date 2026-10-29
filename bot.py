@@ -342,7 +342,20 @@ def initialize_statistics_database():
                     NULL, '[]'::jsonb, '[]'::jsonb, %s
                 ) ON CONFLICT (id) DO NOTHING
             """, (MISUKI_VERSION, time.time()))
-        connection.commit()
+        # A new process starts disconnected from Discord. Clear any
+        # heartbeat left by a previous process before the Gateway connects.
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                UPDATE bot_statistics
+                SET bot_status = 'Offline',
+                    last_seen = NULL,
+                    updated_at = %s
+                WHERE id = 1
+            """, (time.time(),))
+            connection.commit()
+        finally:
+            cursor.close()
         print("🗄️ Statistics database initialized.")
     except Exception as error:
         if connection:
