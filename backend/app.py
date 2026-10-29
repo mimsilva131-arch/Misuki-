@@ -5577,7 +5577,11 @@ def statistics_api():
     # DATABASE STATUS
     # =====================================================
 
-    if database_ok:
+    # The statistics snapshot can only be trusted when PostgreSQL was
+    # successfully read above. The local activity databases must also work.
+    postgres_ok = bool(bot_snapshot)
+
+    if postgres_ok and database_ok:
 
         statistics_data[
             "database_status"
