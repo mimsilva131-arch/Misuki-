@@ -1143,9 +1143,19 @@ class MainSetupView(discord.ui.View):
 
         # Personal Settings is an explicit top-level Setup category.
         # Language and Timezone are configured inside it.
+        # Personal Settings is a top-level Setup category.
         self.add_item(
             PersonalSettingsCategoryButton(
                 config,
+                self.user_id,
+                row=0
+            )
+        )
+
+        # Language is also exposed as its own Setup category so it is
+        # always visible without having to enter Personal Settings first.
+        self.add_item(
+            SetupLanguageCategoryButton(
                 self.user_id,
                 row=0
             )
