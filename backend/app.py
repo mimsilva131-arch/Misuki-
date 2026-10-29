@@ -4697,63 +4697,53 @@ def statistics():
     # HEARTBEAT
     # =====================================================
 
+    # Prefer the local runtime heartbeat written by the Discord child process.
+    runtime_status = None
+    runtime_last_seen = None
+    runtime_file = os.path.join(BASE_DIR, "data", "bot_runtime_status.json")
+
+    try:
+        with open(runtime_file, "r", encoding="utf-8") as file:
+            runtime_snapshot = json.load(file)
+        runtime_status = str(runtime_snapshot.get("status") or "").strip().lower()
+        runtime_last_seen = float(runtime_snapshot.get("last_seen"))
+    except (OSError, ValueError, TypeError, json.JSONDecodeError):
+        runtime_status = None
+        runtime_last_seen = None
+
     current_time = time.time()
 
-    last_seen = bot_snapshot.get(
-        "last_seen"
-    )
-
-
-    if last_seen is not None:
-
+    if runtime_last_seen is not None:
         try:
-
-            heartbeat_age = (
-                current_time
-                - float(last_seen)
-            )
-
-
-            # -------------------------------------------------
-            # 60 SEGUNDOS SEM HEARTBEAT = OFFLINE
-            # -------------------------------------------------
-
-            stored_status = str(
-                bot_snapshot.get("bot_status") or ""
-            ).strip().lower()
-
-            # The Discord bot heartbeat runs every 5 seconds.
-            # The heartbeat itself is authoritative: if it is fresh,
-            # the bot is considered online even if an older database
-            # status value still says Offline.
-            if heartbeat_age <= 15:
-
-                statistics_data[
-                    "bot_status"
-                ] = "Online"
-
+            runtime_age = current_time - runtime_last_seen
+            if runtime_age <= 15 and runtime_status == "online":
+                statistics_data["bot_status"] = "Online"
             else:
-
-                statistics_data[
-                    "bot_status"
-                ] = "Offline"
-
-
-        except (
-            TypeError,
-            ValueError
-        ):
-
-            statistics_data[
-                "bot_status"
-            ] = "Offline"
-
+                statistics_data["bot_status"] = "Offline"
+                statistics_data["latency"] = 0
+                statistics_data["uptime"] = "0s"
+        except (TypeError, ValueError):
+            statistics_data["bot_status"] = "Offline"
+            statistics_data["latency"] = 0
+            statistics_data["uptime"] = "0s"
     else:
-
-        statistics_data[
-            "bot_status"
-        ] = "Offline"
-
+        # Backwards-compatible fallback to the PostgreSQL heartbeat.
+        last_seen = bot_snapshot.get("last_seen")
+        if last_seen is not None:
+            try:
+                heartbeat_age = current_time - float(last_seen)
+                if heartbeat_age <= 15 and str(bot_snapshot.get("bot_status") or "").strip().lower() == "online":
+                    statistics_data["bot_status"] = "Online"
+                else:
+                    statistics_data["bot_status"] = "Offline"
+                    statistics_data["latency"] = 0
+                    statistics_data["uptime"] = "0s"
+            except (TypeError, ValueError):
+                statistics_data["bot_status"] = "Offline"
+                statistics_data["latency"] = 0
+                statistics_data["uptime"] = "0s"
+        else:
+            statistics_data["bot_status"] = "Offline"
 
     # =====================================================
     # API STATUS
