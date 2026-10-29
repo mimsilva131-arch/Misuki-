@@ -67,8 +67,7 @@
                 pt: "Portuguese",
                 de: "German",
                 es: "Spanish",
-                fr: "French",
-                current: "Current language"
+                fr: "French"
             },
 
             menu: {
@@ -483,8 +482,7 @@
                 pt: "Português",
                 de: "Alemão",
                 es: "Espanhol",
-                fr: "Francês",
-                current: "Idioma atual"
+                fr: "Francês"
             },
 
             menu: {
@@ -891,8 +889,7 @@
                 pt: "Portugiesisch",
                 de: "Deutsch",
                 es: "Spanisch",
-                fr: "Französisch",
-                current: "Aktuelle Sprache"
+                fr: "Französisch"
             },
 
             menu: {
@@ -1299,8 +1296,7 @@
                 pt: "Portugués",
                 de: "Alemán",
                 es: "Español",
-                fr: "Francés",
-                current: "Idioma actual"
+                fr: "Francés"
             },
 
             menu: {
@@ -1707,8 +1703,7 @@
                 pt: "Portugais",
                 de: "Allemand",
                 es: "Espagnol",
-                fr: "Français",
-                current: "Langue actuelle"
+                fr: "Français"
             },
 
             menu: {
@@ -2481,16 +2476,6 @@
 
         if (name) {
             name.textContent =
-                info.name;
-        }
-
-        const currentValue =
-            document.querySelector(
-                "#languageCurrent .language-current-value"
-            );
-
-        if (currentValue) {
-            currentValue.textContent =
                 info.name;
         }
 
