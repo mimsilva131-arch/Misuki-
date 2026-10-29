@@ -24,6 +24,10 @@ try:
 except (TypeError, ValueError):
     OWNER_ID = 1146083816503529545
 BOT_START_TIME = time.time()
+# True only while the Discord Gateway connection is actually ready.
+# The website heartbeat is a process heartbeat; it must never claim the
+# Discord bot is Online while the Gateway is disconnected/reconnecting.
+GATEWAY_CONNECTED = False
 
 intents = discord.Intents.default()
 intents.members = True
@@ -469,7 +473,9 @@ async def heartbeat_loop():
         connection = None
         try:
             heartbeat = time.time()
-            status = "Online" if bot.is_ready() else "Offline"
+            # is_ready() can remain set while discord.py is reconnecting.
+            # Use the explicit gateway connection state instead.
+            status = "Online" if GATEWAY_CONNECTED and bot.is_ready() else "Offline"
             uptime = get_uptime()
             latency = round(bot.latency * 1000)
             connection = get_database_connection()
@@ -552,7 +558,8 @@ async def on_guild_remove(guild):
 
 @bot.event
 async def on_ready():
-    global statistics_task, heartbeat_task
+    global statistics_task, heartbeat_task, GATEWAY_CONNECTED
+    GATEWAY_CONNECTED = True
     await bot.change_presence(status=discord.Status.online, activity=discord.Game(name="Misuki Server"))
     print(f"🤖 Bot connected as {bot.user}")
     print(f"🟢 Bot status: {bot.status}")
