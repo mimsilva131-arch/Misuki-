@@ -4697,26 +4697,19 @@ def statistics():
     # HEARTBEAT
     # =====================================================
 
-    # Prefer the local runtime heartbeat written by the Discord child process.
-    runtime_status = None
-    runtime_last_seen = None
-    runtime_file = os.path.join(BASE_DIR, "data", "bot_runtime_status.json")
-
-    try:
-        with open(runtime_file, "r", encoding="utf-8") as file:
-            runtime_snapshot = json.load(file)
-        runtime_status = str(runtime_snapshot.get("status") or "").strip().lower()
-        runtime_last_seen = float(runtime_snapshot.get("last_seen"))
-    except (OSError, ValueError, TypeError, json.JSONDecodeError):
-        runtime_status = None
-        runtime_last_seen = None
-
+    # The Discord bot publishes its authoritative heartbeat in PostgreSQL.
+    # This is shared across Render instances and survives zero-downtime deploys.
     current_time = time.time()
 
-    if runtime_last_seen is not None:
+    last_seen = bot_snapshot.get("last_seen")
+
+    if last_seen is not None:
         try:
-            runtime_age = current_time - runtime_last_seen
-            if runtime_age <= 15 and runtime_status == "online":
+            heartbeat_age = current_time - float(last_seen)
+            if (
+                heartbeat_age <= 15
+                and str(bot_snapshot.get("bot_status") or "").strip().lower() == "online"
+            ):
                 statistics_data["bot_status"] = "Online"
             else:
                 statistics_data["bot_status"] = "Offline"
@@ -4727,23 +4720,7 @@ def statistics():
             statistics_data["latency"] = 0
             statistics_data["uptime"] = "0s"
     else:
-        # Backwards-compatible fallback to the PostgreSQL heartbeat.
-        last_seen = bot_snapshot.get("last_seen")
-        if last_seen is not None:
-            try:
-                heartbeat_age = current_time - float(last_seen)
-                if heartbeat_age <= 15 and str(bot_snapshot.get("bot_status") or "").strip().lower() == "online":
-                    statistics_data["bot_status"] = "Online"
-                else:
-                    statistics_data["bot_status"] = "Offline"
-                    statistics_data["latency"] = 0
-                    statistics_data["uptime"] = "0s"
-            except (TypeError, ValueError):
-                statistics_data["bot_status"] = "Offline"
-                statistics_data["latency"] = 0
-                statistics_data["uptime"] = "0s"
-        else:
-            statistics_data["bot_status"] = "Offline"
+        statistics_data["bot_status"] = "Offline"
 
     # =====================================================
     # API STATUS
@@ -5394,69 +5371,38 @@ def statistics_api():
     # HEARTBEAT
     # =====================================================
 
+    # PostgreSQL is the single shared source of truth for the Discord
+    # Gateway heartbeat. Never use a local file here because Render can
+    # temporarily run more than one instance during deployments.
     current_time = time.time()
 
-    last_seen = bot_snapshot.get(
-        "last_seen"
-    )
-
+    last_seen = bot_snapshot.get("last_seen")
 
     if last_seen is not None:
-
         try:
+            heartbeat_age = current_time - float(last_seen)
 
-            heartbeat_age = (
-                current_time
-                - float(last_seen)
-            )
-
-
-            # A fresh heartbeat alone only proves that the bot process is
-            # alive. The bot_status value is written from the Discord Gateway
-            # connection state, so both conditions are required for Online.
             if (
                 heartbeat_age <= 15
                 and str(
                     bot_snapshot.get("bot_status") or ""
                 ).strip().lower() == "online"
             ):
-
-                statistics_data[
-                    "bot_status"
-                ] = "Online"
-
+                statistics_data["bot_status"] = "Online"
             else:
+                statistics_data["bot_status"] = "Offline"
+                statistics_data["latency"] = 0
+                statistics_data["uptime"] = "0s"
 
-                statistics_data[
-                    "bot_status"
-                ] = "Offline"
-
-                # Never display stale uptime/latency as if the Discord bot
-                # were still connected.
-                statistics_data[
-                    "latency"
-                ] = 0
-
-                statistics_data[
-                    "uptime"
-                ] = "0s"
-
-
-        except (
-            TypeError,
-            ValueError
-        ):
-
-            statistics_data[
-                "bot_status"
-            ] = "Offline"
+        except (TypeError, ValueError):
+            statistics_data["bot_status"] = "Offline"
+            statistics_data["latency"] = 0
+            statistics_data["uptime"] = "0s"
 
     else:
-
-        statistics_data[
-            "bot_status"
-        ] = "Offline"
-
+        statistics_data["bot_status"] = "Offline"
+        statistics_data["latency"] = 0
+        statistics_data["uptime"] = "0s"
 
     # =====================================================
     # API STATUS
