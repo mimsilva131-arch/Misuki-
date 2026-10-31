@@ -4707,7 +4707,7 @@ def statistics():
         try:
             heartbeat_age = current_time - float(last_seen)
             if (
-                heartbeat_age <= 15
+                heartbeat_age <= 20
                 and str(bot_snapshot.get("bot_status") or "").strip().lower() == "online"
             ):
                 statistics_data["bot_status"] = "Online"
