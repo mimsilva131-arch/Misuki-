@@ -7,6 +7,7 @@ import os
 import asyncio
 import json
 import time
+import uuid
 
 import discord
 import psycopg2
@@ -28,6 +29,7 @@ BOT_START_TIME = time.time()
 # The website heartbeat is a process heartbeat; it must never claim the
 # Discord bot is Online while the Gateway is disconnected/reconnecting.
 GATEWAY_CONNECTED = False
+BOT_INSTANCE_ID = uuid.uuid4().hex
 
 RUNTIME_STATUS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "bot_runtime_status.json")
 
@@ -334,6 +336,7 @@ def initialize_statistics_database():
                     last_seen DOUBLE PRECISION,
                     admin_servers JSONB NOT NULL DEFAULT '[]'::jsonb,
                     admin_users JSONB NOT NULL DEFAULT '[]'::jsonb,
+                    runtime_id TEXT,
                     updated_at DOUBLE PRECISION NOT NULL
                 )
             """)
@@ -346,6 +349,7 @@ def initialize_statistics_database():
                 "ALTER TABLE bot_statistics ADD COLUMN IF NOT EXISTS admin_users JSONB NOT NULL DEFAULT '[]'::jsonb",
                 "ALTER TABLE bot_statistics ADD COLUMN IF NOT EXISTS last_seen DOUBLE PRECISION",
                 "ALTER TABLE bot_statistics ADD COLUMN IF NOT EXISTS updated_at DOUBLE PRECISION NOT NULL DEFAULT 0",
+                "ALTER TABLE bot_statistics ADD COLUMN IF NOT EXISTS runtime_id TEXT",
             ]
             for migration in migrations:
                 cursor.execute(migration)
@@ -353,23 +357,27 @@ def initialize_statistics_database():
                 INSERT INTO bot_statistics (
                     id, servers, users, channels, latency, commands, tickets,
                     moderation_actions, announcements, verifications, bot_status,
-                    uptime, version, last_seen, admin_servers, admin_users, updated_at
+                    uptime, version, last_seen, admin_servers, admin_users, runtime_id, updated_at
                 ) VALUES (
                     1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Offline', '0s', %s,
-                    NULL, '[]'::jsonb, '[]'::jsonb, %s
+                    NULL, '[]'::jsonb, '[]'::jsonb, NULL, %s
                 ) ON CONFLICT (id) DO NOTHING
             """, (MISUKI_VERSION, time.time()))
-        # A new process starts disconnected from Discord. Clear any
-        # heartbeat left by a previous process before the Gateway connects.
+        # Claim the shared statistics row for this bot process.
+        # This prevents an old Render instance from marking a newer
+        # bot instance Offline during zero-downtime deploys.
         cursor = connection.cursor()
         try:
+            now = time.time()
             cursor.execute("""
                 UPDATE bot_statistics
                 SET bot_status = 'Offline',
                     last_seen = NULL,
+                    runtime_id = %s,
+                    version = %s,
                     updated_at = %s
                 WHERE id = 1
-            """, (time.time(),))
+            """, (BOT_INSTANCE_ID, MISUKI_VERSION, now))
             connection.commit()
         finally:
             cursor.close()
@@ -458,13 +466,16 @@ async def update_stats_snapshot():
                     last_seen = %s,
                     admin_servers = %s::jsonb,
                     admin_users = %s::jsonb,
+                    runtime_id = %s,
                     updated_at = %s
                 WHERE id = 1
+                  AND runtime_id = %s
             """, (
                 servers_count, users_count, channels_count, latency,
                 commands_count, verifications_count, bot_status, uptime,
                 version, last_seen, json.dumps(detected_servers, ensure_ascii=False),
-                json.dumps(BOT_ADMIN_USERS, ensure_ascii=False), last_seen
+                json.dumps(BOT_ADMIN_USERS, ensure_ascii=False), BOT_INSTANCE_ID,
+                last_seen, BOT_INSTANCE_ID
             ))
         connection.commit()
         print("📊 Bot statistics updated:")
@@ -517,15 +528,19 @@ async def heartbeat_loop():
                         uptime = %s,
                         version = %s,
                         last_seen = %s,
+                        runtime_id = %s,
                         updated_at = %s
                     WHERE id = 1
+                      AND runtime_id = %s
                 """, (
                     status,
                     latency,
                     uptime,
                     MISUKI_VERSION,
                     heartbeat,
+                    BOT_INSTANCE_ID,
                     heartbeat,
+                    BOT_INSTANCE_ID,
                 ))
             connection.commit()
         except Exception as error:
@@ -584,7 +599,8 @@ async def on_disconnect():
                     last_seen = %s,
                     updated_at = %s
                 WHERE id = 1
-            """, (now, now))
+                  AND runtime_id = %s
+            """, (now, now, BOT_INSTANCE_ID))
         connection.commit()
     except Exception as error:
         print(f"⚠️ Could not mark bot offline after Gateway disconnect: {error}")
