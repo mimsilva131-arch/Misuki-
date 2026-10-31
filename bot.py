@@ -377,7 +377,18 @@ def initialize_statistics_database():
                     version = %s,
                     updated_at = %s
                 WHERE id = 1
-            """, (BOT_INSTANCE_ID, MISUKI_VERSION, now))
+                  AND (
+                      runtime_id = %s
+                      OR last_seen IS NULL
+                      OR %s - last_seen > 20
+                  )
+            """, (
+                BOT_INSTANCE_ID,
+                MISUKI_VERSION,
+                now,
+                BOT_INSTANCE_ID,
+                now,
+            ))
             connection.commit()
         finally:
             cursor.close()
@@ -615,6 +626,36 @@ async def on_resumed():
     global GATEWAY_CONNECTED
     GATEWAY_CONNECTED = True
     write_runtime_status("Online")
+
+    connection = None
+    try:
+        heartbeat = time.time()
+        connection = get_database_connection()
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                UPDATE bot_statistics
+                SET bot_status = 'Online',
+                    latency = %s,
+                    uptime = %s,
+                    version = %s,
+                    last_seen = %s,
+                    updated_at = %s
+                WHERE id = 1
+                  AND runtime_id = %s
+            """, (
+                round(bot.latency * 1000),
+                get_uptime(),
+                MISUKI_VERSION,
+                heartbeat,
+                heartbeat,
+                BOT_INSTANCE_ID,
+            ))
+        connection.commit()
+    except Exception as error:
+        print(f"⚠️ Could not publish resumed Gateway state: {error}")
+    finally:
+        if connection:
+            connection.close()
 
 
 @bot.event
