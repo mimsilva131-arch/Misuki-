@@ -7664,34 +7664,72 @@ def health():
 # =========================================================
 
 bot_process = None
+bot_lock_connection = None
+BOT_ADVISORY_LOCK_ID = 455245524
 
 
 def start_discord_bot():
-    global bot_process
+    global bot_process, bot_lock_connection
 
     if not BOT_TOKEN:
         print("⚠️ Discord bot not started: DISCORD_BOT_TOKEN is not configured.")
         return
 
     try:
+        # The website can run multiple Gunicorn workers and Render can briefly
+        # run old and new instances during a zero-downtime deploy. Starting a
+        # Discord Gateway process from every web worker causes the same bot
+        # token to have multiple competing sessions. Use a PostgreSQL
+        # advisory lock so exactly one web process owns the Discord bot.
+        lock_connection = database_connection()
+        with lock_connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT pg_try_advisory_lock(%s)",
+                (BOT_ADVISORY_LOCK_ID,)
+            )
+            acquired = bool(cursor.fetchone()[0])
+
+        if not acquired:
+            lock_connection.close()
+            print("ℹ️ Discord bot is already owned by another web process.")
+            return
+
+        bot_lock_connection = lock_connection
+
         bot_path = os.path.join(BASE_DIR, "bot.py")
         bot_process = subprocess.Popen(
             [sys.executable, "-u", bot_path],
             cwd=BASE_DIR
         )
-        print(f"🤖 Discord bot process started (PID {bot_process.pid}).")
+        print(
+            f"🤖 Discord bot process started (PID {bot_process.pid}) "
+            f"with PostgreSQL ownership lock."
+        )
     except Exception as error:
+        if bot_lock_connection:
+            try:
+                bot_lock_connection.close()
+            except Exception:
+                pass
+            bot_lock_connection = None
         print(f"❌ Could not start Discord bot: {error}")
 
 
 def stop_discord_bot():
-    global bot_process
+    global bot_process, bot_lock_connection
 
     if bot_process and bot_process.poll() is None:
         try:
             bot_process.terminate()
         except Exception:
             pass
+
+    if bot_lock_connection:
+        try:
+            bot_lock_connection.close()
+        except Exception:
+            pass
+        bot_lock_connection = None
 
 
 if __name__ == "__main__":
