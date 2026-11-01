@@ -2252,11 +2252,15 @@ Misuki — Statistics
         }
 
 
+        const botIsOnline =
+            String(data.bot_status || "").toLowerCase() === "online";
+
         if (uptime) {
 
             uptime.textContent =
-                data.uptime ??
-                "—";
+                botIsOnline
+                    ? (data.uptime ?? "—")
+                    : "—";
 
         }
 
@@ -2331,7 +2335,9 @@ Misuki — Statistics
 
 
         updateLatency(
-            data.latency
+            botIsOnline
+                ? data.latency
+                : null
         );
 
 
@@ -2395,6 +2401,15 @@ Misuki — Statistics
 
             // Never leave a stale online state on the dashboard.
             updateBotIndicator("Offline");
+            updateLatency(null);
+
+            const uptimeElement =
+                document.getElementById("statistics-uptime");
+
+            if (uptimeElement) {
+                uptimeElement.textContent = "—";
+            }
+
             updateDatabaseIndicator("offline");
             updateApiIndicator("Unavailable");
 
