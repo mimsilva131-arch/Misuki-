@@ -454,7 +454,7 @@ async def update_stats_snapshot():
         verifications_count = count_verified_users()
         last_seen = time.time()
         latency = round(bot.latency * 1000)
-        bot_status = "Online" if GATEWAY_CONNECTED and bot.is_ready() else "Offline"
+        bot_status = "Online" if bot.is_ready() else "Offline"
         uptime = get_uptime()
         version = MISUKI_VERSION
         channels_count = sum(len(guild.channels) for guild in bot.guilds)
@@ -525,9 +525,11 @@ async def heartbeat_loop():
         connection = None
         try:
             heartbeat = time.time()
-            # is_ready() can remain set while discord.py is reconnecting.
-            # Use the explicit gateway connection state instead.
-            status = "Online" if GATEWAY_CONNECTED and bot.is_ready() else "Offline"
+            # discord.py's ready state is the authoritative signal that the
+            # bot can operate normally. GATEWAY_CONNECTED is only a transient
+            # event flag and can briefly become false during automatic
+            # reconnects even though the bot remains usable.
+            status = "Online" if bot.is_ready() else "Offline"
             uptime = get_uptime()
             latency = round(bot.latency * 1000)
             connection = get_database_connection()
@@ -595,31 +597,16 @@ async def sync_owner_license_command_permissions():
 
 @bot.event
 async def on_disconnect():
-    """Mark the Discord bot offline immediately when the Gateway drops."""
+    """Record the Gateway disconnect without invalidating the live heartbeat."""
     global GATEWAY_CONNECTED
     GATEWAY_CONNECTED = False
     write_runtime_status("Offline")
-    connection = None
-    try:
-        connection = get_database_connection()
-        now = time.time()
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                UPDATE bot_statistics
-                SET bot_status = 'Offline',
-                    latency = 0,
-                    uptime = '0s',
-                    last_seen = NULL,
-                    updated_at = %s
-                WHERE id = 1
-                  AND runtime_id = %s
-            """, (now, BOT_INSTANCE_ID))
-        connection.commit()
-    except Exception as error:
-        print(f"⚠️ Could not mark bot offline after Gateway disconnect: {error}")
-    finally:
-        if connection:
-            connection.close()
+
+    # Do not overwrite PostgreSQL here. discord.py can disconnect briefly
+    # while automatically reconnecting; the heartbeat loop will continue to
+    # publish the real ready state. The website only declares the bot Offline
+    # when the shared heartbeat becomes stale.
+    print("⚠️ Discord Gateway disconnected; waiting for automatic reconnect.")
 
 
 @bot.event
