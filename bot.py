@@ -607,6 +607,8 @@ async def on_disconnect():
             cursor.execute("""
                 UPDATE bot_statistics
                 SET bot_status = 'Offline',
+                    latency = 0,
+                    uptime = '0s',
                     last_seen = NULL,
                     updated_at = %s
                 WHERE id = 1
