@@ -4784,8 +4784,6 @@ def statistics():
         ValueError
     ):
 
-        database_ok = False
-
         statistics_data[
             "tickets"
         ] = 0
@@ -4831,8 +4829,6 @@ def statistics():
         TypeError,
         ValueError
     ):
-
-        database_ok = False
 
         moderation_actions = 0
 
@@ -5383,7 +5379,7 @@ def statistics_api():
             heartbeat_age = current_time - float(last_seen)
 
             if (
-                heartbeat_age <= 15
+                heartbeat_age <= 20
                 and str(
                     bot_snapshot.get("bot_status") or ""
                 ).strip().lower() == "online"
@@ -5418,8 +5414,6 @@ def statistics_api():
     # =====================================================
     # TICKETS
     # =====================================================
-
-    database_ok = True
 
     try:
 
@@ -5516,19 +5510,12 @@ def statistics_api():
     # DATABASE STATUS
     # =====================================================
 
-    # The statistics snapshot can only be trusted when PostgreSQL was
-    # successfully read above. The local activity databases must also work.
-    if postgres_ok and database_ok:
-
-        statistics_data[
-            "database_status"
-        ] = "Operational"
-
-    else:
-
-        statistics_data[
-            "database_status"
-        ] = "Error"
+    # PostgreSQL is the authoritative database for the live statistics
+    # snapshot. Local SQLite files are auxiliary activity stores and must
+    # never make the main database indicator report a false error.
+    statistics_data[
+        "database_status"
+    ] = "Operational" if postgres_ok else "Error"
 
 
     # =====================================================
