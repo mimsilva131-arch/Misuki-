@@ -607,11 +607,11 @@ async def on_disconnect():
             cursor.execute("""
                 UPDATE bot_statistics
                 SET bot_status = 'Offline',
-                    last_seen = %s,
+                    last_seen = NULL,
                     updated_at = %s
                 WHERE id = 1
                   AND runtime_id = %s
-            """, (now, now, BOT_INSTANCE_ID))
+            """, (now, BOT_INSTANCE_ID))
         connection.commit()
     except Exception as error:
         print(f"⚠️ Could not mark bot offline after Gateway disconnect: {error}")
