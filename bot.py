@@ -684,40 +684,8 @@ async def on_ready():
     if heartbeat_task is None or heartbeat_task.done():
         heartbeat_task = asyncio.create_task(heartbeat_loop())
 
-    await refresh_bot_installers()
-    await populate_member_cache()
-    print_detected_servers()
-    print("📋 Comandos registados:")
-    registered_count = 0
-
-    for command in bot.tree.get_commands():
-        if isinstance(
-            command,
-            discord.app_commands.Group
-        ):
-            print(f"   /{command.name}")
-
-            for subcommand in command.commands:
-                registered_count += 1
-                print(
-                    f"      /{command.name} "
-                    f"{subcommand.name}"
-                )
-        else:
-            registered_count += 1
-            print(f"   /{command.name}")
-
-    print(
-        f"📊 Total de comandos registados: "
-        f"{registered_count}"
-    )
-
-    await update_stats_snapshot()
-
-    license_manager = bot.get_cog("LicenseManager")
-    if license_manager is not None:
-        license_manager.start_expiration_worker()
-
+    # Synchronise application commands immediately after the Gateway is ready.
+    # Keep slow installer/member-cache work from delaying Discord command publication.
     try:
         synced = await bot.tree.sync()
 
@@ -763,6 +731,43 @@ async def on_ready():
         await sync_owner_license_command_permissions()
     except Exception as error:
         print(f"❌ Command sync error: {error}")
+
+
+    await refresh_bot_installers()
+    await populate_member_cache()
+    print_detected_servers()
+    print("📋 Comandos registados:")
+    registered_count = 0
+
+    for command in bot.tree.get_commands():
+        if isinstance(
+            command,
+            discord.app_commands.Group
+        ):
+            print(f"   /{command.name}")
+
+            for subcommand in command.commands:
+                registered_count += 1
+                print(
+                    f"      /{command.name} "
+                    f"{subcommand.name}"
+                )
+        else:
+            registered_count += 1
+            print(f"   /{command.name}")
+
+    print(
+        f"📊 Total de comandos registados: "
+        f"{registered_count}"
+    )
+
+    await update_stats_snapshot()
+
+    license_manager = bot.get_cog("LicenseManager")
+    if license_manager is not None:
+        license_manager.start_expiration_worker()
+
+
     if heartbeat_task is None or heartbeat_task.done():
         heartbeat_task = asyncio.create_task(heartbeat_loop())
 
