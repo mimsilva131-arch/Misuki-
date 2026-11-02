@@ -676,6 +676,14 @@ async def on_ready():
     print(f"🤖 Bot connected as {bot.user}")
     print(f"🟢 Bot status: {bot.status}")
     print(f"🏠 Discord guild count: {len(bot.guilds)}")
+
+    # Publish the website heartbeat immediately after the Discord Gateway
+    # becomes ready. Do not wait for member-cache population, installer
+    # lookups, command sync, or other startup work: any of those operations
+    # may take time or fail independently of the live Gateway connection.
+    if heartbeat_task is None or heartbeat_task.done():
+        heartbeat_task = asyncio.create_task(heartbeat_loop())
+
     await refresh_bot_installers()
     await populate_member_cache()
     print_detected_servers()
