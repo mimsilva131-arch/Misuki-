@@ -545,7 +545,7 @@ class Utility(
                 print(f"⚠️ Could not check license for /help: {error}")
 
         owner_id = int(os.getenv("OWNER_ID", "1146083816503529545"))
-        free_commands = {"help", "ping", "setup", "license"}
+        free_commands = {"help", "ping", "setup", "tutorial", "license"}
         owner_commands = {"createlicense", "revokelicense", "extendlicense"}
         premium_commands = {"ticket", "verify", "warn", "warnings", "unwarn", "clearwarnings", "clear", "timeout", "untimeout", "kick", "ban", "unban", "softban", "jail", "unjail", "jailinfo", "announce", "trigger", "impersonate"}
         available_commands = []
