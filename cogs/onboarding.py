@@ -17,6 +17,16 @@ class Onboarding(commands.Cog):
         self.bot = bot
 
     async def find_installer(self, guild):
+        # The Audit Log is optional for onboarding. If Misuki cannot read it,
+        # use the server owner as a safe fallback instead of producing errors.
+        me = guild.me
+        if me is not None and not me.guild_permissions.view_audit_log:
+            print(
+                f"ℹ️ Installer could not be determined for {guild.name} "
+                f"({guild.id}); using the server owner for onboarding."
+            )
+            return guild.owner
+
         try:
             async for entry in guild.audit_logs(
                 limit=20,
@@ -28,9 +38,14 @@ class Onboarding(commands.Cog):
                     user = getattr(entry, "user", None)
                     if user is not None:
                         return user
-        except Exception as error:
+        except discord.Forbidden:
             print(
-                f"Could not read installer audit log for "
+                f"ℹ️ Discord denied Audit Log access for {guild.name} "
+                f"({guild.id}); using the server owner for onboarding."
+            )
+        except discord.HTTPException as error:
+            print(
+                f"⚠️ Could not read installer audit log for "
                 f"{guild.name} ({guild.id}): {error}"
             )
 
