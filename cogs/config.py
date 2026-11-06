@@ -1095,6 +1095,15 @@ class Config(commands.Cog):
             description=text["tutorial_description"],
             color=discord.Color.blurple()
         )
+        def command_mention(name):
+            command = self.bot.tree.get_command(name)
+            if command is None:
+                return f"/{name}"
+            return f"</{name}:{command.id}>"
+
+        setup_mention = command_mention("setup")
+        tutorial_mention = command_mention("tutorial")
+
         embed.add_field(
             name=text["tutorial_permissions_title"],
             value=text["tutorial_permissions"],
@@ -1102,19 +1111,92 @@ class Config(commands.Cog):
         )
         embed.add_field(
             name=text["tutorial_steps_title"],
-            value=text["tutorial_steps"],
+            value=text["tutorial_steps"].format(
+                setup=setup_mention,
+                tutorial=tutorial_mention
+            ),
             inline=False
         )
         embed.add_field(
             name=text["tutorial_setup_title"],
-            value=text["tutorial_setup"],
+            value=text["tutorial_setup"].format(
+                setup=setup_mention
+            ),
+            inline=False
+        )
+        embed.add_field(
+            name=text.get("tutorial_configuration_title", "Configuration"),
+            value=text.get(
+                "tutorial_configuration",
+                "Use the setup panel to configure the required roles and channels."
+            ).format(setup=setup_mention),
             inline=False
         )
         embed.set_footer(text=text["tutorial_footer"])
 
         await interaction.response.send_message(
             embed=embed,
-            ephemeral=True
+            ephemeral=True,
+            view=TutorialView(
+                self,
+                interaction.user.id
+            )
+        )
+
+
+class TutorialSetupButton(discord.ui.Button):
+
+    def __init__(self, config, user_id):
+        self.config = config
+        self.user_id = user_id
+        super().__init__(
+            label="Open Setup",
+            emoji="⚙️",
+            style=discord.ButtonStyle.primary
+        )
+
+    async def callback(self, interaction):
+        if interaction.user.id != self.user_id:
+            await interaction.response.send_message(
+                "❌ These setup controls belong to another user.",
+                ephemeral=True
+            )
+            return
+
+        language, _ = get_user_preferences(self.user_id)
+        text = TRANSLATIONS.get(
+            language,
+            TRANSLATIONS[DEFAULT_LANGUAGE]
+        )
+
+        embed = discord.Embed(
+            title=f"⚙️ {text['setup_title']}",
+            description=(
+                text['setup_description']
+                + "\n\n"
+                + text['setup_choose']
+            ),
+            color=discord.Color.blurple()
+        )
+
+        await interaction.response.edit_message(
+            embed=embed,
+            view=MainSetupView(
+                self.config,
+                self.user_id
+            )
+        )
+
+
+class TutorialView(discord.ui.View):
+
+    def __init__(self, config, user_id):
+        super().__init__(timeout=600)
+        self.add_item(
+            TutorialSetupButton(
+                config,
+                user_id
+            )
         )
 
 
