@@ -30,8 +30,7 @@ DATABASE_URL = os.getenv(
 # =========================================================
 
 class TriggerManager(
-    commands.GroupCog,
-    group_name="trigger"
+    commands.Cog
 ):
 
     def __init__(
@@ -40,6 +39,13 @@ class TriggerManager(
     ):
 
         self.bot = bot
+
+        # Register the trigger subcommands explicitly under /trigger.
+        # This avoids the current GroupCog discovery issue in this cog.
+        self.trigger_group = app_commands.Group(
+            name="trigger",
+            description="Manage server triggers."
+        )
 
         if not DATABASE_URL:
 
@@ -1035,30 +1041,23 @@ async def setup(
 
 
     # -----------------------------------------------------
-    # DEBUG
+    # EXPLICIT /TRIGGER GROUP REGISTRATION
     # -----------------------------------------------------
 
-    try:
+    commands_list = list(cog.get_app_commands())
 
-        commands_list = (
-            cog.get_app_commands()
-        )
+    for command in commands_list:
+        cog.trigger_group.add_command(command)
 
+    bot.tree.add_command(cog.trigger_group)
+
+    print(
+        f"⚡ TriggerManager commands registered: "
+        f"{len(cog.trigger_group.commands)}"
+    )
+
+    for command in cog.trigger_group.commands:
         print(
-            f"Comandos do TriggerManager: "
-            f"{len(commands_list)}"
-        )
-
-        for command in commands_list:
-
-            print(
-                f"/trigger {command.name}"
-            )
-
-    except Exception as error:
-
-        print(
-            f"⚠️ Não foi possível listar "
-            f"os comandos do TriggerManager: {error}"
+            f"/trigger {command.name}"
         )
 
