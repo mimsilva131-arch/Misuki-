@@ -127,14 +127,30 @@ def is_human_member(member):
 
 BOT_INSTALLERS = {}
 BOT_GUILD_HUMAN_COUNTS = {}
+AUDIT_LOG_WARNED_GUILDS = set()
 
 
 async def refresh_bot_installers():
-    """Find who actually added Misuki in each guild using Discord's audit log."""
+    """Find who actually added Misuki when the bot can read the audit log."""
     if not bot.user:
         return
 
     for guild in bot.guilds:
+        guild_key = str(guild.id)
+
+        # Reading the audit log requires the View Audit Log permission.
+        # A server without that permission must not generate an error every
+        # statistics cycle. The installer simply remains unknown.
+        me = guild.me
+        if me is not None and not me.guild_permissions.view_audit_log:
+            if guild_key not in AUDIT_LOG_WARNED_GUILDS:
+                print(
+                    f"ℹ️ Cannot determine installer for {guild.name} "
+                    f"({guild.id}): Missing View Audit Log permission."
+                )
+                AUDIT_LOG_WARNED_GUILDS.add(guild_key)
+            continue
+
         try:
             async for entry in guild.audit_logs(
                 limit=50,
@@ -146,10 +162,22 @@ async def refresh_bot_installers():
                     actor = getattr(entry, "user", None)
                     actor_id = getattr(actor, "id", None)
                     if actor_id:
-                        BOT_INSTALLERS[str(guild.id)] = str(actor_id)
+                        BOT_INSTALLERS[guild_key] = str(actor_id)
                     break
-        except Exception as error:
-            print(f"⚠️ Could not read installer audit log for {guild.name} ({guild.id}): {error}")
+        except discord.Forbidden:
+            if guild_key not in AUDIT_LOG_WARNED_GUILDS:
+                print(
+                    f"ℹ️ Cannot determine installer for {guild.name} "
+                    f"({guild.id}): Discord denied Audit Log access."
+                )
+                AUDIT_LOG_WARNED_GUILDS.add(guild_key)
+        except discord.HTTPException as error:
+            if guild_key not in AUDIT_LOG_WARNED_GUILDS:
+                print(
+                    f"⚠️ Could not read installer audit log for "
+                    f"{guild.name} ({guild.id}): {error}"
+                )
+                AUDIT_LOG_WARNED_GUILDS.add(guild_key)
 
 
 BOT_ADMIN_USERS = []
@@ -565,34 +593,11 @@ async def heartbeat_loop():
 
 
 async def sync_owner_license_command_permissions():
-    """Make license-management commands visible only to the bot owner in each guild."""
-    if not OWNER_ID:
-        return
-
-    commands_to_restrict = {"createlicense", "revokelicense"}
-
-    for guild in bot.guilds:
-        try:
-            for command in bot.tree.get_commands():
-                if command.name not in commands_to_restrict:
-                    continue
-
-                await bot.tree.set_permissions(
-                    guild,
-                    command,
-                    permissions=[
-                        discord.app_commands.CommandPermission(
-                            id=OWNER_ID,
-                            type=discord.app_commands.AppCommandPermissionType.user,
-                            permission=True,
-                        )
-                    ],
-                )
-        except Exception as error:
-            print(
-                f"⚠️ Could not restrict license command permissions in "
-                f"{guild.id}: {error}"
-            )
+    """Kept as a compatibility hook; owner checks are enforced in the commands."""
+    # discord.py's CommandTree has no set_permissions() API. The license
+    # commands already validate OWNER_ID inside their callbacks, so attempting
+    # to edit command permissions here only creates runtime warnings.
+    return
 
 
 @bot.event
