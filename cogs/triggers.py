@@ -1047,7 +1047,12 @@ async def setup(
     commands_list = list(cog.get_app_commands())
 
     for command in commands_list:
-        cog.trigger_group.add_command(command)
+        bot.tree.remove_command(
+            command.name
+        )
+        cog.trigger_group.add_command(
+            command
+        )
 
     bot.tree.add_command(cog.trigger_group)
 
