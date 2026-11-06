@@ -509,9 +509,15 @@ class Utility(
                 latency=latency
             )
 
-            await interaction.response.send_message(
-                text
-            )
+            if interaction.response.is_done():
+                await interaction.followup.send(
+                    text,
+                    ephemeral=True
+                )
+            else:
+                await interaction.response.send_message(
+                    text
+                )
 
         except discord.HTTPException as error:
 
@@ -587,7 +593,16 @@ class Utility(
         )
 
         try:
-            await interaction.response.send_message(embed=embed, ephemeral=True)
+            if interaction.response.is_done():
+                await interaction.followup.send(
+                    embed=embed,
+                    ephemeral=True
+                )
+            else:
+                await interaction.response.send_message(
+                    embed=embed,
+                    ephemeral=True
+                )
         except discord.HTTPException as error:
             print(f"❌ Error executing /help: {error}")
 
