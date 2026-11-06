@@ -42,13 +42,15 @@ TRANSLATIONS = {
         "setup_description": "Configure Misuki for this server.",
         "setup_choose": "Choose a category below.",
         "tutorial_title": "Misuki setup tutorial",
-        "tutorial_description": "Follow these steps to configure Misuki correctly on your server.",
+        "tutorial_description": "Configure Misuki from the setup panel. This guide explains the required steps and provides direct access to the panel.",
         "tutorial_permissions_title": "Required permissions",
-        "tutorial_permissions": "Manage Server, Manage Channels, Manage Roles, View Channels, Send Messages, Embed Links, Read Message History, Manage Messages, Manage Webhooks, Moderate Members and View Audit Log. Some features may require additional permissions.",
+        "tutorial_permissions": "For initial setup, allow Misuki to view channels, send messages, embed links, read message history, manage channels and manage roles. Specific features may require additional permissions.",
         "tutorial_steps_title": "Steps",
-        "tutorial_steps": "1. Invite Misuki with the required permissions.\\n2. Run /setup.\\n3. Open Personal Settings and choose your language.\\n4. Configure roles and channels for the features you use.\\n5. Test the configured panels and commands.",
-        "tutorial_setup_title": "Setup command",
-        "tutorial_setup": "Use /setup to open the configuration menu. Use /tutorial at any time to see this guide again.",
+        "tutorial_steps": "1. Invite Misuki with the required permissions.\\n2. Open {setup} to enter the setup panel.\\n3. In Personal Settings, choose your language and timezone.\\n4. In Roles, configure the roles used by each system.\\n5. In Channels, select the channels for logs, verification, announcements and tickets.\\n6. Open Tickets, Moderation, Verification and Jail and confirm the required settings.\\n7. Publish the panels for the features you want to use.\\n8. Reopen this guide with {tutorial}.",
+        "tutorial_setup_title": "Setup panel",
+        "tutorial_setup": "Open {setup} to configure the server. The panel lets you select roles, channels and ticket categories directly, without copying IDs.",
+        "tutorial_configuration_title": "Recommended order",
+        "tutorial_configuration": "Start with Personal Settings, then Roles and Channels. Next configure Tickets, Moderation, Verification and Jail. Stats does not require manual configuration.",
         "tutorial_footer": "Misuki • Setup guide",
 
         "description": "/ping — Check if the bot is online.\n/help — Show this message.",
@@ -77,14 +79,17 @@ TRANSLATIONS = {
         "setup_help": "Use as Definições pessoais para escolher a sua língua e o fuso horário.",
 
         "tutorial_title": "Tutorial de configuração do Misuki",
-        "tutorial_description": "Siga estes passos para configurar corretamente o Misuki no seu servidor.",
+        "tutorial_description": "Configure o Misuki através do painel de configuração. Este guia explica os passos necessários e dá acesso direto ao painel.",
         "tutorial_permissions_title": "Permissões necessárias",
-        "tutorial_permissions": "Gerir servidor, Gerir canais, Gerir cargos, Ver canais, Enviar mensagens, Incorporar links, Ler histórico de mensagens, Gerir mensagens, Gerir webhooks, Moderar membros e Ver registo de auditoria. Algumas funcionalidades podem exigir permissões adicionais.",
+        "tutorial_permissions": "Para a configuração inicial, permita ao Misuki ver canais, enviar mensagens, incorporar links, ler o histórico de mensagens, gerir canais e gerir cargos. Algumas funcionalidades podem exigir permissões adicionais.",
         "tutorial_steps_title": "Passos",
-        "tutorial_steps": "1. Convide o Misuki com as permissões necessárias.\n2. Execute /setup.\n3. Abra as Definições pessoais e escolha a sua língua.\n4. Configure os cargos e canais das funcionalidades que utiliza.\n5. Teste os painéis e comandos configurados.",
-        "tutorial_setup_title": "Comando de configuração",
-        "tutorial_setup": "Use /setup para abrir o menu de configuração. Use /tutorial a qualquer momento para voltar a consultar este guia.",
+        "tutorial_steps": "1. Convide o Misuki com as permissões necessárias.\\n2. Abra {setup} para entrar no painel de configuração.\\n3. Em Definições pessoais, escolha a sua língua e o fuso horário.\\n4. Em Cargos, defina os cargos usados por cada sistema.\\n5. Em Canais, escolha os canais de logs, verificação, anúncios e tickets.\\n6. Abra Tickets, Moderação, Verificação e Prisão e confirme as definições necessárias.\\n7. Publique os painéis das funcionalidades que pretende utilizar.\\n8. Volte a abrir este guia com {tutorial}.",
+        "tutorial_setup_title": "Painel de configuração",
+        "tutorial_setup": "Abra {setup} para configurar o servidor. O painel permite selecionar diretamente cargos, canais e a categoria dos tickets, sem ter de copiar IDs.",
+        "tutorial_configuration_title": "Ordem recomendada",
+        "tutorial_configuration": "Comece por Definições pessoais, depois Cargos e Canais. Em seguida configure Tickets, Moderação, Verificação e Prisão. As Estatísticas não precisam de configuração manual.",
         "tutorial_footer": "Misuki • Guia de configuração",
+
         "title": "🤖 Misuki Bot — Comandos",
         "setup_roles": "Cargos",
         "setup_channels": "Canais",
@@ -551,21 +556,55 @@ class Utility(
                 print(f"⚠️ Could not check license for /help: {error}")
 
         owner_id = int(os.getenv("OWNER_ID", "1146083816503529545"))
-        free_commands = {"help", "ping", "setup", "tutorial", "license"}
-        owner_commands = {"createlicense", "revokelicense", "extendlicense"}
-        premium_commands = {"ticket", "verify", "warn", "warnings", "unwarn", "clearwarnings", "clear", "timeout", "untimeout", "kick", "ban", "unban", "softban", "jail", "unjail", "jailinfo", "announce", "trigger", "impersonate"}
+        free_commands = {
+            "help", "ping", "setup", "tutorial", "license"
+        }
+
+        owner_commands = {
+            "createlicense", "revokelicense", "extendlicense"
+        }
+
+        premium_commands = {
+            "ticket", "verify", "warn", "warnings", "unwarn",
+            "clearwarnings", "clear", "timeout", "untimeout",
+            "kick", "ban", "unban", "softban", "jail", "unjail",
+            "jailinfo", "announce", "trigger", "impersonate"
+        }
+
         available_commands = []
 
+        def collect_commands(command, prefix=""):
+            command_name = getattr(command, "name", None)
+            if not command_name:
+                return
+
+            full_name = f"{prefix} {command_name}".strip()
+            root_name = full_name.split(" ", 1)[0]
+
+            if root_name in owner_commands and interaction.user.id != owner_id:
+                return
+
+            if root_name in premium_commands and not active_license:
+                return
+
+            if (
+                root_name not in free_commands
+                and root_name not in premium_commands
+                and root_name not in owner_commands
+            ):
+                return
+
+            children = getattr(command, "commands", None)
+
+            if children:
+                for child in children:
+                    collect_commands(child, full_name)
+                return
+
+            available_commands.append("/" + full_name)
+
         for command in self.bot.tree.get_commands():
-            name = getattr(command, 'name', None)
-            if not name:
-                continue
-            if name in owner_commands and interaction.user.id != owner_id:
-                continue
-            if name in premium_commands and not active_license:
-                continue
-            if name in free_commands or name in premium_commands or name in owner_commands:
-                available_commands.append('/' + name)
+            collect_commands(command)
 
         available_commands.sort()
         status_text = translations["license_active"] if active_license else translations["license_inactive"]
