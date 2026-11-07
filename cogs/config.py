@@ -1219,8 +1219,13 @@ class TutorialSetupButton(discord.ui.Button):
     def __init__(self, config, user_id):
         self.config = config
         self.user_id = user_id
+        language, _ = get_user_preferences(user_id)
+        text = TRANSLATIONS.get(
+            language,
+            TRANSLATIONS[DEFAULT_LANGUAGE]
+        )
         super().__init__(
-            label="Open Setup",
+            label=text.get("tutorial_open_setup", "Open Setup"),
             emoji="⚙️",
             style=discord.ButtonStyle.primary
         )
@@ -1228,7 +1233,10 @@ class TutorialSetupButton(discord.ui.Button):
     async def callback(self, interaction):
         if interaction.user.id != self.user_id:
             await interaction.response.send_message(
-                "❌ These setup controls belong to another user.",
+                get_translation(
+                    interaction.user.id,
+                    "tutorial_wrong_user"
+                ),
                 ephemeral=True
             )
             return
