@@ -1077,6 +1077,8 @@ class Config(commands.Cog):
         self,
         interaction: discord.Interaction
     ):
+        # Acknowledge immediately so Discord never expires the interaction
+        # while the tutorial is being built.
         if interaction.guild is None:
             await interaction.response.send_message(
                 "This command can only be used in a server.",
@@ -1084,64 +1086,132 @@ class Config(commands.Cog):
             )
             return
 
-        language, _ = get_user_preferences(interaction.user.id)
-        text = TRANSLATIONS.get(
-            language,
-            TRANSLATIONS[DEFAULT_LANGUAGE]
-        )
+        try:
+            await interaction.response.defer(ephemeral=True)
 
-        embed = discord.Embed(
-            title=text["tutorial_title"],
-            description=text["tutorial_description"],
-            color=discord.Color.blurple()
-        )
-        def command_mention(name):
-            command = self.bot.tree.get_command(name)
-            if command is None:
-                return f"/{name}"
-            return f"</{name}:{command.id}>"
-
-        setup_mention = command_mention("setup")
-        tutorial_mention = command_mention("tutorial")
-
-        embed.add_field(
-            name=text["tutorial_permissions_title"],
-            value=text["tutorial_permissions"],
-            inline=False
-        )
-        embed.add_field(
-            name=text["tutorial_steps_title"],
-            value=text["tutorial_steps"].format(
-                setup=setup_mention,
-                tutorial=tutorial_mention
-            ),
-            inline=False
-        )
-        embed.add_field(
-            name=text["tutorial_setup_title"],
-            value=text["tutorial_setup"].format(
-                setup=setup_mention
-            ),
-            inline=False
-        )
-        embed.add_field(
-            name=text.get("tutorial_configuration_title", "Configuration"),
-            value=text.get(
-                "tutorial_configuration",
-                "Use the setup panel to configure the required roles and channels."
-            ).format(setup=setup_mention),
-            inline=False
-        )
-        embed.set_footer(text=text["tutorial_footer"])
-
-        await interaction.response.send_message(
-            embed=embed,
-            ephemeral=True,
-            view=TutorialView(
-                self,
+            language, _ = get_user_preferences(
                 interaction.user.id
             )
-        )
+
+            text = TRANSLATIONS.get(
+                language,
+                TRANSLATIONS[DEFAULT_LANGUAGE]
+            )
+
+            embed = discord.Embed(
+                title=text.get(
+                    "tutorial_title",
+                    "Misuki setup tutorial"
+                ),
+                description=text.get(
+                    "tutorial_description",
+                    "Configure Misuki from the setup panel."
+                ),
+                color=discord.Color.blurple()
+            )
+
+            def command_mention(name):
+                command = self.bot.tree.get_command(name)
+                if command is None or not getattr(command, "id", None):
+                    return f"/{name}"
+                return f"</{name}:{command.id}>"
+
+            setup_mention = command_mention("setup")
+            tutorial_mention = command_mention("tutorial")
+
+            embed.add_field(
+                name=text.get(
+                    "tutorial_permissions_title",
+                    "Required permissions"
+                ),
+                value=text.get(
+                    "tutorial_permissions",
+                    "Misuki needs the permissions required by the features you enable."
+                ),
+                inline=False
+            )
+
+            embed.add_field(
+                name=text.get(
+                    "tutorial_steps_title",
+                    "Steps"
+                ),
+                value=text.get(
+                    "tutorial_steps",
+                    "Open {setup} to configure Misuki."
+                ).format(
+                    setup=setup_mention,
+                    tutorial=tutorial_mention
+                ),
+                inline=False
+            )
+
+            embed.add_field(
+                name=text.get(
+                    "tutorial_setup_title",
+                    "Setup panel"
+                ),
+                value=text.get(
+                    "tutorial_setup",
+                    "Open {setup} to configure the server."
+                ).format(
+                    setup=setup_mention
+                ),
+                inline=False
+            )
+
+            embed.add_field(
+                name=text.get(
+                    "tutorial_configuration_title",
+                    "Recommended order"
+                ),
+                value=text.get(
+                    "tutorial_configuration",
+                    "Configure Personal Settings, Roles, Channels and the features you want to use."
+                ).format(
+                    setup=setup_mention,
+                    tutorial=tutorial_mention
+                ),
+                inline=False
+            )
+
+            embed.set_footer(
+                text=text.get(
+                    "tutorial_footer",
+                    "Use the setup panel to configure Misuki."
+                )
+            )
+
+            await interaction.edit_original_response(
+                embed=embed,
+                view=TutorialView(
+                    self,
+                    interaction.user.id
+                )
+            )
+
+        except Exception as error:
+            print(
+                f"❌ /tutorial failed for user {interaction.user.id}: "
+                f"{type(error).__name__}: {error}"
+            )
+
+            error_message = (
+                "❌ I couldn't open the tutorial right now. "
+                "Please try again in a moment."
+            )
+
+            if interaction.response.is_done():
+                await interaction.edit_original_response(
+                    content=error_message,
+                    embed=None,
+                    view=None
+                )
+            else:
+                await interaction.response.send_message(
+                    error_message,
+                    ephemeral=True
+                )
 
 
 class TutorialSetupButton(discord.ui.Button):
