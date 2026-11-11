@@ -4660,11 +4660,7 @@ def statistics():
                     SELECT
                         servers, users, channels, latency, commands,
                         tickets, moderation_actions, announcements,
-                        (
-                            SELECT COUNT(DISTINCT user_id)
-                            FROM verification_requests
-                            WHERE status = 'verified'
-                        ) AS verifications,
+                        verifications,
                         bot_status, uptime, version,
                         last_seen, admin_servers, admin_users, updated_at
                     FROM bot_statistics
