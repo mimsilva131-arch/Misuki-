@@ -2205,13 +2205,10 @@
 
             if (original.includes("{{") || original.includes("{%")) return;
 
-            if (language === "en") {
-                textNode.nodeValue = original;
-                return;
-            }
-
             const normalized = normalizeStaticText(original);
-            const key = englishPhraseKeys[normalized];
+            const key =
+                englishPhraseKeys[normalized] ||
+                staticPhraseKeys[normalized];
 
             if (!key) {
                 textNode.nodeValue = original;
@@ -2300,7 +2297,7 @@
                 stored_title: "Que dados podem ser armazenados?", stored_1: "ID de utilizador do Discord", stored_2: "IDs dos servidores Discord", stored_3: "Configuração do servidor", stored_4: "Definições das funcionalidades do Misuki", stored_5: "Informação necessária para licenças e subscrições", stored_6: "Informação de suporte ou avaliações que forneça voluntariamente", why_title: "Porque são armazenados?", why_text: "A informação é armazenada apenas quando é necessária para fornecer o serviço ou funcionalidade solicitada.", request_title: "Solicitar os seus dados", request_text: "Pode solicitar através do suporte a informação associada à sua utilização do Misuki.", contact_support: "Contactar o suporte", deletion_title: "Eliminação de dados", deletion_text: "Pode solicitar a eliminação dos dados pessoais associados à sua conta, salvo a informação que tenha de ser conservada por motivos legítimos.", deletion_note: "Alguns registos podem ter de ser conservados por motivos de segurança, legais ou operacionais.", discord_title: "Dados do Discord", discord_text: "Os dados do Discord são tratados de acordo com as políticas do Discord e as permissões concedidas ao Misuki.", discord_policy: "Ver a política de privacidade do Discord", privacy_button: "Política de privacidade"
             },
             license: { inactive: "Inativa", no_license_title: "Sem licença" },
-            verification: { login_required: "Connectez-vous pour continuer", login_description:nicia sesión para continuar", login_description:elden Sie sich an, um fortzufahren", login_description:nicie sessão para continuar", login_description: "Para iniciar a verificação, precisa de iniciar sessão com a sua conta Discord.", login_note: "Depois de iniciar sessão, voltará automaticamente para esta página e poderá continuar a verificação.", protected: "Protegido pelo Misuki", captcha_title: "Verificação", captcha_question: "Conclua a verificação abaixo" },
+            verification: { login_required: "Inicie sessão para continuar", login_description: "Para iniciar a verificação, precisa de iniciar sessão com a sua conta Discord.", login_note: "Depois de iniciar sessão, voltará automaticamente para esta página e poderá continuar a verificação.", protected: "Protegido pelo Misuki", captcha_title: "Verificação", captcha_question: "Conclua a verificação abaixo" },
             advertisements: { status_page_title: "As minhas publicidades", status_id: "ID:", duration_days: "dias", status_unknown: "Estado indisponível", payment_success_title: "Pagamento concluído" }
         },
         de: {
@@ -2343,6 +2340,39 @@
     }
 
     mergeTranslationOverrides();
+
+    /* =========================================================
+       ALL-LANGUAGE STATIC TEXT INDEX
+       Templates contain some legacy Portuguese text without
+       data-i18n attributes. Index every translation language so
+       those legacy strings can still be translated.
+       ========================================================= */
+
+    const staticPhraseKeys = {};
+
+    function buildStaticPhraseIndex(language, value, path) {
+        if (!value || typeof value !== "object") return;
+
+        Object.keys(value).forEach(function (key) {
+            const current = value[key];
+            const currentPath = path ? path + "." + key : key;
+
+            if (typeof current === "string") {
+                const normalized = normalizeStaticText(current);
+                if (!normalized) return;
+
+                if (!staticPhraseKeys[normalized]) {
+                    staticPhraseKeys[normalized] = currentPath;
+                }
+            } else if (current && typeof current === "object") {
+                buildStaticPhraseIndex(language, current, currentPath);
+            }
+        });
+    }
+
+    SUPPORTED_LANGUAGES.forEach(function (language) {
+        buildStaticPhraseIndex(language, translations[language], "");
+    });
 
     /* =========================================================
        GET TRANSLATION
