@@ -5245,6 +5245,9 @@ def statistics_api():
     # =====================================================
 
     bot_snapshot = {}
+    # PostgreSQL is the single source of truth for the live statistics.
+    # Start as unavailable so a database error can never leave a stale/fixed value.
+    postgres_ok = False
 
     try:
 
@@ -5281,7 +5284,10 @@ def statistics_api():
                         last_seen,
                         admin_servers,
                         admin_users,
-                        updated_at
+                        updated_at,
+                        tickets,
+                        moderation_actions,
+                        announcements
                     FROM bot_statistics
                     WHERE id = 1
                     """
@@ -5321,6 +5327,12 @@ def statistics_api():
                         "admin_users": result[11] or [],
 
                         "updated_at": result[12],
+
+                        "tickets": result[13],
+
+                        "moderation_actions": result[14],
+
+                        "announcements": result[15],
                     }
 
 
@@ -5351,6 +5363,9 @@ def statistics_api():
         "uptime",
         "last_seen",
         "updated_at",
+        "tickets",
+        "moderation_actions",
+        "announcements",
     ):
 
         if key in bot_snapshot:
@@ -5412,103 +5427,12 @@ def statistics_api():
 
 
     # =====================================================
-    # TICKETS
-    # =====================================================
-
-    try:
-
-        tickets_database = os.path.join(
-            BASE_DIR,
-            "data",
-            "tickets.db"
-        )
-
-
-        with sqlite3.connect(
-            tickets_database
-        ) as connection:
-
-            result = connection.execute(
-                """
-                SELECT
-                    COALESCE(
-                        SUM(number),
-                        0
-                    )
-                FROM ticket_counter
-                """
-            ).fetchone()
-
-
-            statistics_data[
-                "tickets"
-            ] = int(
-                result[0] or 0
-            )
-
-
-    except (
-        OSError,
-        sqlite3.Error,
-        TypeError,
-        ValueError
-    ):
-
-        database_ok = False
-
-        statistics_data[
-            "tickets"
-        ] = 0
-
-
-    # =====================================================
-    # MODERATION
-    # =====================================================
-
-    moderation_actions = 0
-
-    try:
-
-        moderation_database = os.path.join(
-            BASE_DIR,
-            "data",
-            "moderation.db"
-        )
-
-
-        with sqlite3.connect(
-            moderation_database
-        ) as connection:
-
-            result = connection.execute(
-                """
-                SELECT
-                    COUNT(*)
-                FROM warnings
-                """
-            ).fetchone()
-
-
-            moderation_actions = int(
-                result[0] or 0
-            )
-
-
-    except (
-        OSError,
-        sqlite3.Error,
-        TypeError,
-        ValueError
-    ):
-
-        database_ok = False
-
-        moderation_actions = 0
-
-
-    # =====================================================
     # DATABASE STATUS
     # =====================================================
+
+    # All displayed statistics are taken from the current PostgreSQL row.
+    # There are no hard-coded production counters and no local SQLite fallback
+    # is allowed to overwrite the authoritative values.
 
     # PostgreSQL is the authoritative database for the live statistics
     # snapshot. Local SQLite files are auxiliary activity stores and must
@@ -5517,26 +5441,6 @@ def statistics_api():
         "database_status"
     ] = "Operational" if postgres_ok else "Error"
 
-
-    # =====================================================
-    # ACTIVITY COUNTERS — POSTGRESQL
-    # =====================================================
-
-    try:
-        with database_connection() as connection:
-            with connection.cursor() as cursor:
-                cursor.execute("""
-                    SELECT tickets, moderation_actions, announcements
-                    FROM bot_statistics
-                    WHERE id = 1
-                """)
-                row = cursor.fetchone()
-                if row:
-                    statistics_data["tickets"] = int(row[0] or 0)
-                    statistics_data["moderation_actions"] = int(row[1] or 0)
-                    statistics_data["announcements"] = int(row[2] or 0)
-    except Exception as error:
-        print(f"⚠️ Could not load activity counters: {error}")
 
     # =====================================================
     # RESPONSE
@@ -5566,6 +5470,14 @@ def statistics_api():
 
         "tickets": statistics_data[
             "tickets"
+        ],
+
+        "moderation_actions": statistics_data[
+            "moderation_actions"
+        ],
+
+        "announcements": statistics_data[
+            "announcements"
         ],
 
         "verifications": statistics_data[
