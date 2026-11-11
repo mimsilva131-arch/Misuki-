@@ -119,6 +119,15 @@ class Verification(commands.Cog):
                     """
                 )
 
+                cursor.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS verification_dm_sent (
+                        user_id BIGINT PRIMARY KEY,
+                        sent_at DOUBLE PRECISION NOT NULL
+                    )
+                    """
+                )
+
             connection.commit()
 
             print(
@@ -661,6 +670,94 @@ class Verification(commands.Cog):
                 connection.close()
 
     # =====================================================
+    # FIRST VERIFICATION DM
+    # =====================================================
+
+    def claim_first_verification_dm(
+        self,
+        user_id
+    ):
+        connection = None
+
+        try:
+
+            connection = get_database_connection()
+
+            with connection.cursor() as cursor:
+
+                cursor.execute(
+                    """
+                    INSERT INTO verification_dm_sent (
+                        user_id,
+                        sent_at
+                    )
+                    VALUES (
+                        %s,
+                        %s
+                    )
+                    ON CONFLICT (user_id)
+                    DO NOTHING
+                    RETURNING user_id
+                    """,
+                    (
+                        int(user_id),
+                        time.time()
+                    )
+                )
+
+                claimed = cursor.fetchone() is not None
+
+            connection.commit()
+
+            return claimed
+
+        except Exception as error:
+
+            if connection:
+                connection.rollback()
+
+            print(
+                f"⚠️ Could not register first verification DM: {error}"
+            )
+
+            return False
+
+        finally:
+
+            if connection:
+                connection.close()
+
+
+    async def send_first_verification_dm(
+        self,
+        member
+    ):
+
+        if not self.claim_first_verification_dm(
+            member.id
+        ):
+            return
+
+        try:
+
+            await member.send(
+                "✅ Your Discord account has been successfully verified with Misuki for the first time. Thank you!"
+            )
+
+        except discord.Forbidden:
+
+            print(
+                f"⚠️ Could not send first verification DM to {member} because DMs are disabled."
+            )
+
+        except discord.HTTPException as error:
+
+            print(
+                f"⚠️ Could not send first verification DM to {member}: {error}"
+            )
+
+
+    # =====================================================
     # VERIFICATION LOG
     # =====================================================
 
@@ -895,6 +992,10 @@ class Verification(commands.Cog):
                 "verified"
             )
 
+            await self.send_first_verification_dm(
+                member
+            )
+
             return
 
         # -------------------------------------------------
@@ -1015,6 +1116,10 @@ class Verification(commands.Cog):
         self.update_verification_status(
             request_id,
             "verified"
+        )
+
+        await self.send_first_verification_dm(
+            member
         )
 
         await self.send_verification_log(
