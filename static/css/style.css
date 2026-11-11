@@ -624,42 +624,115 @@ header {
 }
 
 .review-card {
-    min-height: 170px;
+    position: relative;
+    min-height: 190px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition:
+        transform .2s ease,
+        border-color .2s ease,
+        background .2s ease;
+}
+
+.review-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 22px;
+    right: 22px;
+    height: 2px;
+    background: #5865f2;
+    opacity: .75;
+    border-radius: 0 0 6px 6px;
+}
+
+.review-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(114, 137, 218, .28);
+    background: rgba(255, 255, 255, .055);
 }
 
 .review-user {
     display: flex;
-
     align-items: center;
-
-    gap: 12px;
-
-    margin-bottom: 15px;
+    gap: 13px;
 }
 
 .review-avatar {
-    width: 42px;
-    height: 42px;
-
+    width: 46px;
+    height: 46px;
+    flex: 0 0 46px;
     border-radius: 50%;
-
     object-fit: cover;
+    background: #20232e;
+    border: 2px solid rgba(114, 137, 218, .22);
 }
 
-.review-text {
-    color: #c9ccd5;
+.review-user-info {
+    min-width: 0;
+    flex: 1;
+}
 
-    line-height: 1.6;
+.review-username {
+    display: block;
+    font-size: 15px;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 
-    white-space: pre-wrap;
-
-    overflow-wrap: anywhere;
+.review-rating {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 4px;
 }
 
 .stars {
     color: #ffd166;
-
     letter-spacing: 2px;
+    font-size: 13px;
+    line-height: 1;
+}
+
+.review-rating-value {
+    color: #858b9a;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.review-divider {
+    height: 1px;
+    width: 100%;
+    margin: 17px 0 14px;
+    background: rgba(255, 255, 255, .07);
+}
+
+.review-text {
+    position: relative;
+    display: flex;
+    gap: 5px;
+    color: #c9ccd5;
+    line-height: 1.65;
+    font-size: 14px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.review-quote {
+    flex: 0 0 auto;
+    color: #5865f2;
+    font-size: 28px;
+    font-weight: 800;
+    line-height: .8;
+    margin-top: 3px;
+}
+
+.review-content {
+    min-width: 0;
 }
 
 .empty {
