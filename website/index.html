@@ -294,6 +294,21 @@ Misuki — Discord Bot
                                 <span class="review-content">{{ review.review }}</span>
                             </div>
 
+                            {% if user and (is_admin(user) or user.get("id")|string == review.user_id|string) %}
+                                <form method="POST" action="/reviews/{{ review.id }}/delete" class="review-delete-form">
+                                    <button
+                                        type="submit"
+                                        class="review-delete-button"
+                                        data-i18n="reviews.delete"
+                                        data-confirm=""
+                                        data-i18n-attr="data-confirm:reviews.delete_confirm"
+                                        onclick="return confirm(this.dataset.confirm);"
+                                    >
+                                        Remover
+                                    </button>
+                                </form>
+                            {% endif %}
+
                         </div>
 
                     {% endfor %}
