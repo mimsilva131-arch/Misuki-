@@ -262,34 +262,36 @@ Misuki — Discord Bot
 
                                 {% else %}
 
-                                    <div class="server-icon-placeholder">
+                                    <div class="server-icon-placeholder review-avatar">
                                         {{ review.username[0] }}
                                     </div>
 
                                 {% endif %}
 
-                                <div>
+                                <div class="review-user-info">
 
-                                    <strong>
+                                    <strong class="review-username">
                                         {{ review.username }}
                                     </strong>
 
-                                    <div class="stars">
-
-                                        {% for i in range(review.rating) %}
-
-                                            ★
-
-                                        {% endfor %}
-
+                                    <div class="review-rating">
+                                        <span class="stars" aria-label="{{ review.rating }}/5">
+                                            {% for i in range(review.rating) %}★{% endfor %}
+                                        </span>
+                                        <span class="review-rating-value">
+                                            {{ review.rating }}/5
+                                        </span>
                                     </div>
 
                                 </div>
 
                             </div>
 
+                            <div class="review-divider"></div>
+
                             <div class="review-text">
-                                {{ review.review }}
+                                <span class="review-quote" aria-hidden="true">“</span>
+                                <span class="review-content">{{ review.review }}</span>
                             </div>
 
                         </div>
