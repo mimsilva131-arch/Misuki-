@@ -1424,35 +1424,24 @@ body.menu-open .hamburger {
 
 
 /* =========================================================
-   LANGUAGE SELECTOR WHEN SIDE MENU IS OPEN
-   ========================================================= */
+   LANGUAGE SELECTOR + SIDE MENU
+========================================================= */
 
-body.menu-open .language-dropdown {
-    display: none !important;
-}
-
+/* Keep the language selector usable regardless of menu state. */
 body.menu-open .language-selector {
-    pointer-events: none;
+    pointer-events: auto !important;
+    z-index: 30000 !important;
 }
 
 body.menu-open .language-button {
-    pointer-events: none;
+    pointer-events: auto !important;
+    z-index: 30001 !important;
 }
-/* =========================================================
-   MENU + LANGUAGE INTERACTION
-   ========================================================= */
-
-/*
-   When the side menu is open, the language selector should
-   not interfere with it.
-*/
 
 body.menu-open .language-dropdown {
-    display: none !important;
-}
-
-body.menu-open .language-selector {
-    pointer-events: none;
+    display: flex !important;
+    pointer-events: auto !important;
+    z-index: 30002 !important;
 }
 
 /* =========================================================
