@@ -1746,6 +1746,46 @@ def bot_is_in_guild(
     )
 
 
+def get_existing_verified_request(
+    guild_id,
+    user_id
+):
+
+    if not DATABASE_URL or not db_pool:
+        return False
+
+    try:
+
+        with database_connection() as connection:
+
+            with connection.cursor() as cursor:
+
+                cursor.execute(
+                    """
+                    SELECT 1
+                    FROM verification_requests
+                    WHERE guild_id = %s
+                      AND user_id = %s
+                      AND status = 'verified'
+                    LIMIT 1
+                    """,
+                    (
+                        int(guild_id),
+                        int(user_id)
+                    )
+                )
+
+                return cursor.fetchone() is not None
+
+    except Exception as error:
+
+        print(
+            f"⚠️ Could not check verification status: {error}"
+        )
+
+        return False
+
+
 def create_verification_request(
     guild_id,
     user_id,
@@ -1753,7 +1793,6 @@ def create_verification_request(
 ):
 
     if not DATABASE_URL or not db_pool:
-
         return False
 
     try:
@@ -1793,13 +1832,25 @@ def create_verification_request(
                             EXCLUDED.username,
 
                         status =
-                            'pending',
+                            CASE
+                                WHEN verification_requests.status = 'verified'
+                                THEN verification_requests.status
+                                ELSE 'pending'
+                            END,
 
                         created_at =
-                            EXCLUDED.created_at,
+                            CASE
+                                WHEN verification_requests.status = 'verified'
+                                THEN verification_requests.created_at
+                                ELSE EXCLUDED.created_at
+                            END,
 
                         processed_at =
-                            NULL
+                            CASE
+                                WHEN verification_requests.status = 'verified'
+                                THEN verification_requests.processed_at
+                                ELSE NULL
+                            END
                     """,
                     (
                         int(guild_id),
@@ -2181,6 +2232,30 @@ def submit_verification():
         "Discord User"
 
     )
+
+    # -----------------------------------------------------
+    # ALREADY VERIFIED
+    # -----------------------------------------------------
+
+    if get_existing_verified_request(
+        guild_id_int,
+        user_id
+    ):
+
+        return render_template(
+            "verification.html",
+            user=user,
+            username=username,
+            guild_name=(
+                guild.get("name")
+                or
+                "Discord Server"
+            ),
+            guild_id=str(
+                guild_id_int
+            ),
+            already_verified=True
+        )
 
     # -----------------------------------------------------
     # CREATE REQUEST
