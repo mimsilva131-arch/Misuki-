@@ -196,11 +196,37 @@ header {
 
     color: #d7d9e0;
 
-    transition: .15s;
+    border-radius: 8px;
+    transform-origin: center left;
+    transition:
+        color .22s ease,
+        background-color .22s ease,
+        transform .22s ease,
+        filter .22s ease,
+        border-color .22s ease;
 }
 
 .menu a:hover {
-    color: #7289da;
+    color: #eef0ff;
+    background: rgba(255, 255, 255, .025);
+    transform: scale(1.018);
+    filter: brightness(1.08);
+}
+
+.menu a.active {
+    color: #f4f5ff;
+    background: rgba(114, 137, 218, .075);
+    border-bottom-color: rgba(114, 137, 218, .16);
+    font-weight: 650;
+    transform: scale(1.012);
+    filter: brightness(1.05);
+    box-shadow: inset 2px 0 0 rgba(114, 137, 218, .65);
+}
+
+.menu a.active:hover {
+    background: rgba(114, 137, 218, .10);
+    transform: scale(1.022);
+    filter: brightness(1.09);
 }
 
 .menu-section {
