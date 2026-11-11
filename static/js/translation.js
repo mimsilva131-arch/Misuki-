@@ -466,7 +466,11 @@
                 processing: "The bot will process your verification and assign the appropriate role on the server.",
                 return_discord: "You can return to Discord. If the role takes a few seconds to be assigned, please wait while Misuki processes your request.",
                 info: "By continuing, Misuki will confirm your Discord account and send a verification request to the bot to assign your verification role.",
-                footer: "Protected by Misuki"
+                footer: "Protected by Misuki",
+                already_verified: "Already verified",
+                already_verified_description: "Your account has already been verified on this server. You do not need to verify again.",
+                already_verified_title: "Verification already completed",
+                already_verified_body: "Misuki has already registered your verification on this server."
             }
         },
 
@@ -874,7 +878,11 @@
                 processing: "O bot irá processar a sua verificação e atribuir o cargo correspondente no servidor.",
                 return_discord: "Pode voltar ao Discord. Se a atribuição do cargo demorar alguns segundos, aguarde enquanto o Misuki processa o seu pedido.",
                 info: "Ao continuar, o Misuki irá confirmar a sua conta Discord e enviar um pedido de verificação ao bot para atribuir o seu cargo de verificação.",
-                footer: "Protegido por Misuki"
+                footer: "Protegido por Misuki",
+                already_verified: "Já está verificada",
+                already_verified_description: "A sua conta já foi verificada neste servidor. Não é necessário verificar novamente.",
+                already_verified_title: "Verificação já concluída",
+                already_verified_body: "O Misuki já registou a sua verificação neste servidor."
             }
         },
 
@@ -1282,7 +1290,11 @@
                 processing: "Der Bot wird Ihre Verifizierung bearbeiten und die entsprechende Rolle auf dem Server vergeben.",
                 return_discord: "Sie können zu Discord zurückkehren. Wenn die Vergabe der Rolle einige Sekunden dauert, warten Sie bitte, während Misuki Ihre Anfrage verarbeitet.",
                 info: "Wenn Sie fortfahren, bestätigt Misuki Ihr Discord-Konto und sendet eine Verifizierungsanfrage an den Bot, damit Ihre Verifizierungsrolle vergeben werden kann.",
-                footer: "Geschützt durch Misuki"
+                footer: "Geschützt durch Misuki",
+                already_verified: "Bereits verifiziert",
+                already_verified_description: "Ihr Konto wurde auf diesem Server bereits verifiziert. Eine erneute Verifizierung ist nicht erforderlich.",
+                already_verified_title: "Verifizierung bereits abgeschlossen",
+                already_verified_body: "Misuki hat Ihre Verifizierung auf diesem Server bereits registriert."
             }
         },
 
@@ -1690,7 +1702,11 @@
                 processing: "El bot procesará tu verificación y asignará el rol correspondiente en el servidor.",
                 return_discord: "Puedes volver a Discord. Si el rol tarda unos segundos en asignarse, espera mientras Misuki procesa tu solicitud.",
                 info: "Al continuar, Misuki confirmará tu cuenta de Discord y enviará una solicitud de verificación al bot para asignar tu rol de verificación.",
-                footer: "Protegido por Misuki"
+                footer: "Protegido por Misuki",
+                already_verified: "Ya verificado",
+                already_verified_description: "Tu cuenta ya ha sido verificada en este servidor. No es necesario verificarla de nuevo.",
+                already_verified_title: "Verificación ya completada",
+                already_verified_body: "Misuki ya ha registrado tu verificación en este servidor."
             }
         },
 
@@ -2098,7 +2114,11 @@
                 processing: "Le bot traitera votre vérification et attribuera le rôle correspondant sur le serveur.",
                 return_discord: "Vous pouvez retourner sur Discord. Si l'attribution du rôle prend quelques secondes, veuillez patienter pendant que Misuki traite votre demande.",
                 info: "En continuant, Misuki confirmera votre compte Discord et enverra une demande de vérification au bot afin d'attribuer votre rôle de vérification.",
-                footer: "Protégé par Misuki"
+                footer: "Protégé par Misuki",
+                already_verified: "Déjà vérifié",
+                already_verified_description: "Votre compte a déjà été vérifié sur ce serveur. Il n'est pas nécessaire de recommencer.",
+                already_verified_title: "Vérification déjà terminée",
+                already_verified_body: "Misuki a déjà enregistré votre vérification sur ce serveur."
             }
         }
     };
