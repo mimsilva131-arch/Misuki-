@@ -5336,6 +5336,31 @@ def statistics_api():
                         "announcements": result[15],
                     }
 
+                    # The verification counter is also read directly from the
+                    # verification table on every API request. This prevents
+                    # the website from waiting for the bot statistics loop
+                    # before showing a newly completed verification.
+                    try:
+                        cursor.execute(
+                            """
+                            SELECT COUNT(DISTINCT user_id)
+                            FROM verification_requests
+                            WHERE status = 'verified'
+                            """
+                        )
+                        verification_row = cursor.fetchone()
+                        database_verification_count = int(
+                            verification_row[0] or 0
+                        ) if verification_row else 0
+                        bot_snapshot["verifications"] = max(
+                            int(bot_snapshot.get("verifications") or 0),
+                            database_verification_count
+                        )
+                    except Exception as verification_error:
+                        print(
+                            f"⚠️ Could not refresh verification count: {verification_error}"
+                        )
+
 
     except (
         OSError,
