@@ -299,23 +299,55 @@ async def count_statistics_users():
     return len(BOT_ADMIN_USERS)
 
 def count_verified_users():
+    """
+    Count unique human users who are verified either by the database record
+    or by currently having the configured Verified Role in any guild.
+
+    The role is authoritative for recovery: if a user has the Verified Role
+    but a verification database record is missing/corrupted, the user is
+    still included in the statistics. A user is counted only once globally.
+    """
     connection = None
+    verified_user_ids = set()
+
     try:
         connection = get_database_connection()
         with connection.cursor() as cursor:
             cursor.execute("""
-                SELECT COUNT(DISTINCT user_id)
+                SELECT DISTINCT user_id
                 FROM verification_requests
                 WHERE status = 'verified'
             """)
-            result = cursor.fetchone()
-            return int(result[0] or 0) if result else 0
+            for row in cursor.fetchall():
+                if row and row[0] is not None:
+                    verified_user_ids.add(str(row[0]))
     except Exception as error:
-        print(f"⚠️ Could not read verification statistics: {error}")
-        return 0
+        print(f"⚠️ Could not read verification database statistics: {error}")
     finally:
         if connection:
             connection.close()
+
+    verification_cog = bot.get_cog("Verification")
+
+    if verification_cog is not None:
+        for guild in bot.guilds:
+            try:
+                role = verification_cog.get_verified_role(guild)
+
+                if role is None:
+                    continue
+
+                for member in role.members:
+                    if is_human_member(member):
+                        verified_user_ids.add(str(member.id))
+
+            except Exception as error:
+                print(
+                    f"⚠️ Could not read Verified Role statistics for "
+                    f"{guild.name} ({guild.id}): {error}"
+                )
+
+    return len(verified_user_ids)
 
 
 def get_uptime():
