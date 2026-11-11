@@ -5282,11 +5282,7 @@ def statistics_api():
                         channels,
                         latency,
                         commands,
-                        (
-                            SELECT COUNT(DISTINCT user_id)
-                            FROM verification_requests
-                            WHERE status = 'verified'
-                        ) AS verifications,
+                        verifications,
                         bot_status,
                         uptime,
                         version,
