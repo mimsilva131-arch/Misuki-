@@ -2342,6 +2342,108 @@
     mergeTranslationOverrides();
 
     /* =========================================================
+       LEGACY / MISSING TRANSLATION EXTENSIONS
+       Covers older template keys and visible Portuguese strings
+       that were not part of the original translation dictionary.
+       ========================================================= */
+
+    const legacyTranslationExtensions = {
+        en: {
+            reviews: {
+                intro: "Reviews from members of Misuki communities.",
+                your_voice: "Your voice", form_intro: "Share your experience with Misuki.",
+                community_kicker: "COMMUNITY", delete: "Remove",
+                no_reviews: "No reviews yet.", no_reviews_desc: "Be the first member of the community to share your experience.",
+                delete_confirm: "Remove this review?"
+            },
+            license: {
+                information: "License information",
+                description: "View the license status and details for this server.",
+                created: "Created on", no_license: "This server does not have a registered license."
+            },
+            verification: {
+                captcha_placeholder: "Answer", security_description: "Solve the small calculation below to confirm that you are a person."
+            }
+        },
+        pt: {
+            reviews: {
+                intro: "A opinião de membros das comunidades que utilizam o Misuki.",
+                your_voice: "A sua opinião", form_intro: "Partilhe a sua experiência com o Misuki.",
+                community_kicker: "COMUNIDADE", delete: "Remover",
+                no_reviews: "Ainda não existem avaliações.", no_reviews_desc: "Seja o primeiro membro da comunidade a partilhar a sua experiência.",
+                delete_confirm: "Remover esta avaliação?"
+            },
+            license: {
+                information: "Informação da licença",
+                description: "Consulte aqui o estado e os detalhes da licença deste servidor.",
+                created: "Criada em", no_license: "Este servidor não tem uma licença registada."
+            },
+            verification: {
+                captcha_placeholder: "Resposta", security_description: "Resolva a pequena operação abaixo para confirmar que é uma pessoa."
+            }
+        },
+        de: {
+            reviews: {
+                intro: "Bewertungen von Mitgliedern der Misuki-Communitys.",
+                your_voice: "Ihre Meinung", form_intro: "Teilen Sie Ihre Erfahrungen mit Misuki.",
+                community_kicker: "COMMUNITY", delete: "Entfernen",
+                no_reviews: "Noch keine Bewertungen.", no_reviews_desc: "Seien Sie das erste Community-Mitglied, das seine Erfahrungen teilt.",
+                delete_confirm: "Diese Bewertung entfernen?"
+            },
+            license: {
+                information: "Lizenzinformationen",
+                description: "Hier können Sie den Lizenzstatus und die Details dieses Servers einsehen.",
+                created: "Erstellt am", no_license: "Für diesen Server ist keine Lizenz registriert."
+            },
+            verification: {
+                captcha_placeholder: "Antwort", security_description: "Lösen Sie die kleine Aufgabe unten, um zu bestätigen, dass Sie eine Person sind."
+            }
+        },
+        es: {
+            reviews: {
+                intro: "Opiniones de miembros de las comunidades que utilizan Misuki.",
+                your_voice: "Tu opinión", form_intro: "Comparte tu experiencia con Misuki.",
+                community_kicker: "COMUNIDAD", delete: "Eliminar",
+                no_reviews: "Aún no hay reseñas.", no_reviews_desc: "Sé el primer miembro de la comunidad en compartir tu experiencia.",
+                delete_confirm: "¿Eliminar esta reseña?"
+            },
+            license: {
+                information: "Información de la licencia",
+                description: "Consulta aquí el estado y los detalles de la licencia de este servidor.",
+                created: "Creada el", no_license: "Este servidor no tiene una licencia registrada."
+            },
+            verification: {
+                captcha_placeholder: "Respuesta", security_description: "Resuelve la pequeña operación para confirmar que eres una persona."
+            }
+        },
+        fr: {
+            reviews: {
+                intro: "Avis des membres des communautés qui utilisent Misuki.",
+                your_voice: "Votre avis", form_intro: "Partagez votre expérience avec Misuki.",
+                community_kicker: "COMMUNAUTÉ", delete: "Supprimer",
+                no_reviews: "Aucun avis pour le moment.", no_reviews_desc: "Soyez le premier membre de la communauté à partager votre expérience.",
+                delete_confirm: "Supprimer cet avis ?"
+            },
+            license: {
+                information: "Informations sur la licence",
+                description: "Consultez ici l'état et les détails de la licence de ce serveur.",
+                created: "Créée le", no_license: "Ce serveur n'a pas de licence enregistrée."
+            },
+            verification: {
+                captcha_placeholder: "Réponse", security_description: "Résolvez le petit calcul ci-dessous pour confirmer que vous êtes une personne."
+            }
+        }
+    };
+
+    for (const language of SUPPORTED_LANGUAGES) {
+        const target = translations[language] || (translations[language] = {});
+        const source = legacyTranslationExtensions[language] || {};
+        for (const [section, values] of Object.entries(source)) {
+            target[section] = Object.assign({}, target[section] || {}, values);
+        }
+    }
+
+    /* =========================================================
        ALL-LANGUAGE STATIC TEXT INDEX
        Templates contain some legacy Portuguese text without
        data-i18n attributes. Index every translation language so
