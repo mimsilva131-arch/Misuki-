@@ -285,7 +285,67 @@ Verificação — Misuki
 <main>
     <div class="verification-container">
 
-        {% if verification_submitted %}
+        {% if already_verified %}
+
+        <section class="verification-card success">
+
+            <div class="verification-icon">
+                ✅
+            </div>
+
+            <h1 data-i18n="verification.already_verified">
+                Já está verificada
+            </h1>
+
+            <p class="verification-subtitle"
+               data-i18n="verification.already_verified_description">
+                A sua conta já foi verificada neste servidor. Não é necessário verificar novamente.
+            </p>
+
+            <div class="verification-info">
+
+                {% if username %}
+                <div class="verification-info-row">
+                    <span class="verification-info-label"
+                          data-i18n="verification.account">
+                        Conta
+                    </span>
+                    <span class="verification-info-value">
+                        {{ username }}
+                    </span>
+                </div>
+                {% endif %}
+
+                {% if guild_name %}
+                <div class="verification-info-row">
+                    <span class="verification-info-label"
+                          data-i18n="verification.server">
+                        Servidor
+                    </span>
+                    <span class="verification-info-value">
+                        {{ guild_name }}
+                    </span>
+                </div>
+                {% endif %}
+
+            </div>
+
+            <div class="verification-success">
+                <strong data-i18n="verification.already_verified_title">
+                    Verificação já concluída
+                </strong>
+                <span data-i18n="verification.already_verified_body">
+                    O Misuki já registou a sua verificação neste servidor.
+                </span>
+            </div>
+
+            <div class="verification-footer">
+                Misuki
+            </div>
+
+        </section>
+
+        {% elif verification_submitted %}
 
         <section class="verification-card success">
 
