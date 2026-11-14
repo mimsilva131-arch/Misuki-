@@ -1176,3 +1176,166 @@ footer {
     background: rgba(237, 66, 69, .16);
     border-color: rgba(237, 66, 69, .35);
 }
+
+
+/* =========================================================
+   REVIEW ACTIONS MENU
+   ========================================================= */
+
+.review-card {
+    position: relative;
+}
+
+.review-actions {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 5;
+}
+
+.review-actions-button {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255,255,255,.09);
+    border-radius: 9px;
+    background: rgba(255,255,255,.045);
+    color: rgba(255,255,255,.72);
+    cursor: pointer;
+    transition: background .18s ease, border-color .18s ease, transform .18s ease, color .18s ease;
+}
+
+.review-actions-button:hover {
+    background: rgba(255,255,255,.09);
+    border-color: rgba(255,255,255,.16);
+    color: #fff;
+    transform: scale(1.04);
+}
+
+.review-actions-button span {
+    font-size: 14px;
+    line-height: 1;
+    letter-spacing: 2px;
+    transform: translateY(-2px);
+}
+
+.review-actions-menu {
+    position: absolute;
+    top: 40px;
+    right: 0;
+    width: 150px;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 11px;
+    background: rgba(16,18,27,.98);
+    box-shadow: 0 14px 35px rgba(0,0,0,.38);
+    backdrop-filter: blur(16px);
+}
+
+.review-actions-menu[hidden],
+.review-edit-form[hidden] {
+    display: none !important;
+}
+
+.review-actions-menu > button,
+.review-actions-menu .review-delete-form button {
+    width: 100%;
+    min-height: 38px;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #fff;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 650;
+    text-align: left;
+    cursor: pointer;
+    transition: background .18s ease, color .18s ease;
+}
+
+.review-actions-menu .review-action-edit:hover {
+    background: rgba(88,101,242,.13);
+}
+
+.review-actions-menu .review-action-delete {
+    color: #ff6b6e;
+}
+
+.review-actions-menu .review-action-delete:hover {
+    background: rgba(237,66,69,.13);
+    color: #ff8588;
+}
+
+.review-delete-form {
+    display: block;
+    margin: 0;
+}
+
+.review-edit-form {
+    margin-top: 15px;
+}
+
+.review-edit-form textarea {
+    width: 100%;
+    min-height: 110px;
+    resize: vertical;
+    padding: 11px 12px;
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 10px;
+    background: rgba(0,0,0,.18);
+    color: #fff;
+    font: inherit;
+    line-height: 1.55;
+    outline: none;
+}
+
+.review-edit-form textarea:focus {
+    border-color: rgba(88,101,242,.48);
+    box-shadow: 0 0 0 3px rgba(88,101,242,.08);
+}
+
+.review-edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 9px;
+}
+
+.review-edit-actions button {
+    min-height: 36px;
+    padding: 7px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,.09);
+    background: rgba(255,255,255,.05);
+    color: #fff;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.review-edit-actions .review-edit-save {
+    background: rgba(88,101,242,.18);
+    border-color: rgba(88,101,242,.30);
+}
+
+.review-edit-actions .review-edit-save:hover {
+    background: rgba(88,101,242,.28);
+}
+
+@media (max-width: 600px) {
+    .review-actions {
+        top: 13px;
+        right: 13px;
+    }
+
+    .review-actions-menu {
+        width: 145px;
+    }
+}
