@@ -188,6 +188,10 @@
                 delete: "Remove",
                 no_reviews_desc: "Be the first member of the community to share your experience.",
                 delete_confirm: "Remove this review?",
+                actions: "Review actions",
+                edit: "Edit",
+                save: "Save",
+                cancel: "Cancel",
                 eyebrow: "COMMUNITY",
                 your_voice: "Your voice",
                 form_intro: "Share your experience with Misuki.",
@@ -608,6 +612,10 @@
                 delete: "Remover",
                 no_reviews_desc: "Seja o primeiro membro da comunidade a partilhar a sua experiência.",
                 delete_confirm: "Remover esta avaliação?",
+                actions: "Ações da avaliação",
+                edit: "Editar",
+                save: "Guardar",
+                cancel: "Cancelar",
                 intro: "Avaliações dos membros das comunidades Misuki.",
                 title: "Avaliações da comunidade",
                 no_reviews: "Ainda não há avaliações.",
@@ -1020,6 +1028,10 @@
                 delete: "Entfernen",
                 no_reviews_desc: "Seien Sie das erste Community-Mitglied, das seine Erfahrung teilt.",
                 delete_confirm: "Diese Bewertung entfernen?",
+                actions: "Bewertungsaktionen",
+                edit: "Bearbeiten",
+                save: "Speichern",
+                cancel: "Abbrechen",
                 intro: "Bewertungen von Mitgliedern der Misuki-Community.",
                 title: "Community-Bewertungen",
                 no_reviews: "Noch keine Bewertungen.",
@@ -1432,6 +1444,10 @@
                 delete: "Eliminar",
                 no_reviews_desc: "Sé el primer miembro de la comunidad en compartir tu experiencia.",
                 delete_confirm: "¿Eliminar esta evaluación?",
+                actions: "Acciones de la reseña",
+                edit: "Editar",
+                save: "Guardar",
+                cancel: "Cancelar",
                 intro: "Reseñas de miembros de las comunidades de Misuki.",
                 title: "Reseñas de la comunidad",
                 no_reviews: "Todavía no hay reseñas.",
@@ -1844,6 +1860,10 @@
                 delete: "Supprimer",
                 no_reviews_desc: "Soyez le premier membre de la communauté à partager votre expérience.",
                 delete_confirm: "Supprimer cet avis ?",
+                actions: "Actions de l’avis",
+                edit: "Modifier",
+                save: "Enregistrer",
+                cancel: "Annuler",
                 intro: "Avis des membres des communautés Misuki.",
                 title: "Avis de la communauté",
                 no_reviews: "Aucun avis pour le moment.",
@@ -2354,7 +2374,11 @@
                 your_voice: "Your voice", form_intro: "Share your experience with Misuki.",
                 community_kicker: "COMMUNITY", delete: "Remove",
                 no_reviews: "No reviews yet.", no_reviews_desc: "Be the first member of the community to share your experience.",
-                delete_confirm: "Remove this review?"
+                delete_confirm: "Remove this review?",
+                actions: "Review actions",
+                edit: "Edit",
+                save: "Save",
+                cancel: "Cancel"
             },
             license: {
                 information: "License information",
@@ -2371,7 +2395,11 @@
                 your_voice: "A sua opinião", form_intro: "Partilhe a sua experiência com o Misuki.",
                 community_kicker: "COMUNIDADE", delete: "Remover",
                 no_reviews: "Ainda não existem avaliações.", no_reviews_desc: "Seja o primeiro membro da comunidade a partilhar a sua experiência.",
-                delete_confirm: "Remover esta avaliação?"
+                delete_confirm: "Remover esta avaliação?",
+                actions: "Ações da avaliação",
+                edit: "Editar",
+                save: "Guardar",
+                cancel: "Cancelar"
             },
             license: {
                 information: "Informação da licença",
@@ -2388,7 +2416,11 @@
                 your_voice: "Ihre Meinung", form_intro: "Teilen Sie Ihre Erfahrungen mit Misuki.",
                 community_kicker: "COMMUNITY", delete: "Entfernen",
                 no_reviews: "Noch keine Bewertungen.", no_reviews_desc: "Seien Sie das erste Community-Mitglied, das seine Erfahrungen teilt.",
-                delete_confirm: "Diese Bewertung entfernen?"
+                delete_confirm: "Diese Bewertung entfernen?",
+                actions: "Bewertungsaktionen",
+                edit: "Bearbeiten",
+                save: "Speichern",
+                cancel: "Abbrechen"
             },
             license: {
                 information: "Lizenzinformationen",
@@ -2422,7 +2454,11 @@
                 your_voice: "Votre avis", form_intro: "Partagez votre expérience avec Misuki.",
                 community_kicker: "COMMUNAUTÉ", delete: "Supprimer",
                 no_reviews: "Aucun avis pour le moment.", no_reviews_desc: "Soyez le premier membre de la communauté à partager votre expérience.",
-                delete_confirm: "Supprimer cet avis ?"
+                delete_confirm: "Supprimer cet avis ?",
+                actions: "Actions de l’avis",
+                edit: "Modifier",
+                save: "Enregistrer",
+                cancel: "Annuler"
             },
             license: {
                 information: "Informations sur la licence",
