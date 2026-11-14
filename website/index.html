@@ -295,17 +295,23 @@ Misuki — Discord Bot
                             </div>
 
                             {% if user and (is_admin(user) or user.get("id")|string == review.user_id|string) %}
-                                <form method="POST" action="/reviews/{{ review.id }}/delete" class="review-delete-form">
-                                    <button
-                                        type="submit"
-                                        class="review-delete-button"
-                                        data-i18n="reviews.delete"
-                                        data-confirm=""
-                                        data-i18n-attr="data-confirm:reviews.delete_confirm"
-                                        onclick="return confirm(this.dataset.confirm);"
-                                    >
-                                        Remover
+                                <div class="review-actions">
+                                    <button type="button" class="review-actions-button" aria-expanded="false" aria-label="Review actions" data-i18n-attr="aria-label:reviews.actions">
+                                        <span aria-hidden="true">•••</span>
                                     </button>
+                                    <div class="review-actions-menu" hidden>
+                                        <button type="button" class="review-action-edit" data-review-id="{{ review.id }}" data-i18n="reviews.edit">Editar</button>
+                                        <form method="POST" action="/reviews/{{ review.id }}/delete" class="review-delete-form">
+                                            <button type="submit" class="review-action-delete" data-i18n="reviews.delete" data-confirm="" data-i18n-attr="data-confirm:reviews.delete_confirm" onclick="return confirm(this.dataset.confirm);">Remover</button>
+                                        </form>
+                                    </div>
+                                </div>
+                                <form method="POST" action="/reviews/{{ review.id }}/edit" class="review-edit-form" hidden>
+                                    <textarea name="review" maxlength="1000" required>{{ review.review }}</textarea>
+                                    <div class="review-edit-actions">
+                                        <button type="submit" class="review-edit-save" data-i18n="reviews.save">Guardar</button>
+                                        <button type="button" class="review-edit-cancel" data-i18n="reviews.cancel">Cancelar</button>
+                                    </div>
                                 </form>
                             {% endif %}
 
