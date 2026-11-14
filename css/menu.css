@@ -505,3 +505,88 @@ header {
     pointer-events: auto !important;
 }
 
+
+
+/* =========================================================
+   ACTIVE PAGE + SMOOTH HOVER
+   ========================================================= */
+
+.menu a {
+    transform-origin: center left;
+    transition:
+        transform .22s ease,
+        background-color .22s ease,
+        color .22s ease,
+        box-shadow .22s ease,
+        padding-left .22s ease;
+}
+
+.menu a:hover {
+    background: rgba(255, 255, 255, .075);
+    transform: scale(1.025) translateX(2px);
+    color: #ffffff;
+}
+
+.menu a.active {
+    background: rgba(114, 137, 218, .10);
+    box-shadow: inset 2px 0 0 rgba(114, 137, 218, .72);
+    transform: scale(1.018);
+    padding-left: 15px;
+    color: #ffffff;
+}
+
+.menu a.active:hover {
+    background: rgba(114, 137, 218, .125);
+    transform: scale(1.028) translateX(2px);
+}
+
+.menu a.active[href="/statistics"] {
+    background: rgba(114, 137, 218, .13);
+    box-shadow:
+        inset 2px 0 0 rgba(114, 137, 218, .82),
+        0 5px 20px rgba(0, 0, 0, .12);
+    transform: scale(1.035);
+    padding-left: 16px;
+    font-weight: 650;
+}
+
+.menu a.active[href="/statistics"]:hover {
+    background: rgba(114, 137, 218, .15);
+    transform: scale(1.045) translateX(2px);
+}
+
+@media (max-width: 600px) {
+    .menu {
+        width: min(390px, calc(100vw - 12px));
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .menu a {
+        min-height: 48px;
+        padding: 12px 14px;
+        font-size: 16px;
+    }
+
+    .menu a.active {
+        padding-left: 16px;
+        transform: scale(1.012);
+    }
+
+    .menu a.active[href="/statistics"] {
+        transform: scale(1.022);
+        padding-left: 17px;
+    }
+
+    .menu a:hover,
+    .menu a.active:hover,
+    .menu a.active[href="/statistics"]:hover {
+        transform: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .menu a {
+        transition: none !important;
+    }
+}
