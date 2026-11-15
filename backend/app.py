@@ -4437,9 +4437,9 @@ def edit_review(review_id):
                     return error_page("Access denied", "You do not have permission to edit this review.", 403, user)
 
                 cursor.execute(
-                    "UPDATE reviews
+                    """UPDATE reviews
                     SET review = %s, updated_at = CURRENT_TIMESTAMP
-                    WHERE id = %s",
+                    WHERE id = %s""",
                     (review_text, review_id)
                 )
 
