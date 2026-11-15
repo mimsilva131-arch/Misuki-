@@ -192,6 +192,7 @@
                 edit: "Edit",
                 save: "Save",
                 cancel: "Cancel",
+                edited: "(edited)",
                 eyebrow: "COMMUNITY",
                 your_voice: "Your voice",
                 form_intro: "Share your experience with Misuki.",
@@ -220,7 +221,7 @@
                 key: "License Key",
                 expires: "Expires",
                 never: "Never",
-                missing: "This server does not have a Misuki license."
+                missing: "This server does not have o Misuki license."
             },
 
             dashboard: {
@@ -616,6 +617,7 @@
                 edit: "Editar",
                 save: "Guardar",
                 cancel: "Cancelar",
+                edited: "(editado)",
                 intro: "Avaliações dos membros das comunidades Misuki.",
                 title: "Avaliações da comunidade",
                 no_reviews: "Ainda não há avaliações.",
@@ -669,7 +671,7 @@
 
             common: {
                 product: "Produto",
-                advertise_intro: "Promova o seu servidor Discord junto da comunidade Misuki. Escolha a duração e crie o seu anúncio.",
+                advertise_intro: "Promova o seu servidor Discord junto da comunidade do Misuki. Escolha a duração e crie o seu anúncio.",
                 documentation_intro: "Aprenda a configurar e utilizar o Misuki no seu servidor Discord.",
                 logged_in_as: "Sessão iniciada como",
                 authorized_servers: "🔐 Servidores autorizados",
@@ -739,8 +741,8 @@
                 save_050: "Poupe €0,50",},
 
             statistics: {
-                hero_description: "Visão geral do serviço Misuki e das suas estatísticas atuais.",
-                service_description: "Estatísticas gerais sobre o serviço Misuki.",
+                hero_description: "Visão geral do serviço do Misuki e das suas estatísticas atuais.",
+                service_description: "Estatísticas gerais sobre o serviço do Misuki.",
                 servers: "Servidores",
                 users: "Utilizadores",
                 channels: "Canais",
@@ -748,7 +750,7 @@
                 tickets_created: "Tickets criados",
                 verifications: "Verificações",
                 system_status: "Estado do sistema",
-                system_description: "Estado atual do serviço Misuki.",
+                system_description: "Estado atual do serviço do Misuki.",
                 discord_bot: "Bot do Discord",
                 website: "Website",
                 database: "Base de dados",
@@ -1032,6 +1034,7 @@
                 edit: "Bearbeiten",
                 save: "Speichern",
                 cancel: "Abbrechen",
+                edited: "(bearbeitet)",
                 intro: "Bewertungen von Mitgliedern der Misuki-Community.",
                 title: "Community-Bewertungen",
                 no_reviews: "Noch keine Bewertungen.",
@@ -1448,6 +1451,7 @@
                 edit: "Editar",
                 save: "Guardar",
                 cancel: "Cancelar",
+                edited: "(editado)",
                 intro: "Reseñas de miembros de las comunidades de Misuki.",
                 title: "Reseñas de la comunidad",
                 no_reviews: "Todavía no hay reseñas.",
@@ -1772,7 +1776,7 @@
             licenses: {
                 admin_eyebrow: "ADMINISTRATION",
                 title: "Gestion des licences",
-                description: "Créez, prolongez et révoquez les licences de serveurs directement depuis le site Misuki.",
+                description: "Créez, prolongez et révoquez les licences de serveurs directement depuis le site do Misuki.",
                 back_statistics: "Retour aux statistiques",
                 create_title: "Créer une licence",
                 create_description: "Une nouvelle licence devient active immédiatement après sa création.",
@@ -1864,6 +1868,7 @@
                 edit: "Modifier",
                 save: "Enregistrer",
                 cancel: "Annuler",
+                edited: "(modifié)",
                 intro: "Avis des membres des communautés Misuki.",
                 title: "Avis de la communauté",
                 no_reviews: "Aucun avis pour le moment.",
@@ -2222,15 +2227,15 @@
                 .replace(/\bno Misuki\b/gi, "no Misuki")
                 .replace(/\bna Misuki\b/gi, "no Misuki")
                 .replace(/\bao Misuki\b/gi, "ao Misuki")
-                .replace(/\bà Misuki\b/gi, "ao Misuki")
+                .replace(/\bao Misuki\b/gi, "ao Misuki")
                 .replace(/\bcom Misuki\b/gi, "com o Misuki")
                 .replace(/\besta Misuki\b/gi, "este Misuki")
                 .replace(/\besta do Misuki\b/gi, "este do Misuki")
                 .replace(/\bpara Misuki\b/gi, "para o Misuki")
                 .replace(/\bem Misuki\b/gi, "no Misuki")
                 .replace(/\bde Misuki\b/gi, "do Misuki")
-                .replace(/\buma licença Misuki\b/gi, "uma licença do Misuki")
-                .replace(/\blicença Misuki\b/gi, "licença do Misuki")
+                .replace(/\buma licenço Misuki\b/gi, "uma licença do Misuki")
+                .replace(/\blicenço Misuki\b/gi, "licença do Misuki")
                 .replace(/\bcomunidade Misuki\b/gi, "comunidade do Misuki")
                 .replace(/\bequipa Misuki\b/gi, "equipa do Misuki")
                 .replace(/\bserviço Misuki\b/gi, "serviço do Misuki")
