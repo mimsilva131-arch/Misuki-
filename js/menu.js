@@ -47,6 +47,7 @@
             ) return;
 
             const language = languageOverride || window.MisukiTranslation.getLanguage();
+            if (!["en", "pt", "de", "es", "fr"].includes(language)) return;
             const infoMap = {
                 en: { name: "English", short: "EN", flag: "🇬🇧" },
                 pt: { name: "Português", short: "PT", flag: "🇵🇹" },
@@ -221,17 +222,20 @@
         });
 
         window.addEventListener("misukiLanguageChanged", function (event) {
-            syncLanguageButton(
-                event && event.detail && event.detail.language
-                    ? event.detail.language
-                    : null
-            );
+            const changedLanguage = event && event.detail && event.detail.language
+                ? event.detail.language
+                : null;
+            syncLanguageButton(changedLanguage || "en");
             hardCloseLanguage();
         });
 
         hardCloseMenu();
         hardCloseLanguage();
-        syncLanguageButton();
+        const initialLanguage = window.MisukiTranslation &&
+            typeof window.MisukiTranslation.getLanguage === "function"
+            ? window.MisukiTranslation.getLanguage()
+            : "en";
+        syncLanguageButton(initialLanguage);
 
         console.log("✅ Misuki menu initialized.");
     }
