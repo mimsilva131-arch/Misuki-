@@ -122,6 +122,21 @@ html.misuki-page-ready #misuki-page-transition {
    REDUCED MOTION
    ========================================================= */
 
+/* =========================================================
+   MOBILE / TOUCH — NO MOUSE TRAIL
+   ========================================================= */
+
+@media (max-width: 800px), (hover: none), (pointer: coarse) {
+    .misuki-mouse-trail {
+        display: none !important;
+    }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
 @media (prefers-reduced-motion: reduce) {
 
     #misuki-page-transition {
