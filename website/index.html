@@ -276,6 +276,13 @@ Misuki — Discord Bot
                                         {{ review.username }}
                                     </strong>
 
+                                    <span class="review-date">
+                                        <time datetime="{{ review.created_at }}">{{ review.created_at|short_datetime }}</time>
+                                        {% if review.edited %}
+                                            <small class="review-edited" data-i18n="reviews.edited">(editado)</small>
+                                        {% endif %}
+                                    </span>
+
                                     <div class="review-rating">
                                         <span class="stars" aria-label="{{ review.rating }}/5">
                                             {% for i in range(review.rating) %}★{% endfor %}
