@@ -75,7 +75,9 @@
                 navigation: "Navigation",
                 resources: "Resources",
                 legal: "Legal",
-                account: "Account"
+                account: "Account",
+                open: "Open menu",
+                close: "Close menu"
             },
 
             nav: {
@@ -93,9 +95,9 @@
                 data: "Data",
                 cookies: "Cookies",
                 logout: "Logout",
-                login: "Login with Discord"
-            },
-                license_management: "License Management",
+                login: "Login with Discord",
+                license_management: "License Management"
+            }
 
             licenses: {
                 admin_eyebrow: "ADMINISTRATION",
@@ -214,6 +216,8 @@
             license: {
                 title: "License",
                 back_to_dashboard: "Back to Dashboard",
+                information: "License information",
+                description: "View the status and details of this server license.",
                 status: "Status",
                 active: "Active",
                 expired: "Expired",
@@ -221,7 +225,7 @@
                 key: "License Key",
                 expires: "Expires",
                 never: "Never",
-                missing: "This server does not have o Misuki license."
+                missing: "Este servidor no tiene una licencia de Misuki."
             },
 
             dashboard: {
@@ -500,7 +504,9 @@
                 navigation: "Navegação",
                 resources: "Recursos",
                 legal: "Legal",
-                account: "Conta"
+                account: "Conta",
+                open: "Abrir menu",
+                close: "Fechar menu"
             },
 
             nav: {
@@ -518,9 +524,9 @@
                 data: "Dados",
                 cookies: "Cookies",
                 logout: "Terminar sessão",
-                login: "Entrar com o Discord"
-            },
-                license_management: "Gestão de licenças",
+                login: "Entrar com o Discord",
+                license_management: "Gestão de licenças"
+            }
 
             licenses: {
                 admin_eyebrow: "ADMINISTRAÇÃO",
@@ -633,6 +639,8 @@
             license: {
                 title: "Licença",
                 back_to_dashboard: "Voltar ao painel",
+                information: "Informação da licença",
+                description: "Consulte aqui o estado e os detalhes da licença deste servidor.",
                 status: "Estado",
                 active: "Ativa",
                 expired: "Expirada",
@@ -917,7 +925,9 @@
                 navigation: "Navigation",
                 resources: "Ressourcen",
                 legal: "Rechtliches",
-                account: "Konto"
+                account: "Konto",
+                open: "Menü öffnen",
+                close: "Menü schließen"
             },
 
             nav: {
@@ -935,9 +945,9 @@
                 data: "Daten",
                 cookies: "Cookies",
                 logout: "Abmelden",
-                login: "Mit Discord anmelden"
-            },
-                license_management: "Lizenzverwaltung",
+                login: "Mit Discord anmelden",
+                license_management: "Lizenzverwaltung"
+            }
 
             licenses: {
                 admin_eyebrow: "ADMINISTRATION",
@@ -1050,6 +1060,8 @@
             license: {
                 title: "Lizenz",
                 back_to_dashboard: "Zurück zum Dashboard",
+                information: "Lizenzinformationen",
+                description: "Hier können Sie den Status und die Details der Serverlizenz einsehen.",
                 status: "Status",
                 active: "Aktiv",
                 expired: "Abgelaufen",
@@ -1334,7 +1346,9 @@
                 navigation: "Navegación",
                 resources: "Recursos",
                 legal: "Legal",
-                account: "Cuenta"
+                account: "Cuenta",
+                open: "Abrir menú",
+                close: "Cerrar menú"
             },
 
             nav: {
@@ -1352,9 +1366,9 @@
                 data: "Datos",
                 cookies: "Cookies",
                 logout: "Cerrar sesión",
-                login: "Iniciar sesión con Discord"
-            },
-                license_management: "Gestión de licencias",
+                login: "Iniciar sesión con Discord",
+                license_management: "Gestión de licencias"
+            }
 
             licenses: {
                 admin_eyebrow: "ADMINISTRACIÓN",
@@ -1751,7 +1765,9 @@
                 navigation: "Navigation",
                 resources: "Ressources",
                 legal: "Mentions légales",
-                account: "Compte"
+                account: "Compte",
+                open: "Ouvrir le menu",
+                close: "Fermer le menu"
             },
 
             nav: {
@@ -1769,9 +1785,9 @@
                 data: "Données",
                 cookies: "Cookies",
                 logout: "Se déconnecter",
-                login: "Se connecter avec Discord"
-            },
-                license_management: "Gestion des licences",
+                login: "Se connecter avec Discord",
+                license_management: "Gestion des licences"
+            }
 
             licenses: {
                 admin_eyebrow: "ADMINISTRATION",
@@ -1884,6 +1900,8 @@
             license: {
                 title: "Licence",
                 back_to_dashboard: "Retour au tableau de bord",
+                information: "Informations sur la licence",
+                description: "Consultez ici le statut et les détails de la licence de ce serveur.",
                 status: "Statut",
                 active: "Active",
                 expired: "Expirée",
