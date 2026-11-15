@@ -168,8 +168,15 @@
                 }
 
                 // Always read the saved value after translation and before closing.
+                // Keep the selected language visible on the closed button.
                 syncLanguageButton(language);
                 hardCloseLanguage();
+                requestAnimationFrame(function () {
+                    syncLanguageButton(language);
+                });
+                setTimeout(function () {
+                    syncLanguageButton(language);
+                }, 50);
                 return;
             }
 
