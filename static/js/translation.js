@@ -2437,7 +2437,8 @@
                 actions: "Review actions",
                 edit: "Edit",
                 save: "Save",
-                cancel: "Cancel"
+                cancel: "Cancel",
+                edited: "(edited)"
             },
             license: {
                 information: "License information",
@@ -2458,7 +2459,8 @@
                 actions: "Ações da avaliação",
                 edit: "Editar",
                 save: "Guardar",
-                cancel: "Cancelar"
+                cancel: "Cancelar",
+                edited: "(editado)"
             },
             license: {
                 information: "Informação da licença",
@@ -2479,7 +2481,8 @@
                 actions: "Bewertungsaktionen",
                 edit: "Bearbeiten",
                 save: "Speichern",
-                cancel: "Abbrechen"
+                cancel: "Abbrechen",
+                edited: "(bearbeitet)"
             },
             license: {
                 information: "Lizenzinformationen",
@@ -2496,7 +2499,8 @@
                 your_voice: "Tu opinión", form_intro: "Comparte tu experiencia con Misuki.",
                 community_kicker: "COMUNIDAD", delete: "Eliminar",
                 no_reviews: "Aún no hay reseñas.", no_reviews_desc: "Sé el primer miembro de la comunidad en compartir tu experiencia.",
-                delete_confirm: "¿Eliminar esta reseña?"
+                delete_confirm: "¿Eliminar esta reseña?",
+                actions: "Acciones de la reseña", edit: "Editar", save: "Guardar", cancel: "Cancelar", edited: "(editado)"
             },
             license: {
                 information: "Información de la licencia",
