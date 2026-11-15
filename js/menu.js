@@ -70,6 +70,7 @@
             languageButton.dataset.currentLanguage = language;
             languageButton.setAttribute("data-language", language);
             languageButton.setAttribute("aria-label", info.name);
+            languageButton.setAttribute("title", info.name);
 
         }
 
@@ -181,7 +182,7 @@
                     const saved = window.MisukiTranslation &&
                         typeof window.MisukiTranslation.getLanguage === "function"
                         ? window.MisukiTranslation.getLanguage()
-                        : language;
+                        : (localStorage.getItem("misuki_language") || language);
 
                     hardCloseLanguage();
                     syncLanguageButton(saved || language);
@@ -231,7 +232,11 @@
             const changedLanguage = event && event.detail && event.detail.language
                 ? event.detail.language
                 : null;
-            syncLanguageButton(changedLanguage || "en");
+            const currentLanguage = changedLanguage ||
+                (window.MisukiTranslation && typeof window.MisukiTranslation.getLanguage === "function"
+                    ? window.MisukiTranslation.getLanguage()
+                    : (localStorage.getItem("misuki_language") || "en"));
+            syncLanguageButton(currentLanguage);
             hardCloseLanguage();
         });
 
