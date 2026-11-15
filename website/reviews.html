@@ -126,17 +126,17 @@ Misuki — Reviews
                                         <span class="review-dots" aria-hidden="true">⋮</span>
                                     </button>
                                     <div class="review-actions-menu" hidden>
-                                        <button type="button" class="review-action-edit" data-review-id="{{ review.id }}" data-i18n="reviews.edit"><span class="review-action-icon" aria-hidden="true">✎</span><span>Editar</span></button>
+                                        <button type="button" class="review-action-edit" data-review-id="{{ review.id }}"><span class="review-action-icon" aria-hidden="true">✎</span><span data-i18n="reviews.edit">Editar</span></button>
                                         <form method="POST" action="/reviews/{{ review.id }}/delete" class="review-delete-form">
-                                            <button type="submit" class="review-action-delete" data-i18n="reviews.delete" data-confirm="" data-i18n-attr="data-confirm:reviews.delete_confirm" onclick="return confirm(this.dataset.confirm);"><span class="review-action-icon" aria-hidden="true">⌫</span><span>Remover</span></button>
+                                            <button type="submit" class="review-action-delete" data-confirm="" data-i18n-attr="data-confirm:reviews.delete_confirm" onclick="return confirm(this.dataset.confirm);"><span class="review-action-icon" aria-hidden="true">⌫</span><span data-i18n="reviews.delete">Remover</span></button>
                                         </form>
                                     </div>
                                 </div>
                                 <form method="POST" action="/reviews/{{ review.id }}/edit" class="review-edit-form" hidden>
                                     <textarea name="review" maxlength="1000" required>{{ review.review }}</textarea>
                                     <div class="review-edit-actions">
-                                        <button type="submit" class="review-edit-save" data-i18n="reviews.save"><span class="review-edit-icon" aria-hidden="true">✓</span><span>Guardar</span></button>
-                                        <button type="button" class="review-edit-cancel" data-i18n="reviews.cancel"><span class="review-edit-icon" aria-hidden="true">×</span><span>Cancelar</span></button>
+                                        <button type="submit" class="review-edit-save"><span class="review-edit-icon" aria-hidden="true">✓</span><span data-i18n="reviews.save">Guardar</span></button>
+                                        <button type="button" class="review-edit-cancel"><span class="review-edit-icon" aria-hidden="true">×</span><span data-i18n="reviews.cancel">Cancelar</span></button>
                                     </div>
                                 </form>
                             {% endif %}
