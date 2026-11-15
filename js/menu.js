@@ -167,12 +167,32 @@
 
                 const language = languageOption.getAttribute("data-lang");
 
-                if (
-                    language &&
-                    window.MisukiTranslation &&
-                    typeof window.MisukiTranslation.setLanguage === "function"
-                ) {
-                    window.MisukiTranslation.setLanguage(language);
+                if (language) {
+                    // Update the closed selector immediately. The translation
+                    // engine is allowed to translate the page afterwards, but
+                    // it must never own the visible selected-language state.
+                    syncLanguageButton(language);
+
+                    try {
+                        localStorage.setItem("misuki_language", language);
+                    } catch (error) {
+                        console.warn("Misuki: could not persist language.", error);
+                    }
+
+                    if (
+                        window.MisukiTranslation &&
+                        typeof window.MisukiTranslation.setLanguage === "function"
+                    ) {
+                        window.MisukiTranslation.setLanguage(language);
+                    }
+
+                    // Re-apply after the translation pass as a final guard.
+                    requestAnimationFrame(function () {
+                        syncLanguageButton(language);
+                    });
+                    setTimeout(function () {
+                        syncLanguageButton(language);
+                    }, 150);
                 }
 
                 // Close the selector and then explicitly restore the selected
