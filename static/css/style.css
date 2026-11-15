@@ -1188,14 +1188,14 @@ footer {
 
 .review-actions {
     position: absolute;
-    top: 16px;
-    right: 16px;
+    top: 10px;
+    right: 10px;
     z-index: 5;
 }
 
 .review-actions-button {
-    width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
     padding: 0;
     display: inline-flex;
     align-items: center;
@@ -1216,15 +1216,35 @@ footer {
 }
 
 .review-actions-button span {
-    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    width: 4px;
+    height: 16px;
+    font-size: 0;
     line-height: 1;
-    letter-spacing: 2px;
-    transform: translateY(-2px);
+    letter-spacing: 0;
+}
+
+.review-actions-button span::before,
+.review-actions-button span::after {
+    content: "";
+    display: block;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.review-actions-button span::after {
+    box-shadow: 0 7px 0 currentColor;
 }
 
 .review-actions-menu {
     position: absolute;
-    top: 40px;
+    top: 37px;
     right: 0;
     width: 150px;
     padding: 6px;
@@ -1331,8 +1351,8 @@ footer {
 
 @media (max-width: 600px) {
     .review-actions {
-        top: 13px;
-        right: 13px;
+        top: 9px;
+        right: 9px;
     }
 
     .review-actions-menu {
