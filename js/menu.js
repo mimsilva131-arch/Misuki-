@@ -91,6 +91,12 @@
             menu.setAttribute("aria-hidden", "false");
             syncLanguageButton();
 
+            // Start warming the menu destinations as soon as the menu opens,
+            // not only after hover. This makes an immediate click much faster.
+            if (typeof prefetchMenuPage === "function") {
+                menu.querySelectorAll("a").forEach(prefetchMenuPage);
+            }
+
             window.dispatchEvent(new CustomEvent("misukiMenuOpened"));
         }
 
