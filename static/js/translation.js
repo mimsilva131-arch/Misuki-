@@ -3238,11 +3238,46 @@
 
         if (!document.body || window.__misukiTranslationObserver) return;
 
+        const ignoredDynamicSelectors = [
+            ".misuki-mouse-trail",
+            ".misuki-star",
+            ".misuki-shooting-star",
+            "#misuki-page-transition"
+        ];
+
+        function isIgnoredDynamicNode(node) {
+            if (!node) return true;
+
+            if (node.nodeType === Node.TEXT_NODE) {
+                return !node.parentElement ||
+                    !!node.parentElement.closest(ignoredDynamicSelectors.join(","));
+            }
+
+            if (node.nodeType !== Node.ELEMENT_NODE) return true;
+
+            return node.matches(ignoredDynamicSelectors.join(",")) ||
+                !!node.closest(ignoredDynamicSelectors.join(","));
+        }
+
         window.__misukiTranslationObserver = new MutationObserver(function (mutations) {
             if (translationInProgress) return;
 
             const added = mutations.some(function (mutation) {
-                return mutation.addedNodes && mutation.addedNodes.length > 0;
+                if (!mutation.addedNodes || !mutation.addedNodes.length) return false;
+
+                return Array.from(mutation.addedNodes).some(function (node) {
+                    if (isIgnoredDynamicNode(node)) return false;
+
+                    if (node.nodeType === Node.ELEMENT_NODE) {
+                        return node.querySelector(
+                            "[data-i18n], [data-i18n-attr]"
+                        ) !== null || node.textContent.trim().length > 0;
+                    }
+
+                    return node.nodeType === Node.TEXT_NODE &&
+                        !!node.nodeValue &&
+                        node.nodeValue.trim().length > 0;
+                });
             });
 
             if (!added) return;
