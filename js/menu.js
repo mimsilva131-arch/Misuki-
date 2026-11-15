@@ -1,14 +1,13 @@
 /* =========================================================
    MISUKI — MENU.JS
-   SIDE MENU
+   SIDE MENU + LANGUAGE SELECTOR
+   Single controller: the two menus can never be open together.
    ========================================================= */
 
 (function () {
-
     "use strict";
 
     function initMenu() {
-
         const hamburger = document.getElementById("hamburger");
         const menu = document.getElementById("menu");
         const overlay = document.getElementById("overlay");
@@ -22,13 +21,59 @@
             return;
         }
 
-        function openMenu(event) {
+        function hardCloseLanguage() {
+            if (!languageSelector || !languageDropdown || !languageButton) return;
 
+            languageSelector.classList.remove("open", "active");
+            languageDropdown.classList.remove("show");
+            languageDropdown.style.display = "none";
+            languageDropdown.setAttribute("aria-hidden", "true");
+            languageButton.setAttribute("aria-expanded", "false");
+        }
+
+        function hardCloseMenu() {
+            menu.classList.remove("open", "active");
+            overlay.classList.remove("show", "active");
+            document.body.classList.remove("menu-open");
+            hamburger.setAttribute("aria-expanded", "false");
+            menu.setAttribute("aria-hidden", "true");
+        }
+
+        function syncLanguageButton() {
+            if (
+                !languageButton ||
+                !window.MisukiTranslation ||
+                typeof window.MisukiTranslation.getLanguage !== "function"
+            ) return;
+
+            const language = window.MisukiTranslation.getLanguage();
+            const infoMap = {
+                en: { name: "English", short: "EN", flag: "🇬🇧" },
+                pt: { name: "Português", short: "PT", flag: "🇵🇹" },
+                de: { name: "Deutsch", short: "DE", flag: "🇩🇪" },
+                es: { name: "Español", short: "ES", flag: "🇪🇸" },
+                fr: { name: "Français", short: "FR", flag: "🇫🇷" }
+            };
+            const info = infoMap[language] || infoMap.en;
+
+            const flag = languageButton.querySelector(".language-flag");
+            const short = languageButton.querySelector(".language-short");
+            const name = languageButton.querySelector(".language-name");
+
+            if (flag) flag.textContent = info.flag;
+            if (short) short.textContent = info.short;
+            if (name) name.textContent = info.name;
+            languageButton.dataset.currentLanguage = language;
+        }
+
+        function openMenu(event) {
             if (event) {
                 event.preventDefault();
+                event.stopPropagation();
             }
 
-            closeLanguageSelector();
+            // Mutual exclusion is enforced before anything is shown.
+            hardCloseLanguage();
 
             menu.classList.add("open");
             overlay.classList.add("show");
@@ -36,23 +81,18 @@
 
             hamburger.setAttribute("aria-expanded", "true");
             menu.setAttribute("aria-hidden", "false");
+            syncLanguageButton();
 
             window.dispatchEvent(new CustomEvent("misukiMenuOpened"));
-
         }
 
-        function closeLanguageSelector() {
-            if (languageSelector) {
-                languageSelector.classList.remove("open", "active");
+        function closeMenu(event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
             }
-            if (languageDropdown) {
-                languageDropdown.classList.remove("show");
-                languageDropdown.style.display = "";
-                languageDropdown.setAttribute("aria-hidden", "true");
-            }
-            if (languageButton) {
-                languageButton.setAttribute("aria-expanded", "false");
-            }
+
+            hardCloseMenu();
         }
 
         function openLanguageSelector(event) {
@@ -61,16 +101,17 @@
                 event.stopPropagation();
             }
 
-            if (!languageSelector || !languageButton || !languageDropdown) {
-                return;
-            }
+            if (!languageSelector || !languageButton || !languageDropdown) return;
 
             const wasOpen = languageSelector.classList.contains("open");
-            closeMenu();
-            closeLanguageSelector();
+
+            // Close the side menu completely before touching the language menu.
+            hardCloseMenu();
+            hardCloseLanguage();
 
             if (!wasOpen) {
-                languageSelector.classList.add("open");
+                syncLanguageButton();
+                languageSelector.classList.add("open", "active");
                 languageDropdown.classList.add("show");
                 languageDropdown.style.display = "flex";
                 languageDropdown.setAttribute("aria-hidden", "false");
@@ -78,25 +119,10 @@
             }
         }
 
-        function closeMenu(event) {
-
-            if (event) {
-                event.preventDefault();
-            }
-
-            menu.classList.remove("open");
-            overlay.classList.remove("show");
-            document.body.classList.remove("menu-open");
-
-            hamburger.setAttribute("aria-expanded", "false");
-            menu.setAttribute("aria-hidden", "true");
-
-        }
-
         function toggleMenu(event) {
-
             if (event) {
                 event.preventDefault();
+                event.stopPropagation();
             }
 
             if (menu.classList.contains("open")) {
@@ -104,11 +130,8 @@
             } else {
                 openMenu();
             }
-
         }
 
-        // Expose only the controls needed by the language selector.
-        // The two menus are mutually exclusive: opening one closes the other.
         window.MisukiMenu = {
             open: openMenu,
             close: closeMenu,
@@ -116,11 +139,11 @@
             isOpen: function () {
                 return menu.classList.contains("open");
             },
-            closeLanguageSelector: closeLanguageSelector
+            closeLanguageSelector: hardCloseLanguage,
+            syncLanguageButton: syncLanguageButton
         };
 
         hamburger.addEventListener("click", toggleMenu);
-
         menuClose.addEventListener("click", closeMenu);
 
         if (languageButton) {
@@ -144,55 +167,54 @@
                     window.MisukiTranslation.setLanguage(language);
                 }
 
-                closeLanguageSelector();
+                // Always read the saved value after translation and before closing.
+                syncLanguageButton();
+                hardCloseLanguage();
                 return;
             }
 
-            if (languageSelector && !languageSelector.contains(event.target)) {
-                closeLanguageSelector();
+            if (
+                languageSelector &&
+                !languageSelector.contains(event.target) &&
+                !event.target.closest("#hamburger")
+            ) {
+                hardCloseLanguage();
             }
         });
 
         overlay.addEventListener("click", closeMenu);
 
         document.addEventListener("keydown", function (event) {
+            if (event.key !== "Escape") return;
 
-            if (
-                event.key === "Escape" &&
-                menu.classList.contains("open")
-            ) {
+            if (menu.classList.contains("open")) {
                 closeMenu();
+            } else if (languageSelector && languageSelector.classList.contains("open")) {
+                hardCloseLanguage();
             }
-
         });
 
-        const links = menu.querySelectorAll("a");
-
-        links.forEach(function (link) {
-
+        menu.querySelectorAll("a").forEach(function (link) {
             link.addEventListener("click", function () {
                 closeMenu();
             });
-
         });
 
-        closeMenu();
+        window.addEventListener("misukiLanguageChanged", function () {
+            syncLanguageButton();
+            hardCloseLanguage();
+        });
+
+        hardCloseMenu();
+        hardCloseLanguage();
+        syncLanguageButton();
 
         console.log("✅ Misuki menu initialized.");
-
     }
 
     if (document.readyState === "loading") {
-
-        document.addEventListener(
-            "DOMContentLoaded",
-            initMenu
-        );
-
+        document.addEventListener("DOMContentLoaded", initMenu, { once: true });
     } else {
-
         initMenu();
-
     }
-
 })();
