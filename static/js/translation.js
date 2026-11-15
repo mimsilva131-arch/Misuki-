@@ -220,7 +220,7 @@
                 key: "License Key",
                 expires: "Expires",
                 never: "Never",
-                missing: "This server does not have o Misuki license."
+                missing: "This server does not have a Misuki license."
             },
 
             dashboard: {
@@ -2191,6 +2191,57 @@
         return element.hasAttribute("data-i18n");
     }
 
+    function normalizePortugueseMisukiText(language) {
+        if (language !== "pt" || !document.body) return;
+
+        const walker = document.createTreeWalker(
+            document.body,
+            NodeFilter.SHOW_TEXT
+        );
+
+        const nodes = [];
+        let node;
+
+        while ((node = walker.nextNode())) {
+            nodes.push(node);
+        }
+
+        nodes.forEach(function (textNode) {
+            const parent = textNode.parentElement;
+            if (!parent || isProtectedStaticElement(parent)) return;
+            if (!textNode.nodeValue || !textNode.nodeValue.trim()) return;
+
+            const original = textNode.nodeValue;
+            const trimmed = original.trim();
+
+            // Only correct article usage in Portuguese prose; never alter the brand by itself.
+            const corrected = trimmed
+                .replace(/\bdo Misuki\b/gi, "do Misuki")
+                .replace(/\bda Misuki\b/gi, "da Misuki")
+                .replace(/\bno Misuki\b/gi, "no Misuki")
+                .replace(/\bna Misuki\b/gi, "na Misuki")
+                .replace(/\bao Misuki\b/gi, "ao Misuki")
+                .replace(/\bà Misuki\b/gi, "à Misuki")
+                .replace(/\bcom Misuki\b/gi, "com o Misuki")
+                .replace(/\bpara Misuki\b/gi, "para o Misuki")
+                .replace(/\bem Misuki\b/gi, "no Misuki")
+                .replace(/\bde Misuki\b/gi, "do Misuki")
+                .replace(/\buma licença Misuki\b/gi, "uma licença do Misuki")
+                .replace(/\blicença Misuki\b/gi, "licença do Misuki")
+                .replace(/\bcomunidade Misuki\b/gi, "comunidade do Misuki")
+                .replace(/\bequipa Misuki\b/gi, "equipa do Misuki")
+                .replace(/\bserviço Misuki\b/gi, "serviço do Misuki")
+                .replace(/\bsite Misuki\b/gi, "site do Misuki")
+                .replace(/\bwebsite Misuki\b/gi, "website do Misuki");
+
+            if (corrected !== trimmed) {
+                const leading = original.match(/^\s*/)?.[0] || "";
+                const trailing = original.match(/\s*$/)?.[0] || "";
+                textNode.nodeValue = leading + corrected + trailing;
+            }
+        });
+    }
+
     function translateStaticText(language) {
 
         const walker = document.createTreeWalker(
@@ -2951,6 +3002,10 @@
             language
         );
 
+        normalizePortugueseMisukiText(
+            language
+        );
+
         translateDocumentTitle(
             language
         );
@@ -2969,6 +3024,11 @@
         saveLanguage(
             language
         );
+
+        const currentLanguageButton = getLanguageElements().button;
+        if (currentLanguageButton) {
+            currentLanguageButton.dataset.currentLanguage = language;
+        }
 
         translationInProgress = false;
 
