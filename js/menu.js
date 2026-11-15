@@ -25,10 +25,22 @@
                 event.preventDefault();
             }
 
-            // Keep the language selector independent from the side menu.
-            // If it is open, close it before the side menu appears.
-            if (window.MisukiTranslation && typeof window.MisukiTranslation.closeLanguageDropdown === "function") {
-                window.MisukiTranslation.closeLanguageDropdown();
+            // Close the language dropdown directly. Do not depend on the
+            // translation script having initialized yet.
+            const languageSelector = document.getElementById("languageSelector");
+            const languageButton = document.getElementById("languageButton");
+            const languageDropdown = document.getElementById("languageDropdown");
+
+            if (languageSelector) {
+                languageSelector.classList.remove("open", "active");
+            }
+            if (languageDropdown) {
+                languageDropdown.classList.remove("show");
+                languageDropdown.style.display = "none";
+                languageDropdown.setAttribute("aria-hidden", "true");
+            }
+            if (languageButton) {
+                languageButton.setAttribute("aria-expanded", "false");
             }
 
             menu.classList.add("open");
