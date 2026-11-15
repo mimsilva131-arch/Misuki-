@@ -3609,7 +3609,8 @@ def get_random_reviews(
                             avatar,
                             review,
                             rating,
-                            created_at
+                            created_at,
+                            updated_at
                         FROM reviews
                         ORDER BY RANDOM()
                         LIMIT %s
@@ -3653,7 +3654,13 @@ def get_random_reviews(
                 row["rating"],
 
             "created_at":
-                row["created_at"]
+                row["created_at"],
+
+            "updated_at":
+                row.get("updated_at"),
+
+            "edited":
+                bool(row.get("updated_at"))
         })
 
     return reviews
