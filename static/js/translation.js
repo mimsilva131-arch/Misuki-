@@ -3134,6 +3134,22 @@
                 event.preventDefault();
                 event.stopPropagation();
 
+                // Close the side menu first, directly, so the language
+                // selector can never open together with it.
+                if (window.MisukiMenu && typeof window.MisukiMenu.close === "function") {
+                    window.MisukiMenu.close();
+                } else {
+                    const menu = document.getElementById("menu");
+                    const overlay = document.getElementById("overlay");
+                    const hamburger = document.getElementById("hamburger");
+
+                    menu?.classList.remove("open", "active");
+                    overlay?.classList.remove("show", "active");
+                    document.body.classList.remove("menu-open");
+                    hamburger?.setAttribute("aria-expanded", "false");
+                    menu?.setAttribute("aria-hidden", "true");
+                }
+
                 toggleLanguageDropdown();
 
             }
@@ -3243,30 +3259,10 @@
        ========================================================= */
 
     function setupMenuIntegration() {
-
-        // The two menus are independent and mutually exclusive.
-        // Opening the language selector closes the side menu first.
+        // The language button and side menu close each other directly.
+        // This function is kept as the integration hook for compatibility.
         window.addEventListener("misukiMenuOpened", closeLanguageDropdown);
-
-        const {
-            button: languageButton
-        } = getLanguageElements();
-
-        if (languageButton) {
-            languageButton.addEventListener("click", function () {
-                if (
-                    window.MisukiMenu &&
-                    typeof window.MisukiMenu.close === "function" &&
-                    typeof window.MisukiMenu.isOpen === "function" &&
-                    window.MisukiMenu.isOpen()
-                ) {
-                    window.MisukiMenu.close();
-                }
-            }, true);
-        }
-
     }
-
 
     /* =========================================================
        INITIALIZATION
