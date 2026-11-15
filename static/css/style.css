@@ -949,42 +949,52 @@ footer {
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(255,255,255,.12);
-    border-radius: 9px;
-    background: rgba(15,17,25,.88);
+    border: 1px solid rgba(255,255,255,.13);
+    border-radius: 10px;
+    background: rgba(15,17,25,.82);
     color: rgba(255,255,255,.72);
     cursor: pointer;
     font: inherit;
     appearance: none;
     -webkit-appearance: none;
+    box-shadow: 0 5px 16px rgba(0,0,0,.18);
     transition:
         background .18s ease,
         border-color .18s ease,
         color .18s ease,
-        transform .18s ease;
+        transform .18s ease,
+        box-shadow .18s ease;
 }
 
 .review-actions-button:hover,
+.review-actions-button:focus-visible,
 .review-actions-button[aria-expanded="true"] {
     background: rgba(255,255,255,.10);
-    border-color: rgba(255,255,255,.20);
+    border-color: rgba(255,255,255,.24);
     color: #fff;
-    transform: scale(1.05);
+    transform: translateY(-1px) scale(1.04);
+    box-shadow: 0 8px 22px rgba(0,0,0,.25);
+}
+
+.review-actions-button:focus-visible {
+    outline: 2px solid rgba(114,137,218,.65);
+    outline-offset: 2px;
 }
 
 .review-actions-button .review-dots {
+    position: relative;
     display: block !important;
-    width: 12px !important;
-    height: 24px !important;
+    width: 4px !important;
+    height: 4px !important;
+    margin: 0 !important;
+    border-radius: 50% !important;
+    background: currentColor !important;
     color: #ffffff !important;
-    font-family: Arial, sans-serif !important;
-    font-size: 28px !important;
-    font-weight: 900 !important;
-    line-height: 18px !important;
-    text-align: center !important;
-    letter-spacing: 0 !important;
+    box-shadow:
+        0 7px 0 currentColor,
+        0 14px 0 currentColor !important;
     overflow: visible !important;
-    transform: translateY(-1px) !important;
+    transform: translateY(-7px) !important;
 }
 .review-actions-menu {
     position: absolute;
