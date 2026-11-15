@@ -218,6 +218,10 @@
 }
 
 .review-date {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
     font-size: .76rem;
     color: var(--text-muted, #8f96a6);
 }
@@ -530,13 +534,6 @@
     color: #fff !important;
     border-color: rgba(255,255,255,.22) !important;
     background: rgba(255,255,255,.10) !important;
-}
-
-.review-date {
-    display: inline-flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 4px;
 }
 
 .review-date time {
