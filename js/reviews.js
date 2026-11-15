@@ -127,6 +127,84 @@
             }
 
 
+            /* =================================================
+               REVIEW ACTION MENUS
+            ================================================== */
+
+            document.addEventListener("click", function (event) {
+                const actionButton = event.target.closest(".review-actions-button");
+
+                if (actionButton) {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    const actions = actionButton.closest(".review-actions");
+                    if (!actions) return;
+
+                    const menu = actions.querySelector(".review-actions-menu");
+                    if (!menu) return;
+
+                    document.querySelectorAll(".review-actions-menu:not([hidden])").forEach(function (openMenu) {
+                        if (openMenu !== menu) {
+                            openMenu.hidden = true;
+                            const openButton = openMenu.parentElement?.querySelector(".review-actions-button");
+                            openButton?.setAttribute("aria-expanded", "false");
+                        }
+                    });
+
+                    menu.hidden = !menu.hidden;
+                    actionButton.setAttribute("aria-expanded", menu.hidden ? "false" : "true");
+                    return;
+                }
+
+                const editButton = event.target.closest(".review-action-edit");
+                if (editButton) {
+                    event.preventDefault();
+
+                    const card = editButton.closest(".review-card");
+                    const editForm = card?.querySelector(".review-edit-form");
+                    const actionsMenu = card?.querySelector(".review-actions-menu");
+                    const actionsButton = card?.querySelector(".review-actions-button");
+
+                    if (!editForm) return;
+
+                    editForm.hidden = false;
+                    if (actionsMenu) actionsMenu.hidden = true;
+                    if (actionsButton) actionsButton.setAttribute("aria-expanded", "false");
+                    editForm.querySelector("textarea")?.focus();
+                    return;
+                }
+
+                const cancelButton = event.target.closest(".review-edit-cancel");
+                if (cancelButton) {
+                    event.preventDefault();
+
+                    const card = cancelButton.closest(".review-card");
+                    const editForm = card?.querySelector(".review-edit-form");
+                    if (editForm) editForm.hidden = true;
+                    return;
+                }
+
+                if (!event.target.closest(".review-actions")) {
+                    document.querySelectorAll(".review-actions-menu:not([hidden])").forEach(function (menu) {
+                        menu.hidden = true;
+                        const button = menu.parentElement?.querySelector(".review-actions-button");
+                        button?.setAttribute("aria-expanded", "false");
+                    });
+                }
+            });
+
+            document.addEventListener("keydown", function (event) {
+                if (event.key !== "Escape") return;
+
+                document.querySelectorAll(".review-actions-menu:not([hidden])").forEach(function (menu) {
+                    menu.hidden = true;
+                    const button = menu.parentElement?.querySelector(".review-actions-button");
+                    button?.setAttribute("aria-expanded", "false");
+                });
+            });
+
+
         }
     );
 
