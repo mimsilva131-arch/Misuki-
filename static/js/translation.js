@@ -2216,13 +2216,16 @@
 
             // Only correct article usage in Portuguese prose; never alter the brand by itself.
             const corrected = trimmed
+                .replace(/\b[Aa] Misuki\b/g, function (match) { return match[0] === "A" ? "O Misuki" : "o Misuki"; })
                 .replace(/\bdo Misuki\b/gi, "do Misuki")
-                .replace(/\bda Misuki\b/gi, "da Misuki")
+                .replace(/\bda Misuki\b/gi, "do Misuki")
                 .replace(/\bno Misuki\b/gi, "no Misuki")
-                .replace(/\bna Misuki\b/gi, "na Misuki")
+                .replace(/\bna Misuki\b/gi, "no Misuki")
                 .replace(/\bao Misuki\b/gi, "ao Misuki")
-                .replace(/\bà Misuki\b/gi, "à Misuki")
+                .replace(/\bà Misuki\b/gi, "ao Misuki")
                 .replace(/\bcom Misuki\b/gi, "com o Misuki")
+                .replace(/\besta Misuki\b/gi, "este Misuki")
+                .replace(/\besta do Misuki\b/gi, "este do Misuki")
                 .replace(/\bpara Misuki\b/gi, "para o Misuki")
                 .replace(/\bem Misuki\b/gi, "no Misuki")
                 .replace(/\bde Misuki\b/gi, "do Misuki")
