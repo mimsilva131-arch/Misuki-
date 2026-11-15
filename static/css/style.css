@@ -973,24 +973,19 @@ footer {
 }
 
 .review-actions-button .review-dots {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 3px;
-    width: 5px;
-    height: 17px;
+    display: block !important;
+    width: 12px !important;
+    height: 24px !important;
+    color: #ffffff !important;
+    font-family: Arial, sans-serif !important;
+    font-size: 28px !important;
+    font-weight: 900 !important;
+    line-height: 18px !important;
+    text-align: center !important;
+    letter-spacing: 0 !important;
+    overflow: visible !important;
+    transform: translateY(-1px) !important;
 }
-
-.review-actions-button .review-dots i {
-    display: block;
-    width: 4px;
-    height: 4px;
-    flex: 0 0 4px;
-    border-radius: 50%;
-    background: currentColor;
-}
-
 .review-actions-menu {
     position: absolute;
     top: 40px;
@@ -1253,9 +1248,14 @@ body.menu-open header.container {
 
 @media (max-width: 800px) {
     .hero-icon {
+        width: 120px !important;
+        height: 120px !important;
+        margin: 0 auto 28px !important;
         padding: 0 !important;
+        display: block !important;
         overflow: hidden !important;
         background: transparent !important;
+        border-radius: 30px !important;
     }
 
     .hero-icon img {
@@ -1263,8 +1263,11 @@ body.menu-open header.container {
         width: 100% !important;
         height: 100% !important;
         max-width: none !important;
+        max-height: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
         object-fit: cover !important;
         object-position: center !important;
-        border-radius: inherit !important;
+        border-radius: 30px !important;
     }
 }
