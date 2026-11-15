@@ -297,7 +297,7 @@ Misuki — Discord Bot
                             {% if user and (is_admin(user) or user.get("id")|string == review.user_id|string) %}
                                 <div class="review-actions">
                                     <button type="button" class="review-actions-button" aria-expanded="false" aria-label="Review actions" data-i18n-attr="aria-label:reviews.actions">
-                                        <span class="review-dots" aria-hidden="true"></span>
+                                        <span class="review-dots" aria-hidden="true">⋮</span>
                                     </button>
                                     <div class="review-actions-menu" hidden>
                                         <button type="button" class="review-action-edit" data-review-id="{{ review.id }}" data-i18n="reviews.edit">Editar</button>
