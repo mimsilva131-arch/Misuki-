@@ -420,7 +420,7 @@ header {
     padding: 22px;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: visible;
     transition:
         transform .2s ease,
         border-color .2s ease,
@@ -1250,6 +1250,19 @@ header.container {
 
 body.menu-open header.container {
     z-index: 9000;
+}
+
+/* The side menu owns the screen while it is open.
+   Hide the language control immediately so it cannot flash
+   underneath the overlay during the menu transition. */
+body.menu-open .language-selector {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+body:not(.menu-open) .language-selector {
+    visibility: visible;
+    pointer-events: auto;
 }
 
 /* =========================================================
