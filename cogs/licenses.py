@@ -223,19 +223,17 @@ class LicenseManager(commands.Cog):
                     """)
                 for row in rows:
                     await self.sync_verification_panel(int(row["guild_id"]), False)
-                async with self.pool.acquire() as connection:
-                    active_rows = await connection.fetch(
-                        "SELECT guild_id FROM licenses WHERE status = 'active'"
-                    )
-                for row in active_rows:
-                    await self.sync_verification_panel(int(row["guild_id"]), True)
+                # Active panels do not need to be re-sent every cycle.
+                # They are synchronized when a license is created/changed.
+                # Re-syncing every active guild here generated unnecessary
+                # Discord API traffic and could add event-loop latency.
                 if rows:
                     print(f"🗑️ Removed {len(rows)} expired license(s).")
             except asyncio.CancelledError:
                 raise
             except Exception as error:
                 print(f"❌ License expiration worker error: {error}")
-            await asyncio.sleep(30)
+            await asyncio.sleep(60)
 
     # =====================================================
     # DATABASE CHECK
