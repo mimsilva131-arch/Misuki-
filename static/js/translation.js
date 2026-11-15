@@ -3427,6 +3427,12 @@
             language,
             key
         ) {
+            // Support both getTranslation(language, key) and
+            // getTranslation(key) for legacy/dynamic UI callers.
+            if (key === undefined) {
+                key = language;
+                language = getSavedLanguage();
+            }
 
             return getTranslation(
                 language,
