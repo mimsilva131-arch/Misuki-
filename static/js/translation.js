@@ -3352,6 +3352,10 @@
             return getSavedLanguage();
         },
 
+        closeLanguageDropdown: function () {
+            closeLanguageDropdown();
+        },
+
         getTranslation: function (
             language,
             key
