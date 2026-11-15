@@ -128,6 +128,26 @@
         }
 
         document.addEventListener("click", function (event) {
+            const languageOption = event.target.closest("#languageDropdown [data-lang]");
+
+            if (languageOption && languageDropdown && languageDropdown.contains(languageOption)) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                const language = languageOption.getAttribute("data-lang");
+
+                if (
+                    language &&
+                    window.MisukiTranslation &&
+                    typeof window.MisukiTranslation.setLanguage === "function"
+                ) {
+                    window.MisukiTranslation.setLanguage(language);
+                }
+
+                closeLanguageSelector();
+                return;
+            }
+
             if (languageSelector && !languageSelector.contains(event.target)) {
                 closeLanguageSelector();
             }
