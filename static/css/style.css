@@ -984,17 +984,19 @@ footer {
 .review-actions-button .review-dots {
     position: relative;
     display: block !important;
-    width: 4px !important;
-    height: 4px !important;
+    width: 16px !important;
+    height: 22px !important;
     margin: 0 !important;
-    border-radius: 50% !important;
-    background: currentColor !important;
     color: #ffffff !important;
-    box-shadow:
-        0 7px 0 currentColor,
-        0 14px 0 currentColor !important;
+    font-family: Arial, sans-serif !important;
+    font-size: 23px !important;
+    font-weight: 800 !important;
+    line-height: 18px !important;
+    text-align: center !important;
+    background: transparent !important;
+    box-shadow: none !important;
     overflow: visible !important;
-    transform: translateY(-7px) !important;
+    transform: none !important;
 }
 .review-actions-menu {
     position: absolute;
@@ -1230,7 +1232,11 @@ footer {
     }
 
     .language-name {
-        display: none;
+        display: inline !important;
+        max-width: 90px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .language-dropdown {
