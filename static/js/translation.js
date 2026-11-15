@@ -3055,8 +3055,21 @@
             return;
         }
 
-        // The selector remains openable even when the main menu is open.
-        // The main menu is layered above it by CSS.
+        // The two navigation controls are mutually exclusive.
+        // Close the side menu before opening the language selector.
+        if (window.MisukiMenu && typeof window.MisukiMenu.close === "function") {
+            window.MisukiMenu.close();
+        } else {
+            const menu = document.getElementById("menu");
+            const overlay = document.getElementById("overlay");
+            const hamburger = document.getElementById("hamburger");
+
+            menu?.classList.remove("open", "active");
+            overlay?.classList.remove("show", "active");
+            document.body.classList.remove("menu-open");
+            hamburger?.setAttribute("aria-expanded", "false");
+            menu?.setAttribute("aria-hidden", "true");
+        }
 
         selector.classList.add(
             "open"
