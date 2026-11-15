@@ -1241,3 +1241,26 @@ body.menu-open .language-selector,
 body.menu-open .language-dropdown {
     pointer-events: none;
 }
+
+
+/* =========================================================
+   MOBILE — MISUKI IMAGE FILLS ITS SMALL SQUARE
+   ========================================================= */
+
+@media (max-width: 800px) {
+    .hero-icon {
+        padding: 0 !important;
+        overflow: hidden !important;
+        background: transparent !important;
+    }
+
+    .hero-icon img {
+        display: block !important;
+        width: 100% !important;
+        height: 100% !important;
+        max-width: none !important;
+        object-fit: cover !important;
+        object-position: center !important;
+        border-radius: inherit !important;
+    }
+}
