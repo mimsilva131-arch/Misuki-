@@ -2222,6 +2222,11 @@
             // Only correct article usage in Portuguese prose; never alter the brand by itself.
             const corrected = trimmed
                 .replace(/\b[Aa] Misuki\b/g, function (match) { return match[0] === "A" ? "O Misuki" : "o Misuki"; })
+                .replace(/\b[Uu]ma Misuki\b/g, function (match) { return match[0] === "U" ? "Um Misuki" : "um Misuki"; })
+                .replace(/\b[Ee]sta Misuki\b/g, function (match) { return match[0][0] === "E" ? "Este Misuki" : "este Misuki"; })
+                .replace(/\b[Nn]esta Misuki\b/g, function (match) { return match[0] === "N" ? "Neste Misuki" : "neste Misuki"; })
+                .replace(/\b[Dd]esta Misuki\b/g, function (match) { return match[0] === "D" ? "Deste Misuki" : "deste Misuki"; })
+                .replace(/\b[Pp]ela Misuki\b/g, function (match) { return match[0] === "P" ? "Pelo Misuki" : "pelo Misuki"; })
                 .replace(/\bdo Misuki\b/gi, "do Misuki")
                 .replace(/\bda Misuki\b/gi, "do Misuki")
                 .replace(/\bno Misuki\b/gi, "no Misuki")
