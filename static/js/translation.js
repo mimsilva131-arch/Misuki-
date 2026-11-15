@@ -2229,7 +2229,7 @@
             if (!textNode.nodeValue || !textNode.nodeValue.trim()) return;
 
             const original = textNode.nodeValue;
-            const trimmed = original.trim();
+            const trimmed = original.trim().replace(/\u00A0/g, " ");
 
             // Misuki is a masculine brand name in Portuguese. Normalize all
             // feminine Portuguese articles/forms that can survive translation.
@@ -3060,6 +3060,8 @@
             language
         );
 
+        // Re-assert the selected language after every translation pass.
+        updateLanguageButton(language);
         const currentLanguageButton = getLanguageElements().button;
         if (currentLanguageButton) {
             currentLanguageButton.dataset.currentLanguage = language;
