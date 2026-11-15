@@ -32,7 +32,9 @@
     let mouseReady = false;
     let lastTrailTime = 0;
 
-    const TRAIL_INTERVAL = 22;
+    const TRAIL_INTERVAL = 30;
+    const MAX_TRAIL_ELEMENTS = 16;
+    const trailElements = [];
 
     document.addEventListener(
         "mousemove",
@@ -69,31 +71,18 @@
             const angle =
                 Math.atan2(dy, dx) * 180 / Math.PI;
 
-            const steps =
+            createTrail(
+                x,
+                y,
+                angle,
                 Math.max(
-                    1,
-                    Math.ceil(distance / 7)
-                );
-
-            for (let i = 1; i <= steps; i++) {
-
-                const progress =
-                    i / steps;
-
-                createTrail(
-                    lastX + dx * progress,
-                    lastY + dy * progress,
-                    angle,
-                    Math.max(
-                        5,
-                        Math.min(
-                            18,
-                            distance / steps
-                        )
+                    6,
+                    Math.min(
+                        20,
+                        distance
                     )
-                );
-
-            }
+                )
+            );
 
             lastX = x;
             lastY = y;
@@ -141,29 +130,29 @@
         );
 
 
-        document.body.appendChild(
-            element
-        );
+        document.body.appendChild(element);
+        trailElements.push(element);
 
-
-        requestAnimationFrame(
-            function () {
-
-                element.style.opacity =
-                    "0";
-
+        if (trailElements.length > MAX_TRAIL_ELEMENTS) {
+            const oldest = trailElements.shift();
+            if (oldest && oldest.parentNode) {
+                oldest.remove();
             }
-        );
+        }
 
+        requestAnimationFrame(function () {
+            element.style.opacity = "0";
+        });
 
-        setTimeout(
-            function () {
-
+        setTimeout(function () {
+            const index = trailElements.indexOf(element);
+            if (index !== -1) {
+                trailElements.splice(index, 1);
+            }
+            if (element.parentNode) {
                 element.remove();
-
-            },
-            500
-        );
+            }
+        }, 500);
     }
 
     /* =====================================================
