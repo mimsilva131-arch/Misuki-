@@ -2263,7 +2263,31 @@
                     .replace(/\bserviço Misuki\b/g, "serviço do Misuki")
                     .replace(/\bsite Misuki\b/g, "site do Misuki")
                     .replace(/\bwebsite Misuki\b/g, "website do Misuki")
-                : trimmed;
+                : language === "es"
+                    ? trimmed
+                        .replace(/\bla Misuki\b/g, "el Misuki")
+                        .replace(/\bLa Misuki\b/g, "El Misuki")
+                        .replace(/\buna Misuki\b/g, "un Misuki")
+                        .replace(/\bUna Misuki\b/g, "Un Misuki")
+                        .replace(/\besta Misuki\b/g, "este Misuki")
+                        .replace(/\bEsta Misuki\b/g, "Este Misuki")
+                    : language === "fr"
+                        ? trimmed
+                            .replace(/\bla Misuki\b/g, "le Misuki")
+                            .replace(/\bLa Misuki\b/g, "Le Misuki")
+                            .replace(/\bune Misuki\b/g, "un Misuki")
+                            .replace(/\bUne Misuki\b/g, "Un Misuki")
+                            .replace(/\bcette Misuki\b/g, "ce Misuki")
+                            .replace(/\bCette Misuki\b/g, "Ce Misuki")
+                        : language === "de"
+                            ? trimmed
+                                .replace(/\bdie Misuki\b/g, "der Misuki")
+                                .replace(/\bDie Misuki\b/g, "Der Misuki")
+                                .replace(/\beine Misuki\b/g, "ein Misuki")
+                                .replace(/\bEine Misuki\b/g, "Ein Misuki")
+                                .replace(/\bdiese Misuki\b/g, "dieser Misuki")
+                                .replace(/\bDiese Misuki\b/g, "Dieser Misuki")
+                            : trimmed;
 
             if (corrected !== trimmed) {
                 const leading = original.match(/^\s*/)?.[0] || "";
