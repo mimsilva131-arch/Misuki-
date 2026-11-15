@@ -3244,9 +3244,9 @@
 
     function setupMenuIntegration() {
 
-        // Intentionally empty.
-        // The language selector remains available independently of the
-        // side menu, while CSS keeps the side menu above it.
+        // The language selector is independent from the side menu.
+        // Opening the side menu only closes an already-open language dropdown.
+        window.addEventListener("misukiMenuOpened", closeLanguageDropdown);
 
     }
 
