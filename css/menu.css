@@ -552,18 +552,18 @@ body.menu-open .hamburger {
 
 header.container {
     position: relative;
-    z-index: 100;
+    z-index: 20000;
 }
 
 .overlay {
-    z-index: 10990;
+    z-index: 30000;
 }
 
 .menu {
-    z-index: 11000;
+    z-index: 31000;
 }
 
 .hamburger,
 .language-selector {
-    z-index: 101;
+    z-index: 20001;
 }
