@@ -38,7 +38,10 @@
         "mousemove",
         function (event) {
 
-            if (!isHome()) {
+            if (
+                !isHome() ||
+                window.matchMedia("(max-width: 800px), (hover: none), (pointer: coarse)").matches
+            ) {
                 return;
             }
 
