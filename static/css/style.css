@@ -1256,3 +1256,22 @@ footer {
         width: 180px;
     }
 }
+
+
+/* =========================================================
+   HEADER / LANGUAGE — KEEP SEPARATE FROM SIDE MENU
+   ========================================================= */
+
+header.container {
+    position: relative;
+    z-index: 10001;
+}
+
+body.menu-open header.container {
+    z-index: 9000;
+}
+
+body.menu-open .language-selector,
+body.menu-open .language-dropdown {
+    pointer-events: none;
+}
