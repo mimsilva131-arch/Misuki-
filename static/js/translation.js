@@ -2197,7 +2197,7 @@
     }
 
     function normalizePortugueseMisukiText(language) {
-        if (language !== "pt" || !document.body) return;
+        if (!document.body) return;
 
         const walker = document.createTreeWalker(
             document.body,
@@ -2231,37 +2231,39 @@
             const original = textNode.nodeValue;
             const trimmed = original.trim();
 
-            // Only correct article usage in Portuguese prose; never alter the brand by itself.
-            const corrected = trimmed
-                // O Misuki is masculine: normalize common feminine forms.
-                .replace(/\b[Aa]s Misuki\b/g, m => m[0] === "A" ? "Os Misuki" : "os Misuki")
-                .replace(/\b[Uu]mas Misuki\b/g, m => m[0] === "U" ? "Uns Misuki" : "uns Misuki")
-                .replace(/\b[Aa] Misuki\b/g, m => m[0] === "A" ? "O Misuki" : "o Misuki")
-                .replace(/\b[Uu]ma Misuki\b/g, m => m[0] === "U" ? "Um Misuki" : "um Misuki")
-                .replace(/\b[Ee]sta Misuki\b/g, m => m[0] === "E" ? "Este Misuki" : "este Misuki")
-                .replace(/\b[Ee]ssa Misuki\b/g, m => m[0] === "E" ? "Esse Misuki" : "esse Misuki")
-                .replace(/\b[Aa]quela Misuki\b/g, m => m[0] === "A" ? "Aquele Misuki" : "aquele Misuki")
-                .replace(/\b[Nn]esta Misuki\b/g, m => m[0] === "N" ? "Neste Misuki" : "neste Misuki")
-                .replace(/\b[Nn]essa Misuki\b/g, m => m[0] === "N" ? "Nesse Misuki" : "nesse Misuki")
-                .replace(/\b[Nn]aquela Misuki\b/g, m => m[0] === "N" ? "Naquele Misuki" : "naquele Misuki")
-                .replace(/\b[Dd]esta Misuki\b/g, m => m[0] === "D" ? "Deste Misuki" : "deste Misuki")
-                .replace(/\b[Dd]essa Misuki\b/g, m => m[0] === "D" ? "Desse Misuki" : "desse Misuki")
-                .replace(/\b[Dd]aquela Misuki\b/g, m => m[0] === "D" ? "Daquele Misuki" : "daquele Misuki")
-                .replace(/\b[Pp]ela Misuki\b/g, m => m[0] === "P" ? "Pelo Misuki" : "pelo Misuki")
-                .replace(/\b[Àà] Misuki\b/g, m => m[0] === "À" ? "Ao Misuki" : "ao Misuki")
-                .replace(/\b[Dd]a Misuki\b/g, "do Misuki")
-                .replace(/\b[Nn]a Misuki\b/g, "no Misuki")
-                .replace(/\b[Dd]e Misuki\b/g, "do Misuki")
-                .replace(/\b[Ee]m Misuki\b/g, "no Misuki")
-                .replace(/\b[Cc]om Misuki\b/g, "com o Misuki")
-                .replace(/\b[Pp]ara Misuki\b/g, "para o Misuki")
-                .replace(/\b[Uu]ma licença Misuki\b/g, "uma licença do Misuki")
-                .replace(/\blicença Misuki\b/g, "licença do Misuki")
-                .replace(/\bcomunidade Misuki\b/g, "comunidade do Misuki")
-                .replace(/\bequipa Misuki\b/g, "equipa do Misuki")
-                .replace(/\bserviço Misuki\b/g, "serviço do Misuki")
-                .replace(/\bsite Misuki\b/g, "site do Misuki")
-                .replace(/\bwebsite Misuki\b/g, "website do Misuki");
+            // Misuki is a masculine brand name in Portuguese. Normalize all
+            // feminine Portuguese articles/forms that can survive translation.
+            const corrected = language === "pt"
+                ? trimmed
+                    .replace(/\b[Aa]s Misuki\b/g, m => m[0] === "A" ? "Os Misuki" : "os Misuki")
+                    .replace(/\b[Uu]mas Misuki\b/g, m => m[0] === "U" ? "Uns Misuki" : "uns Misuki")
+                    .replace(/\b[Aa] Misuki\b/g, m => m[0] === "A" ? "O Misuki" : "o Misuki")
+                    .replace(/\b[Uu]ma Misuki\b/g, m => m[0] === "U" ? "Um Misuki" : "um Misuki")
+                    .replace(/\b[Ee]sta Misuki\b/g, m => m[0] === "E" ? "Este Misuki" : "este Misuki")
+                    .replace(/\b[Ee]ssa Misuki\b/g, m => m[0] === "E" ? "Esse Misuki" : "esse Misuki")
+                    .replace(/\b[Aa]quela Misuki\b/g, m => m[0] === "A" ? "Aquele Misuki" : "aquele Misuki")
+                    .replace(/\b[Nn]esta Misuki\b/g, m => m[0] === "N" ? "Neste Misuki" : "neste Misuki")
+                    .replace(/\b[Nn]essa Misuki\b/g, m => m[0] === "N" ? "Nesse Misuki" : "nesse Misuki")
+                    .replace(/\b[Nn]aquela Misuki\b/g, m => m[0] === "N" ? "Naquele Misuki" : "naquele Misuki")
+                    .replace(/\b[Dd]esta Misuki\b/g, m => m[0] === "D" ? "Deste Misuki" : "deste Misuki")
+                    .replace(/\b[Dd]essa Misuki\b/g, m => m[0] === "D" ? "Desse Misuki" : "desse Misuki")
+                    .replace(/\b[Dd]aquela Misuki\b/g, m => m[0] === "D" ? "Daquele Misuki" : "daquele Misuki")
+                    .replace(/\b[Pp]ela Misuki\b/g, m => m[0] === "P" ? "Pelo Misuki" : "pelo Misuki")
+                    .replace(/\b[Àà] Misuki\b/g, m => m[0] === "À" ? "Ao Misuki" : "ao Misuki")
+                    .replace(/\b[Dd]a Misuki\b/g, "do Misuki")
+                    .replace(/\b[Nn]a Misuki\b/g, "no Misuki")
+                    .replace(/\b[Dd]e Misuki\b/g, "do Misuki")
+                    .replace(/\b[Ee]m Misuki\b/g, "no Misuki")
+                    .replace(/\b[Cc]om Misuki\b/g, "com o Misuki")
+                    .replace(/\b[Pp]ara Misuki\b/g, "para o Misuki")
+                    .replace(/\b[Uu]ma licença Misuki\b/g, "uma licença do Misuki")
+                    .replace(/\blicença Misuki\b/g, "licença do Misuki")
+                    .replace(/\bcomunidade Misuki\b/g, "comunidade do Misuki")
+                    .replace(/\bequipa Misuki\b/g, "equipa do Misuki")
+                    .replace(/\bserviço Misuki\b/g, "serviço do Misuki")
+                    .replace(/\bsite Misuki\b/g, "site do Misuki")
+                    .replace(/\bwebsite Misuki\b/g, "website do Misuki")
+                : trimmed;
 
             if (corrected !== trimmed) {
                 const leading = original.match(/^\s*/)?.[0] || "";
@@ -2288,7 +2290,7 @@
         nodes.forEach(function (textNode) {
             const parent = textNode.parentElement;
 
-            if (isProtectedStaticElement(parent)) return;
+            if (isProtectedStaticElement(parent) || parent.closest("#languageButton, #languageDropdown")) return;
             if (!textNode.nodeValue || !textNode.nodeValue.trim()) return;
 
             if (
@@ -2814,7 +2816,7 @@
 
         document.querySelectorAll("body *").forEach(function (element) {
             if (!element || element.hasAttribute("data-i18n-attr")) return;
-            if (element.closest("script, style, option")) return;
+            if (element.closest("script, style, option, #languageButton, #languageDropdown")) return;
 
             if (!element.__misukiOriginalAttributes) {
                 element.__misukiOriginalAttributes = {};
