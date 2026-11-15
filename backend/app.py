@@ -601,7 +601,9 @@ def create_database():
 
                         rating INTEGER NOT NULL,
 
-                        created_at TEXT NOT NULL
+                        created_at TEXT NOT NULL,
+
+                        updated_at TEXT
 
                     )
                     """
@@ -611,6 +613,13 @@ def create_database():
                     """
                     ALTER TABLE reviews
                     ADD COLUMN IF NOT EXISTS avatar TEXT
+                    """
+                )
+
+                cursor.execute(
+                    """
+                    ALTER TABLE reviews
+                    ADD COLUMN IF NOT EXISTS updated_at TEXT
                     """
                 )
 
@@ -3574,7 +3583,8 @@ def get_random_reviews(
                             avatar,
                             review,
                             rating,
-                            created_at
+                            created_at,
+                            updated_at
                         FROM reviews
                         ORDER BY
                             CASE
@@ -4427,7 +4437,9 @@ def edit_review(review_id):
                     return error_page("Access denied", "You do not have permission to edit this review.", 403, user)
 
                 cursor.execute(
-                    "UPDATE reviews SET review = %s WHERE id = %s",
+                    "UPDATE reviews
+                    SET review = %s, updated_at = CURRENT_TIMESTAMP
+                    WHERE id = %s",
                     (review_text, review_id)
                 )
 
