@@ -618,7 +618,7 @@
                 save: "Guardar",
                 cancel: "Cancelar",
                 edited: "(editado)",
-                intro: "Avaliações dos membros das comunidades Misuki.",
+                intro: "Avaliações dos membros das comunidades do Misuki.",
                 title: "Avaliações da comunidade",
                 no_reviews: "Ainda não há avaliações.",
                 write_review: "Escrever uma avaliação",
@@ -660,7 +660,7 @@
                 no_available: "Não existem servidores adicionais disponíveis.",
                 add_permission: "Permissão para adicionar ✓",
                 no_authorization: "⚠️ Sem autorização",
-                add_misuki: "➕ Adicionar Misuki",
+                add_misuki: "➕ Adicionar o Misuki",
                 cannot_add: "⚠️ Não é possível adicionar",
                 leave_review: "⭐ Escrever uma avaliação"
             },
