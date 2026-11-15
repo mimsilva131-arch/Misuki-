@@ -25,12 +25,20 @@
                 event.preventDefault();
             }
 
+            // Keep the language selector independent from the side menu.
+            // If it is open, close it before the side menu appears.
+            if (window.MisukiTranslation && typeof window.MisukiTranslation.closeLanguageDropdown === "function") {
+                window.MisukiTranslation.closeLanguageDropdown();
+            }
+
             menu.classList.add("open");
             overlay.classList.add("show");
             document.body.classList.add("menu-open");
 
             hamburger.setAttribute("aria-expanded", "true");
             menu.setAttribute("aria-hidden", "false");
+
+            window.dispatchEvent(new CustomEvent("misukiMenuOpened"));
 
         }
 
