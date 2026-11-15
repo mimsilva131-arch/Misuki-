@@ -2213,7 +2213,19 @@
 
         nodes.forEach(function (textNode) {
             const parent = textNode.parentElement;
-            if (!parent || isProtectedStaticElement(parent)) return;
+            if (!parent) return;
+
+            // Keep user-entered/dynamic content untouched, but allow text inside
+            // translated elements to pass through the Portuguese Misuki gender
+            // correction. Previously every [data-i18n] element was protected,
+            // which meant feminine forms such as "A Misuki" survived translation.
+            if (parent.closest(
+                "script, style, textarea, input, select, option, " +
+                ".server-name, .server-id, .review-text, " +
+                ".advertisement-card, .advertisement-content, " +
+                "[data-dynamic-content]"
+            )) return;
+
             if (!textNode.nodeValue || !textNode.nodeValue.trim()) return;
 
             const original = textNode.nodeValue;
@@ -2226,6 +2238,11 @@
                 .replace(/\b[Ee]sta Misuki\b/g, function (match) { return match[0][0] === "E" ? "Este Misuki" : "este Misuki"; })
                 .replace(/\b[Nn]esta Misuki\b/g, function (match) { return match[0] === "N" ? "Neste Misuki" : "neste Misuki"; })
                 .replace(/\b[Dd]esta Misuki\b/g, function (match) { return match[0] === "D" ? "Deste Misuki" : "deste Misuki"; })
+                .replace(/\b[Pp]ela Misuki\b/g, function (match) { return match[0] === "P" ? "Pelo Misuki" : "pelo Misuki"; })
+                .replace(/\b[Aa]s Misuki\b/g, function (match) { return match[0] === "A" ? "Os Misuki" : "os Misuki"; })
+                .replace(/\b[Uu]mas Misuki\b/g, function (match) { return match[0] === "U" ? "Uns Misuki" : "uns Misuki"; })
+                .replace(/\b[Dd]aquela Misuki\b/g, function (match) { return match[0] === "D" ? "Daquele Misuki" : "daquele Misuki"; })
+                .replace(/\b[Dd]aquele Misuki\b/g, function (match) { return match[0] === "D" ? "Daquele Misuki" : "daquele Misuki"; })
                 .replace(/\b[Pp]ela Misuki\b/g, function (match) { return match[0] === "P" ? "Pelo Misuki" : "pelo Misuki"; })
                 .replace(/\b[Àà] Misuki\b/g, function (match) { return match[0] === "À" ? "Ao Misuki" : "ao Misuki"; })
                 .replace(/\b[Aa]quela Misuki\b/g, function (match) { return match[0] === "A" ? "Aquele Misuki" : "aquele Misuki"; })
