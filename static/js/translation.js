@@ -3244,9 +3244,26 @@
 
     function setupMenuIntegration() {
 
-        // The language selector is independent from the side menu.
-        // Opening the side menu only closes an already-open language dropdown.
+        // The two menus are independent and mutually exclusive.
+        // Opening the language selector closes the side menu first.
         window.addEventListener("misukiMenuOpened", closeLanguageDropdown);
+
+        const {
+            button: languageButton
+        } = getLanguageElements();
+
+        if (languageButton) {
+            languageButton.addEventListener("click", function () {
+                if (
+                    window.MisukiMenu &&
+                    typeof window.MisukiMenu.close === "function" &&
+                    typeof window.MisukiMenu.isOpen === "function" &&
+                    window.MisukiMenu.isOpen()
+                ) {
+                    window.MisukiMenu.close();
+                }
+            }, true);
+        }
 
     }
 
