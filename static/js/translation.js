@@ -3130,44 +3130,8 @@
        LANGUAGE BUTTON
        ========================================================= */
 
-    function setupLanguageButton() {
-
-        const {
-            button
-        } = getLanguageElements();
-
-        if (!button) {
-            return;
-        }
-
-        button.addEventListener(
-            "click",
-            function (event) {
-
-                event.preventDefault();
-                event.stopPropagation();
-
-                // Close the side menu first, directly, so the language
-                // selector can never open together with it.
-                if (window.MisukiMenu && typeof window.MisukiMenu.close === "function") {
-                    window.MisukiMenu.close();
-                } else {
-                    const menu = document.getElementById("menu");
-                    const overlay = document.getElementById("overlay");
-                    const hamburger = document.getElementById("hamburger");
-
-                    menu?.classList.remove("open", "active");
-                    overlay?.classList.remove("show", "active");
-                    document.body.classList.remove("menu-open");
-                    hamburger?.setAttribute("aria-expanded", "false");
-                    menu?.setAttribute("aria-hidden", "true");
-                }
-
-                toggleLanguageDropdown();
-
-            }
-        );
-    }
+    // Header menu clicks are handled by js/menu.js so there is only one
+    // controller for opening and closing the language selector.
 
 
     /* =========================================================
@@ -3219,31 +3183,7 @@
        CLICK OUTSIDE
        ========================================================= */
 
-    function setupOutsideClick() {
-
-        document.addEventListener(
-            "click",
-            function (event) {
-
-                const {
-                    selector
-                } = getLanguageElements();
-
-                if (!selector) {
-                    return;
-                }
-
-                if (
-                    !selector.contains(
-                        event.target
-                    )
-                ) {
-
-                    closeLanguageDropdown();
-                }
-            }
-        );
-    }
+    // Outside-click handling is centralized in js/menu.js.
 
 
     /* =========================================================
@@ -3266,16 +3206,6 @@
         );
     }
 
-
-    /* =========================================================
-       MENU INTEGRATION
-       ========================================================= */
-
-    function setupMenuIntegration() {
-        // The language button and side menu close each other directly.
-        // This function is kept as the integration hook for compatibility.
-        window.addEventListener("misukiMenuOpened", closeLanguageDropdown);
-    }
 
     /* =========================================================
        INITIALIZATION
@@ -3333,15 +3263,9 @@
 
         closeLanguageDropdown();
 
-        setupLanguageButton();
-
         setupLanguageOptions();
 
-        setupOutsideClick();
-
         setupKeyboard();
-
-        setupMenuIntegration();
         setupTranslationObserver();
 
         console.log(
