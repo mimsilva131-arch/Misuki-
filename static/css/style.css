@@ -937,73 +937,60 @@ footer {
 
 .review-actions {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 5;
+    top: 12px;
+    right: 12px;
+    z-index: 20;
 }
 
 .review-actions-button {
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     padding: 0;
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(255,255,255,.09);
+    border: 1px solid rgba(255,255,255,.12);
     border-radius: 9px;
-    background: rgba(255,255,255,.045);
+    background: rgba(15,17,25,.82);
     color: rgba(255,255,255,.72);
     cursor: pointer;
+    font: inherit;
+    line-height: 1;
+    appearance: none;
+    -webkit-appearance: none;
     transition: background .18s ease, border-color .18s ease, transform .18s ease, color .18s ease;
 }
 
-.review-actions-button:hover {
-    background: rgba(255,255,255,.09);
-    border-color: rgba(255,255,255,.16);
+.review-actions-button:hover,
+.review-actions-button[aria-expanded="true"] {
+    background: rgba(255,255,255,.10);
+    border-color: rgba(255,255,255,.20);
     color: #fff;
-    transform: scale(1.04);
+    transform: scale(1.05);
 }
 
 .review-actions-button span {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 3px;
-    width: 4px;
-    height: 16px;
-    font-size: 0;
-    line-height: 1;
-    letter-spacing: 0;
-}
-
-.review-actions-button span::before,
-.review-actions-button span::after {
-    content: "";
     display: block;
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: currentColor;
-}
-
-.review-actions-button span::after {
-    box-shadow: 0 7px 0 currentColor;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 12px;
+    letter-spacing: 1px;
+    transform: translateY(-2px);
 }
 
 .review-actions-menu {
     position: absolute;
-    top: 37px;
+    top: 40px;
     right: 0;
     width: 150px;
     padding: 6px;
     display: flex;
     flex-direction: column;
     gap: 4px;
-    border: 1px solid rgba(255,255,255,.10);
+    border: 1px solid rgba(255,255,255,.12);
     border-radius: 11px;
     background: rgba(16,18,27,.98);
-    box-shadow: 0 14px 35px rgba(0,0,0,.38);
+    box-shadow: 0 14px 35px rgba(0,0,0,.42);
     backdrop-filter: blur(16px);
 }
 
@@ -1030,15 +1017,15 @@ footer {
 }
 
 .review-actions-menu .review-action-edit:hover {
-    background: rgba(88,101,242,.13);
+    background: rgba(88,101,242,.14);
 }
 
 .review-actions-menu .review-action-delete {
-    color: #ff6b6e;
+    color: #ff6468;
 }
 
 .review-actions-menu .review-action-delete:hover {
-    background: rgba(237,66,69,.13);
+    background: rgba(237,66,69,.15);
     color: #ff8588;
 }
 
@@ -1061,54 +1048,33 @@ footer {
     background: rgba(0,0,0,.18);
     color: #fff;
     font: inherit;
-    line-height: 1.55;
-    outline: none;
-}
-
-.review-edit-form textarea:focus {
-    border-color: rgba(88,101,242,.48);
-    box-shadow: 0 0 0 3px rgba(88,101,242,.08);
+    line-height: 1.5;
 }
 
 .review-edit-actions {
     display: flex;
-    justify-content: flex-end;
     gap: 8px;
-    margin-top: 9px;
+    margin-top: 8px;
 }
 
 .review-edit-actions button {
-    min-height: 36px;
-    padding: 7px 12px;
+    border: 0;
     border-radius: 8px;
-    border: 1px solid rgba(255,255,255,.09);
-    background: rgba(255,255,255,.05);
-    color: #fff;
+    padding: 8px 12px;
     cursor: pointer;
-    font-size: 12px;
-    font-weight: 700;
+    font: inherit;
+    font-weight: 650;
 }
 
-.review-edit-actions .review-edit-save {
-    background: rgba(88,101,242,.18);
-    border-color: rgba(88,101,242,.30);
+.review-edit-save {
+    background: #5865f2;
+    color: #fff;
 }
 
-.review-edit-actions .review-edit-save:hover {
-    background: rgba(88,101,242,.28);
+.review-edit-cancel {
+    background: rgba(255,255,255,.07);
+    color: rgba(255,255,255,.82);
 }
-
-@media (max-width: 600px) {
-    .review-actions {
-        top: 9px;
-        right: 9px;
-    }
-
-    .review-actions-menu {
-        width: 145px;
-    }
-}
-
 
 /* =========================================================
    HEADER CONTROLS — LANGUAGE SELECTOR
