@@ -159,95 +159,9 @@
        PAGE TRANSITION
        ===================================================== */
 
-    function createTransition() {
-
-        if (
-            document.getElementById(
-                "misuki-page-transition"
-            )
-        ) {
-            return;
-        }
-
-
-        const transition =
-            document.createElement(
-                "div"
-            );
-
-
-        transition.id =
-            "misuki-page-transition";
-
-
-        document.body.appendChild(
-            transition
-        );
-    }
-
-
-    function pageEnter() {
-
-        createTransition();
-
-
-        document.documentElement.classList.add(
-            "misuki-page-enter"
-        );
-
-
-        requestAnimationFrame(
-            function () {
-
-                requestAnimationFrame(
-                    function () {
-
-                        document.documentElement.classList.remove(
-                            "misuki-page-enter"
-                        );
-
-                        document.documentElement.classList.add(
-                            "misuki-page-ready"
-                        );
-
-                    }
-                );
-
-            }
-        );
-    }
-
-
-    function pageLeave(url) {
-
-        createTransition();
-
-
-        document.documentElement.classList.remove(
-            "misuki-page-ready"
-        );
-
-
-        document.documentElement.classList.add(
-            "misuki-page-enter"
-        );
-
-
-        setTimeout(
-            function () {
-
-                window.location.href =
-                    url;
-
-            },
-            120
-        );
-    }
-
-
-    /* Internal navigation uses the browser directly.
-       This avoids an artificial 350ms delay on every page change,
-       especially noticeable on mobile and slower connections. */
+    /* Page navigation is intentionally left to the browser.
+       There is no artificial full-screen fade or timeout anymore:
+       clicking a menu link starts navigation immediately. */
 
     /* =====================================================
        PAGESHOW
