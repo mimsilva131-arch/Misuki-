@@ -449,6 +449,60 @@
 
 
 /* =========================================================
+   REVIEW ACTIONS — DESKTOP + MOBILE
+   ========================================================= */
+.review-card {
+    position: relative;
+}
+
+.review-actions {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    z-index: 30;
+    display: block;
+}
+
+.review-actions-button {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    border: 1px solid rgba(255,255,255,.11);
+    border-radius: 11px;
+    background: rgba(255,255,255,.055);
+    color: rgba(255,255,255,.82);
+    box-sizing: border-box;
+}
+
+.review-dots {
+    display: block;
+    line-height: 1;
+    font-size: 1.35rem;
+    transform: translateY(-2px);
+}
+
+.review-actions-menu {
+    top: 42px;
+    right: 0;
+}
+
+@media (max-width: 680px) {
+    .review-actions {
+        top: 16px;
+        right: 16px;
+    }
+}
+
+/* =========================================================
    REVIEW EDITOR — FINAL VISUAL TREATMENT
    ========================================================= */
 .review-actions-menu button {
