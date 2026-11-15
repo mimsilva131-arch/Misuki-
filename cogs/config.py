@@ -1312,14 +1312,6 @@ class MainSetupView(discord.ui.View):
             )
         )
 
-        # Language is also exposed as its own Setup category so it is
-        # always visible without having to enter Personal Settings first.
-        self.add_item(
-            SetupLanguageCategoryButton(
-                self.user_id,
-                row=0
-            )
-        )
 
         self.add_item(
             RolesButton(config, language, row=1)
@@ -1349,59 +1341,6 @@ class MainSetupView(discord.ui.View):
                     row=row
                 )
             )
-
-
-class SetupLanguageCategoryButton(discord.ui.Button):
-
-    def __init__(self, user_id=None, row=1):
-        self.user_id = user_id
-        language, _ = (
-            get_user_preferences(user_id)
-            if user_id is not None
-            else (DEFAULT_LANGUAGE, DEFAULT_TIMEZONE)
-        )
-        text = TRANSLATIONS.get(
-            language,
-            TRANSLATIONS[DEFAULT_LANGUAGE]
-        )
-        super().__init__(
-            label=text["setup_language"],
-            emoji="🌐",
-            style=discord.ButtonStyle.primary,
-            row=row
-        )
-
-    async def callback(self, interaction):
-        if self.user_id is not None and interaction.user.id != self.user_id:
-            await interaction.response.send_message(
-                "❌ These settings belong to another user.",
-                ephemeral=True
-            )
-            return
-
-        language, _ = get_user_preferences(interaction.user.id)
-        text = TRANSLATIONS.get(
-            language,
-            TRANSLATIONS[DEFAULT_LANGUAGE]
-        )
-
-        await interaction.response.edit_message(
-            embed=discord.Embed(
-                title=text["language_title"],
-                description=text["settings_description"],
-                color=discord.Color.blurple()
-            ),
-            view=LanguageCategoryView(
-                interaction.user.id
-            )
-        )
-
-
-class LanguageCategoryView(discord.ui.View):
-
-    def __init__(self, user_id):
-        super().__init__(timeout=180)
-        self.add_item(LanguageSelect(user_id))
 
 
 class PersonalSettingsCategoryButton(
@@ -1440,9 +1379,21 @@ class PersonalSettingsCategoryButton(
             language, TRANSLATIONS[DEFAULT_LANGUAGE]
         )
 
+        current_language, current_timezone = get_user_preferences(
+            interaction.user.id
+        )
+        language_name = SUPPORTED_LANGUAGES.get(
+            current_language,
+            DEFAULT_LANGUAGE
+        )
+
         embed = discord.Embed(
             title=f"⚙️ {text['setup_settings']}",
-            description=text['setup_settings_description'],
+            description=(
+                f"{text['setup_settings_description']}\n\n"
+                f"**Current language:** {language_name}\n"
+                f"**Current timezone:** {current_timezone}"
+            ),
             color=discord.Color.blurple()
         )
 
@@ -2246,14 +2197,17 @@ class SimpleCategoryButton(discord.ui.Button):
 
         if self.category == "tickets":
 
+            ticket_category = self.config.get_ticket_category(guild.id)
+            transcript_channel = self.config.get_channel_value(
+                guild.id, "transcript_log_channel_id"
+            )
+
             embed = discord.Embed(
                 title="🎫 Tickets",
                 description=(
                     "Configure the ticket system.\n\n"
-                    "• Ticket Category — category where "
-                    "tickets will be created.\n"
-                    "• Transcript Channel — channel where "
-                    "ticket transcripts will be stored."
+                    f"**Ticket Category:** {self._channel_value(guild, ticket_category)}\n"
+                    f"**Transcript Channel:** {self._channel_value(guild, transcript_channel)}"
                 ),
                 color=discord.Color.blurple()
             )
@@ -2273,10 +2227,16 @@ class SimpleCategoryButton(discord.ui.Button):
 
         if self.category == "moderation":
 
+            moderation_log = self.config.get_channel_value(
+                guild.id, "moderation_log_channel_id"
+            )
+
             embed = discord.Embed(
                 title="🛡️ Moderation",
                 description=(
-                    "Configure moderation settings."
+                    "Configure moderation settings.\n\n"
+                    f"**Moderation Logs:** {self._channel_value(guild, moderation_log)}\n"
+                    f"**Moderator Role:** {self._role_value(guild, 'moderator')}"
                 ),
                 color=discord.Color.blurple()
             )
@@ -2310,10 +2270,24 @@ class SimpleCategoryButton(discord.ui.Button):
 
         if self.category == "verification":
 
+            verification_channel = self.config.get_channel_value(
+                guild.id, "verification_channel_id"
+            )
+            verified_logs = self.config.get_channel_value(
+                guild.id, "verified_log_channel_id"
+            )
+            unverified_logs = self.config.get_channel_value(
+                guild.id, "unverified_log_channel_id"
+            )
+
             embed = discord.Embed(
                 title="🔐 Verification",
                 description=(
-                    "Configure the verification system."
+                    "Configure the verification system.\n\n"
+                    f"**Verification Channel:** {self._channel_value(guild, verification_channel)}\n"
+                    f"**Verified Logs:** {self._channel_value(guild, verified_logs)}\n"
+                    f"**Unverified Logs:** {self._channel_value(guild, unverified_logs)}\n"
+                    f"**Verified Role:** {self._role_value(guild, 'verified')}"
                 ),
                 color=discord.Color.blurple()
             )
@@ -2357,10 +2331,16 @@ class SimpleCategoryButton(discord.ui.Button):
 
         if self.category == "jail":
 
+            jail_logs = self.config.get_channel_value(
+                guild.id, "jail_log_channel_id"
+            )
+
             embed = discord.Embed(
                 title="⛓️ Jail",
                 description=(
-                    "Configure the jail system."
+                    "Configure the jail system.\n\n"
+                    f"**Jail Logs:** {self._channel_value(guild, jail_logs)}\n"
+                    f"**Jailed Role:** {self._role_value(guild, 'jailed')}"
                 ),
                 color=discord.Color.blurple()
             )
@@ -2397,8 +2377,8 @@ class SimpleCategoryButton(discord.ui.Button):
             embed = discord.Embed(
                 title="📊 Stats",
                 description=(
-                    "The statistics module currently has "
-                    "no configurable settings."
+                    "The statistics module does not require manual configuration.\n\n"
+                    "**Current status:** Automatically managed"
                 ),
                 color=discord.Color.blurple()
             )
@@ -2418,11 +2398,15 @@ class SimpleCategoryButton(discord.ui.Button):
 
         if self.category == "announcements":
 
+            announcement_channel = self.config.get_channel_value(
+                guild.id, "announcement_channel_id"
+            )
+
             embed = discord.Embed(
                 title="📢 Announcements",
                 description=(
-                    "Configure the channel used for "
-                    "announcements."
+                    "Configure the channel used for announcements.\n\n"
+                    f"**Announcements Channel:** {self._channel_value(guild, announcement_channel)}"
                 ),
                 color=discord.Color.blurple()
             )
