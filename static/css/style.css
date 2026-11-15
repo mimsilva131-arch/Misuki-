@@ -1105,7 +1105,7 @@ footer {
 .header-right {
     gap: 10px;
     position: relative;
-    z-index: 10001;
+    z-index: 20001;
 }
 
 .language-selector {
@@ -1245,7 +1245,7 @@ footer {
 
 header.container {
     position: relative;
-    z-index: 10001;
+    z-index: 20000;
 }
 
 body.menu-open header.container {
