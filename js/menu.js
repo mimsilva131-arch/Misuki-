@@ -242,8 +242,40 @@
             }
         });
 
+        // Warm internal menu pages before the user clicks them. This keeps the
+        // navigation itself immediate, while the browser can fetch the next
+        // HTML in the background (especially helpful on Render's free instance).
+        const prefetchedUrls = new Set();
+
+        function prefetchMenuPage(link) {
+            if (!link || !link.href) return;
+            if (link.target === "_blank" || link.hasAttribute("download")) return;
+
+            const url = new URL(link.href, window.location.href);
+            if (url.origin !== window.location.origin) return;
+            if (prefetchedUrls.has(url.href)) return;
+            if (url.pathname === "/login" || url.pathname === "/logout") return;
+
+            prefetchedUrls.add(url.href);
+
+            const prefetch = document.createElement("link");
+            prefetch.rel = "prefetch";
+            prefetch.as = "document";
+            prefetch.href = url.href;
+            document.head.appendChild(prefetch);
+        }
+
         menu.querySelectorAll("a").forEach(function (link) {
+            link.addEventListener("pointerenter", function () {
+                prefetchMenuPage(link);
+            }, { passive: true });
+
+            link.addEventListener("touchstart", function () {
+                prefetchMenuPage(link);
+            }, { passive: true, once: true });
+
             link.addEventListener("click", function () {
+                // Never wait for animation, translation, or prefetch work here.
                 closeMenu();
             });
         });
