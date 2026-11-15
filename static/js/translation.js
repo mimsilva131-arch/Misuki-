@@ -3138,45 +3138,8 @@
        LANGUAGE OPTIONS
        ========================================================= */
 
-    function setupLanguageOptions() {
-
-        const options =
-            document.querySelectorAll(
-                "#languageDropdown [data-lang]"
-            );
-
-        options.forEach(function (option) {
-
-            option.addEventListener(
-                "click",
-                function (event) {
-
-                    event.preventDefault();
-                    event.stopPropagation();
-
-                    const language =
-                        option.getAttribute(
-                            "data-lang"
-                        );
-
-                    if (
-                        !SUPPORTED_LANGUAGES.includes(
-                            language
-                        )
-                    ) {
-                        return;
-                    }
-
-                    translatePage(
-                        language
-                    );
-
-                    closeLanguageDropdown();
-
-                }
-            );
-        });
-    }
+    // Language option clicks are handled by js/menu.js so the selector
+    // has exactly one event path and cannot double-toggle or close early.
 
 
     /* =========================================================
@@ -3262,8 +3225,6 @@
         }
 
         closeLanguageDropdown();
-
-        setupLanguageOptions();
 
         setupKeyboard();
         setupTranslationObserver();
