@@ -167,25 +167,29 @@
                     window.MisukiTranslation.setLanguage(language);
                 }
 
-                // Always read the saved value after translation and before closing.
-                // Keep the selected language visible on the closed button.
-                // Close only after translation has updated the button, then
-                // restore the selected state on the now-closed control.
-                syncLanguageButton(language);
-                hardCloseLanguage();
-
-                const restoreLanguageButton = function () {
+                // Close the selector and then explicitly restore the selected
+                // language on the closed button. This prevents translation
+                // updates from briefly resetting it to English.
+                const applyClosedLanguage = function () {
                     const saved = window.MisukiTranslation &&
                         typeof window.MisukiTranslation.getLanguage === "function"
                         ? window.MisukiTranslation.getLanguage()
                         : language;
+
+                    hardCloseLanguage();
                     syncLanguageButton(saved || language);
+
+                    if (languageButton) {
+                        languageButton.setAttribute(
+                            "data-current-language",
+                            saved || language
+                        );
+                    }
                 };
 
-                requestAnimationFrame(restoreLanguageButton);
-                setTimeout(restoreLanguageButton, 50);
-                setTimeout(restoreLanguageButton, 180);
-                setTimeout(restoreLanguageButton, 400);
+                applyClosedLanguage();
+                requestAnimationFrame(applyClosedLanguage);
+                setTimeout(applyClosedLanguage, 100);
                 return;
             }
 
