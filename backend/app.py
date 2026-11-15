@@ -3437,7 +3437,8 @@ def logout():
 # =========================================================
 
 def get_random_reviews(
-    amount=6
+    amount=6,
+    user_id=None
 ):
 
     if not DATABASE_URL:
@@ -3472,24 +3473,50 @@ def get_random_reviews(
                 cursor_factory=psycopg2.extras.RealDictCursor
             ) as cursor:
 
-                cursor.execute(
-                    """
-                    SELECT
-                        id,
-                        user_id,
-                        username,
-                        avatar,
-                        review,
-                        rating,
-                        created_at
-                    FROM reviews
-                    ORDER BY RANDOM()
-                    LIMIT %s
-                    """,
-                    (
-                        amount,
+                if user_id:
+                    cursor.execute(
+                        """
+                        SELECT
+                            id,
+                            user_id,
+                            username,
+                            avatar,
+                            review,
+                            rating,
+                            created_at
+                        FROM reviews
+                        ORDER BY
+                            CASE
+                                WHEN CAST(user_id AS TEXT) = %s THEN 0
+                                ELSE 1
+                            END,
+                            RANDOM()
+                        LIMIT %s
+                        """,
+                        (
+                            str(user_id),
+                            amount,
+                        )
                     )
-                )
+                else:
+                    cursor.execute(
+                        """
+                        SELECT
+                            id,
+                            user_id,
+                            username,
+                            avatar,
+                            review,
+                            rating,
+                            created_at
+                        FROM reviews
+                        ORDER BY RANDOM()
+                        LIMIT %s
+                        """,
+                        (
+                            amount,
+                        )
+                    )
 
                 rows = cursor.fetchall()
 
@@ -3861,7 +3888,8 @@ def index():
     # get_active_advertisements() já faz a expiração.
     # Antes isto era chamado duas vezes.
     reviews = get_random_reviews(
-        6
+        6,
+        user_id=user.get("id") if user else None
     )
 
     advertisements = (
@@ -4246,7 +4274,8 @@ def reviews():
     user = get_user()
 
     review_list = get_random_reviews(
-        12
+        12,
+        user_id=user.get("id") if user else None
     )
 
     can_review = False
