@@ -571,7 +571,7 @@ async def statistics_loop():
     await bot.wait_until_ready()
     while not bot.is_closed():
         await update_stats_snapshot()
-        await asyncio.sleep(10)
+        await asyncio.sleep(60)
 
 
 statistics_task = None
@@ -621,7 +621,7 @@ async def heartbeat_loop():
         finally:
             if connection:
                 connection.close()
-        await asyncio.sleep(5)
+        await asyncio.sleep(15)
 
 
 async def sync_owner_license_command_permissions():
