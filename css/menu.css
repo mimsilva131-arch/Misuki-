@@ -608,3 +608,26 @@ header.container {
     .language-button { min-height: 42px; padding: 0 10px; gap: 6px; }
     .language-name { display: none; }
 }
+
+/* =========================================================
+   LANGUAGE SELECTOR — FORCE CURRENT VALUE
+   ========================================================= */
+.language-selector .language-button {
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+.language-selector .language-flag,
+.language-selector .language-short {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+.language-selector .language-name {
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+@media (max-width: 680px) {
+    .language-selector .language-name {
+        display: none !important;
+    }
+}
