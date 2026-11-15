@@ -7,6 +7,8 @@ import json
 import subprocess
 import atexit
 import sys
+import threading
+from contextlib import contextmanager
   
 from decimal import Decimal, InvalidOperation
 from datetime import datetime, timedelta, timezone
@@ -16,6 +18,7 @@ import requests
 from pywebpush import webpush, WebPushException
 import psycopg2
 import psycopg2.extras
+from psycopg2.pool import ThreadedConnectionPool
 
 from flask import (
     Flask,
@@ -432,19 +435,84 @@ DISCORD_TOKEN_URL = (
 # DATABASE
 # =========================================================
 
-def database_connection():
+# PostgreSQL connection reuse
+#
+# The old implementation opened a brand-new TCP/PostgreSQL connection for
+# every query. With Neon, that creates unnecessary connection churn. Keep a
+# very small per-process pool instead. The pool is deliberately small because
+# Render can run more than one web worker and the Discord bot also uses the
+# database.
+DATABASE_POOL_MAX = max(
+    1,
+    min(
+        int(os.getenv("DATABASE_POOL_MAX", "2")),
+        4
+    )
+)
+
+_database_pool = None
+_database_pool_lock = threading.Lock()
+
+
+def _get_database_pool():
+    global _database_pool
 
     if not DATABASE_URL:
-
         raise RuntimeError(
             "DATABASE_URL is not configured."
         )
 
-    return psycopg2.connect(
-        DATABASE_URL,
-        sslmode="require",
-        connect_timeout=10
-    )
+    if _database_pool is None:
+        with _database_pool_lock:
+            if _database_pool is None:
+                _database_pool = ThreadedConnectionPool(
+                    1,
+                    DATABASE_POOL_MAX,
+                    DATABASE_URL,
+                    sslmode="require",
+                    connect_timeout=10,
+                    application_name="misuki-web"
+                )
+
+    return _database_pool
+
+
+@contextmanager
+def database_connection():
+    """
+    Borrow a reusable connection and return it to the small pool.
+
+    This keeps the existing database call sites intact while avoiding a new
+    PostgreSQL connection for every request/query.
+    """
+    pool = _get_database_pool()
+    connection = pool.getconn()
+
+    try:
+        yield connection
+    except Exception:
+        try:
+            connection.rollback()
+        except Exception:
+            pass
+        raise
+    finally:
+        try:
+            if not connection.closed:
+                connection.rollback()
+        except Exception:
+            pass
+
+        try:
+            pool.putconn(
+                connection,
+                close=bool(connection.closed)
+            )
+        except Exception:
+            try:
+                connection.close()
+            except Exception:
+                pass
 
 
 # =========================================================
@@ -7702,7 +7770,12 @@ def start_discord_bot():
         # Discord Gateway process from every web worker causes the same bot
         # token to have multiple competing sessions. Use a PostgreSQL
         # advisory lock so exactly one web process owns the Discord bot.
-        lock_connection = database_connection()
+        lock_connection = psycopg2.connect(
+            DATABASE_URL,
+            sslmode="require",
+            connect_timeout=10,
+            application_name="misuki-bot-lock"
+        )
         with lock_connection.cursor() as cursor:
             cursor.execute(
                 "SELECT pg_try_advisory_lock(%s)",
