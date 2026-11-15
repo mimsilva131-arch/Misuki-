@@ -169,14 +169,23 @@
 
                 // Always read the saved value after translation and before closing.
                 // Keep the selected language visible on the closed button.
+                // Close only after translation has updated the button, then
+                // restore the selected state on the now-closed control.
                 syncLanguageButton(language);
                 hardCloseLanguage();
-                requestAnimationFrame(function () {
-                    syncLanguageButton(language);
-                });
-                setTimeout(function () {
-                    syncLanguageButton(language);
-                }, 50);
+
+                const restoreLanguageButton = function () {
+                    const saved = window.MisukiTranslation &&
+                        typeof window.MisukiTranslation.getLanguage === "function"
+                        ? window.MisukiTranslation.getLanguage()
+                        : language;
+                    syncLanguageButton(saved || language);
+                };
+
+                requestAnimationFrame(restoreLanguageButton);
+                setTimeout(restoreLanguageButton, 50);
+                setTimeout(restoreLanguageButton, 180);
+                setTimeout(restoreLanguageButton, 400);
                 return;
             }
 
