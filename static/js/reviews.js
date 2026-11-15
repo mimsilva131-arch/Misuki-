@@ -1,48 +1,77 @@
 document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll(".review-actions").forEach((actions) => {
-        const button = actions.querySelector(".review-actions-button");
-        const menu = actions.querySelector(".review-actions-menu");
-        if (!button || !menu) return;
-
-        button.addEventListener("click", (event) => {
-            event.stopPropagation();
-            const open = !menu.hidden;
-            document.querySelectorAll(".review-actions-menu").forEach((other) => { other.hidden = true; });
-            document.querySelectorAll(".review-actions-button").forEach((other) => other.setAttribute("aria-expanded", "false"));
-            menu.hidden = open;
-            button.setAttribute("aria-expanded", String(!open));
+    const closeAllReviewMenus = () => {
+        document.querySelectorAll(".review-actions-menu").forEach((menu) => {
+            menu.hidden = true;
         });
+        document.querySelectorAll(".review-actions-button").forEach((button) => {
+            button.setAttribute("aria-expanded", "false");
+        });
+    };
 
-        const card = actions.closest(".review-card");
-        const edit = actions.querySelector(".review-action-edit");
-        const editForm = card ? card.querySelector(".review-edit-form") : null;
-        const text = card ? card.querySelector(".review-text") : null;
+    document.addEventListener("click", (event) => {
+        const button = event.target.closest(".review-actions-button");
 
-        if (edit && editForm && text) {
-            edit.addEventListener("click", () => {
-                menu.hidden = true;
-                button.setAttribute("aria-expanded", "false");
-                text.hidden = true;
-                editForm.hidden = false;
-                const textarea = editForm.querySelector("textarea");
-                if (textarea) {
-                    textarea.focus();
-                    textarea.setSelectionRange(textarea.value.length, textarea.value.length);
-                }
-            });
+        if (button) {
+            event.preventDefault();
+            event.stopPropagation();
 
-            const cancel = editForm.querySelector(".review-edit-cancel");
-            if (cancel) {
-                cancel.addEventListener("click", () => {
-                    editForm.hidden = true;
-                    text.hidden = false;
-                });
+            const actions = button.closest(".review-actions");
+            const menu = actions?.querySelector(".review-actions-menu");
+            if (!menu) return;
+
+            const wasOpen = menu.hidden === false;
+            closeAllReviewMenus();
+
+            if (!wasOpen) {
+                menu.hidden = false;
+                button.setAttribute("aria-expanded", "true");
             }
+            return;
+        }
+
+        if (!event.target.closest(".review-actions-menu")) {
+            closeAllReviewMenus();
         }
     });
 
-    document.addEventListener("click", () => {
-        document.querySelectorAll(".review-actions-menu").forEach((menu) => { menu.hidden = true; });
-        document.querySelectorAll(".review-actions-button").forEach((button) => button.setAttribute("aria-expanded", "false"));
+    document.querySelectorAll(".review-actions-menu").forEach((menu) => {
+        menu.addEventListener("click", (event) => event.stopPropagation());
+    });
+
+    document.addEventListener("click", (event) => {
+        const edit = event.target.closest(".review-action-edit");
+        if (!edit) return;
+
+        const card = edit.closest(".review-card");
+        const actions = edit.closest(".review-actions");
+        const editForm = card?.querySelector(".review-edit-form");
+        const text = card?.querySelector(".review-text");
+
+        if (!editForm || !text) return;
+
+        actions?.querySelector(".review-actions-menu")?.setAttribute("hidden", "");
+        actions?.querySelector(".review-actions-button")?.setAttribute("aria-expanded", "false");
+        text.hidden = true;
+        editForm.hidden = false;
+
+        const textarea = editForm.querySelector("textarea");
+        if (textarea) {
+            textarea.focus();
+            textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+        }
+    });
+
+    document.addEventListener("click", (event) => {
+        const cancel = event.target.closest(".review-edit-cancel");
+        if (!cancel) return;
+
+        const card = cancel.closest(".review-card");
+        const form = cancel.closest(".review-edit-form");
+        const text = card?.querySelector(".review-text");
+
+        if (form && text) {
+            form.hidden = true;
+            text.hidden = false;
+        }
     });
 });
