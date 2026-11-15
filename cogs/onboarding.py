@@ -101,7 +101,7 @@ class Onboarding(commands.Cog):
                 "date_fallback": "30 Tage nach der Aktivierung"
             },
             "es": {
-                "title": "Bienvenido a Misuki",
+                "title": "Bienvenido o Misuki",
                 "description": f"Gracias por añadir Misuki a **{guild.name}**.\n\nTu servidor ha recibido **30 días de Misuki Premium completamente gratis**.",
                 "guide": "Guía rápida",
                 "steps": "1. Configura los ajustes del servidor.\n2. Configura el sistema de verificación.\n3. Configura los tickets y canales de soporte.\n4. Configura las funciones de moderación.\n5. Consulta tu licencia y funciones Premium.",
