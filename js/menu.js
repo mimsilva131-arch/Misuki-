@@ -71,6 +71,17 @@
 
         }
 
+        // Expose only the controls needed by the language selector.
+        // The two menus are mutually exclusive: opening one closes the other.
+        window.MisukiMenu = {
+            open: openMenu,
+            close: closeMenu,
+            toggle: toggleMenu,
+            isOpen: function () {
+                return menu.classList.contains("open");
+            }
+        };
+
         hamburger.addEventListener("click", toggleMenu);
 
         menuClose.addEventListener("click", closeMenu);
