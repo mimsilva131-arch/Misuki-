@@ -127,7 +127,8 @@ html.misuki-page-ready #misuki-page-transition {
    ========================================================= */
 
 @media (max-width: 800px), (hover: none), (pointer: coarse) {
-    .misuki-mouse-trail {
+    .misuki-mouse-trail,
+    .misuki-mouse-trail * {
         display: none !important;
     }
 }
