@@ -220,7 +220,7 @@
                 key: "License Key",
                 expires: "Expires",
                 never: "Never",
-                missing: "This server does not have a Misuki license."
+                missing: "This server does not have o Misuki license."
             },
 
             dashboard: {
@@ -1687,7 +1687,7 @@
           "terms_8_p1": "Misuki puede depender de servicios de terceros, incluidos Discord y otros proveedores de infraestructura.",
           "terms_8_p2": "Sus propias condiciones y políticas pueden aplicarse al utilizar esos servicios.",
           "terms_9_title": "9. Terminación",
-          "terms_9_p1": "El acceso a Misuki puede restringirse o terminarse si se infringen estos Términos de Servicio o si es necesario para proteger el servicio y a sus usuarios.",
+          "terms_9_p1": "El acceso o Misuki puede restringirse o terminarse si se infringen estos Términos de Servicio o si es necesario para proteger el servicio y a sus usuarios.",
           "terms_10_title": "10. Cambios en estos Términos",
           "terms_10_p1": "Estos Términos de Servicio pueden actualizarse periódicamente. El uso continuado de Misuki después de publicar cambios constituye la aceptación de los términos actualizados.",
           "terms_11_title": "11. Contacto",
@@ -1696,7 +1696,7 @@
           "cookies_intro": "Misuki puede utilizar cookies y tecnologías similares para proporcionar y mantener el sitio web y sus funciones.",
           "cookies_1_title": "1. ¿Qué son las Cookies?",
           "cookies_1_p1": "Las cookies son pequeños datos almacenados por su navegador cuando visita un sitio web. Pueden utilizarse para recordar información entre solicitudes y mantener sesiones.",
-          "cookies_2_title": "2. Cómo Utiliza Misuki las Cookies",
+          "cookies_2_title": "2. Cómo Utilizo Misuki las Cookies",
           "cookies_2_p1": "Misuki puede utilizar cookies para mantener las sesiones activas, recordar preferencias y mejorar el servicio en general.",
           "cookies_3_title": "3. Sus Opciones",
           "cookies_3_p1": "Puede aceptar todas las cookies, permitir solo las esenciales o rechazarlas. Su elección se guarda en el navegador y puede revisarse al volver a cargar el sitio.",
@@ -2333,7 +2333,7 @@
             common: { more_documentation: "Más documentación", need_help: "¿Necesitas ayuda?", no_users_match: "No se encontraron usuarios", id_label: "ID", home_title: "Inicio" },
             notifications: { enable: "Activar notificaciones", empty: "Todavía no hay notificaciones." },
             statistics: { overview_title: "Estadísticas del servicio", status_title: "Estado del servicio", performance_title: "Rendimiento", last_update: "Última actualización" },
-            data: { stored_title: "¿Qué datos pueden almacenarse?", stored_1: "ID de usuario de Discord", stored_2: "IDs de servidores de Discord", stored_3: "Configuración del servidor", stored_4: "Configuración de funciones de Misuki", stored_5: "Información necesaria para licencias y suscripciones", stored_6: "Información de soporte o reseñas proporcionada voluntariamente", why_title: "¿Por qué se almacenan?", why_text: "La información solo se almacena cuando es necesaria para proporcionar el servicio o la función solicitada.", request_title: "Solicitar tus datos", request_text: "Puedes solicitar al soporte la información asociada a tu uso de Misuki.", contact_support: "Contactar con soporte", deletion_title: "Eliminación de datos", deletion_text: "Puedes solicitar la eliminación de datos personales asociados a tu cuenta, salvo la información que deba conservarse por motivos legítimos.", deletion_note: "Algunos registros pueden conservarse por motivos de seguridad, legales u operativos.", discord_title: "Datos de Discord", discord_text: "Los datos de Discord se tratan según las políticas de Discord y los permisos concedidos a Misuki.", discord_policy: "Ver la política de privacidad de Discord", privacy_button: "Política de privacidad" },
+            data: { stored_title: "¿Qué datos pueden almacenarse?", stored_1: "ID de usuario de Discord", stored_2: "IDs de servidores de Discord", stored_3: "Configuración del servidor", stored_4: "Configuración de funciones de Misuki", stored_5: "Información necesaria para licencias y suscripciones", stored_6: "Información de soporte o reseñas proporcionada voluntariamente", why_title: "¿Por qué se almacenan?", why_text: "La información solo se almacena cuando es necesaria para proporcionar el servicio o la función solicitada.", request_title: "Solicitar tus datos", request_text: "Puedes solicitar al soporte la información asociada a tu uso de Misuki.", contact_support: "Contactar con soporte", deletion_title: "Eliminación de datos", deletion_text: "Puedes solicitar la eliminación de datos personales asociados a tu cuenta, salvo la información que deba conservarse por motivos legítimos.", deletion_note: "Algunos registros pueden conservarse por motivos de seguridad, legales u operativos.", discord_title: "Datos de Discord", discord_text: "Los datos de Discord se tratan según las políticas de Discord y los permisos concedidos o Misuki.", discord_policy: "Ver la política de privacidad de Discord", privacy_button: "Política de privacidad" },
             license: { inactive: "Inactiva", no_license_title: "Sin licencia" },
             verification: { login_description: "Para iniciar la verificación, debes iniciar sesión con tu cuenta de Discord.", login_note: "Después de iniciar sesión, volverás automáticamente a esta página.", protected: "Protegido por Misuki", captcha_title: "Verificación", captcha_question: "Completa la verificación a continuación" },
             advertisements: { status_page_title: "Mis publicidades", status_id: "ID:", duration_days: "días", status_unknown: "Estado no disponible", payment_success_title: "Pago completado" }
