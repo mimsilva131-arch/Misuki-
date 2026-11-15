@@ -5,7 +5,7 @@ Misuki — Reviews
 {% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="/css/reviews.css?v=3">
+<link rel="stylesheet" href="/css/reviews.css?v=5">
 {% endblock %}
 
 {% block content %}
@@ -100,7 +100,7 @@ Misuki — Reviews
                                     <div class="review-user-info">
                                         <strong>{{ review.username }}</strong>
                                         <span class="review-date">
-    <span>{{ review.created_at|short_datetime }}</span>
+    <time datetime="{{ review.created_at }}">{{ review.created_at|short_datetime }}</time>
     {% if review.edited %}
         <small class="review-edited" data-i18n="reviews.edited">(editado)</small>
     {% endif %}
