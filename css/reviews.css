@@ -697,3 +697,120 @@
 .review-actions-menu .review-action-delete:hover {
     background: rgba(255,76,96,.10) !important;
 }
+
+
+/* =========================================================
+   FINAL REVIEW UI — single authoritative override
+   ========================================================= */
+.review-card {
+    position: relative !important;
+    overflow: visible !important;
+}
+.review-actions {
+    position: absolute !important;
+    top: 14px !important;
+    right: 14px !important;
+    z-index: 100 !important;
+}
+.review-actions-button {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    min-height: 30px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: transparent !important;
+    color: rgba(255,255,255,.58) !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+.review-actions-button:hover,
+.review-actions-button[aria-expanded="true"] {
+    background: rgba(255,255,255,.075) !important;
+    color: #fff !important;
+}
+.review-dots {
+    display: block !important;
+    font-size: 1.55rem !important;
+    line-height: .72 !important;
+    transform: translateY(-1px) !important;
+}
+.review-actions-menu {
+    top: 34px !important;
+    right: 0 !important;
+    min-width: 154px !important;
+    padding: 5px !important;
+    border: 1px solid rgba(255,255,255,.10) !important;
+    border-radius: 12px !important;
+    background: rgba(15,17,27,.985) !important;
+    box-shadow: 0 16px 36px rgba(0,0,0,.38) !important;
+}
+.review-actions-menu button {
+    min-height: 38px !important;
+    padding: 0 10px !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: transparent !important;
+    font-size: .82rem !important;
+}
+.review-edit-form {
+    position: relative !important;
+    margin-top: 18px !important;
+    padding: 16px !important;
+    border: 1px solid rgba(143,156,255,.26) !important;
+    border-radius: 15px !important;
+    background: rgba(255,255,255,.035) !important;
+    box-shadow: 0 12px 30px rgba(0,0,0,.18) !important;
+}
+.review-edit-form textarea {
+    min-height: 125px !important;
+    padding: 13px 14px !important;
+    border-radius: 11px !important;
+    background: rgba(6,8,15,.72) !important;
+}
+.review-edit-actions {
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    margin-top: 11px !important;
+}
+.review-edit-actions button {
+    min-width: 96px !important;
+    min-height: 38px !important;
+    padding: 0 15px !important;
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+}
+.review-edit-save {
+    border: 1px solid rgba(143,156,255,.38) !important;
+    color: #fff !important;
+    background: linear-gradient(135deg, #5865f2, #7b84ff) !important;
+}
+.review-edit-cancel {
+    border: 1px solid rgba(255,255,255,.12) !important;
+    color: rgba(255,255,255,.82) !important;
+    background: rgba(255,255,255,.045) !important;
+}
+.review-date {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+}
+.review-edited {
+    margin-left: 0 !important;
+    font-size: .68rem !important;
+    opacity: .7 !important;
+}
+@media (max-width: 680px) {
+    .review-actions {
+        top: 12px !important;
+        right: 12px !important;
+    }
+    .review-edit-actions {
+        justify-content: stretch !important;
+    }
+    .review-edit-actions button {
+        flex: 1 !important;
+    }
+}
