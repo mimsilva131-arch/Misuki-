@@ -96,7 +96,7 @@ body.menu-open .hamburger {
 
     pointer-events: none;
 
-    z-index: 9998;
+    z-index: 10990;
 
     transition:
         opacity 0.3s ease,
@@ -146,7 +146,7 @@ body.menu-open .hamburger {
     overflow-y: auto;
     overflow-x: hidden;
 
-    z-index: 10000;
+    z-index: 11000;
 
     transition:
         transform 0.3s ease,
@@ -542,4 +542,28 @@ body.menu-open .hamburger {
     .menu a {
         transition: none !important;
     }
+}
+
+
+/* =========================================================
+   FINAL MENU LAYERING
+   The side menu must always sit above header controls.
+   ========================================================= */
+
+header.container {
+    position: relative;
+    z-index: 100;
+}
+
+.overlay {
+    z-index: 10990;
+}
+
+.menu {
+    z-index: 11000;
+}
+
+.hamburger,
+.language-selector {
+    z-index: 101;
 }
