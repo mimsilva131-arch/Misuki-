@@ -1257,11 +1257,13 @@ body.menu-open header.container {
    underneath the overlay during the menu transition. */
 body.menu-open .language-selector {
     visibility: hidden;
+    opacity: 0;
     pointer-events: none;
 }
 
 body:not(.menu-open) .language-selector {
     visibility: visible;
+    opacity: 1;
     pointer-events: auto;
 }
 
