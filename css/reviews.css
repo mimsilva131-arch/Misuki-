@@ -435,7 +435,7 @@
 /* Review metadata and editor polish */
 .review-date time { display:inline; font-variant-numeric:tabular-nums; }
 .review-edited { display:inline-block; }
-.review-actions { position:relative; }
+
 .review-actions-button { width:32px; height:32px; display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,.08); border-radius:10px; background:rgba(255,255,255,.035); color:var(--text-muted,#aeb3c0); cursor:pointer; transition:transform .18s ease, background .18s ease, border-color .18s ease, color .18s ease; }
 .review-actions-button:hover,.review-actions-button[aria-expanded="true"] { transform:translateY(-1px); background:rgba(255,255,255,.08); border-color:rgba(143,156,255,.28); color:#fff; }
 .review-dots { line-height:1; font-size:1.25rem; transform:translateY(-1px); }
