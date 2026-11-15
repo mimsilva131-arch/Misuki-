@@ -39,14 +39,14 @@
             menu.setAttribute("aria-hidden", "true");
         }
 
-        function syncLanguageButton() {
+        function syncLanguageButton(languageOverride) {
             if (
                 !languageButton ||
                 !window.MisukiTranslation ||
                 typeof window.MisukiTranslation.getLanguage !== "function"
             ) return;
 
-            const language = window.MisukiTranslation.getLanguage();
+            const language = languageOverride || window.MisukiTranslation.getLanguage();
             const infoMap = {
                 en: { name: "English", short: "EN", flag: "🇬🇧" },
                 pt: { name: "Português", short: "PT", flag: "🇵🇹" },
@@ -168,7 +168,7 @@
                 }
 
                 // Always read the saved value after translation and before closing.
-                syncLanguageButton();
+                syncLanguageButton(language);
                 hardCloseLanguage();
                 return;
             }
@@ -200,8 +200,12 @@
             });
         });
 
-        window.addEventListener("misukiLanguageChanged", function () {
-            syncLanguageButton();
+        window.addEventListener("misukiLanguageChanged", function (event) {
+            syncLanguageButton(
+                event && event.detail && event.detail.language
+                    ? event.detail.language
+                    : null
+            );
             hardCloseLanguage();
         });
 
