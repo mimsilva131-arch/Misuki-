@@ -350,6 +350,29 @@ def inject_template_helpers():
 
 
 # =========================================================
+# BROWSER CACHE CONTROL
+# =========================================================
+#
+# HTML pages must always revalidate so a newly deployed version of the site
+# cannot remain stuck on an older cached base.html. Versioned CSS/JS assets
+# keep their own cache-busting query strings.
+# =========================================================
+
+@app.after_request
+def prevent_html_cache(response):
+    content_type = response.headers.get("Content-Type", "").lower()
+
+    if "text/html" in content_type:
+        response.headers["Cache-Control"] = (
+            "no-store, no-cache, must-revalidate, max-age=0"
+        )
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+
+    return response
+
+
+# =========================================================
 # STATIC FILES
 # =========================================================
 
