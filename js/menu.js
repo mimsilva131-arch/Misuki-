@@ -63,8 +63,14 @@
 
             if (flag) flag.textContent = info.flag;
             if (short) short.textContent = info.short;
-            if (name) name.textContent = info.name;
+            if (name) {
+                name.textContent = info.name;
+                name.setAttribute("data-current-language-name", language);
+            }
             languageButton.dataset.currentLanguage = language;
+            languageButton.setAttribute("data-language", language);
+            languageButton.setAttribute("aria-label", info.name);
+
         }
 
         function openMenu(event) {
@@ -237,6 +243,12 @@
             : "en";
         syncLanguageButton(initialLanguage);
 
+        syncLanguageButton(
+            window.MisukiTranslation &&
+            typeof window.MisukiTranslation.getLanguage === "function"
+                ? window.MisukiTranslation.getLanguage()
+                : "en"
+        );
         console.log("✅ Misuki menu initialized.");
     }
 
