@@ -98,9 +98,6 @@ Misuki — Reviews
 
                                     <div class="review-user-info">
                                         <strong>{{ review.username }}</strong>
-                                        <span class="review-date">
-    <time datetime="{{ review.updated_at if review.edited else review.created_at }}">{{ (review.updated_at if review.edited else review.created_at)|short_datetime }}</time>{% if review.edited %} <small class="review-edited" data-i18n="reviews.edited">(editado)</small>{% endif %}
-</span>
                                     </div>
                                 </div>
 
@@ -114,6 +111,41 @@ Misuki — Reviews
 
                             <div class="review-text">
                                 {{ review.review }}
+                            </div>
+
+                            <div class="review-date review-date-bottom">
+                                <time datetime="{{ review.updated_at if review.edited else review.created_at }}">{{ (review.updated_at if review.edited else review.created_at)|short_datetime }}</time>{% if review.edited %} <small class="review-edited" data-i18n="reviews.edited">(editado)</small>{% endif %}
+                            </div>
+
+                            <div class="review-replies">
+                                {% if review.replies %}
+                                    <button type="button" class="review-replies-toggle" aria-expanded="false">
+                                        <span data-i18n="reviews.show_replies">Mostrar respostas</span>
+                                        <span class="review-replies-count">{{ review.replies|length }}</span>
+                                    </button>
+                                    <div class="review-replies-list" hidden>
+                                        {% for reply in review.replies %}
+                                            <div class="review-reply">
+                                                <div class="review-reply-user">
+                                                    {% if reply.avatar %}<img class="review-reply-avatar" src="{{ reply.avatar }}" alt="">{% else %}<span class="review-reply-avatar review-avatar-fallback">{{ reply.username[:1]|upper }}</span>{% endif %}
+                                                    <strong>{{ reply.username }}</strong>
+                                                </div>
+                                                <div class="review-reply-text">{{ reply.reply }}</div>
+                                                <time class="review-reply-date" datetime="{{ reply.created_at }}">{{ reply.created_at|short_datetime }}</time>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                {% if user %}
+                                    <button type="button" class="review-reply-open" data-i18n="reviews.reply">Responder</button>
+                                    <form method="POST" action="/reviews/{{ review.id }}/reply" class="review-reply-form" hidden>
+                                        <textarea name="reply" maxlength="1000" required data-i18n-attr="placeholder:reviews.reply_placeholder" placeholder="Escreva uma resposta..."></textarea>
+                                        <div class="review-reply-actions">
+                                            <button type="submit" class="review-reply-submit" data-i18n="reviews.send_reply">Enviar</button>
+                                            <button type="button" class="review-reply-cancel" data-i18n="reviews.cancel">Cancelar</button>
+                                        </div>
+                                    </form>
+                                {% endif %}
                             </div>
 
                             {% if user and (is_admin(user) or user.get("id")|string == review.user_id|string) %}
