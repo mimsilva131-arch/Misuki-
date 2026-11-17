@@ -211,6 +211,10 @@
                 need_license: "You need an active Misuki license to write a review.",
                 login_required: "Log in with Discord and have an active Misuki license to write a review.",
                 section_title: "💬 Community Reviews"
+                show_replies: "Show replies",
+                reply: "Reply",
+                reply_placeholder: "Write a reply...",
+                send_reply: "Send reply",
             },
 
             license: {
