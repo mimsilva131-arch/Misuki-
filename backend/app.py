@@ -331,7 +331,7 @@ def format_short_datetime(value):
             parsed = parsed.replace(tzinfo=timezone.utc)
 
         return parsed.astimezone(timezone.utc).strftime(
-            "%d/%m/%Y %H:%M:%S"
+            "%d/%m/%Y %H:%M"
         )
 
     except Exception:
@@ -605,6 +605,20 @@ def create_database():
 
                         updated_at TEXT
 
+                    )
+                    """
+                )
+
+                cursor.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS review_replies (
+                        id SERIAL PRIMARY KEY,
+                        review_id INTEGER NOT NULL REFERENCES reviews(id) ON DELETE CASCADE,
+                        user_id TEXT NOT NULL,
+                        username TEXT NOT NULL,
+                        avatar TEXT,
+                        reply TEXT NOT NULL,
+                        created_at TEXT NOT NULL
                     )
                     """
                 )
@@ -3536,6 +3550,39 @@ def logout():
 # REVIEWS
 # =========================================================
 
+def get_review_replies(review_id):
+    if not DATABASE_URL:
+        return []
+    try:
+        with database_connection() as connection:
+            with connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
+                cursor.execute(
+                    """
+                    SELECT id, review_id, user_id, username, avatar, reply, created_at
+                    FROM review_replies
+                    WHERE review_id = %s
+                    ORDER BY created_at ASC, id ASC
+                    """,
+                    (review_id,)
+                )
+                rows = cursor.fetchall()
+    except Exception as error:
+        print(f"❌ Review replies database error: {error}")
+        return []
+    return [
+        {
+            "id": row["id"],
+            "review_id": row["review_id"],
+            "user_id": row["user_id"],
+            "username": row["username"],
+            "avatar": row["avatar"],
+            "reply": row["reply"],
+            "created_at": row["created_at"]
+        }
+        for row in rows
+    ]
+
+
 def get_random_reviews(
     amount=6,
     user_id=None
@@ -3660,7 +3707,9 @@ def get_random_reviews(
                 row.get("updated_at"),
 
             "edited":
-                bool(row.get("updated_at"))
+                bool(row.get("updated_at")),
+            "replies":
+                get_review_replies(row["id"])
         })
 
     return reviews
@@ -4401,6 +4450,47 @@ def reviews():
         can_review=can_review,
         is_admin=is_admin
     )
+
+
+@app.route("/reviews/<int:review_id>/reply", methods=["POST"])
+def reply_to_review(review_id):
+    user = get_user()
+    if not user:
+        session["next_url"] = "/reviews"
+        return redirect("/login")
+    reply_text = (request.form.get("reply") or "").strip()
+    if not reply_text:
+        return error_page("Reply error", "The reply cannot be empty.", 400, user)
+    if len(reply_text) > 1000:
+        return error_page("Reply error", "The reply is too long.", 400, user)
+    try:
+        with database_connection() as connection:
+            with connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
+                cursor.execute("SELECT id FROM reviews WHERE id = %s LIMIT 1", (review_id,))
+                review = cursor.fetchone()
+                if not review:
+                    return error_page("Review not found", "This review no longer exists.", 404, user)
+                cursor.execute(
+                    """
+                    INSERT INTO review_replies
+                        (review_id, user_id, username, avatar, reply, created_at)
+                    VALUES
+                        (%s, %s, %s, %s, %s, %s)
+                    """,
+                    (
+                        review_id,
+                        str(user.get("id", "")),
+                        str(user.get("username") or user.get("global_name") or "Discord user"),
+                        user.get("avatar"),
+                        reply_text,
+                        utc_now().isoformat()
+                    )
+                )
+            connection.commit()
+    except Exception as error:
+        print(f"❌ Review reply error: {error}")
+        return error_page("Reply error", "The reply could not be created.", 500, user)
+    return redirect("/reviews")
 
 
 @app.route("/reviews/<int:review_id>/edit", methods=["POST"])
