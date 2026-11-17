@@ -565,3 +565,29 @@
         flex: 1;
     }
 }
+
+
+/* REVIEW LAYOUT + REPLIES + SMOOTH HOMEPAGE CAROUSEL */
+.review-card .review-text { width:100%; margin-top:24px; text-align:center; display:flex; align-items:center; justify-content:center; min-height:105px; }
+.review-date-bottom { width:100%; justify-content:center; margin-top:12px; padding-top:10px; border-top:1px solid rgba(255,255,255,.055); }
+.review-date-top { display:none; }
+.review-replies { width:100%; margin-top:14px; }
+.review-replies-toggle,.review-reply-open { border:0; background:transparent; color:#aeb7ff; font:inherit; font-size:.78rem; font-weight:700; cursor:pointer; transition:color .18s ease,transform .18s ease; }
+.review-replies-toggle:hover,.review-reply-open:hover { color:#fff; transform:translateY(-1px); }
+.review-replies-count { display:inline-flex; min-width:20px; height:20px; margin-left:5px; padding:0 6px; align-items:center; justify-content:center; border-radius:999px; background:rgba(255,255,255,.07); color:#dce0ff; font-size:.68rem; }
+.review-replies-list { margin-top:10px; padding-left:14px; border-left:2px solid rgba(143,156,255,.18); display:flex; flex-direction:column; gap:10px; }
+.review-replies-list[hidden],.review-reply-form[hidden] { display:none !important; }
+.review-reply { padding:11px 13px; border-radius:13px; background:rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.055); text-align:left; }
+.review-reply-user { display:flex; align-items:center; gap:8px; font-size:.78rem; }
+.review-reply-avatar { width:25px; height:25px; flex:0 0 25px; border-radius:50%; object-fit:cover; }
+.review-reply-text { margin-top:7px; color:#d8dbe4; line-height:1.55; font-size:.8rem; white-space:pre-wrap; overflow-wrap:anywhere; }
+.review-reply-date { display:block; margin-top:6px; color:var(--text-muted,#8f96a6); font-size:.68rem; }
+.review-reply-form { margin-top:10px; padding:12px; border:1px solid rgba(143,156,255,.22); border-radius:14px; background:rgba(88,101,242,.055); }
+.review-reply-form textarea { width:100%; min-height:82px; box-sizing:border-box; resize:vertical; padding:11px 12px; border:1px solid rgba(255,255,255,.10); border-radius:11px; background:rgba(6,8,15,.72); color:#eef0f7; font:inherit; outline:none; }
+.review-reply-form textarea:focus { border-color:rgba(143,156,255,.68); box-shadow:0 0 0 3px rgba(88,101,242,.12); }
+.review-reply-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:9px; }
+.review-reply-actions button { min-height:35px; padding:0 12px; border-radius:9px; border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.05); color:#eef0f7; font:inherit; font-size:.76rem; font-weight:700; cursor:pointer; }
+.review-reply-submit { border-color:rgba(143,156,255,.42) !important; background:rgba(88,101,242,.72) !important; }
+main > .section .review-grid { display:flex; overflow-x:auto; overflow-y:hidden; gap:18px; padding:8px 4px 16px; scroll-snap-type:x mandatory; scroll-behavior:smooth; scrollbar-width:thin; }
+main > .section .review-grid .review-card { flex:0 0 min(390px,84vw); scroll-snap-align:center; }
+@media (max-width:680px) { main > .section .review-grid .review-card { flex-basis:min(340px,86vw); } .review-card .review-text { min-height:95px; } }
