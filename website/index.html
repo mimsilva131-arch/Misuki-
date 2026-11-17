@@ -299,17 +299,6 @@ Misuki — Discord Bot
                             </div>
 
                         </div>
-                                </div>
-                                <form method="POST" action="/reviews/{{ review.id }}/edit" class="review-edit-form" hidden>
-                                    <textarea name="review" maxlength="1000" required>{{ review.review }}</textarea>
-                                    <div class="review-edit-actions">
-                                        <button type="submit" class="review-edit-save" data-i18n="reviews.save">Guardar</button>
-                                        <button type="button" class="review-edit-cancel" data-i18n="reviews.cancel">Cancelar</button>
-                                    </div>
-                                </form>
-                            {% endif %}
-
-                        </div>
 
                     {% endfor %}
 
