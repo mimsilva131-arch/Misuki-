@@ -27,7 +27,17 @@
                 button.disabled = true;
                 button.style.opacity = "0.7";
                 button.style.cursor = "wait";
-                button.textContent = "⭐ Submitting...";
+                // Close any open three-dot menu immediately when saving.
+                closeAllReviewMenus();
+
+                // Keep the translated label instead of replacing the button
+                // with an untranslated loading string.
+                const label = button.querySelector("[data-i18n]");
+                if (label) {
+                    label.textContent = "Guardar";
+                } else {
+                    button.textContent = "Guardar";
+                }
             });
         }
 
