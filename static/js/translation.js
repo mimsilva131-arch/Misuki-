@@ -526,7 +526,7 @@
                 logout: "Terminar sessão",
                 login: "Entrar com o Discord",
                 license_management: "Gestão de licenças"
-            }
+            },
 
             licenses: {
                 admin_eyebrow: "ADMINISTRAÇÃO",
@@ -947,7 +947,7 @@
                 logout: "Abmelden",
                 login: "Mit Discord anmelden",
                 license_management: "Lizenzverwaltung"
-            }
+            },
 
             licenses: {
                 admin_eyebrow: "ADMINISTRATION",
@@ -1368,7 +1368,7 @@
                 logout: "Cerrar sesión",
                 login: "Iniciar sesión con Discord",
                 license_management: "Gestión de licencias"
-            }
+            },
 
             licenses: {
                 admin_eyebrow: "ADMINISTRACIÓN",
@@ -1787,7 +1787,7 @@
                 logout: "Se déconnecter",
                 login: "Se connecter avec Discord",
                 license_management: "Gestion des licences"
-            }
+            },
 
             licenses: {
                 admin_eyebrow: "ADMINISTRATION",
