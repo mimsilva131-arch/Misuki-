@@ -97,7 +97,7 @@
                 logout: "Logout",
                 login: "Login with Discord",
                 license_management: "License Management"
-            }
+            },
 
             licenses: {
                 admin_eyebrow: "ADMINISTRATION",
