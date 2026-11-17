@@ -5385,7 +5385,7 @@ def get_admin_users(admin_servers, snapshot_users=None):
             user["created_at"] = datetime.fromtimestamp(
                 timestamp,
                 timezone.utc
-            ).strftime("%d/%m/%Y %H:%M:%S")
+            ).strftime("%d/%m/%Y %H:%M")
 
         except Exception:
             user["created_at"] = None
