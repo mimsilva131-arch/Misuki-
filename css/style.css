@@ -1424,27 +1424,6 @@ body.menu-open .hamburger {
 
 
 /* =========================================================
-   LANGUAGE SELECTOR + SIDE MENU
-========================================================= */
-
-/* Keep the language selector usable regardless of menu state. */
-body.menu-open .language-selector {
-    pointer-events: auto !important;
-    z-index: 30000 !important;
-}
-
-body.menu-open .language-button {
-    pointer-events: auto !important;
-    z-index: 30001 !important;
-}
-
-body.menu-open .language-dropdown {
-    display: flex !important;
-    pointer-events: auto !important;
-    z-index: 30002 !important;
-}
-
-/* =========================================================
    LEGAL + GLOBAL RESPONSIVE IMPROVEMENTS
    ========================================================= */
 
