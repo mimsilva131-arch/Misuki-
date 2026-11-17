@@ -277,10 +277,7 @@ Misuki — Discord Bot
                                     </strong>
 
                                     <span class="review-date">
-                                        <time datetime="{{ review.created_at }}">{{ review.created_at|short_datetime }}</time>
-                                        {% if review.edited %}
-                                            <small class="review-edited" data-i18n="reviews.edited">(editado)</small>
-                                        {% endif %}
+                                        <time datetime="{{ review.updated_at if review.edited else review.created_at }}">{{ (review.updated_at if review.edited else review.created_at)|short_datetime }}</time>{% if review.edited %} <small class="review-edited" data-i18n="reviews.edited">(editado)</small>{% endif %}
                                     </span>
 
                                     <div class="review-rating">
@@ -299,7 +296,6 @@ Misuki — Discord Bot
                             <div class="review-divider"></div>
 
                             <div class="review-text">
-                                <span class="review-quote" aria-hidden="true">“</span>
                                 <span class="review-content">{{ review.review }}</span>
                             </div>
 
