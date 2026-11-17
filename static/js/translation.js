@@ -225,7 +225,7 @@
                 key: "License Key",
                 expires: "Expires",
                 never: "Never",
-                missing: "Este servidor no tiene una licencia de Misuki."
+                missing: "This server does not have a Misuki license."
             },
 
             dashboard: {
