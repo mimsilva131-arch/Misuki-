@@ -275,11 +275,6 @@ Misuki — Discord Bot
                                     <strong class="review-username">
                                         {{ review.username }}
                                     </strong>
-
-                                    <span class="review-date">
-                                        <time datetime="{{ review.updated_at if review.edited else review.created_at }}">{{ (review.updated_at if review.edited else review.created_at)|short_datetime }}</time>{% if review.edited %} <small class="review-edited" data-i18n="reviews.edited">(editado)</small>{% endif %}
-                                    </span>
-
                                     <div class="review-rating">
                                         <span class="stars" aria-label="{{ review.rating }}/5">
                                             {% for i in range(review.rating) %}★{% endfor %}
@@ -299,17 +294,11 @@ Misuki — Discord Bot
                                 <span class="review-content">{{ review.review }}</span>
                             </div>
 
-                            {% if user and (is_admin(user) or user.get("id")|string == review.user_id|string) %}
-                                <div class="review-actions">
-                                    <button type="button" class="review-actions-button" aria-expanded="false" aria-label="Review actions" data-i18n-attr="aria-label:reviews.actions">
-                                        <span class="review-dots" aria-hidden="true">⋮</span>
-                                    </button>
-                                    <div class="review-actions-menu" hidden>
-                                        <button type="button" class="review-action-edit" data-review-id="{{ review.id }}" data-i18n="reviews.edit">Editar</button>
-                                        <form method="POST" action="/reviews/{{ review.id }}/delete" class="review-delete-form">
-                                            <button type="submit" class="review-action-delete" data-i18n="reviews.delete" data-confirm="" data-i18n-attr="data-confirm:reviews.delete_confirm" onclick="return confirm(this.dataset.confirm);">Remover</button>
-                                        </form>
-                                    </div>
+                            <div class="review-date review-date-bottom">
+                                <time datetime="{{ review.updated_at if review.edited else review.created_at }}">{{ (review.updated_at if review.edited else review.created_at)|short_datetime }}</time>{% if review.edited %} <small class="review-edited" data-i18n="reviews.edited">(editado)</small>{% endif %}
+                            </div>
+
+                        </div>
                                 </div>
                                 <form method="POST" action="/reviews/{{ review.id }}/edit" class="review-edit-form" hidden>
                                     <textarea name="review" maxlength="1000" required>{{ review.review }}</textarea>
