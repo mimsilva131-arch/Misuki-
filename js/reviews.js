@@ -16,6 +16,38 @@
         });
     }
 
+    function initReviewReplies() {
+        document.querySelectorAll(".review-replies").forEach(function (container) {
+            const toggle = container.querySelector(".review-replies-toggle");
+            const list = container.querySelector(".review-replies-list");
+            const open = container.querySelector(".review-reply-open");
+            const form = container.querySelector(".review-reply-form");
+            const cancel = container.querySelector(".review-reply-cancel");
+            if (toggle && list) {
+                toggle.addEventListener("click", function () {
+                    const expanded = toggle.getAttribute("aria-expanded") === "true";
+                    toggle.setAttribute("aria-expanded", String(!expanded));
+                    list.hidden = expanded;
+                });
+            }
+            if (open && form) {
+                open.addEventListener("click", function () {
+                    open.hidden = true;
+                    form.hidden = false;
+                    const textarea = form.querySelector("textarea");
+                    if (textarea) textarea.focus();
+                });
+            }
+            if (cancel && form && open) {
+                cancel.addEventListener("click", function () {
+                    form.hidden = true;
+                    open.hidden = false;
+                    form.reset();
+                });
+            }
+        });
+    }
+
     function initReviews() {
         const form = document.querySelector('form[action="/reviews"]');
 
@@ -130,6 +162,7 @@
             }
         });
 
+        initReviewReplies();
         closeAllReviewMenus();
     }
 
