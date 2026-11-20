@@ -973,3 +973,74 @@ header.container {
         font-size: 16px;
     }
 }
+
+
+/* =========================================================
+   FINAL CLEAN MENU GEOMETRY
+   One predictable layout for desktop and mobile.
+========================================================= */
+.menu {
+    box-sizing: border-box;
+    max-width: 100vw;
+    max-height: 100dvh;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+.menu *,
+.menu a,
+.menu button {
+    box-sizing: border-box;
+}
+
+.menu a {
+    transform: none;
+    padding-left: 14px;
+    padding-right: 14px;
+}
+
+.menu a:hover,
+.menu a.active:hover {
+    transform: translateX(4px);
+}
+
+.menu a.active,
+.menu a.active[href="/statistics"],
+.menu a.active[href="/statistics"]:hover {
+    transform: none;
+    padding-left: 14px;
+    background: rgba(100, 140, 255, 0.10);
+    box-shadow: inset 2px 0 0 rgba(114, 137, 218, 0.72);
+}
+
+.menu .discord-login,
+.menu .discord-login:hover {
+    box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+    .menu {
+        width: min(390px, calc(100vw - 12px));
+        padding: 24px 16px;
+    }
+
+    .menu a {
+        width: 100%;
+        min-height: 48px;
+        padding: 12px 14px;
+        font-size: 16px;
+    }
+
+    .menu a:hover,
+    .menu a.active:hover {
+        transform: none;
+    }
+}
+
+@media (max-width: 380px) {
+    .menu {
+        width: calc(100vw - 12px);
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+}
