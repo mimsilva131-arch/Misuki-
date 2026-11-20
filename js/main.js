@@ -1,7 +1,7 @@
 
 /* =========================================================
    MISUKI — MAIN.JS
-   MENU + MOUSE TRAIL + PAGE TRANSITIONS
+   PAGE TRANSITIONS
    ========================================================= */
 
 (function () {
@@ -438,9 +438,6 @@
         function () {
 
             navigating = false;
-
-
-            resetMouse();
 
 
             /* =============================================
