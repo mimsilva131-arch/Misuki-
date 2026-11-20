@@ -3740,6 +3740,7 @@ def get_random_reviews(
                         LIMIT %s
                         """,
                         (
+                            str(user_id),
                             amount,
                         )
                     )
