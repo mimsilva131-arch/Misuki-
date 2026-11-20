@@ -299,12 +299,12 @@ Misuki — Discord Bot
                             </div>
 
                             <div class="review-votes" data-vote-type="review" data-vote-id="{{ review.id }}">
-                                <button type="button" class="review-vote review-vote-like{% if review.user_vote == 1 %} is-active{% endif %}" data-vote="1" aria-pressed="{{ 'true' if review.user_vote == 1 else 'false' }}" data-i18n-attr="aria-label:reviews.like" title="Like">
+                                <button type="button" class="review-vote review-vote-like{% if review.user_vote == 1 %} is-active{% endif %}" data-vote="1" aria-pressed="{{ 'true' if review.user_vote == 1 else 'false' }}" data-i18n-attr="aria-label:reviews.like,title:reviews.like" title="Like">
                                     <span aria-hidden="true">👍</span>
                                     <span class="review-vote-label" data-i18n="reviews.like">Gosto</span>
                                     <span class="review-vote-count">{{ review.likes }}</span>
                                 </button>
-                                <button type="button" class="review-vote review-vote-dislike{% if review.user_vote == -1 %} is-active{% endif %}" data-vote="-1" aria-pressed="{{ 'true' if review.user_vote == -1 else 'false' }}" data-i18n-attr="aria-label:reviews.dislike" title="Dislike">
+                                <button type="button" class="review-vote review-vote-dislike{% if review.user_vote == -1 %} is-active{% endif %}" data-vote="-1" aria-pressed="{{ 'true' if review.user_vote == -1 else 'false' }}" data-i18n-attr="aria-label:reviews.dislike,title:reviews.dislike" title="Dislike">
                                     <span aria-hidden="true">👎</span>
                                     <span class="review-vote-label" data-i18n="reviews.dislike">Não gosto</span>
                                     <span class="review-vote-count">{{ review.dislikes }}</span>
