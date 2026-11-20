@@ -166,6 +166,12 @@
 
             syncLanguageButton(language);
 
+            languageDropdown.querySelectorAll("[data-lang]").forEach(function (option) {
+                const selected = option.getAttribute("data-lang") === language;
+                option.classList.toggle("selected", selected);
+                option.setAttribute("aria-selected", selected ? "true" : "false");
+            });
+
             try {
                 localStorage.setItem("misuki_language", language);
             } catch (error) {
@@ -179,6 +185,23 @@
 
             hardCloseLanguage();
             syncLanguageButton(language);
+            syncLanguageOptions(language);
+        }
+
+
+
+        function syncLanguageOptions(languageOverride) {
+            if (!languageDropdown) return;
+            const language = languageOverride ||
+                (window.MisukiTranslation && typeof window.MisukiTranslation.getLanguage === "function"
+                    ? window.MisukiTranslation.getLanguage()
+                    : "en");
+
+            languageDropdown.querySelectorAll("[data-lang]").forEach(function (option) {
+                const selected = option.getAttribute("data-lang") === language;
+                option.classList.toggle("selected", selected);
+                option.setAttribute("aria-selected", selected ? "true" : "false");
+            });
         }
 
         if (languageDropdown) {
@@ -222,6 +245,7 @@
                     ? window.MisukiTranslation.getLanguage()
                     : (localStorage.getItem("misuki_language") || "en"));
             syncLanguageButton(currentLanguage);
+            syncLanguageOptions(currentLanguage);
             hardCloseLanguage();
         });
 
@@ -232,6 +256,7 @@
             ? window.MisukiTranslation.getLanguage()
             : "en";
         syncLanguageButton(initialLanguage);
+        syncLanguageOptions(initialLanguage);
 
         console.log("✅ Misuki menu initialized.");
     }
