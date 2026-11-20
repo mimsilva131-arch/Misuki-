@@ -168,6 +168,22 @@
         start();
     }
 
+    function revealTargetReview() {
+        const hash = window.location.hash || "";
+        if (!hash.startsWith("#review-")) return;
+
+        const card = document.getElementById(hash.slice(1));
+        if (!card) return;
+
+        window.requestAnimationFrame(function () {
+            card.scrollIntoView({ behavior: "smooth", block: "center" });
+            card.classList.add("review-target-highlight");
+            window.setTimeout(function () {
+                card.classList.remove("review-target-highlight");
+            }, 1800);
+        });
+    }
+
     function initReviews() {
         const textarea = document.querySelector('textarea[name="review"]');
         if (textarea) {
@@ -348,6 +364,7 @@
         initReviewReplies();
         initReviewCarousel();
         closeAllReviewMenus();
+        revealTargetReview();
     }
 
     if (document.readyState === "loading") {
@@ -356,3 +373,8 @@
         initReviews();
     }
 })();
+
+
+window.addEventListener("hashchange", function () {
+    if (typeof revealTargetReview === "function") revealTargetReview();
+});
