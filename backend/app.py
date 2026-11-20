@@ -3731,6 +3731,7 @@ def get_random_reviews(
                         """,
                         (
                             str(user_id),
+                            str(user_id),
                             amount,
                         )
                     )
