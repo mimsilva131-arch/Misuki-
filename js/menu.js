@@ -164,69 +164,40 @@
             languageButton.addEventListener("click", openLanguageSelector);
         }
 
-        document.addEventListener("click", function (event) {
-            const languageOption = event.target.closest("#languageDropdown [data-lang]");
+        function selectLanguage(languageOption) {
+            if (!languageOption || !languageDropdown) return;
 
-            if (languageOption && languageDropdown && languageDropdown.contains(languageOption)) {
-                event.preventDefault();
-                event.stopPropagation();
+            const language = languageOption.getAttribute("data-lang");
+            if (!language || !["en", "pt", "de", "es", "fr"].includes(language)) return;
 
-                const language = languageOption.getAttribute("data-lang");
+            syncLanguageButton(language);
 
-                if (language) {
-                    // Update the closed selector immediately. The translation
-                    // engine is allowed to translate the page afterwards, but
-                    // it must never own the visible selected-language state.
-                    syncLanguageButton(language);
-
-                    try {
-                        localStorage.setItem("misuki_language", language);
-                    } catch (error) {
-                        console.warn("Misuki: could not persist language.", error);
-                    }
-
-                    if (
-                        window.MisukiTranslation &&
-                        typeof window.MisukiTranslation.setLanguage === "function"
-                    ) {
-                        window.MisukiTranslation.setLanguage(language);
-                    }
-
-                    // Re-apply after the translation pass as a final guard.
-                    requestAnimationFrame(function () {
-                        syncLanguageButton(language);
-                    });
-                    setTimeout(function () {
-                        syncLanguageButton(language);
-                    }, 150);
-                }
-
-                // Close the selector and then explicitly restore the selected
-                // language on the closed button. This prevents translation
-                // updates from briefly resetting it to English.
-                const applyClosedLanguage = function () {
-                    const saved = window.MisukiTranslation &&
-                        typeof window.MisukiTranslation.getLanguage === "function"
-                        ? window.MisukiTranslation.getLanguage()
-                        : (localStorage.getItem("misuki_language") || language);
-
-                    hardCloseLanguage();
-                    syncLanguageButton(saved || language);
-
-                    if (languageButton) {
-                        languageButton.setAttribute(
-                            "data-current-language",
-                            saved || language
-                        );
-                    }
-                };
-
-                applyClosedLanguage();
-                requestAnimationFrame(applyClosedLanguage);
-                setTimeout(applyClosedLanguage, 100);
-                return;
+            try {
+                localStorage.setItem("misuki_language", language);
+            } catch (error) {
+                console.warn("Misuki: could not persist language.", error);
             }
 
+            if (window.MisukiTranslation &&
+                typeof window.MisukiTranslation.setLanguage === "function") {
+                window.MisukiTranslation.setLanguage(language);
+            }
+
+            hardCloseLanguage();
+            syncLanguageButton(language);
+        }
+
+        if (languageDropdown) {
+            languageDropdown.querySelectorAll("[data-lang]").forEach(function (option) {
+                option.addEventListener("click", function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    selectLanguage(option);
+                });
+            });
+        }
+
+        document.addEventListener("click", function (event) {
             if (
                 languageSelector &&
                 !languageSelector.contains(event.target) &&
