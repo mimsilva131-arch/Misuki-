@@ -133,25 +133,88 @@
         const carousel = document.querySelector(".home-page .review-grid");
         if (!carousel || carousel.dataset.autoReviewCarousel === "true") return;
 
-        const cards = Array.from(carousel.querySelectorAll(".review-card"));
-        if (cards.length < 2) return;
+        const originalCards = Array.from(carousel.querySelectorAll(".review-card"));
+        if (originalCards.length < 2) return;
 
         carousel.dataset.autoReviewCarousel = "true";
+        carousel.classList.add("is-review-carousel");
+
+        // Build a real infinite track with clones on both ends. This lets the
+        // last review transition into the first review without reversing the
+        // whole row or moving the page itself.
+        const track = document.createElement("div");
+        track.className = "review-carousel-track";
+
+        const cloneBefore = originalCards.map(function (card) {
+            const clone = card.cloneNode(true);
+            clone.dataset.carouselClone = "before";
+            return clone;
+        });
+        const cloneAfter = originalCards.map(function (card) {
+            const clone = card.cloneNode(true);
+            clone.dataset.carouselClone = "after";
+            return clone;
+        });
+
+        originalCards.forEach(function (card) {
+            card.dataset.carouselOriginal = "true";
+            track.appendChild(card);
+        });
+
+        // Rebuild in the desired order: clones, originals, clones.
+        const allCards = cloneBefore.concat(originalCards, cloneAfter);
+        track.innerHTML = "";
+        allCards.forEach(function (card) {
+            track.appendChild(card);
+        });
+        carousel.appendChild(track);
+
+        let activeIndex = originalCards.length;
         let timer = null;
         let paused = false;
-        let activeIndex = 0;
+        let resetting = false;
 
-        const setActive = function (index) {
-            // Circular loop: after the last review, continue directly with
-            // the first one instead of reversing through the previous cards.
-            activeIndex = ((index % cards.length) + cards.length) % cards.length;
+        const cards = Array.from(track.querySelectorAll(".review-card"));
+        const originalCount = originalCards.length;
 
-            cards.forEach(function (card, cardIndex) {
-                card.classList.toggle("is-carousel-center", cardIndex === activeIndex);
-                card.classList.toggle("is-carousel-side", cardIndex !== activeIndex);
+        const updateActiveClasses = function () {
+            cards.forEach(function (card, index) {
+                const logicalIndex = ((index - originalCount) % originalCount + originalCount) % originalCount;
+                const active = logicalIndex === ((activeIndex - originalCount) % originalCount + originalCount) % originalCount;
+                card.classList.toggle("is-carousel-center", active);
+                card.classList.toggle("is-carousel-side", !active);
             });
         };
 
+        const positionTrack = function (animate) {
+            const activeCard = cards[activeIndex];
+            if (!activeCard) return;
+
+            const center = carousel.clientWidth / 2;
+            const cardCenter = activeCard.offsetLeft + activeCard.offsetWidth / 2;
+            track.style.transition = animate
+                ? "transform .62s cubic-bezier(.22,.7,.25,1)"
+                : "none";
+            track.style.transform = "translate3d(" + (center - cardCenter) + "px, 0, 0)";
+            updateActiveClasses();
+        };
+
+        const setActive = function (nextIndex, animate) {
+            if (resetting) return;
+            activeIndex = nextIndex;
+            positionTrack(animate !== false);
+
+            // Once a cloned edge is reached, let its transition finish and
+            // silently jump to the matching original card.
+            if (activeIndex >= originalCount * 2) {
+                resetting = true;
+                window.setTimeout(function () {
+                    activeIndex = originalCount;
+                    positionTrack(false);
+                    resetting = false;
+                }, 650);
+            }
+        };
 
         const stop = function () {
             if (timer) {
@@ -163,8 +226,8 @@
         const start = function () {
             stop();
             timer = setInterval(function () {
-                if (paused) return;
-                setActive(activeIndex + 1);
+                if (paused || resetting) return;
+                setActive(activeIndex + 1, true);
             }, 11000);
         };
 
@@ -180,7 +243,11 @@
             }, { passive: true });
         });
 
-        setActive(0);
+        window.addEventListener("resize", function () {
+            positionTrack(false);
+        }, { passive: true });
+
+        positionTrack(false);
         start();
     }
 
