@@ -2493,7 +2493,26 @@ main {
 .button,
 .dashboard-button,
 .menu a {
-    will-change: transform;
+    will-change: auto;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .card:hover,
+    .button:hover,
+    .dashboard-button:hover,
+    .menu a:hover {
+        will-change: transform;
+    }
+}
+
+@view-transition {
+    navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: .16s;
+    animation-timing-function: cubic-bezier(.2,.8,.2,1);
 }
 
 @media (max-width: 800px) {
