@@ -39,7 +39,7 @@
 
 <link
     rel="stylesheet"
-    href="/css/menu.css?v=26"
+    href="/css/menu.css?v=27"
 >
 
 <link
@@ -466,10 +466,15 @@
 
         <a
             href="/logout"
-            class="{{ 'active' if request.path == '/logout' else '' }}"
+            class="discord-login logout-link {{ 'active' if request.path == '/logout' else '' }}"
             data-i18n="nav.logout"
         >
-            Logout
+            <span data-i18n="nav.logout">Logout</span>
+            <svg class="logout-door-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M13 4H6.5A1.5 1.5 0 0 0 5 5.5v13A1.5 1.5 0 0 0 6.5 20H13"></path>
+                <path d="M11 12h8"></path>
+                <path d="m16 8 4 4-4 4"></path>
+            </svg>
         </a>
 
     {% else %}
