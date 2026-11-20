@@ -373,8 +373,3 @@
         initReviews();
     }
 })();
-
-
-window.addEventListener("hashchange", function () {
-    if (typeof revealTargetReview === "function") revealTargetReview();
-});
