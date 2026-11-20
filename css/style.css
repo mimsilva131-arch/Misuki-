@@ -707,7 +707,7 @@ footer {
     opacity: 1;
 
     transition:
-        opacity 0.35s ease;
+        opacity 0.16s ease;
 }
 
 html.misuki-page-enter
@@ -2473,5 +2473,38 @@ button, a {
 
     .language-dropdown {
         right: -4px;
+    }
+}
+
+
+/* =========================================================
+   PERFORMANCE — keep scrolling and navigation fluid
+   ========================================================= */
+
+html {
+    scroll-behavior: auto;
+}
+
+main {
+    contain: layout paint;
+}
+
+.card,
+.button,
+.dashboard-button,
+.menu a {
+    will-change: transform;
+}
+
+@media (max-width: 800px) {
+    .card {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
     }
 }
