@@ -150,7 +150,7 @@
                 } else {
                     carousel.scrollBy({ left: distance, behavior: "smooth" });
                 }
-            }, 4200);
+            }, 4000);
         };
 
         ["mouseenter", "focusin", "touchstart", "pointerdown"].forEach(function (eventName) {
