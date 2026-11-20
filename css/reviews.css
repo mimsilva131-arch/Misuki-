@@ -775,3 +775,46 @@
     transition: outline-color 0.25s ease, box-shadow 0.25s ease;
     box-shadow: 0 0 0 6px rgba(120, 167, 255, 0.08);
 }
+
+
+/* HOMEPAGE REVIEW CAROUSEL — display-only cards */
+.home-page .review-grid {
+    touch-action: none;
+    overscroll-behavior: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+.home-page .review-grid .review-card {
+    cursor: default;
+}
+.home-page .review-grid .review-rating,
+.home-page .review-grid .review-date,
+.home-page .review-grid .review-votes,
+.home-page .review-grid .review-replies {
+    display: none !important;
+}
+.home-page .review-grid .review-divider {
+    display: none;
+}
+.home-page .review-grid .review-text {
+    position: relative;
+    margin-top: 28px;
+    min-height: 130px;
+    padding: 0 24px;
+    box-sizing: border-box;
+    font-size: 1.02rem;
+}
+.home-page .review-grid .review-content::before {
+    content: "“";
+    margin-right: 4px;
+    color: rgba(255,255,255,.65);
+    font-size: 1.45em;
+    line-height: 0;
+}
+.home-page .review-grid .review-content::after {
+    content: "”";
+    margin-left: 4px;
+    color: rgba(255,255,255,.65);
+    font-size: 1.45em;
+    line-height: 0;
+}
