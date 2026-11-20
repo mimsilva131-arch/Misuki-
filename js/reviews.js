@@ -282,9 +282,9 @@
                 submitButtons.forEach(function (submitButton) {
                     submitButton.disabled = true;
                     submitButton.dataset.originalText = submitButton.textContent;
+                    submitButton.classList.add("is-submitting");
                     submitButton.style.opacity = "0.7";
                     submitButton.style.cursor = "wait";
-                    submitButton.textContent = "Enviando…";
                 });
 
                 const controller = new AbortController();
@@ -318,6 +318,7 @@
 
                     submitButtons.forEach(function (submitButton) {
                         submitButton.disabled = false;
+                        submitButton.classList.remove("is-submitting");
                         submitButton.style.opacity = "";
                         submitButton.style.cursor = "";
                         if (submitButton.dataset.originalText) {
