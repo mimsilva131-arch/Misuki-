@@ -657,7 +657,7 @@
     font-weight: 700;
     cursor: pointer;
     box-shadow: none !important;
-    transition: transform .16s cubic-bezier(.2,.8,.2,1), border-color .16s ease, background .16s ease, opacity .16s ease;
+    transition: transform .11s cubic-bezier(.2,.8,.2,1), border-color .11s ease, background .11s ease, opacity .11s ease;
 }
 .review-vote:hover:not(:disabled) {
     transform: translateY(-1px);
