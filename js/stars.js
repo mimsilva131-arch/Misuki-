@@ -56,7 +56,7 @@
            NORMAL STARS
            ================================================= */
 
-        const STAR_COUNT = 150;
+        const STAR_COUNT = 80;
 
 
         for (
