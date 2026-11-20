@@ -169,29 +169,6 @@
     }
 
     function initReviews() {
-        const form = document.querySelector('form[action="/reviews"]');
-
-        if (form) {
-            form.addEventListener("submit", function (event) {
-                if (form.dataset.submitting === "true") {
-                    event.preventDefault();
-                    return;
-                }
-
-                form.dataset.submitting = "true";
-                const button = form.querySelector('button[type="submit"]');
-                if (!button) return;
-
-                button.disabled = true;
-                button.style.opacity = "0.7";
-                button.style.cursor = "wait";
-                // Close any open three-dot menu immediately when saving.
-                closeAllReviewMenus();
-
-                // Keep the translated label intact while the form is submitted.
-            });
-        }
-
         const textarea = document.querySelector('textarea[name="review"]');
         if (textarea) {
             textarea.addEventListener("input", function () {
