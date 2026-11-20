@@ -17,14 +17,14 @@ footer {
 
 .bottom-nav {
     width: 100%;
-    max-width: 960px;
+    max-width: 1200px;
     margin: 0 auto;
 
-    padding: 40px 20px 30px;
+    padding: 48px 30px 34px;
 
     display: grid !important;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 40px;
+    gap: 64px;
 
     justify-items: center;
 
