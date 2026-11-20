@@ -142,7 +142,9 @@
         let activeIndex = 0;
 
         const setActive = function (index) {
-            activeIndex = (index + cards.length) % cards.length;
+            // Circular loop: after the last review, continue directly with
+            // the first one instead of reversing through the previous cards.
+            activeIndex = ((index % cards.length) + cards.length) % cards.length;
 
             cards.forEach(function (card, cardIndex) {
                 card.classList.toggle("is-carousel-center", cardIndex === activeIndex);
