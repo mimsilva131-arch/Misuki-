@@ -191,7 +191,7 @@
             }, 4000);
         };
 
-        ["mouseenter", "focusin", "touchstart", "pointerdown"].forEach(function (eventName) {
+        ["mouseenter", "focusin"].forEach(function (eventName) {
             carousel.addEventListener(eventName, function () {
                 paused = true;
             }, { passive: true });
