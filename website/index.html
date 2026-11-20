@@ -298,6 +298,52 @@ Misuki — Discord Bot
                                 <time datetime="{{ review.updated_at if review.edited else review.created_at }}">{{ (review.updated_at if review.edited else review.created_at)|short_datetime }}</time>{% if review.edited %} <small class="review-edited" data-i18n="reviews.edited">(editado)</small>{% endif %}
                             </div>
 
+                            <div class="review-votes" data-vote-type="review" data-vote-id="{{ review.id }}">
+                                <button type="button" class="review-vote review-vote-like{% if review.user_vote == 1 %} is-active{% endif %}" data-vote="1" aria-pressed="{{ 'true' if review.user_vote == 1 else 'false' }}" data-i18n-attr="aria-label:reviews.like" title="Like">
+                                    <span aria-hidden="true">👍</span>
+                                    <span class="review-vote-label" data-i18n="reviews.like">Gosto</span>
+                                    <span class="review-vote-count">{{ review.likes }}</span>
+                                </button>
+                                <button type="button" class="review-vote review-vote-dislike{% if review.user_vote == -1 %} is-active{% endif %}" data-vote="-1" aria-pressed="{{ 'true' if review.user_vote == -1 else 'false' }}" data-i18n-attr="aria-label:reviews.dislike" title="Dislike">
+                                    <span aria-hidden="true">👎</span>
+                                    <span class="review-vote-label" data-i18n="reviews.dislike">Não gosto</span>
+                                    <span class="review-vote-count">{{ review.dislikes }}</span>
+                                </button>
+                            </div>
+
+                            {% if review.replies %}
+                                <div class="review-replies homepage-review-replies">
+                                    <button type="button" class="review-replies-toggle" aria-expanded="false">
+                                        <span data-i18n="reviews.show_replies">Mostrar respostas</span>
+                                        <span class="review-replies-count">{{ review.replies|length }}</span>
+                                    </button>
+                                    <div class="review-replies-list" hidden>
+                                        {% for reply in review.replies %}
+                                            <div class="review-reply" data-vote-type="reply" data-vote-id="{{ reply.id }}">
+                                                <div class="review-reply-user">
+                                                    {% if reply.avatar %}<img class="review-reply-avatar" src="{{ reply.avatar }}" alt="">{% else %}<span class="review-reply-avatar review-avatar-fallback">{{ reply.username[:1]|upper }}</span>{% endif %}
+                                                    <strong>{{ reply.username }}</strong>
+                                                </div>
+                                                <div class="review-reply-text">{{ reply.reply }}</div>
+                                                <time class="review-reply-date" datetime="{{ reply.created_at }}">{{ reply.created_at|short_datetime }}</time>
+                                                <div class="review-votes review-reply-votes">
+                                                    <button type="button" class="review-vote review-vote-like{% if reply.user_vote == 1 %} is-active{% endif %}" data-vote="1" aria-pressed="{{ 'true' if reply.user_vote == 1 else 'false' }}" data-i18n-attr="aria-label:reviews.like" title="Like">
+                                                        <span aria-hidden="true">👍</span>
+                                                        <span class="review-vote-label" data-i18n="reviews.like">Gosto</span>
+                                                        <span class="review-vote-count">{{ reply.likes }}</span>
+                                                    </button>
+                                                    <button type="button" class="review-vote review-vote-dislike{% if reply.user_vote == -1 %} is-active{% endif %}" data-vote="-1" aria-pressed="{{ 'true' if reply.user_vote == -1 else 'false' }}" data-i18n-attr="aria-label:reviews.dislike" title="Dislike">
+                                                        <span aria-hidden="true">👎</span>
+                                                        <span class="review-vote-label" data-i18n="reviews.dislike">Não gosto</span>
+                                                        <span class="review-vote-count">{{ reply.dislikes }}</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endif %}
+
                         </div>
 
                     {% endfor %}
