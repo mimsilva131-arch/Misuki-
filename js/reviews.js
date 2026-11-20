@@ -140,7 +140,6 @@
         let timer = null;
         let paused = false;
         let activeIndex = 0;
-        let scrollUpdateTimer = null;
 
         const setActive = function (index, shouldScroll) {
             activeIndex = (index + cards.length) % cards.length;
@@ -202,11 +201,6 @@
                 paused = false;
             }, { passive: true });
         });
-
-        carousel.addEventListener("scroll", function () {
-            window.clearTimeout(scrollUpdateTimer);
-            scrollUpdateTimer = window.setTimeout(detectCenteredCard, 90);
-        }, { passive: true });
 
         setActive(0, true);
         start();
