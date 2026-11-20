@@ -16,6 +16,74 @@
         });
     }
 
+    function initVoteButtons() {
+        document.querySelectorAll(".review-votes").forEach(function (group) {
+            group.addEventListener("click", async function (event) {
+                const button = event.target.closest(".review-vote");
+                if (!button || button.disabled) return;
+
+                const target = group.closest("[data-vote-type][data-vote-id]") || group;
+                const voteType = target.dataset.voteType || group.dataset.voteType;
+                const voteId = target.dataset.voteId || group.dataset.voteId;
+                if (!voteType || !voteId) return;
+
+                const endpoint = voteType === "reply"
+                    ? "/reviews/replies/" + encodeURIComponent(voteId) + "/vote"
+                    : "/reviews/" + encodeURIComponent(voteId) + "/vote";
+
+                group.querySelectorAll(".review-vote").forEach(function (item) {
+                    item.disabled = true;
+                });
+
+                const body = new URLSearchParams();
+                body.set("vote", button.dataset.vote);
+
+                try {
+                    const response = await fetch(endpoint, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded",
+                            "X-Requested-With": "XMLHttpRequest"
+                        },
+                        body: body.toString(),
+                        credentials: "same-origin"
+                    });
+
+                    if (response.status === 401) {
+                        window.location.href = "/login";
+                        return;
+                    }
+
+                    const data = await response.json();
+                    if (!data.ok) throw new Error(data.error || "Vote failed");
+
+                    const like = group.querySelector(".review-vote-like");
+                    const dislike = group.querySelector(".review-vote-dislike");
+
+                    if (like) {
+                        like.classList.toggle("is-active", data.user_vote === 1);
+                        like.setAttribute("aria-pressed", data.user_vote === 1 ? "true" : "false");
+                        const count = like.querySelector(".review-vote-count");
+                        if (count) count.textContent = data.likes;
+                    }
+
+                    if (dislike) {
+                        dislike.classList.toggle("is-active", data.user_vote === -1);
+                        dislike.setAttribute("aria-pressed", data.user_vote === -1 ? "true" : "false");
+                        const count = dislike.querySelector(".review-vote-count");
+                        if (count) count.textContent = data.dislikes;
+                    }
+                } catch (error) {
+                    console.error("Misuki vote error:", error);
+                } finally {
+                    group.querySelectorAll(".review-vote").forEach(function (item) {
+                        item.disabled = false;
+                    });
+                }
+            });
+        });
+    }
+
     function initReviewReplies() {
         document.querySelectorAll(".review-replies").forEach(function (container) {
             const toggle = container.querySelector(".review-replies-toggle");
@@ -104,7 +172,13 @@
         const form = document.querySelector('form[action="/reviews"]');
 
         if (form) {
-            form.addEventListener("submit", function () {
+            form.addEventListener("submit", function (event) {
+                if (form.dataset.submitting === "true") {
+                    event.preventDefault();
+                    return;
+                }
+
+                form.dataset.submitting = "true";
                 const button = form.querySelector('button[type="submit"]');
                 if (!button) return;
 
@@ -214,6 +288,22 @@
             }
         });
 
+        document.querySelectorAll('form[data-single-submit="true"]').forEach(function (writeForm) {
+            writeForm.addEventListener("submit", function (event) {
+                if (writeForm.dataset.submitting === "true") {
+                    event.preventDefault();
+                    return;
+                }
+                writeForm.dataset.submitting = "true";
+                writeForm.querySelectorAll('button[type="submit"]').forEach(function (submitButton) {
+                    submitButton.disabled = true;
+                    submitButton.style.opacity = "0.7";
+                    submitButton.style.cursor = "wait";
+                });
+            });
+        });
+
+        initVoteButtons();
         initReviewReplies();
         initReviewCarousel();
         closeAllReviewMenus();
