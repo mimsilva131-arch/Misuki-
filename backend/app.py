@@ -2242,35 +2242,42 @@ def get_active_license_guild_ids():
 def get_user():
 
     # -----------------------------------------------------
-    # CACHE
+    # REQUEST CACHE
     # -----------------------------------------------------
 
-    if getattr(
-        g,
-        "user_loaded",
-        False
-    ):
-
-        return getattr(
-            g,
-            "user",
-            None
-        )
+    if getattr(g, "user_loaded", False):
+        return getattr(g, "user", None)
 
     g.user_loaded = True
 
-    access_token = session.get(
-        "access_token"
-    )
+    access_token = session.get("access_token")
 
     if not access_token:
-
         g.user = None
-
         return None
 
-    try:
+    # -----------------------------------------------------
+    # SHORT SESSION CACHE
+    # -----------------------------------------------------
+    # A full Discord /users/@me request on every page makes normal
+    # navigation unnecessarily slow. Keep the small user profile in the
+    # signed session for a short period, then refresh it from Discord.
+    # This does not cache guild permissions or dashboard data.
+    # -----------------------------------------------------
 
+    now_timestamp = time.time()
+    cached_user = session.get("user_cache")
+    cached_at = session.get("user_cache_at", 0)
+
+    if (
+        isinstance(cached_user, dict)
+        and isinstance(cached_at, (int, float))
+        and now_timestamp - cached_at < 60
+    ):
+        g.user = cached_user
+        return g.user
+
+    try:
         response = requests.get(
             f"{DISCORD_API}/users/@me",
             headers={
@@ -2286,30 +2293,36 @@ def get_user():
             f"❌ Discord user request error: {error}"
         )
 
-        g.user = None
+        # A recent cached profile is still better than turning a normal
+        # navigation into an empty logged-out page during a transient
+        # Discord/API hiccup.
+        if isinstance(cached_user, dict):
+            g.user = cached_user
+            return g.user
 
+        g.user = None
         return None
 
     if response.status_code != 200:
 
-        if response.status_code in (
-            401,
-            403
-        ):
-
+        if response.status_code in (401, 403):
+            session.pop("user_cache", None)
+            session.pop("user_cache_at", None)
             session.clear()
 
         g.user = None
-
         return None
 
     try:
-
         g.user = response.json()
-
     except ValueError:
-
         g.user = None
+        return None
+
+    if isinstance(g.user, dict):
+        session["user_cache"] = g.user
+        session["user_cache_at"] = now_timestamp
+        session.modified = True
 
     return g.user
 
