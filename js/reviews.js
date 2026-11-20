@@ -117,7 +117,7 @@
     }
 
     function initReviewCarousel() {
-        const carousel = document.querySelector("main > .section .review-grid");
+        const carousel = document.querySelector(".home-page .review-grid");
         if (!carousel || carousel.dataset.autoReviewCarousel === "true") return;
 
         const cards = carousel.querySelectorAll(".review-card");
