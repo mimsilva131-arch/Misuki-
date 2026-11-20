@@ -31,9 +31,22 @@
                     ? "/reviews/replies/" + encodeURIComponent(voteId) + "/vote"
                     : "/reviews/" + encodeURIComponent(voteId) + "/vote";
 
+                const requestedVote = Number(button.dataset.vote);
+                const like = group.querySelector(".review-vote-like");
+                const dislike = group.querySelector(".review-vote-dislike");
+
+                // Give immediate visual feedback; the network request reconciles the counts afterwards.
                 group.querySelectorAll(".review-vote").forEach(function (item) {
                     item.disabled = true;
                 });
+                if (like) {
+                    like.classList.toggle("is-active", requestedVote === 1);
+                    like.setAttribute("aria-pressed", requestedVote === 1 ? "true" : "false");
+                }
+                if (dislike) {
+                    dislike.classList.toggle("is-active", requestedVote === -1);
+                    dislike.setAttribute("aria-pressed", requestedVote === -1 ? "true" : "false");
+                }
 
                 const body = new URLSearchParams();
                 body.set("vote", button.dataset.vote);
