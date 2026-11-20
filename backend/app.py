@@ -3607,6 +3607,18 @@ def logout():
 # REVIEWS
 # =========================================================
 
+def review_avatar_url(user_id, avatar):
+    """Return a browser-ready Discord avatar URL for review content."""
+    if not avatar:
+        return None
+    avatar_text = str(avatar).strip()
+    if avatar_text.startswith(("http://", "https://", "data:")):
+        return avatar_text
+    if user_id and avatar_text:
+        return f"https://cdn.discordapp.com/avatars/{user_id}/{avatar_text}.png?size=128"
+    return None
+
+
 def get_review_replies(review_id, user_id=None):
     if not DATABASE_URL:
         return []
@@ -3656,7 +3668,7 @@ def get_review_replies(review_id, user_id=None):
             "review_id": row["review_id"],
             "user_id": row["user_id"],
             "username": row["username"],
-            "avatar": row["avatar"],
+            "avatar": review_avatar_url(row["user_id"], row["avatar"]),
             "reply": row["reply"],
             "created_at": row["created_at"],
             "likes": int(row["likes"] or 0),
@@ -3785,7 +3797,7 @@ def get_random_reviews(
                 row["username"],
 
             "avatar":
-                row["avatar"],
+                review_avatar_url(row["user_id"], row["avatar"]),
 
             "review":
                 row["review"],
@@ -4028,38 +4040,15 @@ def get_all_advertisements():
 # TEMPORARY REVIEW AUTHORIZATION
 # =========================================================
 def user_can_review():
-    """Allow reviews temporarily for users who manage a server where Misuki is installed."""
+    """Return True only for a logged-in user with an active Misuki license."""
     user = get_user()
-    if not user:
+    if not user or not session.get("access_token"):
         return False
-
-    access_token = session.get("access_token")
-    if not access_token:
-        return False
-
     try:
-        user_guilds = get_user_guilds()
-        bot_guild_ids = {
-            str(guild.get("id"))
-            for guild in get_bot_guilds()
-            if guild.get("id")
-        }
-
-        for guild in user_guilds:
-            guild_id = str(guild.get("id"))
-            if guild_id not in bot_guild_ids:
-                continue
-
-            if str(guild.get("owner", False)).lower() == "true":
-                return True
-
-            if can_manage_guild(guild):
-                return True
-
+        return user_has_license()
     except Exception as error:
-        print(f"⚠️ Review authorization check error: {error}")
-
-    return False
+        print(f"⚠️ Review license check error: {error}")
+        return False
 
 
 # USER HAS ACTIVE LICENSE — OPTIMIZED
@@ -4152,11 +4141,14 @@ def index():
         get_active_advertisements()
     )
 
+    can_review = user_can_review() if user else False
+
     return render_template(
         "index.html",
         user=user,
         reviews=reviews,
         advertisements=advertisements,
+        can_review=can_review,
         is_admin=is_admin
     )
 
@@ -4538,9 +4530,7 @@ def reviews():
 
     if user:
 
-        can_review = (
-            user_can_review()
-        )
+        can_review = user_can_review()
 
     return render_template(
         "reviews.html",
@@ -4557,6 +4547,8 @@ def reply_to_review(review_id):
     if not user:
         session["next_url"] = "/reviews"
         return redirect("/login")
+    if not user_can_review():
+        return error_page("🔒 License required", "You need an active Misuki license to reply to reviews.", 403, user)
     reply_text = (request.form.get("reply") or "").strip()
     if not reply_text:
         return error_page("Reply error", "The reply cannot be empty.", 400, user)
@@ -4618,6 +4610,8 @@ def vote_review(review_id):
 
     if not user:
         return jsonify({"ok": False, "login_required": True}), 401
+    if not user_can_review():
+        return jsonify({"ok": False, "license_required": True}), 403
 
     vote_raw = (request.form.get("vote") or "").strip()
     if vote_raw not in ("1", "-1"):
@@ -4699,6 +4693,8 @@ def vote_review_reply(reply_id):
 
     if not user:
         return jsonify({"ok": False, "login_required": True}), 401
+    if not user_can_review():
+        return jsonify({"ok": False, "license_required": True}), 403
 
     vote_raw = (request.form.get("vote") or "").strip()
     if vote_raw not in ("1", "-1"):
