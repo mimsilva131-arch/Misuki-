@@ -183,6 +183,7 @@
             },
 
             reviews: {
+                section_title: "Reviews",
                 eyebrow: "COMMUNITY",
                 your_voice: "Your voice",
                 form_intro: "Share your experience with Misuki.",
@@ -340,6 +341,7 @@
                 view_documentation: "View Documentation",
                 advertisement: "Advertisement",
                 what_users_say: "⭐ What users say",
+                latest_version: "🟢 LATEST MISUKI VERSION — 15/11/2026",
                 report_problem: "🐛 Report a Problem",
                 documentation_help: "Check the documentation for information about configuring and using Misuki.",
                 report_problem_text: "Found a bug or something that isn't working correctly? Contact the Misuki support team through Discord."
@@ -656,6 +658,7 @@
             },
 
             reviews: {
+                section_title: "Avaliações",
                 eyebrow: "COMUNIDADE",
                 your_voice: "A sua opinião",
                 form_intro: "Partilhe a sua experiência com o Misuki.",
@@ -773,6 +776,7 @@
                 view_documentation: "Ver documentação",
                 advertisement: "Publicidade",
                 what_users_say: "⭐ O que dizem os utilizadores",
+                latest_version: "🟢 VERSÃO MAIS RECENTE DO MISUKI — 15/11/2026",
                 report_problem: "🐛 Reportar um problema",
                 documentation_help: "Consulte a documentação para obter informações sobre como configurar e utilizar o Misuki.",
                 report_problem_text: "Encontrou um erro ou algo que não está a funcionar corretamente? Contacte a equipa de suporte do Misuki através do Discord.",
@@ -1087,6 +1091,7 @@
             },
 
             reviews: {
+                section_title: "Bewertungen",
                 eyebrow: "COMMUNITY",
                 your_voice: "Ihre Meinung",
                 form_intro: "Teilen Sie Ihre Erfahrung mit Misuki.",
@@ -1508,6 +1513,7 @@
             },
 
             reviews: {
+                section_title: "Reseñas",
                 eyebrow: "COMUNIDAD",
                 your_voice: "Tu opinión",
                 form_intro: "Comparte tu experiencia con Misuki.",
@@ -1613,6 +1619,7 @@
                 view_documentation: "Ver documentación",
                 advertisement: "Publicidad",
                 what_users_say: "⭐ Lo que dicen los usuarios",
+                latest_version: "🟢 VERSIÓN MÁS RECIENTE DE MISUKI — 15/11/2026",
                 report_problem: "🐛 Informar de un problema",
                 documentation_help: "Consulta la documentación para obtener información sobre cómo configurar y utilizar Misuki.",
                 report_problem_text: "¿Has encontrado un error o algo no funciona correctamente? Contacta con el equipo de soporte de Misuki a través de Discord.",
@@ -1927,6 +1934,7 @@
             },
 
             reviews: {
+                section_title: "Avis",
                 eyebrow: "COMMUNAUTÉ",
                 your_voice: "Votre avis",
                 form_intro: "Partagez votre expérience avec Misuki.",
@@ -2548,7 +2556,6 @@
     const legacyTranslationExtensions = {
         en: {
             reviews: {
-                section_title: "Avis",
                 intro: "Reviews from members of Misuki communities.",
                 your_voice: "Your voice", form_intro: "Share your experience with Misuki.",
                 community_kicker: "COMMUNITY", delete: "Remove",
@@ -2571,7 +2578,6 @@
         },
         pt: {
             reviews: {
-                section_title: "Avis",
                 intro: "A opinião de membros das comunidades que utilizam o Misuki.",
                 your_voice: "A sua opinião", form_intro: "Partilhe a sua experiência com o Misuki.",
                 community_kicker: "COMUNIDADE", delete: "Remover",
@@ -2594,7 +2600,6 @@
         },
         de: {
             reviews: {
-                section_title: "Avis",
                 intro: "Bewertungen von Mitgliedern der Misuki-Communitys.",
                 your_voice: "Ihre Meinung", form_intro: "Teilen Sie Ihre Erfahrungen mit Misuki.",
                 community_kicker: "COMMUNITY", delete: "Entfernen",
@@ -2617,7 +2622,6 @@
         },
         es: {
             reviews: {
-                section_title: "Avis",
                 intro: "Opiniones de miembros de las comunidades que utilizan Misuki.",
                 your_voice: "Tu opinión", form_intro: "Comparte tu experiencia con Misuki.",
                 community_kicker: "COMUNIDAD", delete: "Eliminar",
@@ -2636,7 +2640,6 @@
         },
         fr: {
             reviews: {
-                section_title: "Avis",
                 intro: "Avis des membres des communautés qui utilisent Misuki.",
                 your_voice: "Votre avis", form_intro: "Partagez votre expérience avec Misuki.",
                 community_kicker: "COMMUNAUTÉ", delete: "Supprimer",
