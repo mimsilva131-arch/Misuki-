@@ -592,7 +592,7 @@
     display: flex;
     align-items: stretch;
     overflow-x: auto;
-    overflow-y: hidden;
+    overflow-y: clip;
     gap: 18px;
     padding: 22px max(18px, calc((100% - 55vw) / 2)) 24px;
     scroll-snap-type: x mandatory;
@@ -607,7 +607,7 @@
     transform: scale(.92);
     opacity: .72;
     filter: saturate(.82);
-    transition: transform .32s cubic-bezier(.2,.8,.2,1), opacity .32s ease, filter .32s ease, box-shadow .32s ease;
+    transition: transform .18s cubic-bezier(.2,.9,.3,1.05), opacity .18s ease, filter .18s ease, box-shadow .18s ease;
 }
 .home-page .review-grid .review-card.is-carousel-center {
     transform: scale(1.035);
