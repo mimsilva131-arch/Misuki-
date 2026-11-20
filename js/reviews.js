@@ -266,17 +266,80 @@
         });
 
         document.querySelectorAll('form[data-single-submit="true"]').forEach(function (writeForm) {
-            writeForm.addEventListener("submit", function (event) {
+            writeForm.addEventListener("submit", async function (event) {
+                event.preventDefault();
+
                 if (writeForm.dataset.submitting === "true") {
-                    event.preventDefault();
                     return;
                 }
+
                 writeForm.dataset.submitting = "true";
-                writeForm.querySelectorAll('button[type="submit"]').forEach(function (submitButton) {
+
+                const submitButtons = Array.from(
+                    writeForm.querySelectorAll('button[type="submit"]')
+                );
+
+                submitButtons.forEach(function (submitButton) {
                     submitButton.disabled = true;
+                    submitButton.dataset.originalText = submitButton.textContent;
                     submitButton.style.opacity = "0.7";
                     submitButton.style.cursor = "wait";
+                    submitButton.textContent = "Enviando…";
                 });
+
+                const controller = new AbortController();
+                const timeout = window.setTimeout(function () {
+                    controller.abort();
+                }, 15000);
+
+                try {
+                    const response = await fetch(writeForm.action || window.location.href, {
+                        method: "POST",
+                        body: new FormData(writeForm),
+                        credentials: "same-origin",
+                        redirect: "follow",
+                        signal: controller.signal
+                    });
+
+                    if (!response.ok) {
+                        throw new Error("Review submission returned HTTP " + response.status);
+                    }
+
+                    window.location.assign(response.url || "/reviews");
+                } catch (error) {
+                    console.error("Misuki review submission error:", error);
+
+                    if (error && error.name === "AbortError") {
+                        window.location.reload();
+                        return;
+                    }
+
+                    writeForm.dataset.submitting = "false";
+
+                    submitButtons.forEach(function (submitButton) {
+                        submitButton.disabled = false;
+                        submitButton.style.opacity = "";
+                        submitButton.style.cursor = "";
+                        if (submitButton.dataset.originalText) {
+                            submitButton.textContent = submitButton.dataset.originalText;
+                            delete submitButton.dataset.originalText;
+                        }
+                    });
+
+                    let errorMessage = writeForm.querySelector(".review-submit-error");
+                    if (!errorMessage) {
+                        errorMessage = document.createElement("p");
+                        errorMessage.className = "review-submit-error";
+                        errorMessage.setAttribute("role", "alert");
+                        errorMessage.style.marginTop = "12px";
+                        errorMessage.style.color = "#ff9b9b";
+                        writeForm.appendChild(errorMessage);
+                    }
+
+                    errorMessage.textContent = "Não foi possível enviar a avaliação. Tente novamente.";
+                } finally {
+                    window.clearTimeout(timeout);
+                }
             });
         });
 
