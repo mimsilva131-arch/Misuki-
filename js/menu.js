@@ -140,6 +140,55 @@
             }
         }
 
+        /* =====================================================
+           TARGETED PAGE PREFETCH
+           Only prefetch a page after the user deliberately hovers a
+           same-origin navigation link. This avoids the old blanket
+           menu prefetch while making desktop navigation feel instant.
+        ===================================================== */
+        const prefetchedUrls = new Set();
+
+        function prefetchPage(link) {
+            if (!link || !window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+                return;
+            }
+
+            const href = link.getAttribute("href");
+            if (!href || href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("tel:")) {
+                return;
+            }
+
+            let url;
+            try {
+                url = new URL(href, window.location.href);
+            } catch (error) {
+                return;
+            }
+
+            if (url.origin !== window.location.origin || url.pathname === window.location.pathname) {
+                return;
+            }
+
+            url.hash = "";
+            const normalized = url.href;
+            if (prefetchedUrls.has(normalized)) return;
+
+            prefetchedUrls.add(normalized);
+
+            const hint = document.createElement("link");
+            hint.rel = "prefetch";
+            hint.as = "document";
+            hint.href = normalized;
+            hint.dataset.misukiPrefetch = "true";
+            document.head.appendChild(hint);
+        }
+
+        document.querySelectorAll(".menu a[href]").forEach(function (link) {
+            link.addEventListener("pointerenter", function () {
+                prefetchPage(link);
+            }, { passive: true, once: true });
+        });
+
         window.MisukiMenu = {
             open: openMenu,
             close: closeMenu,
