@@ -687,17 +687,6 @@
     65% { transform: scale(1.08); }
     100% { transform: scale(1); }
 }
-.review-vote-icon-dislike {
-    transform: scaleY(-1);
-}
-.review-vote-icon-dislike.review-vote-icon {
-    animation-name: misuki-vote-icon-pop-dislike;
-}
-@keyframes misuki-vote-icon-pop-dislike {
-    0% { transform: scaleY(-1) scale(.72); }
-    65% { transform: scaleY(-1) scale(1.12); }
-    100% { transform: scaleY(-1) scale(1); }
-}
 @media (prefers-reduced-motion: reduce) {
     .review-vote.is-active,
     .review-vote.is-active .review-vote-icon {
@@ -718,9 +707,6 @@
     stroke-width: 1.7;
     stroke-linecap: round;
     stroke-linejoin: round;
-}
-.review-vote-icon-dislike {
-    transform: scaleY(-1);
 }
 .review-vote-label {
     display: none !important;
