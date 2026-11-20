@@ -3712,7 +3712,8 @@ def get_random_reviews(
                                 WHEN CAST(user_id AS TEXT) = %s THEN 0
                                 ELSE 1
                             END,
-                            RANDOM()
+                            created_at DESC,
+                            id DESC
                         LIMIT %s
                         """,
                         (
@@ -3736,7 +3737,7 @@ def get_random_reviews(
                             COALESCE((SELECT COUNT(*) FROM review_votes rv WHERE rv.review_id = reviews.id AND rv.vote = -1), 0) AS dislikes,
                             COALESCE((SELECT rv.vote FROM review_votes rv WHERE rv.review_id = reviews.id AND rv.user_id = %s LIMIT 1), 0) AS user_vote
                         FROM reviews
-                        ORDER BY RANDOM()
+                        ORDER BY created_at DESC, id DESC
                         LIMIT %s
                         """,
                         (
