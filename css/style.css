@@ -2789,3 +2789,8 @@ a:focus-visible,
         transition-duration: .14s;
     }
 }
+
+
+/* Fast-feeling navigation: keep interactions immediate without heavy animation work */
+html { scroll-behavior: auto; }
+button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
