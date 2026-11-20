@@ -340,6 +340,13 @@ def format_short_datetime(value):
 
 app.jinja_env.filters["short_datetime"] = format_short_datetime
 
+# A fresh token is rendered into every write form. The database consumes it
+# atomically, so repeated clicks/retries with the same request token can never
+# create duplicate submissions.
+app.jinja_env.globals["submission_token"] = (
+    lambda: secrets.token_urlsafe(32)
+)
+
 
 @app.context_processor
 def inject_template_helpers():
@@ -618,6 +625,43 @@ def create_database():
                         username TEXT NOT NULL,
                         avatar TEXT,
                         reply TEXT NOT NULL,
+                        created_at TEXT NOT NULL
+                    )
+                    """
+                )
+
+                cursor.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS review_votes (
+                        id SERIAL PRIMARY KEY,
+                        review_id INTEGER NOT NULL REFERENCES reviews(id) ON DELETE CASCADE,
+                        user_id TEXT NOT NULL,
+                        vote SMALLINT NOT NULL CHECK (vote IN (-1, 1)),
+                        created_at TEXT NOT NULL,
+                        UNIQUE (review_id, user_id)
+                    )
+                    """
+                )
+
+                cursor.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS review_reply_votes (
+                        id SERIAL PRIMARY KEY,
+                        reply_id INTEGER NOT NULL REFERENCES review_replies(id) ON DELETE CASCADE,
+                        user_id TEXT NOT NULL,
+                        vote SMALLINT NOT NULL CHECK (vote IN (-1, 1)),
+                        created_at TEXT NOT NULL,
+                        UNIQUE (reply_id, user_id)
+                    )
+                    """
+                )
+
+                cursor.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS submission_tokens (
+                        token TEXT PRIMARY KEY,
+                        user_id TEXT NOT NULL,
+                        kind TEXT NOT NULL,
                         created_at TEXT NOT NULL
                     )
                     """
@@ -3550,25 +3594,49 @@ def logout():
 # REVIEWS
 # =========================================================
 
-def get_review_replies(review_id):
+def get_review_replies(review_id, user_id=None):
     if not DATABASE_URL:
         return []
+
     try:
         with database_connection() as connection:
             with connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
                 cursor.execute(
                     """
-                    SELECT id, review_id, user_id, username, avatar, reply, created_at
-                    FROM review_replies
-                    WHERE review_id = %s
-                    ORDER BY created_at ASC, id ASC
+                    SELECT
+                        r.id,
+                        r.review_id,
+                        r.user_id,
+                        r.username,
+                        r.avatar,
+                        r.reply,
+                        r.created_at,
+                        COALESCE(SUM(CASE WHEN v.vote = 1 THEN 1 ELSE 0 END), 0) AS likes,
+                        COALESCE(SUM(CASE WHEN v.vote = -1 THEN 1 ELSE 0 END), 0) AS dislikes,
+                        COALESCE(
+                            MAX(
+                                CASE
+                                    WHEN v.user_id = %s THEN v.vote
+                                    ELSE NULL
+                                END
+                            ),
+                            0
+                        ) AS user_vote
+                    FROM review_replies r
+                    LEFT JOIN review_reply_votes v ON v.reply_id = r.id
+                    WHERE r.review_id = %s
+                    GROUP BY
+                        r.id, r.review_id, r.user_id, r.username,
+                        r.avatar, r.reply, r.created_at
+                    ORDER BY r.created_at ASC, r.id ASC
                     """,
-                    (review_id,)
+                    (str(user_id) if user_id else "", review_id)
                 )
                 rows = cursor.fetchall()
     except Exception as error:
         print(f"❌ Review replies database error: {error}")
         return []
+
     return [
         {
             "id": row["id"],
@@ -3577,7 +3645,10 @@ def get_review_replies(review_id):
             "username": row["username"],
             "avatar": row["avatar"],
             "reply": row["reply"],
-            "created_at": row["created_at"]
+            "created_at": row["created_at"],
+            "likes": int(row["likes"] or 0),
+            "dislikes": int(row["dislikes"] or 0),
+            "user_vote": int(row["user_vote"] or 0)
         }
         for row in rows
     ]
@@ -3631,7 +3702,10 @@ def get_random_reviews(
                             review,
                             rating,
                             created_at,
-                            updated_at
+                            updated_at,
+                            COALESCE((SELECT COUNT(*) FROM review_votes rv WHERE rv.review_id = reviews.id AND rv.vote = 1), 0) AS likes,
+                            COALESCE((SELECT COUNT(*) FROM review_votes rv WHERE rv.review_id = reviews.id AND rv.vote = -1), 0) AS dislikes,
+                            COALESCE((SELECT rv.vote FROM review_votes rv WHERE rv.review_id = reviews.id AND rv.user_id = %s LIMIT 1), 0) AS user_vote
                         FROM reviews
                         ORDER BY
                             CASE
@@ -3657,7 +3731,10 @@ def get_random_reviews(
                             review,
                             rating,
                             created_at,
-                            updated_at
+                            updated_at,
+                            COALESCE((SELECT COUNT(*) FROM review_votes rv WHERE rv.review_id = reviews.id AND rv.vote = 1), 0) AS likes,
+                            COALESCE((SELECT COUNT(*) FROM review_votes rv WHERE rv.review_id = reviews.id AND rv.vote = -1), 0) AS dislikes,
+                            COALESCE((SELECT rv.vote FROM review_votes rv WHERE rv.review_id = reviews.id AND rv.user_id = %s LIMIT 1), 0) AS user_vote
                         FROM reviews
                         ORDER BY RANDOM()
                         LIMIT %s
@@ -3708,8 +3785,14 @@ def get_random_reviews(
 
             "edited":
                 bool(row.get("updated_at")),
+            "likes":
+                int(row.get("likes") or 0),
+            "dislikes":
+                int(row.get("dislikes") or 0),
+            "user_vote":
+                int(row.get("user_vote") or 0),
             "replies":
-                get_review_replies(row["id"])
+                get_review_replies(row["id"], user_id)
         })
 
     return reviews
@@ -4463,12 +4546,32 @@ def reply_to_review(review_id):
         return error_page("Reply error", "The reply cannot be empty.", 400, user)
     if len(reply_text) > 1000:
         return error_page("Reply error", "The reply is too long.", 400, user)
+    submission_token = (request.form.get("submission_token") or "").strip()
+
+    if not submission_token:
+        return error_page("Reply error", "The reply request is invalid.", 400, user)
+
     try:
         with database_connection() as connection:
             with connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
+                cursor.execute(
+                    """
+                    INSERT INTO submission_tokens (token, user_id, kind, created_at)
+                    VALUES (%s, %s, 'review_reply', %s)
+                    ON CONFLICT (token) DO NOTHING
+                    RETURNING token
+                    """,
+                    (submission_token, str(user.get("id", "")), utc_now().isoformat())
+                )
+                token_row = cursor.fetchone()
+                if not token_row:
+                    connection.rollback()
+                    return redirect("/reviews")
+
                 cursor.execute("SELECT id FROM reviews WHERE id = %s LIMIT 1", (review_id,))
                 review = cursor.fetchone()
                 if not review:
+                    connection.rollback()
                     return error_page("Review not found", "This review no longer exists.", 404, user)
                 cursor.execute(
                     """
@@ -4491,6 +4594,164 @@ def reply_to_review(review_id):
         print(f"❌ Review reply error: {error}")
         return error_page("Reply error", "The reply could not be created.", 500, user)
     return redirect("/reviews")
+
+
+@app.route("/reviews/<int:review_id>/vote", methods=["POST"])
+def vote_review(review_id):
+    user = get_user()
+
+    if not user:
+        return jsonify({"ok": False, "login_required": True}), 401
+
+    vote_raw = (request.form.get("vote") or "").strip()
+    if vote_raw not in ("1", "-1"):
+        return jsonify({"ok": False, "error": "Invalid vote."}), 400
+
+    try:
+        with database_connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "SELECT id FROM reviews WHERE id = %s LIMIT 1",
+                    (review_id,)
+                )
+                if not cursor.fetchone():
+                    return jsonify({"ok": False, "error": "Review not found."}), 404
+
+                cursor.execute(
+                    """
+                    SELECT vote
+                    FROM review_votes
+                    WHERE review_id = %s AND user_id = %s
+                    LIMIT 1
+                    """,
+                    (review_id, str(user.get("id", "")))
+                )
+                existing = cursor.fetchone()
+
+                if existing and int(existing[0]) == int(vote_raw):
+                    cursor.execute(
+                        "DELETE FROM review_votes WHERE review_id = %s AND user_id = %s",
+                        (review_id, str(user.get("id", "")))
+                    )
+                    current_vote = 0
+                else:
+                    cursor.execute(
+                        """
+                        INSERT INTO review_votes (review_id, user_id, vote, created_at)
+                        VALUES (%s, %s, %s, %s)
+                        ON CONFLICT (review_id, user_id)
+                        DO UPDATE SET vote = EXCLUDED.vote
+                        """,
+                        (
+                            review_id,
+                            str(user.get("id", "")),
+                            int(vote_raw),
+                            utc_now().isoformat()
+                        )
+                    )
+                    current_vote = int(vote_raw)
+
+                cursor.execute(
+                    """
+                    SELECT
+                        COALESCE(SUM(CASE WHEN vote = 1 THEN 1 ELSE 0 END), 0),
+                        COALESCE(SUM(CASE WHEN vote = -1 THEN 1 ELSE 0 END), 0)
+                    FROM review_votes
+                    WHERE review_id = %s
+                    """,
+                    (review_id,)
+                )
+                likes, dislikes = cursor.fetchone()
+
+            connection.commit()
+
+        return jsonify({
+            "ok": True,
+            "likes": int(likes or 0),
+            "dislikes": int(dislikes or 0),
+            "user_vote": current_vote
+        })
+
+    except Exception as error:
+        print(f"❌ Review vote error: {error}")
+        return jsonify({"ok": False, "error": "Vote could not be saved."}), 500
+
+
+@app.route("/reviews/replies/<int:reply_id>/vote", methods=["POST"])
+def vote_review_reply(reply_id):
+    user = get_user()
+
+    if not user:
+        return jsonify({"ok": False, "login_required": True}), 401
+
+    vote_raw = (request.form.get("vote") or "").strip()
+    if vote_raw not in ("1", "-1"):
+        return jsonify({"ok": False, "error": "Invalid vote."}), 400
+
+    try:
+        with database_connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "SELECT id FROM review_replies WHERE id = %s LIMIT 1",
+                    (reply_id,)
+                )
+                if not cursor.fetchone():
+                    return jsonify({"ok": False, "error": "Reply not found."}), 404
+
+                user_id = str(user.get("id", ""))
+                cursor.execute(
+                    """
+                    SELECT vote
+                    FROM review_reply_votes
+                    WHERE reply_id = %s AND user_id = %s
+                    LIMIT 1
+                    """,
+                    (reply_id, user_id)
+                )
+                existing = cursor.fetchone()
+
+                if existing and int(existing[0]) == int(vote_raw):
+                    cursor.execute(
+                        "DELETE FROM review_reply_votes WHERE reply_id = %s AND user_id = %s",
+                        (reply_id, user_id)
+                    )
+                    current_vote = 0
+                else:
+                    cursor.execute(
+                        """
+                        INSERT INTO review_reply_votes (reply_id, user_id, vote, created_at)
+                        VALUES (%s, %s, %s, %s)
+                        ON CONFLICT (reply_id, user_id)
+                        DO UPDATE SET vote = EXCLUDED.vote
+                        """,
+                        (reply_id, user_id, int(vote_raw), utc_now().isoformat())
+                    )
+                    current_vote = int(vote_raw)
+
+                cursor.execute(
+                    """
+                    SELECT
+                        COALESCE(SUM(CASE WHEN vote = 1 THEN 1 ELSE 0 END), 0),
+                        COALESCE(SUM(CASE WHEN vote = -1 THEN 1 ELSE 0 END), 0)
+                    FROM review_reply_votes
+                    WHERE reply_id = %s
+                    """,
+                    (reply_id,)
+                )
+                likes, dislikes = cursor.fetchone()
+
+            connection.commit()
+
+        return jsonify({
+            "ok": True,
+            "likes": int(likes or 0),
+            "dislikes": int(dislikes or 0),
+            "user_vote": current_vote
+        })
+
+    except Exception as error:
+        print(f"❌ Review reply vote error: {error}")
+        return jsonify({"ok": False, "error": "Vote could not be saved."}), 500
 
 
 @app.route("/reviews/<int:review_id>/edit", methods=["POST"])
@@ -5901,6 +6162,16 @@ def submit_review():
             user
         )
 
+    submission_token = (request.form.get("submission_token") or "").strip()
+
+    if not submission_token:
+        return error_page(
+            "Review Error",
+            "The review request is invalid.",
+            400,
+            user
+        )
+
     review = request.form.get(
         "review",
         ""
@@ -5983,6 +6254,27 @@ def submit_review():
         with database_connection() as connection:
 
             with connection.cursor() as cursor:
+
+                cursor.execute(
+                    """
+                    INSERT INTO submission_tokens
+                    (token, user_id, kind, created_at)
+                    VALUES (%s, %s, 'review', %s)
+                    ON CONFLICT (token) DO NOTHING
+                    RETURNING token
+                    """,
+                    (
+                        submission_token,
+                        user_id,
+                        utc_now().isoformat()
+                    )
+                )
+
+                token_row = cursor.fetchone()
+
+                if not token_row:
+                    connection.rollback()
+                    return redirect("/reviews")
 
                 cursor.execute(
                     """
