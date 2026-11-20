@@ -187,68 +187,6 @@ header {
 
 
 /* =========================================================
-   MENU SECTIONS
-   ========================================================= */
-
-.menu-section {
-    margin-top: 22px;
-    margin-bottom: 7px;
-
-    color: #727d92;
-
-    font-size: 11px;
-    font-weight: 700;
-
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.menu a {
-    display: block;
-
-    margin: 3px 0;
-
-    padding: 12px 14px;
-
-    border-radius: 10px;
-
-    color: #dce2ef;
-
-    text-decoration: none;
-
-    transition:
-        background 0.2s ease,
-        color 0.2s ease,
-        transform 0.2s ease;
-}
-
-.menu a:hover {
-    background: rgba(100, 140, 255, 0.10);
-
-    color: #ffffff;
-
-    transform: translateX(4px);
-}
-
-.menu .discord-login {
-    margin-top: 8px;
-
-    background: rgba(88, 101, 242, 0.14);
-
-    color: #aeb8ff;
-}
-
-.menu .discord-login:hover {
-    background: rgba(88, 101, 242, 0.24);
-    color: white;
-}
-
-body.menu-open {
-    overflow: hidden;
-}
-
-
-/* =========================================================
    HERO
    ========================================================= */
 
@@ -966,10 +904,6 @@ footer {
 
     footer {
         width: calc(100% - 30px);
-    }
-
-    .menu {
-        padding: 24px 20px;
     }
 
     .card {
