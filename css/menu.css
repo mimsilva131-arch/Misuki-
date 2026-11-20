@@ -99,8 +99,8 @@ body.menu-open .hamburger {
     z-index: 10990;
 
     transition:
-        opacity 0.3s ease,
-        visibility 0.3s ease;
+        opacity 0.2s ease,
+        visibility 0.2s ease;
 }
 
 .overlay.show,
@@ -149,8 +149,8 @@ body.menu-open .hamburger {
     z-index: 11000;
 
     transition:
-        transform 0.3s ease,
-        visibility 0.3s ease;
+        transform 0.22s cubic-bezier(.2,.8,.2,1),
+        visibility 0.22s ease;
 }
 
 .menu.open,
