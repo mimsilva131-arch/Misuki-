@@ -627,7 +627,10 @@
 .review-vote-label { display:none; }
 .review-votes-readonly { gap:10px; }
 .review-votes-readonly .review-vote-count-readonly { min-width:34px; min-height:34px; padding:0 10px; border:1px solid rgba(255,255,255,.38); border-radius:999px; display:inline-flex; align-items:center; justify-content:center; color:#fff; }
-@media (max-width:680px) { .home-page .review-grid .review-card { flex-basis:min(340px,86vw); } .review-card .review-text { min-height:95px; } }
+@media (max-width:680px) {
+    .home-page .review-grid .review-card { flex-basis:min(420px,92vw); }
+    .review-card .review-text { min-height:95px; }
+}
 
 
 /* REVIEW VOTES — clean outlined thumbs, inspired by the supplied reference */
@@ -779,8 +782,12 @@
 
 /* HOMEPAGE REVIEW CAROUSEL — display-only cards */
 .home-page .review-grid {
-    touch-action: none;
-    overscroll-behavior: none;
+    /* The carousel itself only accepts vertical touch gestures.
+       Vertical swipes continue scrolling the page; horizontal touch
+       dragging is intentionally ignored. Auto-advance remains JS-driven. */
+    touch-action: pan-y;
+    overscroll-behavior-x: none;
+    overscroll-behavior-y: auto;
     -webkit-user-select: none;
     user-select: none;
 }
