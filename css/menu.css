@@ -1044,3 +1044,18 @@ header.container {
         padding-right: 14px;
     }
 }
+
+
+/* Selected language — always obvious */
+.language-dropdown button.selected {
+    background: rgba(100, 140, 255, 0.16);
+    color: #ffffff;
+    box-shadow: inset 2px 0 0 rgba(114, 137, 218, 0.85);
+}
+.language-dropdown button.selected .language-code {
+    color: #aeb8ff;
+    font-weight: 800;
+}
+.language-dropdown button {
+    min-height: 42px;
+}
