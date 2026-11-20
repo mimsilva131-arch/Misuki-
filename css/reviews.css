@@ -591,16 +591,12 @@
 .home-page .review-grid {
     display: flex;
     align-items: stretch;
-    overflow-x: auto;
-    overflow-y: clip;
+    overflow-x: hidden;
+    overflow-y: visible;
     gap: 18px;
     padding: 22px max(18px, calc((100% - 55vw) / 2)) 24px;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+
 }
-.home-page .review-grid::-webkit-scrollbar { display: none; }
 .home-page .review-grid .review-card {
     flex: 0 0 min(560px, 55vw);
     scroll-snap-align: center;
