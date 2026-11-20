@@ -610,6 +610,7 @@
     margin-top: 12px;
 }
 .review-vote {
+    -webkit-tap-highlight-color: transparent;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -626,7 +627,7 @@
     font-weight: 700;
     cursor: pointer;
     box-shadow: none !important;
-    transition: transform .14s ease, border-color .14s ease, background .14s ease, opacity .14s ease;
+    transition: transform .16s cubic-bezier(.2,.8,.2,1), border-color .16s ease, background .16s ease, opacity .16s ease;
 }
 .review-vote:hover:not(:disabled) {
     transform: translateY(-1px);
@@ -635,24 +636,25 @@
     color: #fff !important;
 }
 .review-vote.is-active {
-    transform: translateY(-1px);
+    transform: translateY(-1px) scale(1.02);
     border-color: #fff !important;
-    background: #fff !important;
-    color: #0b0d14 !important;
+    background: transparent !important;
+    color: #fff !important;
     animation: misuki-vote-pop .22s cubic-bezier(.2,.9,.3,1.35);
 }
 .review-vote.is-active .review-vote-icon {
-    stroke: #0b0d14;
+    fill: #fff;
+    stroke: #fff;
     animation: misuki-vote-icon-pop .22s cubic-bezier(.2,.9,.3,1.35);
 }
 @keyframes misuki-vote-pop {
-    0% { transform: translateY(-1px) scale(.88); }
-    65% { transform: translateY(-1px) scale(1.08); }
-    100% { transform: translateY(-1px) scale(1); }
+    0% { transform: translateY(-1px) scale(.92); }
+    65% { transform: translateY(-1px) scale(1.06); }
+    100% { transform: translateY(-1px) scale(1.02); }
 }
 @keyframes misuki-vote-icon-pop {
-    0% { transform: scale(.72); }
-    65% { transform: scale(1.12); }
+    0% { transform: scale(.82); }
+    65% { transform: scale(1.08); }
     100% { transform: scale(1); }
 }
 .review-vote-icon-dislike {
