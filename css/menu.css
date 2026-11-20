@@ -631,3 +631,22 @@ header.container {
         display: none !important;
     }
 }
+
+
+/* FINAL LANGUAGE SELECTOR INTERACTION */
+.language-selector,
+.language-selector .language-button {
+    pointer-events: auto !important;
+}
+.language-dropdown {
+    pointer-events: none;
+}
+.language-selector.open .language-dropdown,
+.language-selector.active .language-dropdown,
+.language-dropdown.show {
+    pointer-events: auto !important;
+}
+.language-dropdown button {
+    pointer-events: auto !important;
+    touch-action: manipulation;
+}
