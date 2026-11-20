@@ -589,14 +589,50 @@
 .review-reply-actions button { min-height:35px; padding:0 12px; border-radius:9px; border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.05); color:#eef0f7; font:inherit; font-size:.76rem; font-weight:700; cursor:pointer; }
 .review-reply-submit { border-color:rgba(143,156,255,.42) !important; background:rgba(88,101,242,.72) !important; }
 .home-page .review-grid {
-    display: flex;
-    align-items: stretch;
+    display: block;
+    position: relative;
+    overflow: hidden;
     overflow-x: hidden;
     overflow-y: visible;
-    gap: 18px;
-    padding: 22px max(18px, calc((100% - 55vw) / 2)) 24px;
-
+    gap: 0;
+    padding: 22px 0 24px;
+    touch-action: pan-y;
+    overscroll-behavior-x: none;
+    overscroll-behavior-y: auto;
+    -webkit-user-select: none;
+    user-select: none;
 }
+
+.home-page .review-carousel-track {
+    display: flex;
+    align-items: stretch;
+    gap: 18px;
+    width: max-content;
+    will-change: transform;
+}
+
+.home-page .review-grid .review-card {
+    flex: 0 0 min(560px, 55vw);
+    scroll-snap-align: center;
+    transform: scale(.92);
+    opacity: .72;
+    filter: saturate(.82);
+    transition: transform .52s cubic-bezier(.22,.7,.25,1), opacity .52s ease, filter .52s ease, box-shadow .52s ease;
+}
+
+.home-page .review-grid .review-card.is-carousel-center {
+    transform: scale(1.035);
+    opacity: 1;
+    filter: saturate(1);
+    z-index: 2;
+    box-shadow: 0 22px 58px rgba(0,0,0,.22);
+}
+
+.home-page .review-grid .review-card.is-carousel-side {
+    transform: scale(.92);
+    opacity: .72;
+}
+
 .home-page .review-grid .review-card {
     flex: 0 0 min(560px, 55vw);
     scroll-snap-align: center;
@@ -625,12 +661,18 @@
 .review-votes-readonly .review-vote-count-readonly { min-width:34px; min-height:34px; padding:0 10px; border:1px solid rgba(255,255,255,.38); border-radius:999px; display:inline-flex; align-items:center; justify-content:center; color:#fff; }
 @media (max-width:680px) {
     .home-page .review-grid {
-        padding-left: 8px;
-        padding-right: 8px;
+        padding-left: 0;
+        padding-right: 0;
     }
+
     .home-page .review-grid .review-card {
         flex-basis: min(420px, 88vw);
     }
+
+    .home-page .review-carousel-track {
+        gap: 14px;
+    }
+
     .review-card .review-text { min-height:95px; }
 }
 
