@@ -2508,3 +2508,58 @@ main {
         scroll-behavior: auto;
     }
 }
+
+
+/* Notification dropdown — mobile-safe geometry */
+.notification-dropdown {
+    box-sizing: border-box;
+    max-width: calc(100vw - 20px);
+}
+.notification-dropdown-header {
+    min-width: 0;
+}
+.notification-dropdown-header strong {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+.notification-enable-button {
+    flex: 0 1 auto;
+    max-width: 48%;
+    white-space: normal;
+    line-height: 1.25;
+    text-align: center;
+}
+.notification-item-body {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+@media (max-width: 600px) {
+    .notification-dropdown {
+        position: fixed;
+        top: 74px;
+        right: 10px;
+        left: 10px;
+        width: auto;
+        max-width: none;
+        max-height: min(70vh, 520px);
+        overflow: hidden;
+    }
+    .notification-dropdown-header {
+        align-items: flex-start;
+        padding: 12px;
+    }
+    .notification-list {
+        max-height: calc(min(70vh, 520px) - 58px);
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+    .notification-item {
+        padding: 13px 12px;
+    }
+    .notification-item-body {
+        display: block;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+    }
+}
