@@ -118,7 +118,8 @@ Misuki — Reviews
                                 <time datetime="{{ review.updated_at if review.edited else review.created_at }}">{{ (review.updated_at if review.edited else review.created_at)|short_datetime }}</time>{% if review.edited %} <small class="review-edited" data-i18n="reviews.edited">(editado)</small>{% endif %}
                             </div>
 
-                            <div class="review-votes" data-vote-type="review" data-vote-id="{{ review.id }}">
+                            <div class="review-votes{% if not can_review %} review-votes-readonly{% endif %}" data-vote-type="review" data-vote-id="{{ review.id }}">
+                                {% if can_review %}
                                 <button type="button" class="review-vote review-vote-like{% if review.user_vote == 1 %} is-active{% endif %}" data-vote="1" aria-pressed="{{ 'true' if review.user_vote == 1 else 'false' }}" data-i18n-attr="aria-label:reviews.like,title:reviews.like" title="Like">
                                     <span aria-hidden="true">👍</span>
                                     <span class="review-vote-label" data-i18n="reviews.like">Gosto</span>
@@ -129,6 +130,10 @@ Misuki — Reviews
                                     <span class="review-vote-label" data-i18n="reviews.dislike">Não gosto</span>
                                     <span class="review-vote-count">{{ review.dislikes }}</span>
                                 </button>
+                                {% else %}
+                                    <span class="review-vote-count review-vote-count-readonly">{{ review.likes }}</span>
+                                    <span class="review-vote-count review-vote-count-readonly">{{ review.dislikes }}</span>
+                                {% endif %}
                             </div>
 
                             <div class="review-replies">
@@ -146,24 +151,29 @@ Misuki — Reviews
                                                 </div>
                                                 <div class="review-reply-text">{{ reply.reply }}</div>
                                                 <time class="review-reply-date" datetime="{{ reply.created_at }}">{{ reply.created_at|short_datetime }}</time>
-                                                <div class="review-votes review-reply-votes">
-                                                    <button type="button" class="review-vote review-vote-like{% if reply.user_vote == 1 %} is-active{% endif %}" data-vote="1" aria-pressed="{{ 'true' if reply.user_vote == 1 else 'false' }}" data-i18n-attr="aria-label:reviews.like" title="Like">
-                                                        <span aria-hidden="true">👍</span>
-                                                        <span class="review-vote-label" data-i18n="reviews.like">Gosto</span>
-                                                        <span class="review-vote-count">{{ reply.likes }}</span>
-                                                    </button>
-                                                    <button type="button" class="review-vote review-vote-dislike{% if reply.user_vote == -1 %} is-active{% endif %}" data-vote="-1" aria-pressed="{{ 'true' if reply.user_vote == -1 else 'false' }}" data-i18n-attr="aria-label:reviews.dislike" title="Dislike">
-                                                        <span aria-hidden="true">👎</span>
-                                                        <span class="review-vote-label" data-i18n="reviews.dislike">Não gosto</span>
-                                                        <span class="review-vote-count">{{ reply.dislikes }}</span>
-                                                    </button>
+                                                <div class="review-votes review-reply-votes{% if not can_review %} review-votes-readonly{% endif %}">
+                                                    {% if can_review %}
+                                                        <button type="button" class="review-vote review-vote-like{% if reply.user_vote == 1 %} is-active{% endif %}" data-vote="1" aria-pressed="{{ 'true' if reply.user_vote == 1 else 'false' }}" data-i18n-attr="aria-label:reviews.like" title="Like">
+                                                            <span aria-hidden="true">👍</span>
+                                                            <span class="review-vote-label" data-i18n="reviews.like">Gosto</span>
+                                                            <span class="review-vote-count">{{ reply.likes }}</span>
+                                                        </button>
+                                                        <button type="button" class="review-vote review-vote-dislike{% if reply.user_vote == -1 %} is-active{% endif %}" data-vote="-1" aria-pressed="{{ 'true' if reply.user_vote == -1 else 'false' }}" data-i18n-attr="aria-label:reviews.dislike" title="Dislike">
+                                                            <span aria-hidden="true">👎</span>
+                                                            <span class="review-vote-label" data-i18n="reviews.dislike">Não gosto</span>
+                                                            <span class="review-vote-count">{{ reply.dislikes }}</span>
+                                                        </button>
+                                                    {% else %}
+                                                        <span class="review-vote-count review-vote-count-readonly">{{ reply.likes }}</span>
+                                                        <span class="review-vote-count review-vote-count-readonly">{{ reply.dislikes }}</span>
+                                                    {% endif %}
                                                 </div>
                                             </div>
                                         {% endfor %}
                                     </div>
                                 {% endif %}
-                                {% if user %}
-                                    <button type="button" class="review-reply-open" data-i18n="reviews.reply">Responder</button>
+                                {% if can_review %}
+                                    <button type="button" class="review-reply-open data-i18n="reviews.reply">Responder</button>
                                     <form method="POST" action="/reviews/{{ review.id }}/reply" class="review-reply-form" data-single-submit="true" hidden>
                                         <input type="hidden" name="submission_token" value="{{ submission_token() }}">
                                         <textarea name="reply" maxlength="1000" required data-i18n-attr="placeholder:reviews.reply_placeholder" placeholder="Escreva uma resposta..."></textarea>
