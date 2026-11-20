@@ -141,39 +141,15 @@
         let paused = false;
         let activeIndex = 0;
 
-        const setActive = function (index, shouldScroll) {
+        const setActive = function (index) {
             activeIndex = (index + cards.length) % cards.length;
 
             cards.forEach(function (card, cardIndex) {
                 card.classList.toggle("is-carousel-center", cardIndex === activeIndex);
                 card.classList.toggle("is-carousel-side", cardIndex !== activeIndex);
             });
-
-            if (shouldScroll && cards[activeIndex]) {
-                cards[activeIndex].scrollIntoView({
-                    behavior: "smooth",
-                    block: "nearest",
-                    inline: "center"
-                });
-            }
         };
 
-        const detectCenteredCard = function () {
-            const center = carousel.getBoundingClientRect().left + carousel.clientWidth / 2;
-            let closest = 0;
-            let closestDistance = Infinity;
-
-            cards.forEach(function (card, index) {
-                const rect = card.getBoundingClientRect();
-                const distance = Math.abs((rect.left + rect.width / 2) - center);
-                if (distance < closestDistance) {
-                    closestDistance = distance;
-                    closest = index;
-                }
-            });
-
-            setActive(closest, false);
-        };
 
         const stop = function () {
             if (timer) {
@@ -186,7 +162,7 @@
             stop();
             timer = setInterval(function () {
                 if (paused) return;
-                setActive(activeIndex + 1, true);
+                setActive(activeIndex + 1);
             }, 6500);
         };
 
@@ -202,7 +178,7 @@
             }, { passive: true });
         });
 
-        setActive(0, true);
+        setActive(0);
         start();
     }
 
