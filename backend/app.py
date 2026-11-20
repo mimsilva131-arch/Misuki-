@@ -6297,6 +6297,7 @@ def submit_review():
                         %s,
                         %s
                     )
+                    RETURNING id
                     """,
                     (
                         user_id,
@@ -6307,6 +6308,9 @@ def submit_review():
                         utc_now().isoformat()
                     )
                 )
+
+                created_review = cursor.fetchone()
+                created_review_id = created_review[0] if created_review else None
 
             connection.commit()
 
@@ -6322,6 +6326,9 @@ def submit_review():
             500,
             user
         )
+
+    if created_review_id:
+        return redirect(f"/reviews#review-{created_review_id}")
 
     return redirect(
         "/reviews"
