@@ -2794,3 +2794,46 @@ a:focus-visible,
 /* Fast-feeling navigation: keep interactions immediate without heavy animation work */
 html { scroll-behavior: auto; }
 button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+
+
+/* =========================================================
+   HOME — MORE HORIZONTAL MOBILE INFORMATION
+   Keep the three defining feature cards visible in a compact
+   two-column layout instead of stacking every card vertically.
+========================================================= */
+@media (max-width: 600px) {
+    .home-page .server-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .home-page .server-grid .feature-card {
+        min-width: 0;
+        padding: 16px 14px;
+    }
+
+    .home-page .server-grid .feature-card:last-child {
+        grid-column: 1 / -1;
+    }
+
+    .home-page .server-grid .feature-card h3 {
+        font-size: 16px;
+        margin-bottom: 7px;
+    }
+
+    .home-page .server-grid .feature-card p {
+        font-size: 13px;
+        line-height: 1.5;
+    }
+}
+
+@media (max-width: 380px) {
+    .home-page .server-grid {
+        gap: 10px;
+    }
+
+    .home-page .server-grid .feature-card {
+        padding: 14px 12px;
+    }
+}
