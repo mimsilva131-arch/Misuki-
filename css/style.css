@@ -2659,13 +2659,13 @@ a:focus-visible,
     }
 
     header.container {
-        width: calc(100% - 24px);
+        width: calc(100% - 16px);
         padding-top: 10px;
         padding-bottom: 10px;
     }
 
     main.container {
-        width: calc(100% - 24px);
+        width: calc(100% - 16px);
         padding-top: 20px;
         padding-bottom: 30px;
     }
@@ -2746,7 +2746,7 @@ a:focus-visible,
 @media (max-width: 380px) {
     header.container,
     main.container {
-        width: calc(100% - 20px);
+        width: calc(100% - 14px);
     }
 
     main.container {
