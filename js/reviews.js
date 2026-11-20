@@ -188,7 +188,7 @@
             timer = setInterval(function () {
                 if (paused) return;
                 setActive(activeIndex + 1, true);
-            }, 4000);
+            }, 6500);
         };
 
         ["mouseenter", "focusin"].forEach(function (eventName) {
