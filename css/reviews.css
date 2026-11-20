@@ -607,7 +607,7 @@
     transform: scale(.92);
     opacity: .72;
     filter: saturate(.82);
-    transition: transform .18s cubic-bezier(.2,.9,.3,1.05), opacity .18s ease, filter .18s ease, box-shadow .18s ease;
+    transition: transform .52s cubic-bezier(.22,.7,.25,1), opacity .52s ease, filter .52s ease, box-shadow .52s ease;
 }
 .home-page .review-grid .review-card.is-carousel-center {
     transform: scale(1.035);
