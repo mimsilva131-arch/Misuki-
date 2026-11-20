@@ -2563,3 +2563,210 @@ main {
         text-overflow: clip;
     }
 }
+
+
+/* =========================================================
+   MOBILE COMPACT MODE + CLEAN INTERACTION STATES
+   Keep the interface visually compact without making controls
+   difficult to use, and never show the browser's blue selection
+   highlight for normal UI interaction.
+========================================================= */
+
+*,
+*::before,
+*::after {
+    -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body,
+main,
+section,
+article,
+.card,
+button,
+a {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+input,
+textarea,
+select,
+[contenteditable="true"] {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+button,
+a,
+.menu a,
+.language-button,
+.language-dropdown button,
+.hamburger,
+.menu-close {
+    outline: none;
+}
+
+button:focus,
+a:focus,
+.menu a:focus,
+.language-button:focus,
+.language-dropdown button:focus,
+.hamburger:focus,
+.menu-close:focus {
+    outline: none;
+}
+
+button:focus-visible,
+a:focus-visible,
+.menu a:focus-visible,
+.language-button:focus-visible,
+.language-dropdown button:focus-visible,
+.hamburger:focus-visible,
+.menu-close:focus-visible {
+    outline: 2px solid rgba(255,255,255,.28);
+    outline-offset: 2px;
+}
+
+::selection {
+    background: rgba(114,137,218,.22);
+    color: inherit;
+}
+
+@media (max-width: 600px) {
+    body {
+        font-size: 14px;
+    }
+
+    header.container {
+        width: calc(100% - 24px);
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    main.container {
+        width: calc(100% - 24px);
+        padding-top: 20px;
+        padding-bottom: 30px;
+    }
+
+    .hero {
+        padding: 28px 0 24px;
+    }
+
+    .hero h1 {
+        font-size: clamp(30px, 9vw, 42px);
+        line-height: 1.08;
+        margin-bottom: 12px;
+    }
+
+    .hero p,
+    .section-subtitle,
+    .advertisements-subtitle,
+    .advertisement-status-intro {
+        font-size: 14px;
+        line-height: 1.55;
+    }
+
+    .section-title {
+        font-size: clamp(24px, 7vw, 30px);
+        margin-bottom: 14px;
+    }
+
+    .card,
+    .server-card,
+    .manage-card,
+    .manage-license,
+    .advertisements-empty {
+        padding: 18px 16px;
+        border-radius: 16px;
+    }
+
+    .button,
+    button,
+    input[type="submit"] {
+        min-height: 44px;
+        padding: 10px 14px;
+        font-size: 14px;
+    }
+
+    input,
+    textarea,
+    select {
+        min-height: 44px;
+        padding: 10px 12px;
+        font-size: 15px;
+    }
+
+    textarea {
+        min-height: 105px;
+    }
+
+    .server-grid,
+    .review-grid {
+        gap: 14px;
+    }
+
+    .menu {
+        width: min(350px, calc(100vw - 28px));
+        padding: 14px;
+    }
+
+    .menu a {
+        min-height: 44px;
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+
+    .menu-header {
+        padding: 10px 8px 12px;
+    }
+}
+
+@media (max-width: 380px) {
+    header.container,
+    main.container {
+        width: calc(100% - 20px);
+    }
+
+    main.container {
+        padding-top: 16px;
+        padding-bottom: 26px;
+    }
+
+    .hero {
+        padding: 22px 0 20px;
+    }
+
+    .hero h1 {
+        font-size: 29px;
+    }
+
+    .section-title {
+        font-size: 23px;
+    }
+
+    .card,
+    .server-card,
+    .manage-card,
+    .manage-license,
+    .advertisements-empty {
+        padding: 16px 14px;
+    }
+
+    .button,
+    button,
+    input[type="submit"] {
+        min-height: 42px;
+        padding: 9px 12px;
+    }
+}
+
+/* Avoid artificial animation cost during normal page changes. */
+@media (prefers-reduced-motion: no-preference) {
+    a,
+    button {
+        transition-duration: .14s;
+    }
+}
