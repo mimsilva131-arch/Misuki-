@@ -225,223 +225,6 @@
 
 
     /* =====================================================
-       MOUSE TRAIL
-    ===================================================== */
-
-    let previousX = null;
-    let previousY = null;
-
-    let trailLastTime = 0;
-
-    const TRAIL_DELAY = 10;
-    const TRAIL_DISTANCE = 3;
-
-
-    document.addEventListener(
-        "mousemove",
-        function (event) {
-
-            if (!isHome()) {
-                return;
-            }
-
-
-            const mouseX =
-                event.clientX;
-
-            const mouseY =
-                event.clientY;
-
-
-            if (
-                previousX === null ||
-                previousY === null
-            ) {
-
-                previousX = mouseX;
-                previousY = mouseY;
-
-                return;
-
-            }
-
-
-            const now =
-                performance.now();
-
-
-            if (
-                now - trailLastTime <
-                TRAIL_DELAY
-            ) {
-                return;
-            }
-
-
-            const dx =
-                mouseX - previousX;
-
-            const dy =
-                mouseY - previousY;
-
-
-            const distance =
-                Math.hypot(
-                    dx,
-                    dy
-                );
-
-
-            if (
-                distance <
-                TRAIL_DISTANCE
-            ) {
-                return;
-            }
-
-
-            createTrail(
-                previousX,
-                previousY,
-                mouseX,
-                mouseY,
-                distance
-            );
-
-
-            previousX = mouseX;
-            previousY = mouseY;
-
-            trailLastTime = now;
-
-        },
-        {
-            passive: true
-        }
-    );
-
-
-    /* =====================================================
-       CRIAR RASTO
-    ===================================================== */
-
-    function createTrail(
-        x1,
-        y1,
-        x2,
-        y2,
-        distance
-    ) {
-
-        if (!isHome()) {
-            return;
-        }
-
-
-        const line =
-            document.createElement(
-                "span"
-            );
-
-
-        line.className =
-            "misuki-mouse-trail";
-
-
-        const angle =
-            Math.atan2(
-                y2 - y1,
-                x2 - x1
-            ) *
-            180 /
-            Math.PI;
-
-
-        line.style.left =
-            x1 + "px";
-
-
-        line.style.top =
-            y1 + "px";
-
-
-        line.style.width =
-            Math.max(
-                distance,
-                4
-            ) + "px";
-
-        line.style.height = "1px";
-
-
-        line.style.setProperty(
-            "--trail-angle",
-            angle + "deg"
-        );
-
-
-        document.body.appendChild(
-            line
-        );
-
-
-        requestAnimationFrame(
-            function () {
-
-                line.classList.add(
-                    "fade"
-                );
-
-            }
-        );
-
-
-        setTimeout(
-            function () {
-
-                if (
-                    line.parentNode
-                ) {
-
-                    line.remove();
-
-                }
-
-            },
-            450
-        );
-
-    }
-
-
-    /* =====================================================
-       RESET DO RASTO
-    ===================================================== */
-
-    function resetMouse() {
-
-        previousX = null;
-        previousY = null;
-
-        trailLastTime = 0;
-
-
-        document
-            .querySelectorAll(
-                ".misuki-mouse-trail"
-            )
-            .forEach(
-                function (trail) {
-
-                    trail.remove();
-
-                }
-            );
-
-    }
-
-
-    /* =====================================================
        PAGE TRANSITION
     ===================================================== */
 
@@ -488,26 +271,10 @@
         );
 
 
-        requestAnimationFrame(
-            function () {
-
-                requestAnimationFrame(
-                    function () {
-
-                        document.documentElement.classList.remove(
-                            "misuki-page-enter"
-                        );
-
-
-                        document.documentElement.classList.add(
-                            "misuki-page-ready"
-                        );
-
-                    }
-                );
-
-            }
-        );
+        requestAnimationFrame(function () {
+            document.documentElement.classList.remove("misuki-page-enter");
+            document.documentElement.classList.add("misuki-page-ready");
+        });
 
     }
 
@@ -525,7 +292,7 @@
         window.closeMenu();
 
 
-        resetMouse();
+        
 
 
         createTransition();
@@ -541,15 +308,9 @@
         );
 
 
-        setTimeout(
-            function () {
-
-                window.location.href =
-                    url;
-
-            },
-            300
-        );
+        setTimeout(function () {
+                window.location.href = url;
+            }, 140);
 
     }
 
