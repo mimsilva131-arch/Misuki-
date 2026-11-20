@@ -624,7 +624,13 @@
 .review-votes-readonly { gap:10px; }
 .review-votes-readonly .review-vote-count-readonly { min-width:34px; min-height:34px; padding:0 10px; border:1px solid rgba(255,255,255,.38); border-radius:999px; display:inline-flex; align-items:center; justify-content:center; color:#fff; }
 @media (max-width:680px) {
-    .home-page .review-grid .review-card { flex-basis:min(420px,92vw); }
+    .home-page .review-grid {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+    .home-page .review-grid .review-card {
+        flex-basis: min(420px, 88vw);
+    }
     .review-card .review-text { min-height:95px; }
 }
 
