@@ -673,3 +673,12 @@ main > .section .review-grid .review-card { flex:0 0 min(390px,84vw); scroll-sna
 @keyframes misuki-review-spin {
     to { transform: rotate(360deg); }
 }
+
+
+/* Review opened directly after submission */
+.review-target-highlight {
+    outline: 2px solid rgba(120, 167, 255, 0.72);
+    outline-offset: 4px;
+    transition: outline-color 0.25s ease, box-shadow 0.25s ease;
+    box-shadow: 0 0 0 6px rgba(120, 167, 255, 0.08);
+}
