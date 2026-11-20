@@ -646,3 +646,30 @@ main > .section .review-grid .review-card { flex:0 0 min(390px,84vw); scroll-sna
 .homepage-review-replies {
     margin-top: 12px;
 }
+
+
+/* Stable review submit state */
+.review-submit.is-submitting {
+    position: relative;
+    pointer-events: none;
+    cursor: wait !important;
+}
+.review-submit.is-submitting::after {
+    content: "";
+    width: 14px;
+    height: 14px;
+    margin-left: 9px;
+    display: inline-block;
+    vertical-align: -2px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: misuki-review-spin .7s linear infinite;
+}
+.review-submit-error {
+    font-size: 13px;
+    line-height: 1.5;
+}
+@keyframes misuki-review-spin {
+    to { transform: rotate(360deg); }
+}
