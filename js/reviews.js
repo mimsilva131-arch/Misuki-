@@ -120,12 +120,48 @@
         const carousel = document.querySelector(".home-page .review-grid");
         if (!carousel || carousel.dataset.autoReviewCarousel === "true") return;
 
-        const cards = carousel.querySelectorAll(".review-card");
+        const cards = Array.from(carousel.querySelectorAll(".review-card"));
         if (cards.length < 2) return;
 
         carousel.dataset.autoReviewCarousel = "true";
         let timer = null;
         let paused = false;
+        let activeIndex = 0;
+        let scrollUpdateTimer = null;
+
+        const setActive = function (index, shouldScroll) {
+            activeIndex = (index + cards.length) % cards.length;
+
+            cards.forEach(function (card, cardIndex) {
+                card.classList.toggle("is-carousel-center", cardIndex === activeIndex);
+                card.classList.toggle("is-carousel-side", cardIndex !== activeIndex);
+            });
+
+            if (shouldScroll && cards[activeIndex]) {
+                cards[activeIndex].scrollIntoView({
+                    behavior: "smooth",
+                    block: "nearest",
+                    inline: "center"
+                });
+            }
+        };
+
+        const detectCenteredCard = function () {
+            const center = carousel.getBoundingClientRect().left + carousel.clientWidth / 2;
+            let closest = 0;
+            let closestDistance = Infinity;
+
+            cards.forEach(function (card, index) {
+                const rect = card.getBoundingClientRect();
+                const distance = Math.abs((rect.left + rect.width / 2) - center);
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    closest = index;
+                }
+            });
+
+            setActive(closest, false);
+        };
 
         const stop = function () {
             if (timer) {
@@ -138,18 +174,7 @@
             stop();
             timer = setInterval(function () {
                 if (paused) return;
-
-                const first = carousel.querySelector(".review-card");
-                if (!first) return;
-
-                const distance = first.getBoundingClientRect().width + 18;
-                const atEnd = carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth - 8;
-
-                if (atEnd) {
-                    carousel.scrollTo({ left: 0, behavior: "smooth" });
-                } else {
-                    carousel.scrollBy({ left: distance, behavior: "smooth" });
-                }
+                setActive(activeIndex + 1, true);
             }, 4000);
         };
 
@@ -165,6 +190,12 @@
             }, { passive: true });
         });
 
+        carousel.addEventListener("scroll", function () {
+            window.clearTimeout(scrollUpdateTimer);
+            scrollUpdateTimer = window.setTimeout(detectCenteredCard, 90);
+        }, { passive: true });
+
+        setActive(0, true);
         start();
     }
 
