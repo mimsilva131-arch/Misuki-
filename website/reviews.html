@@ -86,7 +86,7 @@ Misuki — Reviews
             {% if review_list %}
                 <div class="review-grid">
                     {% for review in review_list %}
-                        <article class="review-card">
+                        <article id="review-{{ review.id }}" class="review-card">
                             <div class="review-card-top">
                                 <div class="review-user">
                                     {% if review.avatar %}
