@@ -628,12 +628,20 @@
     box-shadow: none !important;
     transition: transform .14s ease, border-color .14s ease, background .14s ease, opacity .14s ease;
 }
-.review-vote:hover:not(:disabled),
-.review-vote.is-active {
+.review-vote:hover:not(:disabled) {
     transform: translateY(-1px);
     border-color: #fff !important;
     background: rgba(255,255,255,.075) !important;
     color: #fff !important;
+}
+.review-vote.is-active {
+    transform: translateY(-1px);
+    border-color: #fff !important;
+    background: #fff !important;
+    color: #0b0d14 !important;
+}
+.review-vote.is-active .review-vote-icon {
+    stroke: #0b0d14;
 }
 .review-vote:disabled {
     cursor: wait;
