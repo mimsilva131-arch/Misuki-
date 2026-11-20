@@ -2548,6 +2548,7 @@
     const legacyTranslationExtensions = {
         en: {
             reviews: {
+                section_title: "Avis",
                 intro: "Reviews from members of Misuki communities.",
                 your_voice: "Your voice", form_intro: "Share your experience with Misuki.",
                 community_kicker: "COMMUNITY", delete: "Remove",
@@ -2570,6 +2571,7 @@
         },
         pt: {
             reviews: {
+                section_title: "Avis",
                 intro: "A opinião de membros das comunidades que utilizam o Misuki.",
                 your_voice: "A sua opinião", form_intro: "Partilhe a sua experiência com o Misuki.",
                 community_kicker: "COMUNIDADE", delete: "Remover",
@@ -2592,6 +2594,7 @@
         },
         de: {
             reviews: {
+                section_title: "Avis",
                 intro: "Bewertungen von Mitgliedern der Misuki-Communitys.",
                 your_voice: "Ihre Meinung", form_intro: "Teilen Sie Ihre Erfahrungen mit Misuki.",
                 community_kicker: "COMMUNITY", delete: "Entfernen",
@@ -2614,6 +2617,7 @@
         },
         es: {
             reviews: {
+                section_title: "Avis",
                 intro: "Opiniones de miembros de las comunidades que utilizan Misuki.",
                 your_voice: "Tu opinión", form_intro: "Comparte tu experiencia con Misuki.",
                 community_kicker: "COMUNIDAD", delete: "Eliminar",
@@ -2632,6 +2636,7 @@
         },
         fr: {
             reviews: {
+                section_title: "Avis",
                 intro: "Avis des membres des communautés qui utilisent Misuki.",
                 your_voice: "Votre avis", form_intro: "Partagez votre expérience avec Misuki.",
                 community_kicker: "COMMUNAUTÉ", delete: "Supprimer",
