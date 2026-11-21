@@ -25,6 +25,11 @@ YTDL_OPTIONS = {
     "extractor_retries": 2,
     "skip_unavailable_fragments": True,
     "concurrent_fragment_downloads": 3,
+    "extractor_args": {
+        "youtube": {
+            "player_client": ["android_vr", "web_safari"],
+        }
+    },
 }
 
 FFMPEG_OPTIONS = {
@@ -68,7 +73,7 @@ class Music(commands.Cog):
             def extract():
                 search_query = query.strip()
                 is_url = search_query.startswith(("http://", "https://"))
-                source = search_query if is_url else f"ytsearch5:{search_query}"
+                source = search_query if is_url else f"ytsearch3:{search_query}"
 
                 with yt_dlp.YoutubeDL(YTDL_OPTIONS) as ytdl:
                     info = ytdl.extract_info(source, download=False)
