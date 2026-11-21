@@ -5502,33 +5502,20 @@ def statistics():
         statistics_data["version"] = MISUKI_VERSION
 
     # =====================================================
-    # HEARTBEAT
+    # BOT RUNTIME STATUS
     # =====================================================
 
-    # The Discord bot publishes its authoritative heartbeat in PostgreSQL.
-    # This is shared across Render instances and survives zero-downtime deploys.
-    current_time = time.time()
+    # Read the bot heartbeat from its local runtime-status file instead of
+    # PostgreSQL. This means the website can still tell whether the Discord
+    # bot is alive even when the database is unavailable.
+    runtime_status = get_bot_runtime_status()
+    statistics_data["bot_status"] = runtime_status["status"]
 
-    last_seen = bot_snapshot.get("last_seen")
-
-    if last_seen is not None:
-        try:
-            heartbeat_age = current_time - float(last_seen)
-            if (
-                heartbeat_age <= 150
-                and str(bot_snapshot.get("bot_status") or "").strip().lower() == "online"
-            ):
-                statistics_data["bot_status"] = "Online"
-            else:
-                statistics_data["bot_status"] = "Offline"
-                statistics_data["latency"] = 0
-                statistics_data["uptime"] = "0s"
-        except (TypeError, ValueError):
-            statistics_data["bot_status"] = "Offline"
-            statistics_data["latency"] = 0
-            statistics_data["uptime"] = "0s"
+    if statistics_data["bot_status"] != "Online":
+        statistics_data["latency"] = 0
+        statistics_data["uptime"] = "0s"
     else:
-        statistics_data["bot_status"] = "Offline"
+        statistics_data["last_seen"] = runtime_status["last_seen"]
 
     # =====================================================
     # API STATUS
