@@ -8535,37 +8535,98 @@ def cookies_page():
 # HEALTH CHECK
 # =========================================================
 
-@app.route(
-    "/health"
-)
+HEALTH_HISTORY_FILE = os.path.join(BASE_DIR, "data", "health_history.json")
+HEALTH_DB_CACHE_TTL = 30
+_health_db_cache = {"checked_at": 0.0, "status": "unknown"}
+
+
+def _check_health_database():
+    now = time.time()
+    if now - _health_db_cache["checked_at"] < HEALTH_DB_CACHE_TTL:
+        return _health_db_cache["status"]
+
+    database_url = os.getenv("DATABASE_URL")
+    if not database_url:
+        status = "down"
+    else:
+        try:
+            with psycopg2.connect(
+                database_url, sslmode="require", connect_timeout=2, application_name="misuki-health"
+            ) as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute("SELECT 1")
+            status = "operational"
+        except Exception:
+            status = "down"
+    _health_db_cache["checked_at"] = now
+    _health_db_cache["status"] = status
+    return status
+
+
+def _health_today_key():
+    return datetime.now(timezone.utc).date().isoformat()
+
+
+def _load_health_history():
+    try:
+        with open(HEALTH_HISTORY_FILE, "r", encoding="utf-8") as file:
+            payload = json.load(file)
+        return payload if isinstance(payload, dict) else {}
+    except Exception:
+        return {}
+
+
+def _save_health_history(history):
+    os.makedirs(os.path.dirname(HEALTH_HISTORY_FILE), exist_ok=True)
+    temporary = HEALTH_HISTORY_FILE + ".tmp"
+    with open(temporary, "w", encoding="utf-8") as file:
+        json.dump(history, file, ensure_ascii=False, indent=2)
+    os.replace(temporary, HEALTH_HISTORY_FILE)
+
+
+def _record_health_snapshot(statuses):
+    history = _load_health_history()
+    today = _health_today_key()
+    current = history.get(today, {})
+    current.update(statuses)
+    history[today] = current
+    cutoff = datetime.now(timezone.utc).date() - timedelta(days=89)
+    history = {key: value for key, value in history.items() if key >= cutoff.isoformat()}
+    _save_health_history(history)
+    return history
+
+
+def _health_payload():
+    bot_status = get_bot_runtime_status()
+    statuses = {
+        "api": "operational",
+        "database": _check_health_database(),
+        "bot": "operational" if str(bot_status.get("status", "")).lower() == "online" else "down",
+    }
+    history = _record_health_snapshot(statuses)
+    days = []
+    today = datetime.now(timezone.utc).date()
+    for offset in range(89, -1, -1):
+        day = today - timedelta(days=offset)
+        key = day.isoformat()
+        saved = history.get(key, {})
+        days.append({
+            "date": key,
+            "api": saved.get("api", "unknown"),
+            "database": saved.get("database", "unknown"),
+            "bot": saved.get("bot", "unknown"),
+        })
+    return {"days": days, "current": statuses, "updated_at": datetime.now(timezone.utc).isoformat()}
+
+
+@app.route("/health")
 def health():
+    return render_template("health.html")
 
-    return {
-        "status": "ok",
 
-        "database": bool(
-            DATABASE_URL
-        ),
-
-        "discord": bool(
-            CLIENT_ID
-        ),
-
-        "bot": bool(
-            BOT_TOKEN
-        ),
-
-        "login_redirect": bool(
-            DISCORD_LOGIN_REDIRECT_URI
-        ),
-
-        "paypal": paypal_is_configured(),
-
-        "paypal_mode": PAYPAL_MODE,
-
-        "paypal_currency": PAYPAL_CURRENCY
-    }, 200
-
+@app.route("/api/health")
+def health_api():
+    return jsonify(_health_payload())
 
 # =========================================================
 # START
