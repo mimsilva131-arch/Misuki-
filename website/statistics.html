@@ -2377,6 +2377,11 @@ Misuki — Statistics
 
             if (!response.ok) {
 
+                if (response.status === 502 || response.status === 503) {
+                    window.location.replace("/availability");
+                    return;
+                }
+
                 throw new Error(
                     `HTTP ${response.status}`
                 );
