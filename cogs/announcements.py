@@ -1233,7 +1233,7 @@ class Announcements(commands.Cog):
                     f"❌ Announcement scheduler error: {error}"
                 )
 
-            await asyncio.sleep(10)
+            await asyncio.sleep(30)
 
     # =====================================================
     # READY
