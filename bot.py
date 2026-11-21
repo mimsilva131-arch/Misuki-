@@ -573,7 +573,7 @@ async def statistics_loop():
         await update_stats_snapshot()
         # Heavy member/audit/statistics aggregation only every 5 minutes.
         # The lightweight heartbeat below keeps the online state fresh.
-        await asyncio.sleep(300)
+        await asyncio.sleep(600)
 
 
 statistics_task = None
@@ -623,7 +623,7 @@ async def heartbeat_loop():
         finally:
             if connection:
                 connection.close()
-        await asyncio.sleep(60)
+        await asyncio.sleep(300)
 
 
 async def sync_owner_license_command_permissions():
