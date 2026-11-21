@@ -916,7 +916,7 @@ class Announcements(commands.Cog):
                 f"❌ Error loading scheduled announcements: {error}"
             )
 
-            return []
+            return None
 
         finally:
 
@@ -1219,9 +1219,9 @@ class Announcements(commands.Cog):
 
             try:
 
-                rows = (
-                    self.get_due_announcements()
-                )
+                rows = self.get_due_announcements()
+                if rows is None:
+                    raise RuntimeError("Announcements database is unavailable.")
                 retry_delay = 60
 
                 for row in rows:
