@@ -10,6 +10,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from cogs.utility import get_server_translation
+
 import psycopg2
 from dotenv import load_dotenv
 
@@ -31,7 +33,7 @@ def increment_activity_stat(stat_name):
     if not DATABASE_URL:
 
         print(
-            "❌ DATABASE_URL não está configurada."
+            get_server_translation(guild, "database_url_missing")
         )
 
         return
@@ -251,7 +253,7 @@ def check_license(
     if license_manager is None:
 
         print(
-            "❌ LicenseManager não está carregado."
+            get_server_translation(guild, "license_manager_missing")
         )
 
         return False
@@ -1512,7 +1514,7 @@ class Transcript(
 
         await interaction.followup.send(
             (
-                "✅ Transcript enviado para "
+                get_server_translation(guild, "transcript_sent")
                 f"{transcript_channel.mention}."
             ),
             ephemeral=True
