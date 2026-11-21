@@ -241,13 +241,14 @@ class Music(commands.Cog):
             )
             voice.play(source, after=after)
         except Exception as error:
-            print(f"⚠️ Could not start music in guild {guild_id}: {error}")
+            print(f"⚠️ Could not start music in guild {guild_id}: {type(error).__name__}: {error}")
             player.current = None
-            await self._play_next(guild_id)
+            if player.queue:
+                await self._play_next(guild_id)
 
     async def _ensure_voice(self, interaction: discord.Interaction) -> Optional[GuildPlayer]:
         if interaction.guild is None:
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "❌ This command can only be used inside a server.",
                 ephemeral=True,
             )
@@ -255,7 +256,7 @@ class Music(commands.Cog):
 
         member = interaction.user
         if not isinstance(member, discord.Member) or member.voice is None or member.voice.channel is None:
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "🎧 Join a voice channel first.",
                 ephemeral=True,
             )
@@ -268,7 +269,7 @@ class Music(commands.Cog):
             voice = interaction.guild.voice_client
             player.voice = voice
             if voice.channel != channel:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     "❌ I am already playing in another voice channel.",
                     ephemeral=True,
                 )
@@ -278,7 +279,7 @@ class Music(commands.Cog):
                 player.voice = await channel.connect()
             except Exception as error:
                 print(f"⚠️ Could not join voice channel: {error}")
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     "❌ I could not join your voice channel.",
                     ephemeral=True,
                 )
@@ -300,11 +301,11 @@ class Music(commands.Cog):
     @app_commands.command(name="play", description="Play a song or add it to the music queue.")
     @app_commands.describe(query="A song name, SoundCloud/Internet Archive URL, or direct audio URL.")
     async def play(self, interaction: discord.Interaction, query: str):
+        await interaction.response.defer()
+
         player = await self._ensure_voice(interaction)
         if player is None:
             return
-
-        await interaction.response.defer()
 
         try:
             track = await self._extract(query)
@@ -322,6 +323,11 @@ class Music(commands.Cog):
         if player.current is None and not was_playing:
             player.current = track
             await self._play_next(interaction.guild.id)
+
+            if player.voice is None or not player.voice.is_playing():
+                player.current = None
+                raise RuntimeError("The audio stream could not be started")
+
             embed = discord.Embed(
                 title="🎵 Now Playing",
                 description=f"[{track.title}]({track.webpage_url})",
