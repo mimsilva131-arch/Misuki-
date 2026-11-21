@@ -598,11 +598,21 @@ async def update_stats_snapshot():
 
 async def statistics_loop():
     await bot.wait_until_ready()
+    interval = 600
+    retry_delay = 600
     while not bot.is_closed():
-        await update_stats_snapshot()
-        # Heavy member/audit/statistics aggregation only every 5 minutes.
-        # The lightweight heartbeat below keeps the online state fresh.
-        await asyncio.sleep(600)
+        try:
+            await update_stats_snapshot()
+            retry_delay = 600
+        except asyncio.CancelledError:
+            raise
+        except Exception as error:
+            # Neon quota/outage: do not hammer PostgreSQL. Back off up to
+            # 15 minutes and automatically return to the normal interval
+            # after a successful database update.
+            print(f"⚠️ Statistics worker paused while PostgreSQL is unavailable: {error}")
+            retry_delay = min(max(retry_delay * 2, interval), 900)
+        await asyncio.sleep(retry_delay)
 
 
 
@@ -718,7 +728,11 @@ async def heartbeat_loop():
                 ))
             connection.commit()
         except Exception as error:
-            print(f"⚠️ Bot heartbeat update failed: {error}")
+            print(f"⚠️ Bot heartbeat paused while PostgreSQL is unavailable: {error}")
+            # Avoid reconnecting every few seconds when Neon has exhausted
+            # its quota. A successful heartbeat automatically restores the
+            # normal 5-minute cadence.
+            await asyncio.sleep(900)
         finally:
             if connection:
                 connection.close()
