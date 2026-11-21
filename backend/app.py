@@ -8,6 +8,7 @@ import subprocess
 import atexit
 import sys
 import threading
+import hmac
 from contextlib import contextmanager
   
 from decimal import Decimal, InvalidOperation
@@ -377,6 +378,101 @@ def prevent_html_cache(response):
         response.headers["Expires"] = "0"
 
     return response
+
+# =========================================================
+# MAINTENANCE MODE
+# =========================================================
+
+MAINTENANCE_API_TOKEN = os.getenv("DISCORD_BOT_TOKEN", "")
+MAINTENANCE_STATE = {
+    "active": False,
+    "estimated": "Not specified",
+    "changes": "Maintenance work in progress.",
+    "scope": "both",
+    "started_at": 0.0,
+    "bot_version": MISUKI_VERSION or "Unspecified",
+    "site_version": os.getenv("SITE_VERSION", "").strip() or "Unspecified",
+}
+MAINTENANCE_LOCK = threading.Lock()
+
+
+def get_maintenance_state():
+    with MAINTENANCE_LOCK:
+        return dict(MAINTENANCE_STATE)
+
+
+@app.before_request
+def maintenance_guard():
+    """Serve the standalone maintenance page before normal site routes."""
+    path = request.path
+
+    if path in {"/maintenance", "/api/maintenance"}:
+        return None
+
+    state = get_maintenance_state()
+    if not state.get("active"):
+        return None
+
+    return _maintenance_response(state)
+
+
+def _maintenance_response(state):
+    return render_template(
+        "maintenance.html",
+        estimated=state.get("estimated") or "Not specified",
+        changes=state.get("changes") or "Maintenance work in progress.",
+        scope=state.get("scope") or "both",
+        started_at=state.get("started_at") or 0,
+        bot_version=state.get("bot_version") or "Unspecified",
+        site_version=state.get("site_version") or "Unspecified",
+    ), 503
+
+
+@app.route("/maintenance")
+def maintenance_page():
+    state = get_maintenance_state()
+    if not state.get("active"):
+        return redirect("/")
+    return _maintenance_response(state)
+
+
+@app.route("/api/maintenance", methods=["POST"])
+def maintenance_api():
+    token = request.headers.get("X-Misuki-Bot-Token", "")
+    if not MAINTENANCE_API_TOKEN or not hmac.compare_digest(
+        token,
+        MAINTENANCE_API_TOKEN
+    ):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    payload = request.get_json(silent=True) or {}
+
+    active = bool(payload.get("active"))
+    scope = str(payload.get("scope") or "both").lower()
+    if scope not in {"bot", "site", "both"}:
+        scope = "both"
+
+    with MAINTENANCE_LOCK:
+        MAINTENANCE_STATE.update({
+            "active": active,
+            "estimated": str(payload.get("estimated") or "Not specified"),
+            "changes": str(payload.get("changes") or "Maintenance work in progress."),
+            "scope": scope,
+            "started_at": float(payload.get("started_at") or time.time()),
+            "bot_version": str(payload.get("bot_version") or MISUKI_VERSION or "Unspecified"),
+            "site_version": str(
+                payload.get("site_version")
+                or os.getenv("SITE_VERSION", "").strip()
+                or "Unspecified"
+            ),
+        })
+
+    return jsonify({
+        "ok": True,
+        "active": active,
+        "scope": scope,
+    })
+
 
 # =========================================================
 # SERVICE AVAILABILITY / ERROR PAGES
