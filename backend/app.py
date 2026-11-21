@@ -378,6 +378,83 @@ def prevent_html_cache(response):
 
     return response
 
+# =========================================================
+# SERVICE AVAILABILITY / ERROR PAGES
+# =========================================================
+
+def _availability_error_response(
+    title,
+    message,
+    status_code
+):
+    try:
+        user = get_user()
+    except Exception:
+        user = None
+
+    return render_template(
+        "error.html",
+        user=user,
+        title=title,
+        message=message,
+        status_code=status_code
+    ), status_code
+
+
+@app.errorhandler(psycopg2.OperationalError)
+def handle_database_operational_error(error):
+    print(f"⚠️ PostgreSQL unavailable: {error}")
+    return _availability_error_response(
+        "🗄️ Database temporariamente indisponível",
+        "O Misuki não conseguiu ligar à base de dados neste momento. "
+        "Tenta novamente dentro de alguns minutos.",
+        503
+    )
+
+
+@app.errorhandler(psycopg2.InterfaceError)
+def handle_database_interface_error(error):
+    print(f"⚠️ PostgreSQL connection error: {error}")
+    return _availability_error_response(
+        "🗄️ Database temporariamente indisponível",
+        "A ligação à base de dados do Misuki foi interrompida. "
+        "Tenta novamente dentro de alguns minutos.",
+        503
+    )
+
+
+@app.errorhandler(404)
+def handle_not_found(error):
+    return _availability_error_response(
+        "🔎 Página não encontrada",
+        "A página que procuras não existe ou já não está disponível.",
+        404
+    )
+
+
+@app.errorhandler(500)
+def handle_internal_server_error(error):
+    print(f"❌ Internal server error: {error}")
+    return _availability_error_response(
+        "⚠️ Algo correu mal",
+        "O Misuki encontrou um erro inesperado. "
+        "Tenta novamente dentro de alguns instantes.",
+        500
+    )
+
+
+@app.errorhandler(503)
+def handle_service_unavailable(error):
+    return _availability_error_response(
+        "🔧 Misuki temporariamente indisponível",
+        "O serviço está temporariamente indisponível. "
+        "Estamos a tratar do problema. Tenta novamente dentro de alguns minutos.",
+        503
+    )
+
+
+
+
 
 # =========================================================
 # STATIC FILES
