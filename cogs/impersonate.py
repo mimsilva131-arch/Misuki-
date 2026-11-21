@@ -72,8 +72,24 @@ class Impersonate(commands.Cog):
 
             webhook = None
 
+            locale = str(getattr(interaction, "locale", "en-US")).lower()
+            success_messages = {
+                "pt": "✅ Paródia enviada com sucesso.",
+                "pt-pt": "✅ Paródia enviada com sucesso.",
+                "en": "✅ Parody message sent successfully.",
+                "en-us": "✅ Parody message sent successfully.",
+                "en-gb": "✅ Parody message sent successfully.",
+                "de": "✅ Parodie-Nachricht erfolgreich gesendet.",
+                "es": "✅ Mensaje de parodia enviado correctamente.",
+                "fr": "✅ Message de parodie envoyé avec succès."
+            }
+            success_message = success_messages.get(
+                locale,
+                success_messages.get(locale.split("-")[0], success_messages["en"])
+            )
+
             await interaction.followup.send(
-                "✅ Paródia enviada.",
+                success_message,
                 ephemeral=True
             )
 
