@@ -13,7 +13,7 @@ from discord.ext import commands
 OWNER_ID = int(os.getenv("OWNER_ID", "0") or 0)
 SITE_URL = os.getenv("MISUKI_SITE_URL", "https://misuki.onrender.com").rstrip("/")
 BOT_VERSION = os.getenv("MISUKI_VERSION", "").strip() or "Unspecified"
-SITE_VERSION = os.getenv("SITE_VERSION", "").strip() or "Unspecified"
+SITE_VERSION = os.getenv("SITE_VERSION", "").strip() or "1.0.0"
 
 STATE_FILE = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
@@ -41,6 +41,7 @@ class Maintenance(commands.Cog):
         self._finishing = False
         self.bot_version = BOT_VERSION
         self.site_version = SITE_VERSION
+        self.site_maintenance_count = 0
         self._sync_task = None
         self._load_state()
 
@@ -58,6 +59,7 @@ class Maintenance(commands.Cog):
                 self.duration_seconds = int(state.get("duration_seconds") or self._parse_duration(self.estimated) or 0)
                 self.bot_version = str(state.get("bot_version") or BOT_VERSION)
                 self.site_version = str(state.get("site_version") or SITE_VERSION)
+                self.site_maintenance_count = int(state.get("site_maintenance_count") or 0)
         except Exception:
             pass
 
@@ -75,6 +77,7 @@ class Maintenance(commands.Cog):
                 "duration_seconds": self.duration_seconds,
                 "bot_version": self.bot_version,
                 "site_version": self.site_version,
+                "site_maintenance_count": self.site_maintenance_count,
             }
         else:
             state = {"active": False}
@@ -121,6 +124,14 @@ class Maintenance(commands.Cog):
             return False
 
         return True
+
+    @staticmethod
+    def _increment_site_version(version):
+        match = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)", str(version).strip())
+        if not match:
+            return "1.0.1"
+        major, minor, patch = map(int, match.groups())
+        return f"{major}.{minor}.{patch + 1}"
 
     @staticmethod
     def _parse_duration(value):
@@ -259,8 +270,6 @@ class Maintenance(commands.Cog):
         estimated="Estimated maintenance interval, for example 15 minutes.",
         scope="What is being maintained.",
         changes="What the update/maintenance will change.",
-        bot_version="Bot version to publish.",
-        site_version="Site version to publish.",
     )
     @app_commands.choices(
         action=[
@@ -280,8 +289,6 @@ class Maintenance(commands.Cog):
         estimated: str,
         scope: app_commands.Choice[str] | None = None,
         changes: str | None = None,
-        bot_version: str | None = None,
-        site_version: str | None = None,
     ):
         if interaction.user.id != OWNER_ID:
             await interaction.response.send_message(
@@ -311,10 +318,9 @@ class Maintenance(commands.Cog):
             self.changes = (changes or "Maintenance work in progress.").strip()
             self.scope = scope.value if scope else "both"
             self.started_at = time.time()
-            if bot_version and bot_version.strip():
-                self.bot_version = bot_version.strip()
-            if site_version and site_version.strip():
-                self.site_version = site_version.strip()
+            self.bot_version = os.getenv("MISUKI_VERSION", "").strip() or BOT_VERSION
+            self.site_version = self._increment_site_version(self.site_version or SITE_VERSION)
+            self.site_maintenance_count += 1
             self._save_state()
 
             site_synced = await self._sync_site()
@@ -340,10 +346,7 @@ class Maintenance(commands.Cog):
             return
 
         final_changes = (changes or self.changes).strip()
-        if bot_version and bot_version.strip():
-            self.bot_version = bot_version.strip()
-        if site_version and site_version.strip():
-            self.site_version = site_version.strip()
+        self.bot_version = os.getenv("MISUKI_VERSION", "").strip() or BOT_VERSION
         site_synced = await self._finish_maintenance(final_changes)
 
         await interaction.response.send_message(
