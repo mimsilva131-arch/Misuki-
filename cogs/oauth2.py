@@ -864,40 +864,23 @@ def license_is_active(guild_id):
 
 
 # =========================================================
-# =========================================================
-# TEMPORARY REVIEW AUTHORIZATION
+# REVIEW AUTHORIZATION
 # =========================================================
 def user_can_review():
-    """Allow reviews temporarily for users who manage a server where Misuki is installed."""
+    """
+    Reviews require the same active Misuki license check used by
+    the rest of the web application. Managing a server where the bot
+    is installed is not sufficient by itself.
+    """
     user = get_user()
-    if not user:
-        return False
 
-    access_token = session.get("access_token")
-    if not access_token:
+    if not user or not session.get("access_token"):
         return False
 
     try:
-        user_guilds = get_user_guilds()
-        bot_guild_ids = {
-            str(guild.get("id"))
-            for guild in get_bot_guilds()
-            if guild.get("id")
-        }
-
-        for guild in user_guilds:
-            guild_id = str(guild.get("id"))
-            if guild_id not in bot_guild_ids:
-                continue
-
-            if str(guild.get("owner", False)).lower() == "true":
-                return True
-
-            if can_manage_guild(guild):
-                return True
-
+        return bool(user_has_license())
     except Exception as error:
-        print(f"⚠️ Review authorization check error: {error}")
+        print(f"⚠️ Review license check error: {error}")
 
     return False
 
