@@ -151,6 +151,9 @@ class Maintenance(commands.Cog):
         )
 
         for channel in candidates:
+            if guild.me is None:
+                continue
+
             permissions = channel.permissions_for(guild.me)
             if permissions.send_messages:
                 return channel
@@ -161,8 +164,8 @@ class Maintenance(commands.Cog):
         message = (
             "🛠️ **Misuki maintenance completed**\n\n"
             f"**What changed:** {changes}\n"
-            f"**Bot version:** {BOT_VERSION}\n"
-            f"**Site version:** {SITE_VERSION}\n\n"
+            f"**Bot version:** {self.bot_version}\n"
+            f"**Site version:** {self.site_version}\n\n"
             "The maintenance has finished and normal activity has been restored. "
             "Thank you for your patience."
         )
@@ -278,8 +281,8 @@ class Maintenance(commands.Cog):
 
         await interaction.response.send_message(
             "✅ **Maintenance completed.**\n\n"
-            f"**Bot version:** {BOT_VERSION}\n"
-            f"**Site version:** {SITE_VERSION}\n"
+            f"**Bot version:** {self.bot_version}\n"
+            f"**Site version:** {self.site_version}\n"
             f"**Server announcements:** {sent} sent"
             + (f", {failed} unavailable" if failed else "")
             + f"\n**Site sync:** {'✅ Restored' if site_synced else '⚠️ Site sync pending'}",
