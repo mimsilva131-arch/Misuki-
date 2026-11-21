@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-PT">
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -22,10 +22,10 @@
 <body>
 <main>
     <div class="mark">⚠️</div>
-    <h1>{{ title or "Misuki temporariamente indisponível" }}</h1>
-    <p>{{ message or "O serviço está temporariamente indisponível. Tenta novamente dentro de alguns instantes." }}</p>
-    {% if status_code %}<div class="code">Erro {{ status_code }}</div>{% endif %}
-    <button type="button" onclick="location.reload()">Tentar novamente</button>
+    <h1>{{ title or "Misuki Temporarily Unavailable" }}</h1>
+    <p>{{ message or "The service is temporarily unavailable. Please try again in a few moments." }}</p>
+    {% if status_code %}<div class="code">Error {{ status_code }}</div>{% endif %}
+    <button type="button" onclick="location.reload()">Try Again</button>
 </main>
 </body>
 </html>
