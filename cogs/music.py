@@ -14,12 +14,18 @@ import yt_dlp
 
 
 YTDL_OPTIONS = {
-    "format": "bestaudio/best",
+    "format": "bestaudio[acodec!=none]/bestaudio/best",
     "noplaylist": True,
     "quiet": True,
     "no_warnings": True,
-    "default_search": "ytsearch1",
+    "default_search": "ytsearch5",
     "source_address": "0.0.0.0",
+    "socket_timeout": 12,
+    "retries": 3,
+    "fragment_retries": 3,
+    "extractor_retries": 2,
+    "skip_unavailable_fragments": True,
+    "concurrent_fragment_downloads": 3,
 }
 
 FFMPEG_OPTIONS = {
@@ -51,42 +57,61 @@ class Music(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.players: dict[int, GuildPlayer] = {}
-        self._extract_lock = asyncio.Lock()
-        self.ffmpeg_executable = imageio_ffmpeg.get_ffmpeg_exe()
+        self._extract_lock =    async def _extract(self, query: str) -> Track:
+        # Search several results and try each until a playable audio stream is found.
+        loop = asyncio.get_running_loop()
 
-    def player_for(self, guild_id: int) -> GuildPlayer:
-        return self.players.setdefault(guild_id, GuildPlayer())
+        def extract():
+            search_query = query.strip()
+            is_url = search_query.startswith(("http://", "https://"))
+            source = search_query if is_url else f"ytsearch5:{search_query}"
 
-    async def _extract(self, query: str) -> Track:
-        async with self._extract_lock:
-            loop = asyncio.get_running_loop()
+            last_error = None
+            with yt_dlp.YoutubeDL(YTDL_OPTIONS) as ytdl:
+                try:
+                    info = ytdl.extract_info(source, download=False)
+                except Exception as error:
+                    raise RuntimeError(f"Search/extraction failed: {error}") from error
 
-            def extract():
-                with yt_dlp.YoutubeDL(YTDL_OPTIONS) as ytdl:
-                    info = ytdl.extract_info(query, download=False)
-                    if "entries" in info:
-                        info = next((entry for entry in info["entries"] if entry), None)
-                    if not info:
-                        raise RuntimeError("No audio source was found.")
+                entries = info.get("entries") if isinstance(info, dict) else None
+                candidates = [entry for entry in (entries or []) if entry] if entries else [info]
 
-                    stream_url = info.get("url")
-                    if not stream_url:
-                        formats = info.get("formats") or []
-                        audio = next(
-                            (
-                                item for item in reversed(formats)
+                for candidate in candidates:
+                    try:
+                        # Search results can be flat; extract the selected result
+                        # again to obtain the actual stream URL.
+                        if candidate.get("_type") == "url" and candidate.get("url"):
+                            candidate = ytdl.extract_info(candidate["url"], download=False)
+
+                        stream_url = candidate.get("url")
+                        if not stream_url:
+                            formats = candidate.get("formats") or []
+                            audio_formats = [
+                                item for item in formats
                                 if item.get("url") and item.get("acodec") != "none"
-                            ),
-                            None,
+                            ]
+                            if audio_formats:
+                                stream_url = audio_formats[-1]["url"]
+
+                        if not stream_url:
+                            raise RuntimeError("no playable audio stream")
+
+                        return Track(
+                            title=str(candidate.get("title") or "Unknown track"),
+                            webpage_url=str(candidate.get("webpage_url") or query),
+                            stream_url=stream_url,
+                            duration=candidate.get("duration"),
                         )
-                        stream_url = audio.get("url") if audio else None
+                    except Exception as error:
+                        last_error = error
+                        continue
 
-                    if not stream_url:
-                        raise RuntimeError("No playable audio stream was found.")
+            raise RuntimeError(
+                f"No playable result found for {query!r}: {last_error or 'unknown error'}"
+            )
 
-                    return Track(
-                        title=str(info.get("title") or "Unknown track"),
-                        webpage_url=str(info.get("webpage_url") or query),
+        return await loop.run_in_executor(None, extract)
+url") or query),
                         stream_url=stream_url,
                         duration=info.get("duration"),
                     )
@@ -294,7 +319,7 @@ class Music(commands.Cog):
 
         embed = discord.Embed(
             title="🎵 Music Queue",
-            description="\\n".join(lines),
+            description="\n".join(lines),
             color=discord.Color.blurple(),
         )
         await interaction.response.send_message(embed=embed)
