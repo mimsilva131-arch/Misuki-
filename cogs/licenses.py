@@ -152,6 +152,10 @@ class LicenseManager(commands.Cog):
 
     async def cog_load(self):
 
+        # Neon must never prevent the Discord bot itself from starting.
+        # If PostgreSQL is unavailable, keep this cog loaded with no pool;
+        # database-backed license commands will return their normal
+        # unavailable/blocked responses instead of aborting startup.
         try:
 
             await self.create_database()
@@ -162,13 +166,14 @@ class LicenseManager(commands.Cog):
 
         except Exception as error:
 
+            self.pool = None
+
             print(
-                "❌ Erro ao conectar o LicenseManager ao Neon:"
+                "⚠️ LicenseManager iniciado sem Neon; "
+                "as funções de licença ficam temporariamente indisponíveis."
             )
 
             print(error)
-
-            raise
 
         return
 
