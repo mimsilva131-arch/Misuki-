@@ -12,7 +12,8 @@ from discord.ext import commands
 
 OWNER_ID = int(os.getenv("OWNER_ID", "0") or 0)
 SITE_URL = os.getenv("MISUKI_SITE_URL", "https://misuki.onrender.com").rstrip("/")
-BOT_VERSION = os.getenv("MISUKI_VERSION", "").strip() or "Unspecified"
+VERSION_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "misuki_version.json")
+BOT_VERSION = os.getenv("MISUKI_VERSION", "").strip() or "1.0.0"
 SITE_VERSION = os.getenv("SITE_VERSION", "").strip() or "1.0.0"
 
 STATE_FILE = os.path.join(
@@ -39,11 +40,29 @@ class Maintenance(commands.Cog):
         self.started_at = 0.0
         self.duration_seconds = 0
         self._finishing = False
-        self.bot_version = BOT_VERSION
+        self.bot_version = self._load_version()
         self.site_version = SITE_VERSION
         self.site_maintenance_count = 0
         self._sync_task = None
         self._load_state()
+
+    def _load_version(self):
+        try:
+            with open(VERSION_FILE, "r", encoding="utf-8") as file:
+                state = json.load(file)
+            version = str(state.get("bot_version") or "").strip()
+            if version:
+                return version
+        except Exception:
+            pass
+        return BOT_VERSION
+
+    def _save_version(self, version):
+        os.makedirs(os.path.dirname(VERSION_FILE), exist_ok=True)
+        temporary = VERSION_FILE + ".tmp"
+        with open(temporary, "w", encoding="utf-8") as file:
+            json.dump({"bot_version": version}, file, ensure_ascii=False, indent=2)
+        os.replace(temporary, VERSION_FILE)
 
     def _load_state(self):
         try:
@@ -57,7 +76,7 @@ class Maintenance(commands.Cog):
                 self.scope = str(state.get("scope") or "both")
                 self.started_at = float(state.get("started_at") or time.time())
                 self.duration_seconds = int(state.get("duration_seconds") or self._parse_duration(self.estimated) or 0)
-                self.bot_version = str(state.get("bot_version") or BOT_VERSION)
+                self.bot_version = self._load_version()
                 self.site_version = str(state.get("site_version") or SITE_VERSION)
                 self.site_maintenance_count = int(state.get("site_maintenance_count") or 0)
         except Exception:
@@ -318,7 +337,8 @@ class Maintenance(commands.Cog):
             self.changes = (changes or "Maintenance work in progress.").strip()
             self.scope = scope.value if scope else "both"
             self.started_at = time.time()
-            self.bot_version = os.getenv("MISUKI_VERSION", "").strip() or BOT_VERSION
+            self.bot_version = self._increment_site_version(self._load_version())
+            self._save_version(self.bot_version)
             self.site_version = self._increment_site_version(self.site_version or SITE_VERSION)
             self.site_maintenance_count += 1
             self._save_state()
@@ -346,7 +366,7 @@ class Maintenance(commands.Cog):
             return
 
         final_changes = (changes or self.changes).strip()
-        self.bot_version = os.getenv("MISUKI_VERSION", "").strip() or BOT_VERSION
+        self.bot_version = self._load_version()
         site_synced = await self._finish_maintenance(final_changes)
 
         await interaction.response.send_message(
