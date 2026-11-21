@@ -18,7 +18,6 @@ YTDL_OPTIONS = {
     "noplaylist": True,
     "quiet": True,
     "no_warnings": True,
-    "default_search": "ytsearch5",
     "source_address": "0.0.0.0",
     "socket_timeout": 12,
     "retries": 3,
@@ -57,60 +56,63 @@ class Music(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.players: dict[int, GuildPlayer] = {}
-        self._extract_lock =    async def _extract(self, query: str) -> Track:
-        # Search several results and try each until a playable audio stream is found.
+        self._extract_lock = asyncio.Lock()
+        self.ffmpeg_executable = imageio_ffmpeg.get_ffmpeg_exe()
+
+    def player_for(self, guild_id: int) -> GuildPlayer:
+        return self.players.setdefault(guild_id, GuildPlayer())
+
+    async def _extract(self, query: str) -> Track:
         loop = asyncio.get_running_loop()
+        async with self._extract_lock:
+            def extract():
+                search_query = query.strip()
+                is_url = search_query.startswith(("http://", "https://"))
+                source = search_query if is_url else f"ytsearch5:{search_query}"
 
-        def extract():
-            search_query = query.strip()
-            is_url = search_query.startswith(("http://", "https://"))
-            source = search_query if is_url else f"ytsearch5:{search_query}"
-
-            last_error = None
-            with yt_dlp.YoutubeDL(YTDL_OPTIONS) as ytdl:
-                try:
+                with yt_dlp.YoutubeDL(YTDL_OPTIONS) as ytdl:
                     info = ytdl.extract_info(source, download=False)
-                except Exception as error:
-                    raise RuntimeError(f"Search/extraction failed: {error}") from error
 
-                entries = info.get("entries") if isinstance(info, dict) else None
-                candidates = [entry for entry in (entries or []) if entry] if entries else [info]
+                    entries = info.get("entries") if isinstance(info, dict) else None
+                    candidates = [entry for entry in (entries or []) if entry] if entries else [info]
+                    last_error = None
 
-                for candidate in candidates:
-                    try:
-                        # Search results can be flat; extract the selected result
-                        # again to obtain the actual stream URL.
-                        if candidate.get("_type") == "url" and candidate.get("url"):
-                            candidate = ytdl.extract_info(candidate["url"], download=False)
+                    for candidate in candidates:
+                        try:
+                            if candidate.get("_type") == "url" and candidate.get("url"):
+                                candidate = ytdl.extract_info(candidate["url"], download=False)
 
-                        stream_url = candidate.get("url")
-                        if not stream_url:
-                            formats = candidate.get("formats") or []
-                            audio_formats = [
-                                item for item in formats
-                                if item.get("url") and item.get("acodec") != "none"
-                            ]
-                            if audio_formats:
-                                stream_url = audio_formats[-1]["url"]
+                            stream_url = candidate.get("url")
+                            if not stream_url:
+                                formats = candidate.get("formats") or []
+                                audio_formats = [
+                                    item for item in formats
+                                    if item.get("url") and item.get("acodec") != "none"
+                                ]
+                                if audio_formats:
+                                    stream_url = audio_formats[-1]["url"]
 
-                        if not stream_url:
-                            raise RuntimeError("no playable audio stream")
+                            if not stream_url:
+                                raise RuntimeError("no playable audio stream")
 
-                        return Track(
-                            title=str(candidate.get("title") or "Unknown track"),
-                            webpage_url=str(candidate.get("webpage_url") or query),
-                            stream_url=stream_url,
-                            duration=candidate.get("duration"),
-                        )
-                    except Exception as error:
-                        last_error = error
-                        continue
+                            return Track(
+                                title=str(candidate.get("title") or "Unknown track"),
+                                webpage_url=str(candidate.get("webpage_url") or query),
+                                stream_url=stream_url,
+                                duration=candidate.get("duration"),
+                            )
+                        except Exception as error:
+                            last_error = error
 
-            raise RuntimeError(
-                f"No playable result found for {query!r}: {last_error or 'unknown error'}"
-            )
+                    raise RuntimeError(
+                        f"No playable result found for {query!r}: "
+                        f"{last_error or 'unknown error'}"
+                    )
 
-        return await loop.run_in_executor(None, extract)
+            try:
+                return await loop.run_in_executor(None, extract)
+            except Exception as error:
+                raise RuntimeError(f"Could not find or load the track: {error}") from error
 
     async def _play_next(self, guild_id: int):
         player = self.players.get(guild_id)
@@ -185,7 +187,8 @@ class Music(commands.Cog):
         else:
             try:
                 player.voice = await channel.connect()
-            except discord.ClientException:
+            except Exception as error:
+                print(f"⚠️ Could not join voice channel: {error}")
                 await interaction.response.send_message(
                     "❌ I could not join your voice channel.",
                     ephemeral=True,
@@ -219,7 +222,7 @@ class Music(commands.Cog):
         except Exception as error:
             print(f"⚠️ Music search failed: {error}")
             await interaction.followup.send(
-                "❌ I could not find or load that track.",
+                "❌ I could not find or load that track. Try a different song name or URL.",
                 ephemeral=True,
             )
             return
@@ -241,7 +244,6 @@ class Music(commands.Cog):
 
         player.queue.append(track)
         position = len(player.queue)
-
         embed = discord.Embed(
             title="➕ Added to Queue",
             description=f"[{track.title}]({track.webpage_url})",
@@ -286,7 +288,6 @@ class Music(commands.Cog):
         if not player or not player.voice:
             await interaction.response.send_message("❌ The music player is not active.", ephemeral=True)
             return
-
         player.queue.clear()
         player.current = None
         player.loop = False
@@ -304,10 +305,8 @@ class Music(commands.Cog):
         lines = []
         if player.current:
             lines.append(f"**Now:** [{player.current.title}]({player.current.webpage_url})")
-
         for index, track in enumerate(player.queue[:10], 1):
             lines.append(f"{index}. [{track.title}]({track.webpage_url})")
-
         if len(player.queue) > 10:
             lines.append(f"… and {len(player.queue) - 10} more.")
 
