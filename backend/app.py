@@ -449,8 +449,8 @@ def bot_status():
 def availability_page():
     """Standalone availability page; deliberately independent from PostgreSQL."""
     return _availability_error_response(
-        "🗄️ Misuki temporariamente indisponível",
-        "A base de dados do Misuki está temporariamente indisponível. O serviço continua a funcionar e voltará a responder assim que a ligação for recuperada.",
+        "Misuki Temporarily Unavailable",
+        "Misuki's database is temporarily unavailable. The service will resume responding as soon as the connection is restored.",
         503
     )
 
@@ -459,7 +459,7 @@ def availability_page():
 def handle_database_operational_error(error):
     print(f"⚠️ PostgreSQL unavailable: {error}")
     return _availability_error_response(
-        "🗄️ Database temporariamente indisponível",
+        "Database Temporarily Unavailable",
         "O Misuki não conseguiu ligar à base de dados neste momento. "
         "Tenta novamente dentro de alguns minutos.",
         503
@@ -470,7 +470,7 @@ def handle_database_operational_error(error):
 def handle_database_interface_error(error):
     print(f"⚠️ PostgreSQL connection error: {error}")
     return _availability_error_response(
-        "🗄️ Database temporariamente indisponível",
+        "Database Temporarily Unavailable",
         "A ligação à base de dados do Misuki foi interrompida. "
         "Tenta novamente dentro de alguns minutos.",
         503
@@ -6179,7 +6179,7 @@ def statistics_api():
         )
         return _availability_error_response(
             "🗄️ Database temporariamente indisponível",
-            "O Misuki não conseguiu ligar à base de dados neste momento. Tenta novamente dentro de alguns minutos.",
+            "Misuki could not connect to the database at this time. Please try again in a few minutes.",
             503
         )
 
