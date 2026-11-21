@@ -63,18 +63,34 @@ PREMIUM_COMMANDS = {
 
 
 async def global_license_check(interaction: discord.Interaction):
-    """Block premium application commands when the guild has no active license."""
+    """Apply maintenance restrictions before normal command/license checks."""
+    command = getattr(interaction, "command", None)
+    command_name = getattr(command, "qualified_name", None) or getattr(command, "name", None)
+    if command_name:
+        command_name = str(command_name).split()[-1].lower()
+    else:
+        command_name = ""
+
+    maintenance = bot.get_cog("Maintenance")
+    if maintenance is not None and maintenance.is_active():
+        scope = maintenance.scope
+        if scope in {"bot", "both"} and not maintenance.is_command_allowed(command_name):
+            await interaction.response.send_message(
+                "🛠️ Misuki is currently under maintenance. "
+                "The bot is limited to essential activity while the update is being completed. "
+                "Our staff is already working on it. Please try again later.",
+                ephemeral=True
+            )
+            return False
+
     # The bot owner is never blocked by license or server permission gates.
+    # Maintenance is intentionally different: even the owner uses only
+    # essential commands while maintenance is active.
     if OWNER_ID and interaction.user.id == OWNER_ID:
         return True
 
     if interaction.guild is None:
         return True
-
-    command = getattr(interaction, "command", None)
-    command_name = getattr(command, "qualified_name", None) or getattr(command, "name", None)
-    if command_name:
-        command_name = str(command_name).split()[-1].lower()
 
     if command_name not in PREMIUM_COMMANDS:
         return True
@@ -897,6 +913,7 @@ EXTENSIONS = [
     "cogs.onboarding",
     "cogs.triggers",
     "cogs.impersonate",
+    "cogs.maintenance",
 ]
 
 
