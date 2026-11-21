@@ -9,3 +9,4 @@ pywebpush
 imageio-ffmpeg
 yt-dlp
 PyNaCl
+davey
