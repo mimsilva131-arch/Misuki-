@@ -927,6 +927,7 @@ EXTENSIONS = [
     "cogs.triggers",
     "cogs.impersonate",
     "cogs.maintenance",
+    "cogs.music",
 ]
 
 
