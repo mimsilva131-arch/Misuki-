@@ -6059,7 +6059,7 @@ def statistics_api():
 
         with psycopg2.connect(
             database_url,
-            connect_timeout=10
+            connect_timeout=2
         ) as connection:
 
             with connection.cursor() as cursor:
