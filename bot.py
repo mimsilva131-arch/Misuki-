@@ -532,7 +532,7 @@ def print_detected_servers():
         )
 
 
-async def update_stats_snapshot():
+async def update_stats_snapshot(raise_on_error=False):
     connection = None
     try:
         await refresh_bot_installers()
@@ -591,6 +591,8 @@ async def update_stats_snapshot():
         print_detected_servers()
     except Exception as error:
         print(f"❌ Error updating bot statistics: {error}")
+        if raise_on_error:
+            raise
     finally:
         if connection:
             connection.close()
@@ -602,7 +604,7 @@ async def statistics_loop():
     retry_delay = 600
     while not bot.is_closed():
         try:
-            await update_stats_snapshot()
+            await update_stats_snapshot(raise_on_error=True)
             retry_delay = 600
         except asyncio.CancelledError:
             raise
@@ -727,16 +729,19 @@ async def heartbeat_loop():
                     BOT_INSTANCE_ID,
                 ))
             connection.commit()
+        except asyncio.CancelledError:
+            raise
         except Exception as error:
             print(f"⚠️ Bot heartbeat paused while PostgreSQL is unavailable: {error}")
-            # Avoid reconnecting every few seconds when Neon has exhausted
-            # its quota. A successful heartbeat automatically restores the
-            # normal 5-minute cadence.
-            await asyncio.sleep(900)
+            # Neon quota/outage: wait 15 minutes before the next database
+            # attempt. Do not add the normal 5-minute sleep after this wait.
+            retry_delay = 900
+        else:
+            retry_delay = 300
         finally:
             if connection:
                 connection.close()
-        await asyncio.sleep(300)
+        await asyncio.sleep(retry_delay)
 
 
 async def sync_owner_license_command_permissions():
