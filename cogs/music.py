@@ -112,6 +112,8 @@ class Music(commands.Cog):
         def after(error):
             if error:
                 print(f"⚠️ Music playback error in guild {guild_id}: {error}")
+            if not player.loop:
+                player.current = None
             future = asyncio.run_coroutine_threadsafe(
                 self._play_next(guild_id),
                 self.bot.loop,
@@ -251,10 +253,11 @@ class Music(commands.Cog):
     @app_commands.command(name="skip", description="Skip the current track.")
     async def skip(self, interaction: discord.Interaction):
         player = self.players.get(interaction.guild.id) if interaction.guild else None
-        if not player or not player.voice or not player.voice.is_playing():
+        if not player or not player.voice or not (player.voice.is_playing() or player.voice.is_paused()):
             await interaction.response.send_message("❌ Nothing is currently playing.", ephemeral=True)
             return
         player.loop = False
+        player.current = None
         player.voice.stop()
         await interaction.response.send_message("⏭️ Track skipped.")
 
