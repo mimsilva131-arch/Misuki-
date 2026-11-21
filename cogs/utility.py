@@ -9,6 +9,8 @@ from discord.ext import commands
 
 
 import os
+import time
+import json
 from zoneinfo import ZoneInfo
 
 import psycopg2
@@ -654,6 +656,195 @@ class Utility(
                 )
         except discord.HTTPException as error:
             print(f"❌ Error executing /help: {error}")
+
+
+# =========================================================
+# /DIAGNOSE (SECRET)
+# =========================================================
+
+    @discord.app_commands.command(
+        name="diagnose",
+        description="Run a private Misuki system diagnostic."
+    )
+    @discord.app_commands.describe(
+        advanced="Run the extended diagnostic checks."
+    )
+    @discord.app_commands.default_permissions(
+        administrator=True
+    )
+    async def diagnose(
+        self,
+        interaction: discord.Interaction,
+        advanced: bool = False
+    ):
+        """Private operational diagnostic for server administrators."""
+        owner_id = int(os.getenv("OWNER_ID", "0") or "0")
+        is_owner = interaction.user.id == owner_id
+        is_admin = (
+            interaction.guild is not None
+            and isinstance(interaction.user, discord.Member)
+            and interaction.user.guild_permissions.administrator
+        )
+
+        if not is_owner and not is_admin:
+            await interaction.response.send_message(
+                "❌ You do not have permission to use this diagnostic.",
+                ephemeral=True
+            )
+            return
+
+        await interaction.response.defer(ephemeral=True)
+        results = []
+
+        try:
+            latency = round(self.bot.latency * 1000)
+            results.append((
+                "Bot",
+                "🟢 Operational" if self.bot.is_ready() else "🔴 Down",
+                f"{latency} ms"
+            ))
+        except Exception as error:
+            results.append(("Bot", "🔴 Error", str(error)[:120]))
+
+        database_ok = False
+        database_detail = "DATABASE_URL unavailable"
+        connection = None
+        try:
+            if DATABASE_URL:
+                started = time.perf_counter()
+                connection = get_db_connection()
+                with connection.cursor() as cursor:
+                    cursor.execute("SELECT 1")
+                    cursor.fetchone()
+                database_detail = f"{round((time.perf_counter() - started) * 1000)} ms"
+                database_ok = True
+        except Exception as error:
+            database_detail = str(error)[:120]
+        finally:
+            if connection:
+                connection.close()
+
+        results.append((
+            "Database",
+            "🟢 Operational" if database_ok else "🔴 Down",
+            database_detail
+        ))
+
+        website_ok = False
+        website_detail = "No response"
+        try:
+            from urllib.request import Request, urlopen
+            site_url = os.getenv(
+                "MISUKI_SITE_URL",
+                "https://misuki.onrender.com"
+            ).rstrip("/")
+            started = time.perf_counter()
+            request = Request(
+                f"{site_url}/api/health",
+                headers={"User-Agent": "Misuki-Diagnostic/1.0"}
+            )
+            with urlopen(request, timeout=5) as response:
+                status_code = response.status
+                body = response.read(4096).decode("utf-8", errors="replace")
+            elapsed = round((time.perf_counter() - started) * 1000)
+            if 200 <= status_code < 300:
+                website_ok = True
+                website_detail = f"{status_code} • {elapsed} ms"
+                try:
+                    current = json.loads(body).get("current", {})
+                    website_detail = (
+                        f"{status_code} • {elapsed} ms • "
+                        f"API {current.get('api', 'unknown')} • "
+                        f"DB {current.get('database', 'unknown')} • "
+                        f"Bot {current.get('bot', 'unknown')}"
+                    )
+                except Exception:
+                    pass
+            else:
+                website_detail = f"HTTP {status_code}"
+        except Exception as error:
+            website_detail = str(error)[:120]
+
+        results.append((
+            "Website / API",
+            "🟢 Operational" if website_ok else "🔴 Down",
+            website_detail
+        ))
+
+        if interaction.guild is not None:
+            me = interaction.guild.me
+            if me is not None:
+                required = {
+                    "View Channels": me.guild_permissions.view_channel,
+                    "Send Messages": me.guild_permissions.send_messages,
+                    "Embed Links": me.guild_permissions.embed_links,
+                    "Read History": me.guild_permissions.read_message_history,
+                    "Manage Channels": me.guild_permissions.manage_channels,
+                    "Manage Roles": me.guild_permissions.manage_roles,
+                }
+                missing = [
+                    name for name, allowed in required.items()
+                    if not allowed
+                ]
+                results.append((
+                    "Permissions",
+                    "🟡 Warning" if missing else "🟢 Operational",
+                    "Missing: " + ", ".join(missing) if missing else "Core permissions OK"
+                ))
+            else:
+                results.append(("Permissions", "🟡 Warning", "Bot member cache unavailable"))
+
+        try:
+            from bot import MISUKI_VERSION, get_uptime
+            results.append((
+                "Version / Uptime",
+                "🟢 Operational",
+                f"v{MISUKI_VERSION} • {get_uptime()}"
+            ))
+        except Exception as error:
+            results.append(("Version / Uptime", "🟡 Warning", str(error)[:120]))
+
+        warnings = sum(1 for _, state, _ in results if state.startswith("🟡"))
+        failures = sum(1 for _, state, _ in results if state.startswith("🔴"))
+
+        if failures:
+            overall, color = "🔴 Critical issues detected", discord.Color.red()
+        elif warnings:
+            overall, color = "🟡 Operational with warnings", discord.Color.orange()
+        else:
+            overall, color = "🟢 Fully operational", discord.Color.green()
+
+        embed = discord.Embed(
+            title="🕵️ Misuki Diagnostic Report",
+            description=(
+                f"**Overall:** {overall}\n"
+                f"**Checks:** {len(results) - failures - warnings} passed • "
+                f"{warnings} warnings • {failures} critical"
+            ),
+            color=color
+        )
+
+        for name, state, detail in results:
+            embed.add_field(
+                name=f"{state}  {name}",
+                value=detail[:1024],
+                inline=False
+            )
+
+        if advanced:
+            embed.add_field(
+                name="🔧 Advanced",
+                value=(
+                    f"**Guild:** {interaction.guild.name if interaction.guild else 'DM'}\n"
+                    f"**Guild ID:** {interaction.guild.id if interaction.guild else 'N/A'}\n"
+                    f"**Bot:** {self.bot.user} ({self.bot.user.id if self.bot.user else 'N/A'})\n"
+                    f"**Latency:** {round(self.bot.latency * 1000)} ms"
+                ),
+                inline=False
+            )
+
+        embed.set_footer(text="Misuki • Private diagnostic")
+        await interaction.followup.send(embed=embed, ephemeral=True)
 
 
 # =========================================================
