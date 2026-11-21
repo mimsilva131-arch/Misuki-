@@ -178,6 +178,9 @@ class LicenseManager(commands.Cog):
         return
 
     def start_expiration_worker(self):
+        # Do not start a database worker when Neon was unavailable at startup.
+        # The worker itself will retry later and recreate the pool if the
+        # database becomes available again.
         if self.expiration_task is None or self.expiration_task.done():
             self.expiration_task = asyncio.create_task(self.license_expiration_worker())
 
@@ -216,8 +219,11 @@ class LicenseManager(commands.Cog):
 
     async def license_expiration_worker(self):
         await self.bot.wait_until_ready()
+        retry_delay = 600
         while not self.bot.is_closed():
             try:
+                if self.pool is None:
+                    await self.create_database()
                 async with self.pool.acquire() as connection:
                     rows = await connection.fetch("""
                         DELETE FROM licenses
@@ -234,11 +240,19 @@ class LicenseManager(commands.Cog):
                 # Discord API traffic and could add event-loop latency.
                 if rows:
                     print(f"🗑️ Removed {len(rows)} expired license(s).")
+                retry_delay = 600
             except asyncio.CancelledError:
                 raise
             except Exception as error:
-                print(f"❌ License expiration worker error: {error}")
-            await asyncio.sleep(600)
+                print(f"⚠️ License expiration worker paused while PostgreSQL is unavailable: {error}")
+                retry_delay = min(max(retry_delay * 2, 600), 900)
+                if self.pool is not None:
+                    try:
+                        await self.pool.close()
+                    except Exception:
+                        pass
+                    self.pool = None
+            await asyncio.sleep(retry_delay)
 
     # =====================================================
     # DATABASE CHECK
