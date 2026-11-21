@@ -605,8 +605,17 @@ def handle_database_interface_error(error):
 def handle_not_found(error):
     return _availability_error_response(
         "🔎 Page Not Found",
-        "A página que procuras não existe ou já não está disponível.",
+        "The page you are looking for does not exist or is no longer available.",
         404
+    )
+
+
+@app.errorhandler(502)
+def handle_bad_gateway(error):
+    return _availability_error_response(
+        "⚠️ Bad Gateway",
+        "Misuki could not reach an upstream service at this time. Our staff is already working on it. Please try again in a few minutes.",
+        502
     )
 
 
@@ -625,8 +634,7 @@ def handle_internal_server_error(error):
 def handle_service_unavailable(error):
     return _availability_error_response(
         "🔧 Misuki Temporarily Unavailable",
-        "The service is temporarily unavailable. "
-        "Estamos a tratar do problema. Please try again in a few minutes.",
+        "The service is temporarily unavailable. Our staff is already working on it. Please try again in a few minutes.",
         503
     )
 
