@@ -387,18 +387,62 @@ def _availability_error_response(
     message,
     status_code
 ):
-    try:
-        user = get_user()
-    except Exception:
-        user = None
-
+    # Deliberately use a standalone template. It must remain renderable when
+    # PostgreSQL is the component that failed.
     return render_template(
-        "error.html",
-        user=user,
+        "availability.html",
         title=title,
         message=message,
         status_code=status_code
     ), status_code
+
+
+def get_bot_runtime_status():
+    """Read bot health without touching PostgreSQL."""
+    default = {
+        "status": "Offline",
+        "last_seen": 0,
+        "version": MISUKI_VERSION
+    }
+
+    try:
+        with open(
+            os.path.join(
+                BASE_DIR,
+                "data",
+                "bot_runtime_status.json"
+            ),
+            "r",
+            encoding="utf-8"
+        ) as file:
+            payload = json.load(file)
+
+        if not isinstance(payload, dict):
+            return default
+
+        last_seen = float(payload.get("last_seen") or 0)
+        status = str(payload.get("status") or "Offline")
+
+        # The bot heartbeat is independent of PostgreSQL. A stale file means
+        # the bot process is no longer publishing a live status.
+        if time.time() - last_seen > 330:
+            status = "Offline"
+
+        return {
+            "status": status,
+            "last_seen": last_seen,
+            "version": str(
+                payload.get("version") or MISUKI_VERSION
+            )
+        }
+    except Exception:
+        return default
+
+
+@app.route("/api/bot-status")
+def bot_status():
+    """Lightweight bot status endpoint; no PostgreSQL access."""
+    return jsonify(get_bot_runtime_status())
 
 
 @app.errorhandler(psycopg2.OperationalError)
