@@ -1141,6 +1141,8 @@ class Verification(commands.Cog):
 
         await self.bot.wait_until_ready()
 
+        retry_delay = 30
+
         while not self.bot.is_closed():
 
             try:
@@ -1148,6 +1150,7 @@ class Verification(commands.Cog):
                 requests = (
                     self.get_pending_verifications()
                 )
+                retry_delay = 30
 
                 for request in requests:
 
@@ -1168,11 +1171,12 @@ class Verification(commands.Cog):
             except Exception as error:
 
                 print(
-                    f"❌ Verification worker error: {error}"
+                    f"⚠️ Verification worker paused while PostgreSQL is unavailable: {error}"
                 )
+                retry_delay = min(max(retry_delay * 2, 30), 900)
 
             await asyncio.sleep(
-                30
+                retry_delay
             )
 
     # =====================================================
