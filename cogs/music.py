@@ -111,12 +111,6 @@ class Music(commands.Cog):
             )
 
         return await loop.run_in_executor(None, extract)
-url") or query),
-                        stream_url=stream_url,
-                        duration=info.get("duration"),
-                    )
-
-            return await loop.run_in_executor(None, extract)
 
     async def _play_next(self, guild_id: int):
         player = self.players.get(guild_id)
