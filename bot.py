@@ -30,7 +30,7 @@ def get_misuki_version():
             return version
     except Exception:
         pass
-    return os.getenv("MISUKI_VERSION", "").strip() or "1.0.0"
+    return "1.0.0"
 
 MISUKI_VERSION = get_misuki_version()
 try:
