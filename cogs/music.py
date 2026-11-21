@@ -3,6 +3,7 @@
 # =========================================================
 
 import asyncio
+import requests
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -20,19 +21,13 @@ YTDL_OPTIONS = {
     "no_warnings": True,
     "source_address": "0.0.0.0",
     "socket_timeout": 12,
-    "retries": 3,
-    "fragment_retries": 3,
+    "retries": 2,
+    "fragment_retries": 2,
     "extractor_retries": 2,
     "skip_unavailable_fragments": True,
-    "concurrent_fragment_downloads": 3,
-    "extractor_args": {
-        "youtube": {
-            "player_client": ["android_vr", "web_safari"],
-        }
-    },
 }
 
-FFMPEG_OPTIONS = {
+FFMPEG_OPTIONS = { = {
     "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
     "options": "-vn",
 }
@@ -67,57 +62,146 @@ class Music(commands.Cog):
     def player_for(self, guild_id: int) -> GuildPlayer:
         return self.players.setdefault(guild_id, GuildPlayer())
 
-    async def _extract(self, query: str) -> Track:
+    async def _extract_soundcloud(self, query: str) -> Track:
         loop = asyncio.get_running_loop()
+
+        def extract():
+            with yt_dlp.YoutubeDL(YTDL_OPTIONS) as ytdl:
+                info = ytdl.extract_info(f"scsearch3:{query}", download=False)
+                entries = [entry for entry in (info.get("entries") or []) if entry]
+                if not entries:
+                    raise RuntimeError("No SoundCloud results")
+
+                last_error = None
+                for candidate in entries:
+                    try:
+                        if candidate.get("url"):
+                            stream_url = candidate["url"]
+                        else:
+                            resolved = ytdl.extract_info(candidate.get("webpage_url"), download=False)
+                            stream_url = resolved.get("url")
+
+                        if not stream_url:
+                            raise RuntimeError("No playable SoundCloud stream")
+
+                        return Track(
+                            title=str(candidate.get("title") or "Unknown track"),
+                            webpage_url=str(candidate.get("webpage_url") or ""),
+                            stream_url=stream_url,
+                            duration=candidate.get("duration"),
+                        )
+                    except Exception as error:
+                        last_error = error
+
+                raise RuntimeError(f"No playable SoundCloud result: {last_error}")
+
+        return await loop.run_in_executor(None, extract)
+
+    async def _extract_archive(self, query: str) -> Track:
+        loop = asyncio.get_running_loop()
+
+        def extract():
+            params = {
+                "q": f"title:({query}) OR description:({query})",
+                "fl[]": ["identifier", "title", "description"],
+                "rows": 5,
+                "page": 1,
+                "output": "json",
+            }
+            response = requests.get(
+                "https://archive.org/advancedsearch.php",
+                params=params,
+                timeout=10,
+            )
+            response.raise_for_status()
+            docs = response.json().get("response", {}).get("docs", [])
+
+            with yt_dlp.YoutubeDL(YTDL_OPTIONS) as ytdl:
+                last_error = None
+                for doc in docs:
+                    identifier = doc.get("identifier")
+                    if not identifier:
+                        continue
+                    try:
+                        info = ytdl.extract_info(
+                            f"https://archive.org/details/{identifier}",
+                            download=False,
+                        )
+                        stream_url = info.get("url")
+                        if not stream_url:
+                            formats = info.get("formats") or []
+                            audio_formats = [
+                                item for item in formats
+                                if item.get("url") and item.get("acodec") != "none"
+                            ]
+                            if audio_formats:
+                                stream_url = audio_formats[-1]["url"]
+                        if not stream_url:
+                            raise RuntimeError("No playable audio stream")
+
+                        return Track(
+                            title=str(info.get("title") or doc.get("title") or "Unknown track"),
+                            webpage_url=str(info.get("webpage_url") or f"https://archive.org/details/{identifier}"),
+                            stream_url=stream_url,
+                            duration=info.get("duration"),
+                        )
+                    except Exception as error:
+                        last_error = error
+
+            raise RuntimeError(f"No playable Internet Archive result: {last_error or 'no results'}")
+
+        return await loop.run_in_executor(None, extract)
+
+    async def _extract(self, query: str) -> Track:
+        search_query = query.strip()
+        if not search_query:
+            raise RuntimeError("Empty music query")
+
         async with self._extract_lock:
-            def extract():
-                search_query = query.strip()
-                is_url = search_query.startswith(("http://", "https://"))
-                source = search_query if is_url else f"ytsearch3:{search_query}"
+            is_url = search_query.startswith(("http://", "https://"))
 
-                with yt_dlp.YoutubeDL(YTDL_OPTIONS) as ytdl:
-                    info = ytdl.extract_info(source, download=False)
+            if is_url:
+                lower_url = search_query.lower()
+                if "youtube.com" in lower_url or "youtu.be" in lower_url:
+                    raise RuntimeError("YouTube is not supported by Misuki's music player")
 
-                    entries = info.get("entries") if isinstance(info, dict) else None
-                    candidates = [entry for entry in (entries or []) if entry] if entries else [info]
-                    last_error = None
+                loop = asyncio.get_running_loop()
 
-                    for candidate in candidates:
-                        try:
-                            if candidate.get("_type") == "url" and candidate.get("url"):
-                                candidate = ytdl.extract_info(candidate["url"], download=False)
+                def extract_url():
+                    with yt_dlp.YoutubeDL(YTDL_OPTIONS) as ytdl:
+                        info = ytdl.extract_info(search_query, download=False)
+                        stream_url = info.get("url")
+                        if not stream_url:
+                            formats = info.get("formats") or []
+                            audio_formats = [
+                                item for item in formats
+                                if item.get("url") and item.get("acodec") != "none"
+                            ]
+                            if audio_formats:
+                                stream_url = audio_formats[-1]["url"]
+                        if not stream_url:
+                            raise RuntimeError("The URL does not contain a playable audio stream")
+                        return Track(
+                            title=str(info.get("title") or "Unknown track"),
+                            webpage_url=str(info.get("webpage_url") or search_query),
+                            stream_url=stream_url,
+                            duration=info.get("duration"),
+                        )
 
-                            stream_url = candidate.get("url")
-                            if not stream_url:
-                                formats = candidate.get("formats") or []
-                                audio_formats = [
-                                    item for item in formats
-                                    if item.get("url") and item.get("acodec") != "none"
-                                ]
-                                if audio_formats:
-                                    stream_url = audio_formats[-1]["url"]
+                return await loop.run_in_executor(None, extract_url)
 
-                            if not stream_url:
-                                raise RuntimeError("no playable audio stream")
-
-                            return Track(
-                                title=str(candidate.get("title") or "Unknown track"),
-                                webpage_url=str(candidate.get("webpage_url") or query),
-                                stream_url=stream_url,
-                                duration=candidate.get("duration"),
-                            )
-                        except Exception as error:
-                            last_error = error
-
-                    raise RuntimeError(
-                        f"No playable result found for {query!r}: "
-                        f"{last_error or 'unknown error'}"
-                    )
+            errors = []
+            try:
+                return await self._extract_soundcloud(search_query)
+            except Exception as error:
+                errors.append(f"SoundCloud: {error}")
 
             try:
-                return await loop.run_in_executor(None, extract)
+                return await self._extract_archive(search_query)
             except Exception as error:
-                raise RuntimeError(f"Could not find or load the track: {error}") from error
+                errors.append(f"Internet Archive: {error}")
+
+            raise RuntimeError(" | ".join(errors))
 
     async def _play_next(self, guild_id: int):
         player = self.players.get(guild_id)
@@ -214,7 +298,7 @@ class Music(commands.Cog):
         return f"{minutes}:{seconds:02d}"
 
     @app_commands.command(name="play", description="Play a song or add it to the music queue.")
-    @app_commands.describe(query="A song name, YouTube URL, or direct audio URL.")
+    @app_commands.describe(query="A song name, SoundCloud/Internet Archive URL, or direct audio URL.")
     async def play(self, interaction: discord.Interaction, query: str):
         player = await self._ensure_voice(interaction)
         if player is None:
@@ -225,7 +309,7 @@ class Music(commands.Cog):
         try:
             track = await self._extract(query)
         except Exception as error:
-            print(f"⚠️ Music search failed: {error}")
+            print(f"⚠️ Music search failed: {type(error).__name__}: {error}")
             await interaction.followup.send(
                 "❌ I could not find or load that track. Try a different song name or URL.",
                 ephemeral=True,
