@@ -36,6 +36,8 @@ class Maintenance(commands.Cog):
         self.changes = ""
         self.scope = "both"
         self.started_at = 0.0
+        self.bot_version = BOT_VERSION
+        self.site_version = SITE_VERSION
         self._sync_task = None
         self._load_state()
 
@@ -50,6 +52,8 @@ class Maintenance(commands.Cog):
                 self.changes = str(state.get("changes") or "Maintenance work in progress.")
                 self.scope = str(state.get("scope") or "both")
                 self.started_at = float(state.get("started_at") or time.time())
+                self.bot_version = str(state.get("bot_version") or BOT_VERSION)
+                self.site_version = str(state.get("site_version") or SITE_VERSION)
         except Exception:
             pass
 
@@ -64,6 +68,8 @@ class Maintenance(commands.Cog):
                 "changes": self.changes,
                 "scope": self.scope,
                 "started_at": self.started_at,
+                "bot_version": self.bot_version,
+                "site_version": self.site_version,
             }
         else:
             state = {"active": False}
@@ -79,8 +85,8 @@ class Maintenance(commands.Cog):
             "changes": self.changes,
             "scope": self.scope,
             "started_at": self.started_at,
-            "bot_version": BOT_VERSION,
-            "site_version": SITE_VERSION,
+            "bot_version": self.bot_version,
+            "site_version": self.site_version,
         }
 
         def send():
