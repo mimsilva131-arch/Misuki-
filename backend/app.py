@@ -4048,10 +4048,12 @@ def user_can_review():
     """
     user = get_user()
 
-    if not user or not session.get("access_token"):
+    if not user:
         return False
 
     try:
+        # user_has_license() faz a verificação real da licença através
+        # dos servidores que o utilizador tem na conta Discord.
         return bool(user_has_license())
     except Exception as error:
         print(f"⚠️ Review license check error: {error}")
@@ -4528,8 +4530,10 @@ def reviews():
 
     user = get_user()
 
+    # A página de Reviews deve mostrar as avaliações existentes,
+    # não apenas um subconjunto pequeno.
     review_list = get_random_reviews(
-        12,
+        50,
         user_id=user.get("id") if user else None
     )
 
@@ -6176,7 +6180,7 @@ def submit_review():
 
         return error_page(
             "🔒 License required",
-            "Only users who have added Misuki to a server can submit reviews.",
+            "Only users with an active Misuki license can submit reviews.",
             403,
             user
         )
