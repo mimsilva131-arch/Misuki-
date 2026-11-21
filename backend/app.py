@@ -567,7 +567,7 @@ def database_availability_guard():
         return None
 
     if not _database_is_available():
-        return redirect("/database-error", code=503)
+        return redirect("/database-error", code=302)
 
     return None
 
