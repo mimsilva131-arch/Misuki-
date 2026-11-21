@@ -90,6 +90,7 @@ class Maintenance(commands.Cog):
             "changes": self.changes,
             "scope": self.scope,
             "started_at": self.started_at,
+            "duration_seconds": self.duration_seconds,
             "bot_version": self.bot_version,
             "site_version": self.site_version,
         }
