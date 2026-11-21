@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os
+import re
 import time
 
 import discord
@@ -36,6 +37,8 @@ class Maintenance(commands.Cog):
         self.changes = ""
         self.scope = "both"
         self.started_at = 0.0
+        self.duration_seconds = 0
+        self._finishing = False
         self.bot_version = BOT_VERSION
         self.site_version = SITE_VERSION
         self._sync_task = None
@@ -52,6 +55,7 @@ class Maintenance(commands.Cog):
                 self.changes = str(state.get("changes") or "Maintenance work in progress.")
                 self.scope = str(state.get("scope") or "both")
                 self.started_at = float(state.get("started_at") or time.time())
+                self.duration_seconds = int(state.get("duration_seconds") or self._parse_duration(self.estimated) or 0)
                 self.bot_version = str(state.get("bot_version") or BOT_VERSION)
                 self.site_version = str(state.get("site_version") or SITE_VERSION)
         except Exception:
@@ -68,6 +72,7 @@ class Maintenance(commands.Cog):
                 "changes": self.changes,
                 "scope": self.scope,
                 "started_at": self.started_at,
+                "duration_seconds": self.duration_seconds,
                 "bot_version": self.bot_version,
                 "site_version": self.site_version,
             }
@@ -116,13 +121,47 @@ class Maintenance(commands.Cog):
 
         return True
 
+    @staticmethod
+    def _parse_duration(value):
+        """Convert a friendly interval such as '15 minutes' or '1h 30m' to seconds."""
+        text = str(value or "").strip().lower()
+        if not text:
+            return 0
+
+        total = 0
+        matched = False
+        for amount, unit in re.findall(r"(\\d+(?:\\.\\d+)?)\\s*(seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d)", text):
+            matched = True
+            number = float(amount)
+            if unit.startswith("s"):
+                multiplier = 1
+            elif unit.startswith("m"):
+                multiplier = 60
+            elif unit.startswith("h"):
+                multiplier = 3600
+            else:
+                multiplier = 86400
+            total += number * multiplier
+
+        if not matched and re.fullmatch(r"\\d+(?:\\.\\d+)?", text):
+            total = float(text) * 60
+            matched = True
+
+        seconds = int(total)
+        if not matched or seconds <= 0 or seconds > 7 * 24 * 60 * 60:
+            return 0
+        return seconds
+
     async def _sync_loop(self):
         await self.bot.wait_until_ready()
 
         while not self.bot.is_closed():
             if self.active:
-                await self._sync_site()
-            await asyncio.sleep(20)
+                if self.duration_seconds > 0 and time.time() >= self.started_at + self.duration_seconds:
+                    await self._finish_maintenance(self.changes, automatic=True)
+                elif self.scope in {"site", "both"}:
+                    await self._sync_site()
+            await asyncio.sleep(10)
 
     async def cog_load(self):
         if self._sync_task is None or self._sync_task.done():
@@ -159,6 +198,29 @@ class Maintenance(commands.Cog):
                 return channel
 
         return None
+
+    async def _finish_maintenance(self, changes, automatic=False):
+        if not self.active or self._finishing:
+            return False
+
+        self._finishing = True
+        try:
+            final_changes = (changes or self.changes).strip()
+            self.active = False
+            self.changes = final_changes
+            self.duration_seconds = 0
+            self._save_state()
+
+            site_synced = await self._sync_site()
+            sent, failed = await self._announce_completion(final_changes)
+            if automatic:
+                print(
+                    "🛠️ Maintenance ended automatically after the estimated interval. "
+                    f"Announcements sent: {sent}, unavailable: {failed}."
+                )
+            return site_synced
+        finally:
+            self._finishing = False
 
     async def _announce_completion(self, changes):
         message = (
@@ -214,7 +276,7 @@ class Maintenance(commands.Cog):
         self,
         interaction: discord.Interaction,
         action: app_commands.Choice[str],
-        estimated: str | None = None,
+        estimated: str,
         scope: app_commands.Choice[str] | None = None,
         changes: str | None = None,
         bot_version: str | None = None,
@@ -235,8 +297,16 @@ class Maintenance(commands.Cog):
                 )
                 return
 
+            self.estimated = estimated.strip()
+            self.duration_seconds = self._parse_duration(self.estimated)
+            if self.duration_seconds <= 0:
+                await interaction.response.send_message(
+                    "❌ Invalid estimated interval. Use a value such as `15 minutes`, `1 hour`, `1h 30m`, or `90m` (maximum 7 days).",
+                    ephemeral=True,
+                )
+                return
+
             self.active = True
-            self.estimated = (estimated or "Not specified").strip()
             self.changes = (changes or "Maintenance work in progress.").strip()
             self.scope = scope.value if scope else "both"
             self.started_at = time.time()
@@ -251,6 +321,7 @@ class Maintenance(commands.Cog):
             await interaction.response.send_message(
                 "🛠️ **Maintenance mode enabled.**\n\n"
                 f"**Estimated time:** {self.estimated}\n"
+                "**Automatic end:** enabled\n"
                 f"**Scope:** {self.scope}\n"
                 f"**Changes:** {self.changes}\n\n"
                 f"**Site page:** {SITE_URL}/maintenance\n"
@@ -272,20 +343,14 @@ class Maintenance(commands.Cog):
             self.bot_version = bot_version.strip()
         if site_version and site_version.strip():
             self.site_version = site_version.strip()
-        self.active = False
-        self.changes = final_changes
-        self._save_state()
-
-        site_synced = await self._sync_site()
-        sent, failed = await self._announce_completion(final_changes)
+        site_synced = await self._finish_maintenance(final_changes)
 
         await interaction.response.send_message(
             "✅ **Maintenance completed.**\n\n"
             f"**Bot version:** {self.bot_version}\n"
             f"**Site version:** {self.site_version}\n"
-            f"**Server announcements:** {sent} sent"
-            + (f", {failed} unavailable" if failed else "")
-            + f"\n**Site sync:** {'✅ Restored' if site_synced else '⚠️ Site sync pending'}",
+            "**Server announcements:** sent to all available servers.\n"
+            f"**Site sync:** {'✅ Restored' if site_synced else '⚠️ Site sync pending'}",
             ephemeral=True,
         )
 
