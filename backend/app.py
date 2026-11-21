@@ -483,6 +483,50 @@ DATABASE_POOL_MAX = max(
 _database_pool = None
 _database_pool_lock = threading.Lock()
 
+# Short cross-request caches. They deliberately live only in the web process:
+# they reduce repeated Neon reads while keeping the UI responsive. Writes
+# invalidate the affected cache immediately, so normal changes still appear
+# without waiting for the TTL.
+LICENSE_CACHE_TTL = max(
+    5,
+    min(
+        int(os.getenv("LICENSE_CACHE_TTL", "20")),
+        60
+    )
+)
+
+_license_memory_cache = {}
+_license_memory_cache_lock = threading.Lock()
+
+REVIEW_ANONYMOUS_CACHE_TTL = max(
+    5,
+    min(
+        int(os.getenv("REVIEW_ANONYMOUS_CACHE_TTL", "15")),
+        60
+    )
+)
+
+_review_anonymous_cache = {
+    "expires_at": 0.0,
+    "amount": 0,
+    "reviews": []
+}
+_review_anonymous_cache_lock = threading.Lock()
+
+STATISTICS_CACHE_TTL = max(
+    10,
+    min(
+        int(os.getenv("STATISTICS_CACHE_TTL", "30")),
+        120
+    )
+)
+
+_statistics_memory_cache = {
+    "expires_at": 0.0,
+    "snapshot": None
+}
+_statistics_memory_cache_lock = threading.Lock()
+
 
 def _get_database_pool():
     global _database_pool
@@ -1834,7 +1878,7 @@ def get_licenses_for_guilds(
     """
 
     # -----------------------------------------------------
-    # CACHE POR REQUEST
+    # CACHE POR REQUEST + SHORT CROSS-REQUEST CACHE
     # -----------------------------------------------------
 
     existing_cache = getattr(
@@ -1844,7 +1888,6 @@ def get_licenses_for_guilds(
     )
 
     if existing_cache is not None:
-
         return existing_cache
 
     result = {}
@@ -1884,6 +1927,15 @@ def get_licenses_for_guilds(
         g.license_cache = result
 
         return result
+
+    cache_key = tuple(sorted(normalized_ids))
+    now_timestamp = time.time()
+
+    with _license_memory_cache_lock:
+        cached = _license_memory_cache.get(cache_key)
+        if cached and cached[0] > now_timestamp:
+            g.license_cache = dict(cached[1])
+            return g.license_cache
 
     try:
 
@@ -2006,9 +2058,37 @@ def get_licenses_for_guilds(
                 f"⚠️ Could not mark licenses as expired: {error}"
             )
 
+    with _license_memory_cache_lock:
+        _license_memory_cache[cache_key] = (
+            time.time() + LICENSE_CACHE_TTL,
+            dict(result)
+        )
+
     g.license_cache = result
 
     return result
+
+
+def clear_license_memory_cache(guild_ids=None):
+    """Invalidate cached license reads after a license mutation."""
+    with _license_memory_cache_lock:
+        if guild_ids is None:
+            _license_memory_cache.clear()
+            return
+
+        normalized = set()
+        for guild_id in guild_ids:
+            try:
+                normalized.add(int(guild_id))
+            except (TypeError, ValueError):
+                continue
+
+        if not normalized:
+            return
+
+        for key in list(_license_memory_cache):
+            if normalized.intersection(key):
+                _license_memory_cache.pop(key, None)
 
 
 def license_is_active(
@@ -3688,142 +3768,161 @@ def get_random_reviews(
         return []
 
     try:
-
-        amount = int(
-            amount
-        )
-
-    except (
-        ValueError,
-        TypeError
-    ):
-
+        amount = int(amount)
+    except (ValueError, TypeError):
         amount = 6
 
-    amount = max(
-        1,
-        min(
-            50,
-            amount
-        )
-    )
+    amount = max(1, min(50, amount))
+
+    # Anonymous homepage requests are identical for every visitor.
+    # Cache them briefly to avoid repeatedly waking Neon for the same
+    # carousel data. Authenticated requests stay uncached because their
+    # personal vote state is part of the response.
+    if not user_id:
+        now_timestamp = time.time()
+        with _review_anonymous_cache_lock:
+            if (
+                _review_anonymous_cache["amount"] == amount
+                and _review_anonymous_cache["expires_at"] > now_timestamp
+            ):
+                return [dict(item) for item in _review_anonymous_cache["reviews"]]
 
     try:
-
         with database_connection() as connection:
-
             with connection.cursor(
                 cursor_factory=psycopg2.extras.RealDictCursor
             ) as cursor:
+
+                user_key = str(user_id or "")
 
                 if user_id:
                     cursor.execute(
                         """
                         SELECT
-                            id,
-                            user_id,
-                            username,
-                            avatar,
-                            review,
-                            rating,
-                            created_at,
-                            updated_at,
-                            COALESCE((SELECT COUNT(*) FROM review_votes rv WHERE rv.review_id = reviews.id AND rv.vote = 1), 0) AS likes,
-                            COALESCE((SELECT COUNT(*) FROM review_votes rv WHERE rv.review_id = reviews.id AND rv.vote = -1), 0) AS dislikes,
-                            COALESCE((SELECT rv.vote FROM review_votes rv WHERE rv.review_id = reviews.id AND rv.user_id = %s LIMIT 1), 0) AS user_vote
-                        FROM reviews
+                            r.id,
+                            r.user_id,
+                            r.username,
+                            r.avatar,
+                            r.review,
+                            r.rating,
+                            r.created_at,
+                            r.updated_at,
+                            COALESCE(SUM(CASE WHEN v.vote = 1 THEN 1 ELSE 0 END), 0) AS likes,
+                            COALESCE(SUM(CASE WHEN v.vote = -1 THEN 1 ELSE 0 END), 0) AS dislikes,
+                            COALESCE(MAX(CASE WHEN v.user_id = %s THEN v.vote ELSE NULL END), 0) AS user_vote
+                        FROM reviews r
+                        LEFT JOIN review_votes v ON v.review_id = r.id
+                        GROUP BY r.id
                         ORDER BY
-                            CASE
-                                WHEN CAST(user_id AS TEXT) = %s THEN 0
-                                ELSE 1
-                            END,
-                            created_at DESC,
-                            id DESC
+                            CASE WHEN CAST(r.user_id AS TEXT) = %s THEN 0 ELSE 1 END,
+                            r.created_at DESC,
+                            r.id DESC
                         LIMIT %s
                         """,
-                        (
-                            str(user_id),
-                            str(user_id),
-                            amount,
-                        )
+                        (user_key, user_key, amount)
                     )
                 else:
                     cursor.execute(
                         """
                         SELECT
-                            id,
-                            user_id,
-                            username,
-                            avatar,
-                            review,
-                            rating,
-                            created_at,
-                            updated_at,
-                            COALESCE((SELECT COUNT(*) FROM review_votes rv WHERE rv.review_id = reviews.id AND rv.vote = 1), 0) AS likes,
-                            COALESCE((SELECT COUNT(*) FROM review_votes rv WHERE rv.review_id = reviews.id AND rv.vote = -1), 0) AS dislikes,
-                            COALESCE((SELECT rv.vote FROM review_votes rv WHERE rv.review_id = reviews.id AND rv.user_id = %s LIMIT 1), 0) AS user_vote
-                        FROM reviews
-                        ORDER BY created_at DESC, id DESC
+                            r.id,
+                            r.user_id,
+                            r.username,
+                            r.avatar,
+                            r.review,
+                            r.rating,
+                            r.created_at,
+                            r.updated_at,
+                            COALESCE(SUM(CASE WHEN v.vote = 1 THEN 1 ELSE 0 END), 0) AS likes,
+                            COALESCE(SUM(CASE WHEN v.vote = -1 THEN 1 ELSE 0 END), 0) AS dislikes,
+                            0 AS user_vote
+                        FROM reviews r
+                        LEFT JOIN review_votes v ON v.review_id = r.id
+                        GROUP BY r.id
+                        ORDER BY r.created_at DESC, r.id DESC
                         LIMIT %s
                         """,
-                        (
-                            str(user_id),
-                            amount,
-                        )
+                        (amount,)
                     )
 
                 rows = cursor.fetchall()
 
+                review_ids = [int(row["id"]) for row in rows]
+                replies_by_review = {review_id: [] for review_id in review_ids}
+
+                if review_ids:
+                    cursor.execute(
+                        """
+                        SELECT
+                            r.id,
+                            r.review_id,
+                            r.user_id,
+                            r.username,
+                            r.avatar,
+                            r.reply,
+                            r.created_at,
+                            COALESCE(SUM(CASE WHEN v.vote = 1 THEN 1 ELSE 0 END), 0) AS likes,
+                            COALESCE(SUM(CASE WHEN v.vote = -1 THEN 1 ELSE 0 END), 0) AS dislikes,
+                            COALESCE(MAX(CASE WHEN v.user_id = %s THEN v.vote ELSE NULL END), 0) AS user_vote
+                        FROM review_replies r
+                        LEFT JOIN review_reply_votes v ON v.reply_id = r.id
+                        WHERE r.review_id = ANY(%s)
+                        GROUP BY r.id
+                        ORDER BY r.created_at ASC, r.id ASC
+                        """,
+                        (user_key, review_ids)
+                    )
+                    for row in cursor.fetchall():
+                        replies_by_review.setdefault(int(row["review_id"]), []).append({
+                            "id": row["id"],
+                            "review_id": row["review_id"],
+                            "user_id": row["user_id"],
+                            "username": row["username"],
+                            "avatar": review_avatar_url(row["user_id"], row["avatar"]),
+                            "reply": row["reply"],
+                            "created_at": row["created_at"],
+                            "likes": int(row["likes"] or 0),
+                            "dislikes": int(row["dislikes"] or 0),
+                            "user_vote": int(row["user_vote"] or 0)
+                        })
+
     except Exception as error:
-
-        print(
-            f"❌ Reviews database error: {error}"
-        )
-
+        print(f"❌ Reviews database error: {error}")
         return []
 
     reviews = []
-
     for row in rows:
-
+        review_id = int(row["id"])
         reviews.append({
-            "id":
-                row["id"],
-
-            "user_id":
-                row["user_id"],
-
-            "username":
-                row["username"],
-
-            "avatar":
-                review_avatar_url(row["user_id"], row["avatar"]),
-
-            "review":
-                row["review"],
-
-            "rating":
-                row["rating"],
-
-            "created_at":
-                row["created_at"],
-
-            "updated_at":
-                row.get("updated_at"),
-
-            "edited":
-                bool(row.get("updated_at")),
-            "likes":
-                int(row.get("likes") or 0),
-            "dislikes":
-                int(row.get("dislikes") or 0),
-            "user_vote":
-                int(row.get("user_vote") or 0),
-            "replies":
-                get_review_replies(row["id"], user_id)
+            "id": row["id"],
+            "user_id": row["user_id"],
+            "username": row["username"],
+            "avatar": review_avatar_url(row["user_id"], row["avatar"]),
+            "review": row["review"],
+            "rating": row["rating"],
+            "created_at": row["created_at"],
+            "updated_at": row.get("updated_at"),
+            "edited": bool(row.get("updated_at")),
+            "likes": int(row.get("likes") or 0),
+            "dislikes": int(row.get("dislikes") or 0),
+            "user_vote": int(row.get("user_vote") or 0),
+            "replies": replies_by_review.get(review_id, [])
         })
 
+    if not user_id:
+        with _review_anonymous_cache_lock:
+            _review_anonymous_cache["amount"] = amount
+            _review_anonymous_cache["reviews"] = [dict(item) for item in reviews]
+            _review_anonymous_cache["expires_at"] = time.time() + REVIEW_ANONYMOUS_CACHE_TTL
+
     return reviews
+
+
+def clear_review_memory_cache():
+    with _review_anonymous_cache_lock:
+        _review_anonymous_cache["expires_at"] = 0.0
+        _review_anonymous_cache["reviews"] = []
+        _review_anonymous_cache["amount"] = 0
 
 
 # =========================================================
@@ -4686,6 +4785,8 @@ def vote_review(review_id):
 
             connection.commit()
 
+        clear_review_memory_cache()
+        clear_review_memory_cache()
         return jsonify({
             "ok": True,
             "likes": int(likes or 0),
@@ -4830,6 +4931,7 @@ def edit_review(review_id):
         print(f"❌ Review editing error: {error}")
         return error_page("Review error", "The review could not be edited.", 500, user)
 
+    clear_review_memory_cache()
     return redirect("/reviews")
 
 
@@ -5218,48 +5320,65 @@ def statistics():
     # =====================================================
 
     bot_snapshot = {}
-    postgres_ok = False
 
-    try:
-        with database_connection() as connection:
-            with connection.cursor() as cursor:
-                cursor.execute("""
-                    SELECT
-                        servers, users, channels, latency, commands,
-                        tickets, moderation_actions, announcements,
-                        verifications,
-                        bot_status, uptime, version,
-                        last_seen, admin_servers, admin_users, updated_at
-                    FROM bot_statistics
-                    WHERE id = 1
-                """)
-                result = cursor.fetchone()
-                if result:
-                    bot_snapshot = {
-                        "servers": result[0], "users": result[1],
-                        "channels": result[2], "latency": result[3],
-                        "commands": result[4], "tickets": result[5],
-                        "moderation_actions": result[6],
-                        "announcements": result[7],
-                        "verifications": result[8],
-                        "bot_status": result[9], "uptime": result[10],
-                        "version": result[11], "last_seen": result[12],
-                        "admin_servers": result[13] or [],
-                        "admin_users": result[14] or [],
-                        "updated_at": result[15],
-                    }
-                    for key in (
-                        "servers", "users", "channels", "latency",
-                        "commands", "tickets", "moderation_actions",
-                        "announcements", "verifications", "bot_status",
-                        "uptime", "updated_at"
-                    ):
-                        if key in bot_snapshot:
-                            statistics_data[key] = bot_snapshot[key]
-                    statistics_data["misuki_version"] = MISUKI_VERSION
-                    statistics_data["version"] = MISUKI_VERSION
-    except Exception as error:
-        print(f"⚠️ Could not load live bot statistics: {error}")
+    now_timestamp = time.time()
+    with _statistics_memory_cache_lock:
+        cached_snapshot = _statistics_memory_cache.get("snapshot")
+        cache_valid = (
+            cached_snapshot is not None
+            and _statistics_memory_cache.get("expires_at", 0.0) > now_timestamp
+        )
+        if cache_valid:
+            bot_snapshot = dict(cached_snapshot)
+
+    if not bot_snapshot:
+        try:
+            with database_connection() as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        SELECT
+                            servers, users, channels, latency, commands,
+                            tickets, moderation_actions, announcements,
+                            verifications,
+                            bot_status, uptime, version,
+                            last_seen, admin_servers, admin_users, updated_at
+                        FROM bot_statistics
+                        WHERE id = 1
+                    """)
+                    result = cursor.fetchone()
+                    if result:
+                        bot_snapshot = {
+                            "servers": result[0], "users": result[1],
+                            "channels": result[2], "latency": result[3],
+                            "commands": result[4], "tickets": result[5],
+                            "moderation_actions": result[6],
+                            "announcements": result[7],
+                            "verifications": result[8],
+                            "bot_status": result[9], "uptime": result[10],
+                            "version": result[11], "last_seen": result[12],
+                            "admin_servers": result[13] or [],
+                            "admin_users": result[14] or [],
+                            "updated_at": result[15],
+                        }
+                        with _statistics_memory_cache_lock:
+                            _statistics_memory_cache["snapshot"] = dict(bot_snapshot)
+                            _statistics_memory_cache["expires_at"] = (
+                                time.time() + STATISTICS_CACHE_TTL
+                            )
+        except Exception as error:
+            print(f"⚠️ Could not load live bot statistics: {error}")
+
+    if bot_snapshot:
+        for key in (
+            "servers", "users", "channels", "latency",
+            "commands", "tickets", "moderation_actions",
+            "announcements", "verifications", "bot_status",
+            "uptime", "updated_at"
+        ):
+            if key in bot_snapshot:
+                statistics_data[key] = bot_snapshot[key]
+        statistics_data["misuki_version"] = MISUKI_VERSION
+        statistics_data["version"] = MISUKI_VERSION
 
     # =====================================================
     # HEARTBEAT
