@@ -390,6 +390,7 @@ MAINTENANCE_STATE = {
     "changes": "Maintenance work in progress.",
     "scope": "both",
     "started_at": 0.0,
+    "duration_seconds": 0,
     "bot_version": MISUKI_VERSION or "Unspecified",
     "site_version": os.getenv("SITE_VERSION", "").strip() or "Unspecified",
 }
@@ -398,7 +399,20 @@ MAINTENANCE_LOCK = threading.Lock()
 
 def get_maintenance_state():
     with MAINTENANCE_LOCK:
-        return dict(MAINTENANCE_STATE)
+        state = dict(MAINTENANCE_STATE)
+
+    duration = float(state.get("duration_seconds") or 0)
+    started = float(state.get("started_at") or 0)
+    if state.get("active") and duration > 0 and started > 0:
+        if time.time() >= started + duration:
+            with MAINTENANCE_LOCK:
+                # The bot remains the source of Discord-side completion and
+                # announcements, but the site can safely expire its own page
+                # even if the web process has not received the next sync yet.
+                MAINTENANCE_STATE["active"] = False
+                state = dict(MAINTENANCE_STATE)
+
+    return state
 
 
 @app.before_request
@@ -459,6 +473,7 @@ def maintenance_api():
             "changes": str(payload.get("changes") or "Maintenance work in progress."),
             "scope": scope,
             "started_at": float(payload.get("started_at") or time.time()),
+            "duration_seconds": max(0, int(payload.get("duration_seconds") or 0)),
             "bot_version": str(payload.get("bot_version") or MISUKI_VERSION or "Unspecified"),
             "site_version": str(
                 payload.get("site_version")
