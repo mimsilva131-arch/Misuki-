@@ -947,9 +947,18 @@ async def main():
     token = os.getenv("DISCORD_BOT_TOKEN")
     if not token:
         raise RuntimeError("DISCORD_BOT_TOKEN não está configurado.")
-    if not DATABASE_URL:
-        raise RuntimeError("DATABASE_URL não está configurado.")
-    initialize_statistics_database()
+    # PostgreSQL is optional for the Discord Gateway startup.
+    # The bot must still load its code and connect to Discord when Neon is
+    # temporarily unavailable. Database-backed features handle their own
+    # unavailable state instead of preventing the entire bot from starting.
+    try:
+        if DATABASE_URL:
+            initialize_statistics_database()
+        else:
+            print("⚠️ DATABASE_URL não está configurado; a base de dados ficará indisponível.")
+    except Exception as error:
+        print(f"⚠️ PostgreSQL indisponível durante o arranque; o bot continuará sem a base de dados: {error}")
+
     await load_extensions()
     await bot.start(token)
 
