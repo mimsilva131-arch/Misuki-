@@ -608,7 +608,7 @@ class Verification(commands.Cog):
                 f"❌ Error reading verification requests: {error}"
             )
 
-            return []
+            return None
 
         finally:
 
@@ -1147,9 +1147,9 @@ class Verification(commands.Cog):
 
             try:
 
-                requests = (
-                    self.get_pending_verifications()
-                )
+                requests = self.get_pending_verifications()
+                if requests is None:
+                    raise RuntimeError("Verification database is unavailable.")
                 retry_delay = 30
 
                 for request in requests:
