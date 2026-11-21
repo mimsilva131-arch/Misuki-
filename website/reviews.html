@@ -173,7 +173,7 @@ Misuki — Reviews
                                     </div>
                                 {% endif %}
                                 {% if can_review %}
-                                    <button type="button" class="review-reply-open data-i18n="reviews.reply">Responder</button>
+                                    <button type="button" class="review-reply-open" data-i18n="reviews.reply">Responder</button>
                                     <form method="POST" action="/reviews/{{ review.id }}/reply" class="review-reply-form" data-single-submit="true" hidden>
                                         <input type="hidden" name="submission_token" value="{{ submission_token() }}">
                                         <textarea name="reply" maxlength="1000" required data-i18n-attr="placeholder:reviews.reply_placeholder" placeholder="Escreva uma resposta..."></textarea>
