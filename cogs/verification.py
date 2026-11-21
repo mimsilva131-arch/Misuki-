@@ -1172,7 +1172,7 @@ class Verification(commands.Cog):
                 )
 
             await asyncio.sleep(
-                5
+                30
             )
 
     # =====================================================
