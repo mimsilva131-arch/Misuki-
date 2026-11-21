@@ -233,7 +233,7 @@ class LicenseManager(commands.Cog):
                 raise
             except Exception as error:
                 print(f"❌ License expiration worker error: {error}")
-            await asyncio.sleep(60)
+            await asyncio.sleep(300)
 
     # =====================================================
     # DATABASE CHECK
