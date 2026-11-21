@@ -514,7 +514,7 @@ def _availability_error_response(
     # Deliberately use a standalone template. It must remain renderable when
     # PostgreSQL is the component that failed.
     return render_template(
-        "error.html",
+        "erro.html",
         title=title,
         message=message,
         status_code=status_code
