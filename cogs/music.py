@@ -287,6 +287,37 @@ class Music(commands.Cog):
 
         return player
 
+    async def _leave_if_alone(self, guild: discord.Guild, voice: discord.VoiceClient):
+        await asyncio.sleep(10)
+        if not voice.is_connected():
+            return
+        channel = voice.channel
+        if channel is None:
+            return
+        members = [member for member in channel.members if not member.bot]
+        if not members:
+            player = self.players.get(guild.id)
+            if player and player.voice is voice:
+                player.queue.clear()
+                player.current = None
+                player.loop = False
+                try:
+                    await voice.disconnect()
+                except Exception as error:
+                    print(f"⚠️ Could not leave empty voice channel: {type(error).__name__}: {error}")
+                player.voice = None
+
+    @commands.Cog.listener()
+    async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
+        if member.bot:
+            return
+        if before.channel is None or before.channel == after.channel:
+            return
+        voice = member.guild.voice_client
+        if voice is None or voice.channel != before.channel:
+            return
+        asyncio.create_task(self._leave_if_alone(member.guild, voice))
+
     @staticmethod
     def _format_duration(seconds: Optional[int]) -> str:
         if seconds is None:
