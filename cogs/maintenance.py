@@ -131,7 +131,7 @@ class Maintenance(commands.Cog):
 
         total = 0
         matched = False
-        for amount, unit in re.findall(r"(\\d+(?:\\.\\d+)?)\\s*(seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d)", text):
+        for amount, unit in re.findall(r"(\d+(?:\.\d+)?)\s*(seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d)", text):
             matched = True
             number = float(amount)
             if unit.startswith("s"):
@@ -144,7 +144,7 @@ class Maintenance(commands.Cog):
                 multiplier = 86400
             total += number * multiplier
 
-        if not matched and re.fullmatch(r"\\d+(?:\\.\\d+)?", text):
+        if not matched and re.fullmatch(r"\d+(?:\.\d+)?", text):
             total = float(text) * 60
             matched = True
 
