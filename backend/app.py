@@ -665,7 +665,7 @@ def _get_database_pool():
                     DATABASE_POOL_MAX,
                     DATABASE_URL,
                     sslmode="require",
-                    connect_timeout=10,
+                    connect_timeout=3,
                     application_name="misuki-web"
                 )
 
