@@ -583,7 +583,7 @@ def database_error_page():
 def handle_database_operational_error(error):
     print(f"⚠️ PostgreSQL unavailable: {error}")
     return _availability_error_response(
-        "Error",
+        "Database Temporarily Unavailable",
         "Misuki could not connect to the database at this time. "
         "Please try again in a few minutes.",
         503
