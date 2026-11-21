@@ -514,7 +514,7 @@ def _availability_error_response(
     # Deliberately use a standalone template. It must remain renderable when
     # PostgreSQL is the component that failed.
     return render_template(
-        "availability.html",
+        "database_error.html",
         title=title,
         message=message,
         status_code=status_code
@@ -569,8 +569,8 @@ def bot_status():
     return jsonify(get_bot_runtime_status())
 
 
-@app.route("/availability")
-def availability_page():
+@app.route("/database-error")
+def database_error_page():
     """Standalone availability page; deliberately independent from PostgreSQL."""
     return _availability_error_response(
         "Misuki Temporarily Unavailable",
