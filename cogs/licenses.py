@@ -53,7 +53,7 @@ class LicenseManager(commands.Cog):
         if not DATABASE_URL:
 
             raise RuntimeError(
-                get_server_translation(guild, "database_url_missing")
+                "DATABASE_URL is not configured."
             )
 
         self.pool = await asyncpg.create_pool(
@@ -273,7 +273,7 @@ class LicenseManager(commands.Cog):
         if not self.database_ready():
 
             raise RuntimeError(
-                get_server_translation(interaction.guild, "license_database_unavailable")
+                "License database is not available."
             )
 
         while True:
@@ -484,13 +484,13 @@ class LicenseManager(commands.Cog):
         if days < 1:
 
             raise ValueError(
-                get_server_translation(interaction.guild, "license_min")
+                "The license duration must be at least 1 day."
             )
 
         if days > 3650:
 
             raise ValueError(
-                get_server_translation(interaction.guild, "license_max")
+                "The maximum license duration is 3650 days."
             )
 
         # -------------------------------------------------
