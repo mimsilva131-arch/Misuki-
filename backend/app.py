@@ -4037,15 +4037,22 @@ def get_all_advertisements():
 
 # =========================================================
 # =========================================================
-# TEMPORARY REVIEW AUTHORIZATION
+# REVIEW AUTHORIZATION
 # =========================================================
 def user_can_review():
-    """Return True only for a logged-in user with an active Misuki license."""
+    """
+    Return True only when the logged-in Discord user has access to
+    at least one active, non-expired Misuki license.
+    
+    Keep this as a single source of truth for UI/reply/vote checks.
+    """
     user = get_user()
+
     if not user or not session.get("access_token"):
         return False
+
     try:
-        return user_has_license()
+        return bool(user_has_license())
     except Exception as error:
         print(f"⚠️ Review license check error: {error}")
         return False
