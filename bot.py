@@ -15,6 +15,8 @@ import psycopg2
 from discord.ext import commands
 from dotenv import load_dotenv
 
+from cogs.utility import get_server_translation
+
 
 load_dotenv(override=False)
 
@@ -89,9 +91,10 @@ async def global_license_check(interaction: discord.Interaction):
         scope = maintenance.scope
         if scope in {"bot", "both"} and not maintenance.is_command_allowed(command_name):
             await interaction.response.send_message(
-                "🛠️ Misuki is currently under maintenance. "
-                "The bot is limited to essential activity while the update is being completed. "
-                "Our staff is already working on it. Please try again later.",
+                get_server_translation(
+                    interaction.guild,
+                    "maintenance"
+                ),
                 ephemeral=True
             )
             return False
@@ -111,7 +114,10 @@ async def global_license_check(interaction: discord.Interaction):
     license_manager = bot.get_cog("LicenseManager")
     if license_manager is None:
         await interaction.response.send_message(
-            "❌ Premium functionality is temporarily unavailable. Please try again later.",
+            get_server_translation(
+                interaction.guild,
+                "premium_unavailable"
+            ),
             ephemeral=True
         )
         return False
@@ -121,7 +127,10 @@ async def global_license_check(interaction: discord.Interaction):
     except Exception as error:
         print(f"⚠️ Could not verify license for /{command_name}: {error}")
         await interaction.response.send_message(
-            "❌ The license could not be verified. Please try again later.",
+            get_server_translation(
+                interaction.guild,
+                "license_verify_error"
+            ),
             ephemeral=True
         )
         return False
@@ -130,7 +139,10 @@ async def global_license_check(interaction: discord.Interaction):
         return True
 
     await interaction.response.send_message(
-        "🔒 This command requires an active Misuki license for this server.",
+        get_server_translation(
+            interaction.guild,
+            "license_required"
+        ),
         ephemeral=True
     )
     return False
@@ -668,8 +680,10 @@ async def on_app_command_error(
         if not interaction.response.is_done():
             await _send_command_error_message(
                 interaction,
-                "⚠️ Este comando não pode ser executado neste momento. "
-                "Verifica as condições necessárias e tenta novamente."
+                get_server_translation(
+                    interaction.guild,
+                    "command_check_failure"
+                )
             )
         return
 
@@ -681,9 +695,10 @@ async def on_app_command_error(
 
     await _send_command_error_message(
         interaction,
-        "⚠️ Ocorreu um erro ao executar este comando. "
-        "O Misuki pode estar temporariamente com problemas. "
-        "Tenta novamente daqui a pouco."
+        get_server_translation(
+            interaction.guild,
+            "command_error"
+        )
     )
 
 
