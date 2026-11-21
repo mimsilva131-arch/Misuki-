@@ -24,6 +24,125 @@ SUPPORTED_LANGUAGES = {"en": "English", "pt": "Português", "de": "Deutsch", "es
 DEFAULT_LANGUAGE = "en"
 DEFAULT_TIMEZONE = "UTC"
 
+# Discord server locales are used for public bot messages. Personal language
+# preferences remain reserved for DMs/personal responses.
+DISCORD_LOCALE_LANGUAGES = {
+    "en-US": "en",
+    "en-GB": "en",
+    "pt-BR": "pt",
+    "pt-PT": "pt",
+    "de": "de",
+    "es-ES": "es",
+    "fr": "fr",
+}
+
+SERVER_TRANSLATIONS = {
+    "en": {
+        "command_check_failure": "⚠️ This command cannot be executed right now. Please check the required conditions and try again.",
+        "command_error": "⚠️ An error occurred while executing this command. Misuki may be temporarily experiencing problems. Please try again shortly.",
+        "maintenance": "🛠️ Misuki is currently under maintenance. The bot is limited to essential activity while the update is being completed. Our staff is already working on it. Please try again later.",
+        "premium_unavailable": "❌ Premium functionality is temporarily unavailable. Please try again later.",
+        "license_verify_error": "❌ The license could not be verified. Please try again later.",
+        "license_required": "🔒 This command requires an active Misuki license for this server.",
+        "impersonate_permission": "❌ Misuki does not have permission to manage webhooks in this channel.",
+        "impersonate_http": "❌ Discord rejected the operation.",
+        "impersonate_error": "❌ An unexpected error occurred.",
+        "database_url_missing": "❌ DATABASE_URL is not configured.",
+        "license_manager_missing": "❌ The LicenseManager is not loaded.",
+        "transcript_sent": "✅ Transcript sent to ",
+        "license_database_unavailable": "License database is not available.",
+        "license_min": "The license duration must be at least 1 day.",
+        "license_max": "The maximum license duration is 3650 days.",
+    },
+    "pt": {
+        "command_check_failure": "⚠️ Este comando não pode ser executado neste momento. Verifique as condições necessárias e tente novamente.",
+        "command_error": "⚠️ Ocorreu um erro ao executar este comando. O Misuki pode estar temporariamente com problemas. Tente novamente daqui a pouco.",
+        "maintenance": "🛠️ O Misuki está atualmente em manutenção. O bot está limitado à atividade essencial enquanto a atualização é concluída. A nossa equipa já está a tratar do problema. Tente novamente mais tarde.",
+        "premium_unavailable": "❌ As funcionalidades Premium estão temporariamente indisponíveis. Tente novamente mais tarde.",
+        "license_verify_error": "❌ Não foi possível verificar a licença. Tente novamente mais tarde.",
+        "license_required": "🔒 Este comando requer uma licença Misuki ativa para este servidor.",
+        "impersonate_permission": "❌ O Misuki não tem permissão para gerir webhooks neste canal.",
+        "impersonate_http": "❌ O Discord rejeitou a operação.",
+        "impersonate_error": "❌ Ocorreu um erro inesperado.",
+        "database_url_missing": "❌ A DATABASE_URL não está configurada.",
+        "license_manager_missing": "❌ O LicenseManager não está carregado.",
+        "transcript_sent": "✅ Transcrição enviada para ",
+        "license_database_unavailable": "A base de dados das licenças não está disponível.",
+        "license_min": "A duração da licença deve ser de pelo menos 1 dia.",
+        "license_max": "A duração máxima da licença é de 3650 dias.",
+    },
+    "de": {
+        "command_check_failure": "⚠️ Dieser Befehl kann derzeit nicht ausgeführt werden. Prüfen Sie die erforderlichen Bedingungen und versuchen Sie es erneut.",
+        "command_error": "⚠️ Beim Ausführen dieses Befehls ist ein Fehler aufgetreten. Misuki hat möglicherweise vorübergehend Probleme. Versuchen Sie es gleich erneut.",
+        "maintenance": "🛠️ Misuki befindet sich derzeit in Wartung. Der Bot ist während der Aktualisierung auf wesentliche Aktivitäten beschränkt. Unser Team arbeitet bereits daran. Bitte versuchen Sie es später erneut.",
+        "premium_unavailable": "❌ Premium-Funktionen sind vorübergehend nicht verfügbar. Bitte versuchen Sie es später erneut.",
+        "license_verify_error": "❌ Die Lizenz konnte nicht überprüft werden. Bitte versuchen Sie es später erneut.",
+        "license_required": "🔒 Dieser Befehl erfordert eine aktive Misuki-Lizenz für diesen Server.",
+        "impersonate_permission": "❌ Misuki hat keine Berechtigung, Webhooks in diesem Kanal zu verwalten.",
+        "impersonate_http": "❌ Discord hat den Vorgang abgelehnt.",
+        "impersonate_error": "❌ Ein unerwarteter Fehler ist aufgetreten.",
+        "database_url_missing": "❌ DATABASE_URL ist nicht konfiguriert.",
+        "license_manager_missing": "❌ Der LicenseManager ist nicht geladen.",
+        "transcript_sent": "✅ Transkript gesendet an ",
+        "license_database_unavailable": "Die Lizenzdatenbank ist nicht verfügbar.",
+        "license_min": "Die Lizenzdauer muss mindestens 1 Tag betragen.",
+        "license_max": "Die maximale Lizenzdauer beträgt 3650 Tage.",
+    },
+    "es": {
+        "command_check_failure": "⚠️ Este comando no se puede ejecutar en este momento. Comprueba las condiciones necesarias e inténtalo de nuevo.",
+        "command_error": "⚠️ Se produjo un error al ejecutar este comando. Es posible que Misuki tenga problemas temporalmente. Inténtalo de nuevo en unos instantes.",
+        "maintenance": "🛠️ Misuki está actualmente en mantenimiento. El bot está limitado a la actividad esencial mientras se completa la actualización. Nuestro equipo ya está trabajando en ello. Inténtalo de nuevo más tarde.",
+        "premium_unavailable": "❌ Las funciones Premium no están disponibles temporalmente. Inténtalo de nuevo más tarde.",
+        "license_verify_error": "❌ No se ha podido verificar la licencia. Inténtalo de nuevo más tarde.",
+        "license_required": "🔒 Este comando requiere una licencia activa de Misuki para este servidor.",
+        "impersonate_permission": "❌ Misuki no tiene permiso para gestionar webhooks en este canal.",
+        "impersonate_http": "❌ Discord rechazó la operación.",
+        "impersonate_error": "❌ Se produjo un error inesperado.",
+        "database_url_missing": "❌ DATABASE_URL no está configurada.",
+        "license_manager_missing": "❌ El LicenseManager no está cargado.",
+        "transcript_sent": "✅ Transcripción enviada a ",
+        "license_database_unavailable": "La base de datos de licencias no está disponible.",
+        "license_min": "La duración de la licencia debe ser de al menos 1 día.",
+        "license_max": "La duración máxima de la licencia es de 3650 días.",
+    },
+    "fr": {
+        "command_check_failure": "⚠️ Cette commande ne peut pas être exécutée pour le moment. Vérifiez les conditions requises et réessayez.",
+        "command_error": "⚠️ Une erreur s'est produite lors de l'exécution de cette commande. Misuki rencontre peut-être des problèmes temporaires. Réessayez dans quelques instants.",
+        "maintenance": "🛠️ Misuki est actuellement en maintenance. Le bot est limité aux activités essentielles pendant la mise à jour. Notre équipe travaille déjà dessus. Veuillez réessayer plus tard.",
+        "premium_unavailable": "❌ Les fonctionnalités Premium sont temporairement indisponibles. Veuillez réessayer plus tard.",
+        "license_verify_error": "❌ La licence n'a pas pu être vérifiée. Veuillez réessayer plus tard.",
+        "license_required": "🔒 Cette commande nécessite une licence Misuki active pour ce serveur.",
+        "impersonate_permission": "❌ Misuki n'a pas la permission de gérer les webhooks dans ce salon.",
+        "impersonate_http": "❌ Discord a refusé l'opération.",
+        "impersonate_error": "❌ Une erreur inattendue s'est produite.",
+        "database_url_missing": "❌ DATABASE_URL n'est pas configurée.",
+        "license_manager_missing": "❌ Le LicenseManager n'est pas chargé.",
+        "transcript_sent": "✅ Transcription envoyée à ",
+        "license_database_unavailable": "La base de données des licences n'est pas disponible.",
+        "license_min": "La durée de la licence doit être d'au moins 1 jour.",
+        "license_max": "La durée maximale de la licence est de 3650 jours.",
+    },
+}
+
+
+def get_server_language(guild):
+    """Return the bot language for public server messages, defaulting to English."""
+    locale = str(getattr(guild, "preferred_locale", "") or "").strip()
+    return DISCORD_LOCALE_LANGUAGES.get(locale, "en")
+
+
+def get_server_translation(guild, key, **kwargs):
+    """Return a translated public message, with English as the final fallback."""
+    language = get_server_language(guild)
+    text = SERVER_TRANSLATIONS.get(language, SERVER_TRANSLATIONS["en"]).get(
+        key,
+        SERVER_TRANSLATIONS["en"].get(key, key),
+    )
+    try:
+        return text.format(**kwargs)
+    except (KeyError, IndexError, ValueError):
+        return text
+
 TRANSLATIONS = {
     "en": {
         "license_active": "Active",
