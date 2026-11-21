@@ -19,7 +19,20 @@ from dotenv import load_dotenv
 load_dotenv(override=False)
 
 DATABASE_URL = os.getenv("DATABASE_URL")
-MISUKI_VERSION = os.getenv("MISUKI_VERSION", "").strip()
+VERSION_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "misuki_version.json")
+
+def get_misuki_version():
+    try:
+        with open(VERSION_FILE, "r", encoding="utf-8") as file:
+            state = json.load(file)
+        version = str(state.get("bot_version") or "").strip()
+        if version:
+            return version
+    except Exception:
+        pass
+    return os.getenv("MISUKI_VERSION", "").strip() or "1.0.0"
+
+MISUKI_VERSION = get_misuki_version()
 try:
     OWNER_ID = int(os.getenv("OWNER_ID", "1146083816503529545"))
 except (TypeError, ValueError):
