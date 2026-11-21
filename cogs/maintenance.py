@@ -13,7 +13,7 @@ from discord.ext import commands
 OWNER_ID = int(os.getenv("OWNER_ID", "0") or 0)
 SITE_URL = os.getenv("MISUKI_SITE_URL", "https://misuki.onrender.com").rstrip("/")
 VERSION_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "misuki_version.json")
-BOT_VERSION = os.getenv("MISUKI_VERSION", "").strip() or "1.0.0"
+BOT_VERSION = "1.0.0"
 SITE_VERSION = os.getenv("SITE_VERSION", "").strip() or "1.0.0"
 
 STATE_FILE = os.path.join(
