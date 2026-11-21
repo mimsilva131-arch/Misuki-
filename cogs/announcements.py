@@ -1213,6 +1213,8 @@ class Announcements(commands.Cog):
 
         await self.bot.wait_until_ready()
 
+        retry_delay = 60
+
         while not self.bot.is_closed():
 
             try:
@@ -1220,6 +1222,7 @@ class Announcements(commands.Cog):
                 rows = (
                     self.get_due_announcements()
                 )
+                retry_delay = 60
 
                 for row in rows:
 
@@ -1230,10 +1233,11 @@ class Announcements(commands.Cog):
             except Exception as error:
 
                 print(
-                    f"❌ Announcement scheduler error: {error}"
+                    f"⚠️ Announcement scheduler paused while PostgreSQL is unavailable: {error}"
                 )
+                retry_delay = min(max(retry_delay * 2, 60), 900)
 
-            await asyncio.sleep(60)
+            await asyncio.sleep(retry_delay)
 
     # =====================================================
     # READY
