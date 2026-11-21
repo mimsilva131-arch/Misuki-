@@ -450,7 +450,7 @@ def availability_page():
     """Standalone availability page; deliberately independent from PostgreSQL."""
     return _availability_error_response(
         "Misuki Temporarily Unavailable",
-        "Misuki's database is temporarily unavailable. The service will resume responding as soon as the connection is restored.",
+        "Misuki's database is temporarily unavailable. Our staff is already working on it. The service will resume responding as soon as the connection is restored.",
         503
     )
 
@@ -6179,7 +6179,7 @@ def statistics_api():
         )
         return _availability_error_response(
             "🗄️ Database temporariamente indisponível",
-            "Misuki could not connect to the database at this time. Please try again in a few minutes.",
+            "Misuki could not connect to the database at this time. Our staff is already working on it. Please try again in a few minutes.",
             503
         )
 
