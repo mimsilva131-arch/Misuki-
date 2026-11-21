@@ -15,6 +15,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from cogs.utility import get_server_translation
+
 
 # =========================================================
 # ENVIRONMENT
@@ -51,7 +53,7 @@ class LicenseManager(commands.Cog):
         if not DATABASE_URL:
 
             raise RuntimeError(
-                "DATABASE_URL não está configurado."
+                get_server_translation(guild, "database_url_missing")
             )
 
         self.pool = await asyncpg.create_pool(
@@ -170,7 +172,7 @@ class LicenseManager(commands.Cog):
 
             print(
                 "⚠️ LicenseManager iniciado sem Neon; "
-                "as funções de licença ficam temporariamente indisponíveis."
+                "license features are temporarily unavailable."
             )
 
             print(error)
@@ -271,7 +273,7 @@ class LicenseManager(commands.Cog):
         if not self.database_ready():
 
             raise RuntimeError(
-                "License database não está disponível."
+                get_server_translation(interaction.guild, "license_database_unavailable")
             )
 
         while True:
@@ -482,13 +484,13 @@ class LicenseManager(commands.Cog):
         if days < 1:
 
             raise ValueError(
-                "A duração da licença deve ser de pelo menos 1 dia."
+                get_server_translation(interaction.guild, "license_min")
             )
 
         if days > 3650:
 
             raise ValueError(
-                "A duração máxima da licença é de 3650 dias."
+                get_server_translation(interaction.guild, "license_max")
             )
 
         # -------------------------------------------------
