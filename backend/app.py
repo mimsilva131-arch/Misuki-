@@ -8759,16 +8759,18 @@ def start_discord_bot():
         print("⚠️ Discord bot not started: DISCORD_BOT_TOKEN is not configured.")
         return
 
+    bot_path = os.path.join(BASE_DIR, "bot.py")
+
+    # Prefer the PostgreSQL advisory lock so zero-downtime deploys do not
+    # create competing Discord Gateway sessions. If PostgreSQL itself is
+    # unavailable, however, the bot must still be allowed to start: bot.py
+    # already handles database-backed features independently and Discord
+    # commands do not require PostgreSQL just to be registered/synchronised.
     try:
-        # The website can run multiple Gunicorn workers and Render can briefly
-        # run old and new instances during a zero-downtime deploy. Starting a
-        # Discord Gateway process from every web worker causes the same bot
-        # token to have multiple competing sessions. Use a PostgreSQL
-        # advisory lock so exactly one web process owns the Discord bot.
         lock_connection = psycopg2.connect(
             DATABASE_URL,
             sslmode="require",
-            connect_timeout=10,
+            connect_timeout=3,
             application_name="misuki-bot-lock"
         )
         with lock_connection.cursor() as cursor:
@@ -8785,7 +8787,6 @@ def start_discord_bot():
 
         bot_lock_connection = lock_connection
 
-        bot_path = os.path.join(BASE_DIR, "bot.py")
         bot_process = subprocess.Popen(
             [sys.executable, "-u", bot_path],
             cwd=BASE_DIR
@@ -8794,6 +8795,8 @@ def start_discord_bot():
             f"🤖 Discord bot process started (PID {bot_process.pid}) "
             f"with PostgreSQL ownership lock."
         )
+        return
+
     except Exception as error:
         if bot_lock_connection:
             try:
@@ -8801,6 +8804,24 @@ def start_discord_bot():
             except Exception:
                 pass
             bot_lock_connection = None
+
+        print(
+            "⚠️ PostgreSQL bot ownership lock is unavailable; "
+            f"starting the Discord bot without the database lock: {error}"
+        )
+
+    # Database-independent fallback. This keeps the Discord Gateway and
+    # application-command synchronisation available during a Neon outage.
+    try:
+        bot_process = subprocess.Popen(
+            [sys.executable, "-u", bot_path],
+            cwd=BASE_DIR
+        )
+        print(
+            f"🤖 Discord bot process started (PID {bot_process.pid}) "
+            "without PostgreSQL ownership lock."
+        )
+    except Exception as error:
         print(f"❌ Could not start Discord bot: {error}")
 
 
