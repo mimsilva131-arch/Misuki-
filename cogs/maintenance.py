@@ -74,7 +74,7 @@ class Maintenance(commands.Cog):
 
     async def _sync_site(self):
         payload = {
-            "active": self.active,
+            "active": self.active and self.scope in {"site", "both"},
             "estimated": self.estimated,
             "changes": self.changes,
             "scope": self.scope,
@@ -116,7 +116,7 @@ class Maintenance(commands.Cog):
         while not self.bot.is_closed():
             if self.active:
                 await self._sync_site()
-            await asyncio.sleep(30)
+            await asyncio.sleep(20)
 
     async def cog_load(self):
         if self._sync_task is None or self._sync_task.done():
@@ -187,6 +187,8 @@ class Maintenance(commands.Cog):
         estimated="Estimated maintenance interval, for example 15 minutes.",
         scope="What is being maintained.",
         changes="What the update/maintenance will change.",
+        bot_version="Bot version to publish.",
+        site_version="Site version to publish.",
     )
     @app_commands.choices(
         action=[
@@ -206,6 +208,8 @@ class Maintenance(commands.Cog):
         estimated: str | None = None,
         scope: app_commands.Choice[str] | None = None,
         changes: str | None = None,
+        bot_version: str | None = None,
+        site_version: str | None = None,
     ):
         if interaction.user.id != OWNER_ID:
             await interaction.response.send_message(
@@ -227,6 +231,10 @@ class Maintenance(commands.Cog):
             self.changes = (changes or "Maintenance work in progress.").strip()
             self.scope = scope.value if scope else "both"
             self.started_at = time.time()
+            if bot_version and bot_version.strip():
+                self.bot_version = bot_version.strip()
+            if site_version and site_version.strip():
+                self.site_version = site_version.strip()
             self._save_state()
 
             site_synced = await self._sync_site()
@@ -251,6 +259,10 @@ class Maintenance(commands.Cog):
             return
 
         final_changes = (changes or self.changes).strip()
+        if bot_version and bot_version.strip():
+            self.bot_version = bot_version.strip()
+        if site_version and site_version.strip():
+            self.site_version = site_version.strip()
         self.active = False
         self.changes = final_changes
         self._save_state()
