@@ -584,8 +584,8 @@ def handle_database_operational_error(error):
     print(f"⚠️ PostgreSQL unavailable: {error}")
     return _availability_error_response(
         "Database Temporarily Unavailable",
-        "O Misuki não conseguiu ligar à base de dados neste momento. "
-        "Tenta novamente dentro de alguns minutos.",
+        "Misuki could not connect to the database at this time. "
+        "Please try again in a few minutes.",
         503
     )
 
@@ -595,8 +595,8 @@ def handle_database_interface_error(error):
     print(f"⚠️ PostgreSQL connection error: {error}")
     return _availability_error_response(
         "Database Temporarily Unavailable",
-        "A ligação à base de dados do Misuki foi interrompida. "
-        "Tenta novamente dentro de alguns minutos.",
+        "The connection to Misuki's database was interrupted. "
+        "Please try again in a few minutes.",
         503
     )
 
@@ -604,7 +604,7 @@ def handle_database_interface_error(error):
 @app.errorhandler(404)
 def handle_not_found(error):
     return _availability_error_response(
-        "🔎 Página não encontrada",
+        "🔎 Page Not Found",
         "A página que procuras não existe ou já não está disponível.",
         404
     )
@@ -614,9 +614,9 @@ def handle_not_found(error):
 def handle_internal_server_error(error):
     print(f"❌ Internal server error: {error}")
     return _availability_error_response(
-        "⚠️ Algo correu mal",
-        "O Misuki encontrou um erro inesperado. "
-        "Tenta novamente dentro de alguns instantes.",
+        "⚠️ Something Went Wrong",
+        "Misuki encountered an unexpected error. "
+        "Please try again in a few moments.",
         500
     )
 
@@ -624,9 +624,9 @@ def handle_internal_server_error(error):
 @app.errorhandler(503)
 def handle_service_unavailable(error):
     return _availability_error_response(
-        "🔧 Misuki temporariamente indisponível",
-        "O serviço está temporariamente indisponível. "
-        "Estamos a tratar do problema. Tenta novamente dentro de alguns minutos.",
+        "🔧 Misuki Temporarily Unavailable",
+        "The service is temporarily unavailable. "
+        "Estamos a tratar do problema. Please try again in a few minutes.",
         503
     )
 
@@ -6302,7 +6302,7 @@ def statistics_api():
             f"❌ Statistics API database error: {error}"
         )
         return _availability_error_response(
-            "🗄️ Database temporariamente indisponível",
+            "🗄️ Database Temporarily Unavailable",
             "Misuki could not connect to the database at this time. Our staff is already working on it. Please try again in a few minutes.",
             503
         )
