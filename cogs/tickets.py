@@ -33,7 +33,7 @@ def increment_activity_stat(stat_name):
     if not DATABASE_URL:
 
         print(
-            get_server_translation(guild, "database_url_missing")
+            "❌ DATABASE_URL is not configured."
         )
 
         return
@@ -253,7 +253,7 @@ def check_license(
     if license_manager is None:
 
         print(
-            get_server_translation(guild, "license_manager_missing")
+            "❌ LicenseManager is not loaded."
         )
 
         return False
@@ -1514,8 +1514,10 @@ class Transcript(
 
         await interaction.followup.send(
             (
-                get_server_translation(guild, "transcript_sent")
-                f"{transcript_channel.mention}."
+                get_server_translation(
+                    interaction.guild,
+                    "transcript_sent"
+                ) + f"{transcript_channel.mention}."
             ),
             ephemeral=True
         )
