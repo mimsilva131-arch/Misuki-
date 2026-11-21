@@ -194,7 +194,8 @@ class Maintenance(commands.Cog):
                     await self._sync_site()
             await asyncio.sleep(10)
 
-    async def cog_load(self):
+    @commands.Cog.listener()
+    async def on_ready(self):
         if self._sync_task is None or self._sync_task.done():
             self._sync_task = asyncio.create_task(self._sync_loop())
 
