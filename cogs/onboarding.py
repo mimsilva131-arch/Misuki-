@@ -8,7 +8,7 @@ import asyncio
 import discord
 from discord.ext import commands
 
-from cogs.utility import get_user_preferences, format_user_datetime
+from cogs.utility import get_user_preferences, format_user_datetime, get_server_language
 
 
 class Onboarding(commands.Cog):
@@ -59,9 +59,10 @@ class Onboarding(commands.Cog):
         expires_at
     ):
 
-        language, timezone_name = get_user_preferences(
+        _, timezone_name = get_user_preferences(
             user.id
         )
+        language = get_server_language(guild)
 
         texts = {
             "en": {
