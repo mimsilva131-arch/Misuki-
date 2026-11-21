@@ -2,6 +2,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from cogs.utility import get_server_translation
+
 
 class Impersonate(commands.Cog):
 
@@ -102,7 +104,10 @@ class Impersonate(commands.Cog):
                     pass
 
             await interaction.followup.send(
-                "❌ O Misuki não tem permissão para gerir webhooks neste canal.",
+                get_server_translation(
+                    interaction.guild,
+                    "impersonate_permission"
+                ),
                 ephemeral=True
             )
 
@@ -119,7 +124,10 @@ class Impersonate(commands.Cog):
                     pass
 
             await interaction.followup.send(
-                "❌ O Discord rejeitou a operação.",
+                get_server_translation(
+                    interaction.guild,
+                    "impersonate_http"
+                ),
                 ephemeral=True
             )
 
@@ -136,7 +144,10 @@ class Impersonate(commands.Cog):
                     pass
 
             await interaction.followup.send(
-                "❌ Ocorreu um erro inesperado.",
+                get_server_translation(
+                    interaction.guild,
+                    "impersonate_error"
+                ),
                 ephemeral=True
             )
 
@@ -153,7 +164,10 @@ class Impersonate(commands.Cog):
         ):
 
             message = (
-                "❌ Apenas Staff pode utilizar este comando."
+                get_server_translation(
+                    interaction.guild,
+                    "command_check_failure"
+                )
             )
 
         else:
@@ -163,7 +177,10 @@ class Impersonate(commands.Cog):
             )
 
             message = (
-                "❌ Ocorreu um erro ao executar o comando."
+                get_server_translation(
+                    interaction.guild,
+                    "command_error"
+                )
             )
 
         if interaction.response.is_done():
