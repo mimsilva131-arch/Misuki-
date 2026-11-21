@@ -8661,11 +8661,51 @@ def _save_health_history(history):
 def _record_health_snapshot(statuses):
     history = _load_health_history()
     today = _health_today_key()
+    now = datetime.now(timezone.utc)
+    now_iso = now.isoformat()
+
     current = history.get(today, {})
+    previous_statuses = {
+        key: current.get(key, "unknown")
+        for key in ("api", "database", "bot")
+    }
+    incidents = current.get("incidents", [])
+    if not isinstance(incidents, list):
+        incidents = []
+
+    for service, status in statuses.items():
+        previous = previous_statuses.get(service, "unknown")
+        if status != previous:
+            # Record the moment a service enters an error/degraded state.
+            if status in {"down", "degraded"}:
+                incidents.append({
+                    "service": service,
+                    "status": status,
+                    "started_at": now_iso,
+                    "ended_at": None,
+                })
+
+            # Close the most recent open incident when the service recovers.
+            elif status == "operational":
+                for incident in reversed(incidents):
+                    if (
+                        incident.get("service") == service
+                        and incident.get("status") in {"down", "degraded"}
+                        and not incident.get("ended_at")
+                    ):
+                        incident["ended_at"] = now_iso
+                        break
+
     current.update(statuses)
+    current["incidents"] = incidents
     history[today] = current
-    cutoff = datetime.now(timezone.utc).date() - timedelta(days=89)
-    history = {key: value for key, value in history.items() if key >= cutoff.isoformat()}
+
+    cutoff = now.date() - timedelta(days=89)
+    history = {
+        key: value
+        for key, value in history.items()
+        if key >= cutoff.isoformat()
+    }
     _save_health_history(history)
     return history
 
@@ -8689,6 +8729,7 @@ def _health_payload():
             "api": saved.get("api", "unknown"),
             "database": saved.get("database", "unknown"),
             "bot": saved.get("bot", "unknown"),
+            "incidents": saved.get("incidents", []),
         })
     return {"days": days, "current": statuses, "updated_at": datetime.now(timezone.utc).isoformat()}
 
