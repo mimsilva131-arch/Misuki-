@@ -576,6 +576,76 @@ async def statistics_loop():
         await asyncio.sleep(600)
 
 
+
+async def _send_command_error_message(
+    interaction,
+    message
+):
+    try:
+        if interaction.response.is_done():
+            await interaction.followup.send(
+                message,
+                ephemeral=True
+            )
+        else:
+            await interaction.response.send_message(
+                message,
+                ephemeral=True
+            )
+    except Exception as error:
+        print(
+            f"⚠️ Could not send command error response: {error}"
+        )
+
+
+@bot.tree.error
+async def on_app_command_error(
+    interaction,
+    error
+):
+    """
+    Show a short, private warning when a slash command reaches the bot
+    but cannot be completed. A completely offline bot cannot receive an
+    interaction, so that case is represented by the website status instead.
+    """
+    original_error = getattr(
+        error,
+        "original",
+        error
+    )
+
+    if isinstance(
+        original_error,
+        discord.app_commands.CommandNotFound
+    ):
+        return
+
+    if isinstance(
+        original_error,
+        discord.app_commands.CheckFailure
+    ):
+        if not interaction.response.is_done():
+            await _send_command_error_message(
+                interaction,
+                "⚠️ Este comando não pode ser executado neste momento. "
+                "Verifica as condições necessárias e tenta novamente."
+            )
+        return
+
+    print(
+        f"❌ Application command error "
+        f"({getattr(interaction.command, 'qualified_name', 'unknown')}): "
+        f"{original_error}"
+    )
+
+    await _send_command_error_message(
+        interaction,
+        "⚠️ Ocorreu um erro ao executar este comando. "
+        "O Misuki pode estar temporariamente com problemas. "
+        "Tenta novamente daqui a pouco."
+    )
+
+
 statistics_task = None
 heartbeat_task = None
 
