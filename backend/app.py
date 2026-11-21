@@ -506,6 +506,72 @@ def maintenance_api():
 # SERVICE AVAILABILITY / ERROR PAGES
 # =========================================================
 
+DATABASE_AVAILABILITY_CACHE_TTL = 10
+_database_availability_cache = {
+    "checked_at": 0.0,
+    "available": True,
+}
+
+
+def _database_is_available():
+    """Check PostgreSQL briefly and cache the result to avoid per-request DB traffic."""
+    now = time.time()
+
+    if now - _database_availability_cache["checked_at"] < DATABASE_AVAILABILITY_CACHE_TTL:
+        return _database_availability_cache["available"]
+
+    if not DATABASE_URL:
+        available = False
+    else:
+        try:
+            with psycopg2.connect(
+                DATABASE_URL,
+                sslmode="require",
+                connect_timeout=2,
+                application_name="misuki-availability"
+            ) as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute("SELECT 1")
+            available = True
+        except Exception as error:
+            print(f"⚠️ Database availability check failed: {error}")
+            available = False
+
+    _database_availability_cache["checked_at"] = now
+    _database_availability_cache["available"] = available
+    return available
+
+
+@app.before_request
+def database_availability_guard():
+    """Redirect normal site pages to the standalone database error page."""
+    path = request.path
+
+    # The error page and its assets must remain reachable while PostgreSQL is down.
+    excluded_paths = {
+        "/database-error",
+        "/health",
+        "/api/health",
+        "/api/bot-status",
+        "/maintenance",
+        "/api/maintenance",
+    }
+
+    if (
+        path in excluded_paths
+        or path.startswith("/css/")
+        or path.startswith("/js/")
+        or path.startswith("/assets/")
+        or path.startswith("/static/")
+    ):
+        return None
+
+    if not _database_is_available():
+        return redirect("/database-error", code=503)
+
+    return None
+
+
 def _availability_error_response(
     title,
     message,
@@ -514,7 +580,7 @@ def _availability_error_response(
     # Deliberately use a standalone template. It must remain renderable when
     # PostgreSQL is the component that failed.
     return render_template(
-        "erro.html",
+        "error.html",
         title=title,
         message=message,
         status_code=status_code
