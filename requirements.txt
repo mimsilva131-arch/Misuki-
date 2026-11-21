@@ -6,3 +6,6 @@ gunicorn
 discord.py
 asyncpg
 pywebpush
+imageio-ffmpeg
+yt-dlp
+PyNaCl
