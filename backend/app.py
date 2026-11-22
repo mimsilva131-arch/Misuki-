@@ -8717,11 +8717,20 @@ def _health_payload():
         "database": _check_health_database(),
         "bot": "operational" if str(bot_status.get("status", "")).lower() == "online" else "down",
     }
+
+    # Always materialise today's snapshot before returning the payload. This
+    # makes the current day visible immediately, even when the history file
+    # was empty after a restart/deploy.
     history = _record_health_snapshot(statuses)
+    today = _health_today_key()
+    today_snapshot = history.get(today, {})
+    today_snapshot.update(statuses)
+    history[today] = today_snapshot
+
     days = []
-    today = datetime.now(timezone.utc).date()
+    today_date = datetime.now(timezone.utc).date()
     for offset in range(89, -1, -1):
-        day = today - timedelta(days=offset)
+        day = today_date - timedelta(days=offset)
         key = day.isoformat()
         saved = history.get(key, {})
         days.append({
@@ -8731,7 +8740,13 @@ def _health_payload():
             "bot": saved.get("bot", "unknown"),
             "incidents": saved.get("incidents", []),
         })
-    return {"days": days, "current": statuses, "updated_at": datetime.now(timezone.utc).isoformat()}
+
+    return {
+        "days": days,
+        "current": statuses,
+        "today": today,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    }
 
 
 @app.route("/health")
