@@ -8736,6 +8736,12 @@ def _health_payload():
 
 @app.route("/health")
 def health():
+    # Record a fresh health snapshot as soon as the status page is opened.
+    # The frontend will continue polling /api/health afterwards.
+    try:
+        _health_payload()
+    except Exception as error:
+        print(f"⚠️ Could not record initial health snapshot: {error}")
     return render_template("health.html")
 
 
