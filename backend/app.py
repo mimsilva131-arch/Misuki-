@@ -764,6 +764,17 @@ def static_js(filename):
 # ASSETS
 # =========================================================
 
+@app.route("/favicon.ico")
+def favicon():
+    # Keep the browser's conventional favicon path working even when the
+    # browser ignores the HTML link or has an old cached favicon URL.
+    return send_from_directory(
+        os.path.join(ASSETS_DIR, "images"),
+        "favicon.png",
+        mimetype="image/png"
+    )
+
+
 @app.route("/assets/<path:filename>")
 def assets(filename):
 
@@ -8710,6 +8721,49 @@ def _record_health_snapshot(statuses):
     return history
 
 
+_health_monitor_started = False
+_health_monitor_lock = threading.Lock()
+
+
+def _run_health_monitor():
+    """Keep the status history alive without requiring someone to open /health."""
+    global _health_monitor_started
+
+    with _health_monitor_lock:
+        if _health_monitor_started:
+            return
+        _health_monitor_started = True
+
+    last_day = _health_today_key()
+    while True:
+        try:
+            current_day = _health_today_key()
+
+            # Record immediately after a process restart and once when the
+            # calendar day changes. Normal incident tracking continues through
+            # the status page's /api/health polling.
+            if current_day != last_day:
+                _health_payload()
+                last_day = current_day
+            elif not os.path.exists(HEALTH_HISTORY_FILE):
+                _health_payload()
+        except Exception as error:
+            print(f"⚠️ Health monitor could not update history: {error}")
+
+        # The monitor only needs to notice the next UTC date boundary; keeping
+        # this at one minute avoids unnecessary PostgreSQL activity.
+        time.sleep(60)
+
+
+def start_health_monitor():
+    thread = threading.Thread(
+        target=_run_health_monitor,
+        name="misuki-health-monitor",
+        daemon=True,
+    )
+    thread.start()
+
+
 def _health_payload():
     bot_status = get_bot_runtime_status()
     statuses = {
@@ -8957,6 +9011,7 @@ if __name__ == "__main__":
         "=========================================="
     )
 
+    start_health_monitor()
     start_discord_bot()
     atexit.register(stop_discord_bot)
 
